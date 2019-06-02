@@ -7,7 +7,7 @@ import subprocess
 from os import listdir
 from random import randrange
 
-cascPath = "/home/pi/greet-faces/haarcascade_frontalface_default.xml"
+cascPath = "/home/pi/really-useful-robot/haarcascade_frontalface_default.xml"
 faceCascade = cv2.CascadeClassifier(cascPath)
 log.basicConfig(filename='webcam.log',level=log.INFO)
 
@@ -79,10 +79,10 @@ def manageDisplay(d):
 
 def playSound(folder):
     global VOLUME
-    files = listdir("/home/pi/greet-faces/sounds/"+folder+"/")
+    files = listdir("/home/pi/really-useful-robot/sounds/"+folder+"/")
     choice = randrange(len(files))
-    #print("/home/pi/greet-faces/sounds/"+folder+"/" + files[choice])
-    subprocess.run(["omxplayer", "--vol", VOLUME, "/home/pi/greet-faces/sounds/"+folder+"/" + files[choice]])
+    #print("/home/pi/really-useful-robot/sounds/"+folder+"/" + files[choice])
+    subprocess.run(["omxplayer", "--vol", VOLUME, "/home/pi/really-useful-robot/sounds/"+folder+"/" + files[choice]])
     
 
 while True:
