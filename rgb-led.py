@@ -10,27 +10,31 @@ BLUE = 18
 GREEN = 23
 RED = 24
 
+def breathe(color, start, increment, lighter):
+    while start >= 0:
+        led(color, start)
+        if lighter is True:
+            start = start + increment
+        else:
+            start = start - increment
+        if start > 100:
+            lighter =  not lighter
+            start = 100
+            time.sleep(1)
+        time.sleep(0.05)
+    time.sleep(1)    
+
 def led(color, percent):
     global pi
     pi.set_PWM_dutycycle(color, 255*(percent/100))
 
-while True:
-#   pi.write(RED,1)
-   led(RED, 10)
-   time.sleep(1)
-   led(RED, 20)
-   time.sleep(1)
-   led(RED, 50)
-   time.sleep(1)
-   led(RED, 100)
-   time.sleep(1)
-   pi.write(RED,0)
-   time.sleep(1)
-   pi.write(GREEN,1)
-   time.sleep(1)
-   pi.write(GREEN,0)
-   time.sleep(1)
-   pi.write(BLUE,1)
-   time.sleep(1)
-   pi.write(BLUE,0)
-   time.sleep(5)
+try:
+    while True:
+        breathe(BLUE, 0, 2, True)
+        breathe(RED, 0, 2, True)
+        breathe(GREEN, 0, 2, True)
+
+except KeyboardInterrupt:
+        led(RED, 0)
+        led(GREEN, 0)
+        led(BLUE, 0)
