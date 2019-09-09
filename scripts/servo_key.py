@@ -11,17 +11,17 @@ pi = pigpio.pi()
 pi.set_mode(17, pigpio.OUTPUT)
 pi.set_mode(27, pigpio.OUTPUT)
 
-pi.set_servo_pulsewidth(17, 1330)
-pi.set_servo_pulsewidth(27, 1540)
+pi.set_servo_pulsewidth(17, 1600)
+pi.set_servo_pulsewidth(27, 1560)
 sleep(0.25)
 
-INCREMENT = 70
+INCREMENT = 40
 
 def set_servo(pi, servo, pwm):
-    if pwm < 25:
-        pwm = 25
-    if pwm > 40000:
-        pwm = 40000
+    if pwm < 1280:
+        pwm = 1280
+    if pwm > 2050:
+        pwm = 2050
     pi.set_servo_pulsewidth(servo, pwm)
 
 def main(win):

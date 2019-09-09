@@ -2,13 +2,17 @@ import pigpio
 import time
 
 pi = pigpio.pi()
-pi.set_mode(18, pigpio.OUTPUT)
-pi.set_mode(23, pigpio.OUTPUT)
-pi.set_mode(24, pigpio.OUTPUT)
+pi.set_mode(5, pigpio.OUTPUT)
+pi.set_mode(6, pigpio.OUTPUT)
+pi.set_mode(13, pigpio.OUTPUT)
+pi.set_mode(12, pigpio.OUTPUT)
 
-BLUE = 18
-GREEN = 23
-RED = 24
+BLUE = 5
+GREEN = 6
+RED = 13
+
+ENABLE = 12
+pi.write(ENABLE, 1) # test for enable pin
 
 def breathe(color, start, increment, lighter):
     while start >= 0:
@@ -38,3 +42,5 @@ except KeyboardInterrupt:
         led(RED, 0)
         led(GREEN, 0)
         led(BLUE, 0)
+        pi.write(ENABLE, 0)
+        
