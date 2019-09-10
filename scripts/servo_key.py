@@ -11,7 +11,7 @@ pi = pigpio.pi()
 pi.set_mode(17, pigpio.OUTPUT)
 pi.set_mode(27, pigpio.OUTPUT)
 
-pi.set_servo_pulsewidth(17, 1600)
+pi.set_servo_pulsewidth(17, 1760)
 pi.set_servo_pulsewidth(27, 1560)
 sleep(0.25)
 
