@@ -8,17 +8,17 @@ class Servo:
         self.pi = pigpio.pi()
         self.pi.set_mode(pin, pigpio.OUTPUT)
         self.start = startPos
+        self.pos = self.start
         self.move(self.start)
     
-    def move(self, percent):
-        if percent < 0:
-            percent = 0
-        if percent > 100:
-            percent = 100
-            
-        print(self.translate(percent));
-        self.pi.set_servo_pulsewidth(self.pin, self.translate(percent))
-        sleep(0.5) # @todo calculate time required to reach
+    def move(self, percentage):
+        if percentage >= 0 and percentage <= 100:
+            self.pos = self.translate(percentage)
+            print(self.pos)
+            self.pi.set_servo_pulsewidth(self.pin, self.pos)
+            sleep(0.5)  # @todo calculate time required to reach
+        else:
+            raise ValueError('Percentage %d out of range' % percentage)
         
     def reset(self):
         self.move(self.start)
