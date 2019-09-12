@@ -2,24 +2,78 @@ import pigpio
 from time import sleep
 
 class Servo:
-    def __init__(self, pin, pwmRange, startPos=50):
+
+    def __init__(self, pin, pwm_range, start_pos=50, buffer=0, delta=1.5):
         self.pin = pin
-        self.range = pwmRange
+        self.range = pwm_range
         self.pi = pigpio.pi()
         self.pi.set_mode(pin, pigpio.OUTPUT)
-        self.start = startPos
+        self.start = start_pos
         self.pos = self.start
+        self.buffer = buffer  # PWM amount to specify as acceleration / deceleration buffer
+        self.delta = delta  # amount of change in acceleration / deceleration (as a multiple of current increment)
+
         self.move(self.start)
-    
+
     def move(self, percentage):
-        if percentage >= 0 and percentage <= 100:
-            self.pos = self.translate(percentage)
-            print(self.pos)
-            self.pi.set_servo_pulsewidth(self.pin, self.pos)
-            sleep(0.5)  # @todo calculate time required to reach
+        if 0 <= percentage <= 100:
+            new = self.translate(percentage)
+            print(new)
+            self.do_move(self.pos, new)
+            self.pos = new
         else:
             raise ValueError('Percentage %d out of range' % percentage)
-        
+
+    def do_move(self, old, new):
+        current = old if self.buffer > 0 else new
+
+        increment = 1
+        decelerate = False
+
+        safety = 1000  # quit after 1000 iterations, in case something has gone wrong
+
+        # debug info
+        position = []
+        increments = []
+
+        while current <= new and safety:
+            safety = safety - 1
+            self.pi.set_servo_pulsewidth(self.pin, current)
+            sleep(0.1)  # @todo calculate wait time based on movement amount
+
+            increments.append(increment)
+            position.append(current)
+
+            if current == new:
+                print(len(increments))
+                print(increments)
+                print(position)
+                break
+
+            # Accelerate / Decelerate
+            # @todo simplify
+            if old < new:
+                if increment < self.buffer and not decelerate:
+                    increment = increment * self.delta if increment * self.delta < self.buffer else self.buffer
+                    current = current + increment if current + increment < new else new
+                elif decelerate:
+                    increment = increment / self.delta if increment / self.delta > 1 else 1
+                    current = current + increment if current + increment < new else new
+                else:
+                    current = new - self.buffer
+                    decelerate = True
+            else:
+                if increment < self.buffer and not decelerate:
+                    increment = increment * self.delta if increment * self.delta < self.buffer else self.buffer
+                    current = current - increment if current - increment > new else new
+                elif decelerate:
+                    increment = increment / self.delta if increment / self.delta > 1 else 1
+                    current = current - increment if current - increment > new else new
+                else:
+                    current = new + self.buffer
+                    decelerate = True
+
+
     def reset(self):
         self.move(self.start)
     

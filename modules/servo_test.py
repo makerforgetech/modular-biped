@@ -1,4 +1,5 @@
 import modules.mock_pigpio
+import modules.mock_time
 from modules.servo import Servo
 import pytest
 
@@ -43,3 +44,16 @@ def test_move():
     with pytest.raises(ValueError) as ex:
         sv.move(101)
     assert "out of range" in str(ex.value)
+
+
+def test_buffer():
+    sv = Servo(1, (0, 2000), 50)
+    sv.move(100)
+    assert sv.pos == 2000
+
+    sv = Servo(1, (0, 2000), 50, 100)
+    sv.move(100)
+    assert sv.pos == 2000
+
+    sv.move(0)
+    assert sv.pos == 0
