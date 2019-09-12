@@ -7,8 +7,8 @@ print("Loading...")
 
 def main():
     print("Main function")
-    top = Servo(Pins.servoTop, (1280, 2050))
-    bottom = Servo(Pins.servoBottom, (560, 2450))
+    tilt = Servo(Pins.servoTop, (1560, 1880), 60)
+    pan = Servo(Pins.servoBottom, (560, 2450))
     rgb = RGB(Pins.ledRed,Pins.ledGreen,Pins.ledBlue)
     
     loop = True
@@ -16,16 +16,16 @@ def main():
     while loop:
         try:
             rgb.breathe(Pins.ledRed)
-            rgb.breathe(Pins.ledGreen)
-            rgb.breathe(Pins.ledBlue)
-            top.move(0)
-            top.move(100)
-            bottom.move(0)
-            bottom.move(100)
+            #rgb.breathe(Pins.ledGreen)
+            #rgb.breathe(Pins.ledBlue)
+            pan.move(45)
+            pan.move(55)
+            tilt.move(0)
+            tilt.move(100)
         except KeyboardInterrupt as e:
             print('EXITING!')
-            top.reset()
-            bottom.reset()
+            pan.reset()
+            tilt.reset()
             rgb.reset()
             loop = False
     
