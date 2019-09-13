@@ -57,3 +57,7 @@ def test_buffer():
 
     sv.move(0)
     assert sv.pos == 0
+
+    sv = Servo(1, (1560, 1880), 40, 100)
+    sv.move(30)
+    assert sv.pos == 1656

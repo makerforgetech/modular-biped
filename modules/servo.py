@@ -9,11 +9,20 @@ class Servo:
         self.pi = pigpio.pi()
         self.pi.set_mode(pin, pigpio.OUTPUT)
         self.start = start_pos
-        self.pos = self.start
+        self.pos = self.translate(self.start)
         self.buffer = buffer  # PWM amount to specify as acceleration / deceleration buffer
         self.delta = delta  # amount of change in acceleration / deceleration (as a multiple of current increment)
 
         self.move(self.start)
+
+    def move_relative(self, percentage):
+        new = self.pos + self.translate(percentage)
+        if self.range[0] <= new <= self.range[0]:
+            print(new)
+            self.do_move(self.pos, new)
+            self.pos = new
+        else:
+            raise ValueError('Percentage %d out of range' % percentage)
 
     def move(self, percentage):
         if 0 <= percentage <= 100:
@@ -39,7 +48,10 @@ class Servo:
         while current <= new and safety:
             safety = safety - 1
             self.pi.set_servo_pulsewidth(self.pin, current)
-            sleep(0.1)  # @todo calculate wait time based on movement amount
+            if self.buffer > 0:
+                sleep(0.1)  # @todo calculate wait time based on movement amount
+            else:
+                sleep(0.5)
 
             increments.append(increment)
             position.append(current)
