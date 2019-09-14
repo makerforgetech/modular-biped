@@ -3,7 +3,7 @@ from modules.servo import Servo
 # from modules.rgb import RGB
 from modules.vision import Vision
 from modules.tracking import Tracking
-from modules.stepperMotor import StepperMotor
+from modules.stepper import StepperMotor
 print("Loading...")
 
 import curses  # keyboard input
@@ -24,14 +24,13 @@ def main():
     curses.cbreak()
     curses.noecho()
 
-    
     loop = True
     
     while loop:
         try:
             # rgb.breathe(Pins.ledRed)
-            #rgb.breathe(Pins.ledGreen)
-            #rgb.breathe(Pins.ledBlue)
+            # rgb.breathe(Pins.ledGreen)
+            # rgb.breathe(Pins.ledBlue)
             pan.move(45)
             pan.move(55)
             tilt.move(0)
@@ -40,6 +39,7 @@ def main():
             # for i in range(2048):
             #     stepper.doСlockwiseStep()
 
+            # Manual keyboard input for puppeteering
             key = stdscr.getkey()
             if key == "KEY_LEFT":
                 pan.move_relative(10)
@@ -49,8 +49,12 @@ def main():
                 tilt.move_relative(10)
             elif key == "KEY_DOWN":
                 tilt.move_relative(-10)
+            elif key == ord('w'):
+                stepper.doСlockwiseStep()
+            elif key == ord('s'):
+                stepper.doСounterclockwiseStep()
             else:
-                print(key)
+                print(key)  # tell me what the key is
 
             # tracking.track_largest_match()
         except KeyboardInterrupt as e:
