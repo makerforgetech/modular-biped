@@ -16,8 +16,12 @@ class Servo:
         self.move(self.start)
 
     def move_relative(self, percentage):
-        new = self.pos + self.translate(percentage)
-        if self.range[0] <= new <= self.range[0]:
+        print(percentage)
+        print(self.translate(percentage))
+        print(self.pos)
+              
+        new = self.pos + (self.translate(percentage) - self.range[0])
+        if self.range[0] <= new <= self.range[1]:
             print(new)
             self.do_move(self.pos, new)
             self.pos = new
