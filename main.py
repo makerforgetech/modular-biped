@@ -1,13 +1,16 @@
+from time import sleep
+import curses  # keyboard input
+
+# Import modules
 from modules.pins import Pins
 from modules.servo import Servo
 # from modules.rgb import RGB
 from modules.vision import Vision
 from modules.tracking import Tracking
 from modules.stepper import StepperMotor
-from time import sleep
-print("Loading...")
+from modules.linear_actuator import LinearActuator
 
-import curses  # keyboard input
+
 
 
 def main(stdscr):
@@ -18,6 +21,7 @@ def main(stdscr):
     vision = Vision('motion', True)
     tracking = Tracking(vision, pan, tilt)
     stepper = StepperMotor(Pins.stepper1, Pins.stepper2, Pins.stepper3, Pins.stepper4)
+    leg = LinearActuator(Pins.stepper1, Pins.stepper2, Pins.stepper3, Pins.stepper4, (0, 100), 0)
 
     # Configure keyboard input
     #stdscr = curses.initscr()

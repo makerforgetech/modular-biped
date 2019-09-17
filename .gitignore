@@ -2,3 +2,4 @@ sounds/*
 PIGPIO/
 modules/__pycache__
 .idea/
+modules/.coverage
