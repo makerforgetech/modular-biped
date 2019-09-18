@@ -3,12 +3,12 @@ import curses  # keyboard input
 
 # Import modules
 from modules.pins import Pins
-from modules.servo import Servo
+from modules.actuators.servo import Servo
 # from modules.rgb import RGB
 from modules.vision import Vision
 from modules.tracking import Tracking
-from modules.stepper import StepperMotor
-from modules.linear_actuator import LinearActuator
+from modules.actuators.stepper import StepperMotor
+from modules.actuators.linear_actuator import LinearActuator
 
 
 

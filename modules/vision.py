@@ -105,7 +105,9 @@ class Vision:
         Add lines to draw on screen in next render operation
         :param lines: [(x, y)]
         """
+        print(lines)
         self.lines = self.lines + list(set(lines) - set(self.lines))
+        print(self.lines)
 
     def get_area(self, match):
         """

@@ -1,6 +1,5 @@
-import modules.mock_cv2
+from modules.mocks.mock_cv2 import MockCV2
 from modules.vision import Vision
-import pytest
 
 
 def test_basic_config():
@@ -42,3 +41,16 @@ def test_detect_faces():
     matches = vision.detect()
     assert vision.static_back is None
     assert matches is not None
+
+
+def test_add_lines():
+    vision = Vision()
+    vision.add_lines([((10, 10), (90, 90))])
+
+    assert vision.lines == [((10, 10), (90, 90))]
+
+
+def test_get_area():
+    vision = Vision()
+    area = vision.get_area((0, 1, 2, 3))
+    assert area == 32

@@ -16,13 +16,8 @@ class Servo:
         self.move(self.start)
 
     def move_relative(self, percentage):
-        print(percentage)
-        print(self.translate(percentage))
-        print(self.pos)
-              
         new = self.pos + (self.translate(percentage) - self.range[0])
         if self.range[0] <= new <= self.range[1]:
-            print(new)
             self.do_move(self.pos, new)
             self.pos = new
         else:
@@ -31,12 +26,12 @@ class Servo:
     def move(self, percentage):
         if 0 <= percentage <= 100:
             new = self.translate(percentage)
-            print(new)
             self.do_move(self.pos, new)
             self.pos = new
         else:
             raise ValueError('Percentage %d out of range' % percentage)
 
+    # @todo refactor to calculate steps first, then carry out move (helps with testing)
     def do_move(self, old, new):
         current = old if self.buffer > 0 else new
 
@@ -49,7 +44,7 @@ class Servo:
         position = []
         increments = []
 
-        while current <= new and safety:
+        while safety:
             safety = safety - 1
             self.pi.set_servo_pulsewidth(self.pin, current)
             if self.buffer > 0:
@@ -88,7 +83,6 @@ class Servo:
                 else:
                     current = new + self.buffer
                     decelerate = True
-
 
     def reset(self):
         self.move(self.start)

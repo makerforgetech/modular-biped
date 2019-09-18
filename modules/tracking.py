@@ -18,7 +18,10 @@ class Tracking:
 
         Incremental amount is the percentage of the screen defined as boundary
         """
-        (x, y, w, h) = self._largest(self.vision.detect())
+        largest = self._largest(self.vision.detect())
+        if largest is None:
+            return
+        (x, y, w, h) = largest
         if x < self.bounds:
             self.pan.move_relative(self.bounds_percent)
         elif (x + w) > (self.vision.dimensions[0] - self.bounds):
@@ -37,6 +40,8 @@ class Tracking:
             ((0, self.bounds), (right, self.bounds)),
             ((0, top - self.bounds), (right, top - self.bounds))
         ]
+        print('lines')
+        print(lines)
         return lines
 
     def _largest(self, matches):
@@ -46,8 +51,10 @@ class Tracking:
         :return: (x, y, w, h) match
         """
         largest = 0
-        for key in matches:
-            if self.vision.get_area(matches[key]) > self.vision.get_area(matches[largest]):
-                largest = key
+        if matches is not None:
+            for key in matches:
+                if self.vision.get_area(matches[key]) > self.vision.get_area(matches[largest]):
+                    largest = key
 
-        return matches[largest]
+            return matches[largest]
+        return None

@@ -19,14 +19,17 @@ class MockPiGPIO:
             self.max_pulse = self.pulse
         return self.pulse
 
-    def get_servo_pulsewidth(self, pin):
-        return self.pulse
-
+    # def get_servo_pulsewidth(self, pin):
+    #     return self.pulse
+    #
     def set_PWM_dutycycle(self, pin, val):
         self.pulse = val
         if self.pulse > self.max_pulse:
             self.max_pulse = self.pulse
         return self.pulse
+
+    def write(self, pin, value):
+        return value
 
 module = type(sys)('pigpio')
 module.pi = pi

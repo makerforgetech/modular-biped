@@ -1,4 +1,4 @@
-from modules.stepper import StepperMotor
+from modules.actuators.stepper import StepperMotor
 
 
 class LinearActuator:

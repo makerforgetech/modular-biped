@@ -1,6 +1,6 @@
-import modules.mock_pigpio
-import modules.mock_time
-from modules.servo import Servo
+from modules.mocks.mock_pigpio import MockPiGPIO
+from modules.mocks import mock_time
+from modules.actuators.servo import Servo
 import pytest
 
 
@@ -37,12 +37,32 @@ def test_move():
     sv.move(100)
     assert sv.pos == 200
 
+    sv.reset()
+    assert sv.pos == 100
+
     # test out of range values
     with pytest.raises(ValueError) as ex:
         sv.move(-10)
     assert "out of range" in str(ex.value)
     with pytest.raises(ValueError) as ex:
         sv.move(101)
+    assert "out of range" in str(ex.value)
+
+
+def test_move_relative():
+    sv = Servo(1, (0, 200), 50)
+    # test absolute values
+    sv.move_relative(10)
+    assert sv.pos == 120
+    sv.move_relative(-20)
+    assert sv.pos == 80
+
+    # test out of range values
+    with pytest.raises(ValueError) as ex:
+        sv.move_relative(-50)
+    assert "out of range" in str(ex.value)
+    with pytest.raises(ValueError) as ex:
+        sv.move_relative(101)
     assert "out of range" in str(ex.value)
 
 
@@ -57,7 +77,3 @@ def test_buffer():
 
     sv.move(0)
     assert sv.pos == 0
-
-    sv = Servo(1, (1560, 1880), 40, 100)
-    sv.move(30)
-    assert sv.pos == 1656

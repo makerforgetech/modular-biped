@@ -51,10 +51,11 @@ class MockCV2:
         return one
 
     def findContours(one, two, three):
-        return (one, two, three)
+        return [None, (1, 2, 3, 4), None]
 
     def contourArea(contourArea):
-        return 1000
+        print(contourArea)
+        return 32
 
 # module = type(sys)('cv2')
 # module.VideoCapture = MockCV2.VideoCapture
