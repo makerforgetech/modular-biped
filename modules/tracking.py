@@ -40,8 +40,6 @@ class Tracking:
             ((0, self.bounds), (right, self.bounds)),
             ((0, top - self.bounds), (right, top - self.bounds))
         ]
-        print('lines')
-        print(lines)
         return lines
 
     def _largest(self, matches):

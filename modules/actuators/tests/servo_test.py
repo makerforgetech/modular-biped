@@ -71,9 +71,21 @@ def test_buffer():
     sv.move(100)
     assert sv.pos == 2000
 
-    sv = Servo(1, (0, 2000), 50, 100)
-    sv.move(100)
-    assert sv.pos == 2000
+    sv2 = Servo(1, (0, 2000), 50, 100)
+    sv2.move(100)
+    assert sv2.pos == 2000
 
-    sv.move(0)
-    assert sv.pos == 0
+    sv2.move(0)
+    assert sv2.pos == 0
+
+    sequence = sv.calculate_move(100, 200)
+    assert len(sequence) == 1
+
+    sequence = sv2.calculate_move(100, 200)
+    # [(100, 0.1), (101.5, 0.1), (103.75, 0.1), (107.125, 0.1), (112.1875, 0.1), (119.78125, 0.1), (131.171875, 0.1), (148.2578125, 0.1), (173.88671875, 0.1), (200, 0.1)]
+    assert len(sequence) == 10
+    assert sequence[0][0] == 100
+    assert sequence[9][0] == 200
+
+
+

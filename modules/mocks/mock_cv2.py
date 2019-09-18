@@ -54,7 +54,6 @@ class MockCV2:
         return [None, (1, 2, 3, 4), None]
 
     def contourArea(contourArea):
-        print(contourArea)
         return 32
 
 # module = type(sys)('cv2')

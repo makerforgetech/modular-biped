@@ -18,7 +18,7 @@ class Servo:
     def move_relative(self, percentage):
         new = self.pos + (self.translate(percentage) - self.range[0])
         if self.range[0] <= new <= self.range[1]:
-            self.do_move(self.pos, new)
+            self.execute_move(self.calculate_move(self.pos, new))
             self.pos = new
         else:
             raise ValueError('Percentage %d out of range' % percentage)
@@ -26,13 +26,17 @@ class Servo:
     def move(self, percentage):
         if 0 <= percentage <= 100:
             new = self.translate(percentage)
-            self.do_move(self.pos, new)
+            self.execute_move(self.calculate_move(self.pos, new))
             self.pos = new
         else:
             raise ValueError('Percentage %d out of range' % percentage)
 
-    # @todo refactor to calculate steps first, then carry out move (helps with testing)
-    def do_move(self, old, new):
+    def execute_move(self, sequence):
+        for s in sequence:
+            self.pi.set_servo_pulsewidth(self.pin, s[0])
+            sleep(s[1])
+
+    def calculate_move(self, old, new):
         current = old if self.buffer > 0 else new
 
         increment = 1
@@ -40,26 +44,14 @@ class Servo:
 
         safety = 1000  # quit after 1000 iterations, in case something has gone wrong
 
-        # debug info
-        position = []
-        increments = []
+        sequence = []
 
         while safety:
             safety = safety - 1
-            self.pi.set_servo_pulsewidth(self.pin, current)
-            if self.buffer > 0:
-                sleep(0.1)  # @todo calculate wait time based on movement amount
-            else:
-                sleep(0.5)
-
-            increments.append(increment)
-            position.append(current)
+            sequence.append((current, 0.1 if self.buffer > 0 else 0.5))
 
             if current == new:
-                print(len(increments))
-                print(increments)
-                print(position)
-                break
+                return sequence
 
             # Accelerate / Decelerate
             # @todo simplify

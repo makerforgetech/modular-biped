@@ -12,7 +12,6 @@ class LinearActuator:
     def move(self, percentage):
         if 0 <= percentage <= 100:
             new = self.translate(percentage)
-            print(new)
 
             while new != pos:
                 if new > pos:
