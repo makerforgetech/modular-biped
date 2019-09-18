@@ -36,7 +36,7 @@ class Servo:
             self.pi.set_servo_pulsewidth(self.pin, s[0])
             sleep(s[1])
 
-    def calculate_move(self, old, new):
+    def calculate_move(self, old, new, time=0.1):
         current = old if self.buffer > 0 else new
 
         increment = 1
@@ -48,7 +48,7 @@ class Servo:
 
         while safety:
             safety = safety - 1
-            sequence.append((current, 0.1 if self.buffer > 0 else 0.5))
+            sequence.append((current, time if self.buffer > 0 else 0.5))
 
             if current == new:
                 return sequence
