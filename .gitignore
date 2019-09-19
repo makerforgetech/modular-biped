@@ -3,3 +3,4 @@ PIGPIO/
 modules/__pycache__
 .idea/
 modules/.coverage
+*__pycache__

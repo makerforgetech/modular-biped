@@ -36,7 +36,10 @@ class Servo:
             self.pi.set_servo_pulsewidth(self.pin, s[0])
             sleep(s[1])
 
-    def calculate_move(self, old, new, time=0.1):
+    def calculate_move(self, old, new, time=0.1, translate=False):
+        if translate:
+            old = self.translate(old)
+            new = self.translate(new)
         current = old if self.buffer > 0 else new
 
         increment = 1

@@ -9,7 +9,7 @@ from modules.vision import Vision
 from modules.tracking import Tracking
 from modules.actuators.stepper import StepperMotor
 from modules.actuators.linear_actuator import LinearActuator
-
+from modules.animate import Animate
 
 
 
@@ -22,12 +22,13 @@ def main(stdscr):
     tracking = Tracking(vision, pan, tilt)
     stepper = StepperMotor(Pins.stepper1, Pins.stepper2, Pins.stepper3, Pins.stepper4)
     leg = LinearActuator(Pins.stepper1, Pins.stepper2, Pins.stepper3, Pins.stepper4, (0, 100), 0)
-
+    animate = Animate(pan, tilt, 'animations')
+    
     # Configure keyboard input
     #stdscr = curses.initscr()
     stdscr.keypad(True)
-    curses.cbreak()
-    curses.noecho()
+#    curses.cbreak()
+#    curses.noecho()
 
     loop = True
     
@@ -46,7 +47,11 @@ def main(stdscr):
 
             # Manual keyboard input for puppeteering
             key = stdscr.getkey()
-            stdscr.clear()
+            
+#            stdscr.clear()
+#            key = ''
+            print(key)
+#            print(ord("KEY_LEFT"))
             if key == "KEY_LEFT":
                 pan.move_relative(5)
             elif key == "KEY_RIGHT":
@@ -55,12 +60,21 @@ def main(stdscr):
                 tilt.move_relative(30)
             elif key == "KEY_DOWN":
                 tilt.move_relative(-30)
-            elif key == ord('w'):
-                stepper.doСlockwiseStep()
-            elif key == ord('s'):
-                stepper.doСounterclockwiseStep()
             else:
-                print(key)  # tell me what the key is
+                ch = stdscr.getch() # @todo this is wrong, it requires input twice
+                print(ch)
+                if ch == ord('w'):
+                    stepper.doСlockwiseStep()
+                elif ch == ord('s'):
+                    stepper.doСounterclockwiseStep()
+                elif ch == ord('h') or ch == 'h':
+                    print('head_shake')
+                    animate.animate('head_shake')
+                elif ch == ord('n'):
+                    print('head_swirl')
+                    animate.animate('head_swirl')                
+                else:
+                    print(ch)  # tell me what the key is
 
             # tracking.track_largest_match()
 
@@ -70,6 +84,10 @@ def main(stdscr):
             tilt.reset()
             # rgb.reset()
             loop = False
+            curses.nocbreak()
+            stdscr.keypad(False)
+            curses.echo()
+            curses.endwin()
     
 if __name__ == '__main__':
     curses.wrapper(main)
