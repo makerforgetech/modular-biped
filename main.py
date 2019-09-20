@@ -1,5 +1,6 @@
 from time import sleep
 import curses  # keyboard input
+import pigpio
 
 # Import modules
 from modules.pins import Pins
@@ -15,9 +16,10 @@ from modules.power import Power
 
 def main(stdscr):
     print("Main function")
-    power = Power(Pins.powerEnabledPin)
-    tilt = Servo(Pins.servoTop, (1560, 1880), start_pos=40, power=power)
-    pan = Servo(Pins.servoBottom, (560, 2450), start_pos=55, power=power)
+    pi = pigpio.pi()
+    power = Power(Pins.powerEnabledPin, pi=pi)
+    tilt = Servo(Pins.servoTop, (1560, 1880), start_pos=40, power=power, pi=pi)
+    pan = Servo(Pins.servoBottom, (560, 2450), start_pos=55, power=power, pi=pi)
     # rgb = RGB(Pins.ledRed,Pins.ledGreen,Pins.ledBlue)
     vision = Vision('motion', True)
     tracking = Tracking(vision, pan, tilt)

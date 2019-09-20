@@ -8,6 +8,7 @@ class MockPiGPIO:
     pulse = 0
     max_pulse = 0
     setmode_called = 0
+    value = None
 
     def set_mode(self, pin, mode):
         self.setmode_called = self.setmode_called + 1
@@ -29,6 +30,7 @@ class MockPiGPIO:
         return self.pulse
 
     def write(self, pin, value):
+        self.value = value
         return value
 
 module = type(sys)('pigpio')

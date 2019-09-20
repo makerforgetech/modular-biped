@@ -2,8 +2,8 @@ import pigpio
 from time import sleep
 
 class RGB:
-    def __init__(self, r, g, b):
-        pi = pigpio.pi()
+    def __init__(self, r, g, b, **kwargs):
+        pi = kwargs.get('pi', pigpio.pi())
         self.r = r
         self.g = g
         self.b = b
@@ -12,7 +12,7 @@ class RGB:
         pi.set_mode(g, pigpio.OUTPUT)
         pi.set_mode(b, pigpio.OUTPUT)
 
-    def breathe(self, color, start = 0, increment = 2, lighter = True):
+    def breathe(self, color, start=0, increment=2, lighter=True):
         while start >= 0:
             self.led(color, start)
             if lighter is True:
