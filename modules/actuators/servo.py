@@ -3,15 +3,16 @@ from time import sleep
 
 class Servo:
 
-    def __init__(self, pin, pwm_range, start_pos=50, buffer=0, delta=1.5):
+    def __init__(self, pin, pwm_range, **kwargs): #start_pos=50, power=None, buffer=0, delta=1.5):
         self.pin = pin
         self.range = pwm_range
-        self.pi = pigpio.pi()
+        self.power = kwargs.get('power', None)
+        self.pi = kwargs.get('pi', pigpio.pi())
         self.pi.set_mode(pin, pigpio.OUTPUT)
-        self.start = start_pos
+        self.start = kwargs.get('start_pos', 50)
         self.pos = self.translate(self.start)
-        self.buffer = buffer  # PWM amount to specify as acceleration / deceleration buffer
-        self.delta = delta  # amount of change in acceleration / deceleration (as a multiple of current increment)
+        self.buffer = kwargs.get('buffer', 0) # PWM amount to specify as acceleration / deceleration buffer
+        self.delta = kwargs.get('delta', 1.5)  # amount of change in acceleration / deceleration (as a multiple of current increment)
 
         self.move(self.start)
 
@@ -32,9 +33,13 @@ class Servo:
             raise ValueError('Percentage %d out of range' % percentage)
 
     def execute_move(self, sequence):
+        if self.power:
+            self.power.use()
         for s in sequence:
             self.pi.set_servo_pulsewidth(self.pin, s[0])
             sleep(s[1])
+        if self.power:
+            self.power.release()
 
     def calculate_move(self, old, new, time=0.1, translate=False):
         if translate:

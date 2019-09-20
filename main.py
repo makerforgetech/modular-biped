@@ -10,20 +10,21 @@ from modules.tracking import Tracking
 from modules.actuators.stepper import StepperMotor
 from modules.actuators.linear_actuator import LinearActuator
 from modules.animate import Animate
-
+from modules.power import Power
 
 
 def main(stdscr):
     print("Main function")
-    tilt = Servo(Pins.servoTop, (1560, 1880), 40)
-    pan = Servo(Pins.servoBottom, (560, 2450), 55)
+    power = Power(Pins.powerEnabledPin)
+    tilt = Servo(Pins.servoTop, (1560, 1880), start_pos=40, power=power)
+    pan = Servo(Pins.servoBottom, (560, 2450), start_pos=55, power=power)
     # rgb = RGB(Pins.ledRed,Pins.ledGreen,Pins.ledBlue)
     vision = Vision('motion', True)
     tracking = Tracking(vision, pan, tilt)
-    stepper = StepperMotor(Pins.stepper1, Pins.stepper2, Pins.stepper3, Pins.stepper4)
-    leg = LinearActuator(Pins.stepper1, Pins.stepper2, Pins.stepper3, Pins.stepper4, (0, 100), 0)
+    stepper = StepperMotor(Pins.stepper1, Pins.stepper2, Pins.stepper3, Pins.stepper4, power)
+    leg = LinearActuator(Pins.stepper1, Pins.stepper2, Pins.stepper3, Pins.stepper4, (0, 100), 0, power)
     animate = Animate(pan, tilt, 'animations')
-    
+
     # Configure keyboard input
     #stdscr = curses.initscr()
     stdscr.keypad(True)
@@ -31,7 +32,18 @@ def main(stdscr):
 #    curses.noecho()
 
     loop = True
-    
+
+    # @todo use this instead of if/else blocks
+    key_mappings = {
+        'KEY_LEFT': {pan.move_relative, 5},
+        'KEY_RIGHT': {pan.move_relative, -5},
+        'KEY_UP': {tilt.move_relative, 30},
+        'KEY_DOWN': {tilt.move_relative, -30},
+        ord('w'): {stepper.doСlockwiseStep},
+        ord('s'): {stepper.doСounterclockwiseStep},
+        ord('h'): {animate.animate, 'head_shake'}
+    }
+
     while loop:
         try:
             # rgb.breathe(Pins.ledRed)

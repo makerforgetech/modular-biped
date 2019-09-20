@@ -2,15 +2,18 @@ from modules.actuators.stepper import StepperMotor
 
 
 class LinearActuator:
-    def __init__(self, pin1, pin2, pin3, pin4, pwm_range, start):
+    def __init__(self, pin1, pin2, pin3, pin4, pwm_range, start, power=None):
         self.stepper = StepperMotor(pin1, pin2, pin3, pin4)
         self.range = pwm_range
         self.start = start
         self.pos = start
         self.increment = 1  # step increment
+        self.power = power
 
     def move(self, percentage):
         if 0 <= percentage <= 100:
+            if self.power:
+                self.power.use()
             new = self.translate(percentage)
 
             while new != pos:
@@ -22,6 +25,8 @@ class LinearActuator:
                     # move down
                     self.stepper.doСounterclockwiseStep()
                     pos = pos - self.increment
+            if self.power:
+                self.power.release()
 
         else:
             raise ValueError('Percentage %d out of range' % percentage)

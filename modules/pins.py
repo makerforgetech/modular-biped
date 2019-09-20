@@ -3,6 +3,8 @@ class Pins:
     # ledGreen = 6
     # ledBlue = 5
 
+    powerEnabledPin = 2
+
     servoTop = 17
     servoBottom = 27
 

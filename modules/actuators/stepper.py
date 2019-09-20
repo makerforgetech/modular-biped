@@ -24,7 +24,7 @@ halfStepSequence = (
 
 class StepperMotor:
 
-    def __init__(self, pin1, pin2, pin3, pin4, sequence=halfStepSequence, delayAfterStep=0.0025):
+    def __init__(self, pin1, pin2, pin3, pin4, power=None, sequence=halfStepSequence, delayAfterStep=0.0025):
         pi = pigpio.pi()  # modified to include pigpio reference directly
         pi.set_mode(pin1, pigpio.OUTPUT)
         pi.set_mode(pin2, pigpio.OUTPUT)
@@ -34,6 +34,7 @@ class StepperMotor:
         self.pin2 = pin2
         self.pin3 = pin3
         self.pin4 = pin4
+        self.power = power
         self.pi = pi
         self.delayAfterStep = delayAfterStep
         self.deque = deque(sequence)
@@ -47,8 +48,12 @@ class StepperMotor:
         self.doStepAndDelay(self.deque[0])
 
     def doStepAndDelay(self, step):
+        if self.power:
+            self.power.use()
         self.pi.write(self.pin1, step[0])
         self.pi.write(self.pin2, step[1])
         self.pi.write(self.pin3, step[2])
         self.pi.write(self.pin4, step[3])
         sleep(self.delayAfterStep)
+        if self.power:
+            self.power.release()
