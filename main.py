@@ -24,8 +24,8 @@ def main(stdscr):
     # rgb = RGB(Pins.ledRed,Pins.ledGreen,Pins.ledBlue)
     vision = Vision('motion', True)
     tracking = Tracking(vision, pan, tilt)
-    stepper = StepperMotor(Pins.stepper1, Pins.stepper2, Pins.stepper3, Pins.stepper4, power)
-    leg = LinearActuator(Pins.stepper1, Pins.stepper2, Pins.stepper3, Pins.stepper4, (0, 100), 0, power)
+    stepper = StepperMotor(Pins.stepper1, Pins.stepper2, Pins.stepper3, Pins.stepper4, power=power)
+    leg = LinearActuator(Pins.stepper1, Pins.stepper2, Pins.stepper3, Pins.stepper4, (0, 100), 0, power=power)
     animate = Animate(pan, tilt, 'animations')
     bt = BTWrapper()
 
