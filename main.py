@@ -12,7 +12,6 @@ from modules.actuators.stepper import StepperMotor
 from modules.actuators.linear_actuator import LinearActuator
 from modules.animate import Animate
 from modules.power import Power
-from modules.btwrapper import BTWrapper
 
 
 def main(stdscr):
@@ -27,7 +26,6 @@ def main(stdscr):
     stepper = StepperMotor(Pins.stepper1, Pins.stepper2, Pins.stepper3, Pins.stepper4, power=power)
     leg = LinearActuator(Pins.stepper1, Pins.stepper2, Pins.stepper3, Pins.stepper4, (0, 100), 0, power=power)
     animate = Animate(pan, tilt, 'animations')
-    bt = BTWrapper()
 
     # Configure keyboard input
     #stdscr = curses.initscr()
@@ -50,7 +48,6 @@ def main(stdscr):
 
     while loop:
         try:
-            bt.read()
             # rgb.breathe(Pins.ledRed)
             # rgb.breathe(Pins.ledGreen)
             # rgb.breathe(Pins.ledBlue)
