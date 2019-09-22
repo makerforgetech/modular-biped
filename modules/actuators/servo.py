@@ -18,17 +18,25 @@ class Servo:
 
         self.move(self.start)
 
-    def move_relative(self, percentage):
+    def move_relative(self, percentage, safe=True):
         new = self.pos + (self.translate(percentage) - self.range[0])
+        if new > self.range[1] and safe:
+            new = self.range[1]
+        elif new < self.range[0] and safe:
+            new = self.range[0]
         if self.range[0] <= new <= self.range[1]:
             self.execute_move(self.calculate_move(self.pos, new))
             self.pos = new
         else:
             raise ValueError('Percentage %d out of range' % percentage)
 
-    def move(self, percentage):
+    def move(self, percentage, safe=True):
         if 0 <= percentage <= 100:
             new = self.translate(percentage)
+            if new > self.range[1] and safe:
+                new = self.range[1]
+            elif new < self.range[0] and safe:
+                new = self.range[0]
             self.execute_move(self.calculate_move(self.pos, new))
             self.pos = new
         else:

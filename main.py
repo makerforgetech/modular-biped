@@ -102,6 +102,7 @@ def main(stdscr):
             stdscr.keypad(False)
             curses.echo()
             curses.endwin()
+            print(e)
     
 if __name__ == '__main__':
     curses.wrapper(main)

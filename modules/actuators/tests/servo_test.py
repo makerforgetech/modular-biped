@@ -60,10 +60,10 @@ def test_move_relative():
 
     # test out of range values
     with pytest.raises(ValueError) as ex:
-        sv.move_relative(-50)
+        sv.move_relative(-50, False)
     assert "out of range" in str(ex.value)
     with pytest.raises(ValueError) as ex:
-        sv.move_relative(101)
+        sv.move_relative(101, False)
     assert "out of range" in str(ex.value)
 
 
