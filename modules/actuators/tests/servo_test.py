@@ -88,8 +88,9 @@ def test_buffer():
     assert sequence[0][0] == 100
     assert sequence[9][0] == 200
 
+
 def test_power():
-    power  = Power(0)
+    power = Power(0, thread=False)
     sv = Servo(1, (0, 2000), start_pos=50, power=power)
     sv.move(100)
     assert sv.pos == 2000

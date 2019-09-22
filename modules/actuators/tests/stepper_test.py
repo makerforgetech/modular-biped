@@ -4,11 +4,9 @@ from modules.actuators.stepper import StepperMotor
 import pytest
 
 from collections import deque
-from modules.power import Power
 
 def test_init():
-    power = Power(0)
-    stepper = StepperMotor(0, 1, 2, 3, power)
+    stepper = StepperMotor(0, 1, 2, 3)
     assert 0 == stepper.pin1
     assert 1 == stepper.pin2
     assert 2 == stepper.pin3
@@ -19,15 +17,13 @@ def test_init():
 
 
 def test_doСounterclockwiseStep():
-    power = Power(0)
-    stepper = StepperMotor(0, 1, 2, 3, power)
+    stepper = StepperMotor(0, 1, 2, 3)
     # stepper.doСounterclockwiseStep()
     assert True  # @todo how to test this?
 
 
 def test_doСlockwiseStep():
-    power = Power(0)
-    stepper = StepperMotor(0, 1, 2, 3, power)
+    stepper = StepperMotor(0, 1, 2, 3)
     # stepper.doСlockwiseStep()
     assert True  # @todo how to test this?
 
