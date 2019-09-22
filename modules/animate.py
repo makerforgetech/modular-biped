@@ -22,11 +22,11 @@ class Animate:
         for step in parsed_json:
             if pos_x:
                 self.pan.execute_move(
-                    self.pan.calculate_move(self.map(pos_x), self.map(step['x']), step['t']/1000, True))
+                    self.pan.calculate_move(self.map(pos_x), self.map(step['x']), step['t'], True))
             pos_x = step['x']
             if pos_y:
                 self.tilt.execute_move(
-                    self.tilt.calculate_move(self.map(pos_y), self.map(step['y']), step['t']/1000, True))
+                    self.tilt.calculate_move(self.map(pos_y), self.map(step['y']), step['t'], True))
             pos_y = step['y']
 
     def map(self, value, old=(-1, 1), new=(0, 100)):

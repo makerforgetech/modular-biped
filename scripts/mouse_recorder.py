@@ -9,6 +9,7 @@ import datetime
 filename = "../animations/" + datetime.datetime.now().strftime("%I:%M:%S %B-%d-%Y") + ".json"
 f = open(filename,"w+")
 tstart = datetime.datetime.now()
+tstep = tstart
 
 from pygame.locals import *  #just so that some extra functions work
 pygame.init() #this turns pygame 'on'
@@ -47,7 +48,8 @@ while running:
         print("mouse at " + str(x) + ', ' + str(y))
 
         # f.write(str({"x": x, "y": y, "t": (datetime.datetime.now() - tstart).microseconds}) + ',')
-        animations.append({"x": x, "y": y, "t": (datetime.datetime.now() - tstart).microseconds})
+        animations.append({"x": x, "y": y, "t": (datetime.datetime.now() - tstep).total_seconds()})
+        tstep = datetime.datetime.now()
         # if event.pos == (MAX_X / 2, MAX_Y / 2):
         #     screen = pygame.display.set_mode((400, 500))
     screen.fill((0, 0, 0))

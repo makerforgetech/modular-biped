@@ -1,5 +1,7 @@
 import pigpio
 from time import sleep
+import threading
+
 
 class Servo:
 
@@ -33,11 +35,20 @@ class Servo:
             raise ValueError('Percentage %d out of range' % percentage)
 
     def execute_move(self, sequence):
+        """
+        Recursive function to handle each movement in sequence.
+        Move to first position then set thread.Timer for next movement after delay specified in movement 1.
+        Repeat until there are no more movements in sequence
+        :param sequence:
+        :return:
+        """
         if self.power:
             self.power.use()
-        for s in sequence:
-            self.pi.set_servo_pulsewidth(self.pin, s[0])
-            sleep(s[1])
+        s = sequence.pop(0)
+        self.pi.set_servo_pulsewidth(self.pin, s[0])
+        if len(sequence) > 0:
+            timer = threading.Timer(s[1], self.execute_move, [sequence])
+            timer.start()
         if self.power:
             self.power.release()
 
