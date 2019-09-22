@@ -9,19 +9,24 @@ class Power:
         self.pi = kwargs.get('pi', pigpio.pi())
         self.thread = kwargs.get('thread', True)
         self.pi.set_mode(pin, pigpio.OUTPUT)
+        self.timer = None
 
     def use(self):
         print('on')
         self.active_count = self.active_count + 1
         self.pi.write(self.pin, 1)
+        if self.timer is not None:
+            self.timer.cancel()
 
     def release(self):
         self.active_count = self.active_count - 1
         if self.active_count <= 0:
             self.active_count = 0  # just ensure that it hasn't gone below 0
             if self.thread:
-                timer = threading.Timer(10.0, self._off)
-                timer.start()
+                if self.timer is not None:
+                    self.timer.cancel()
+                self.timer = threading.Timer(10.0, self._off)
+                self.timer.start()
             else:
                 self._off()
 
