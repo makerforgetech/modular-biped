@@ -2,6 +2,7 @@
 
 import neopixel
 
+
 class NeoPixel:
     def __init__(self, pin, count):
         self.pin = pin
@@ -14,4 +15,15 @@ class NeoPixel:
             self.pixels[i] = (0, 0, 0)
 
     def set(self, number, color):
-        self.pixels[number] = color  # (255, 0, 0)
+        """
+        Set color of pixel
+        (255, 0, 0) # set to red, full brightness
+        (0, 128, 0) # set to green, half brightness
+        (0, 0, 64)  # set to blue, quarter brightness
+        :param number: pixel number (starting from 0)
+        :param color: (R, G, B)
+        """
+        self.pixels[number] = color
+
+    def fill(self, color):
+        self.pixels.fill(color)
