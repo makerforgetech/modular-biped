@@ -43,11 +43,16 @@ def test_move():
 
     # test out of range values
     with pytest.raises(ValueError) as ex:
-        sv.move(-10)
+        sv.move(-10, False)
     assert "out of range" in str(ex.value)
     with pytest.raises(ValueError) as ex:
-        sv.move(101)
+        sv.move(101, False)
     assert "out of range" in str(ex.value)
+
+    sv.move(-10)
+    assert sv.pos == 0
+    sv.move(181)
+    assert sv.pos == 200
 
 
 def test_move_relative():
@@ -65,6 +70,11 @@ def test_move_relative():
     with pytest.raises(ValueError) as ex:
         sv.move_relative(101, False)
     assert "out of range" in str(ex.value)
+
+    sv.move_relative(-50)
+    assert sv.pos == 0
+    sv.move_relative(101)
+    assert sv.pos == 200
 
 
 def test_buffer():

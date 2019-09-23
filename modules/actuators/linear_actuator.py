@@ -2,8 +2,8 @@ from modules.actuators.stepper import StepperMotor
 
 
 class LinearActuator:
-    def __init__(self, pin1, pin2, pin3, pin4, pwm_range, start, **kwargs):
-        self.stepper = StepperMotor(pin1, pin2, pin3, pin4)
+    def __init__(self, pins, pwm_range, start, **kwargs):
+        self.stepper = StepperMotor(pins)
         self.range = pwm_range
         self.start = start
         self.pos = start
@@ -19,11 +19,11 @@ class LinearActuator:
             while new != pos:
                 if new > pos:
                     # move up
-                    self.stepper.doСlockwiseStep()
+                    self.stepper.c_step()
                     pos = pos + self.increment
                 elif new < pos:
                     # move down
-                    self.stepper.doСounterclockwiseStep()
+                    self.stepper.cc_step()
                     pos = pos - self.increment
             if self.power:
                 self.power.release()
@@ -36,11 +36,11 @@ class LinearActuator:
 
     def translate(self, value):
         # Figure out how 'wide' each range is
-        leftSpan = 100 - 0
-        rightSpan = self.range[1] - self.range[0]
+        left_span = 100 - 0
+        right_span = self.range[1] - self.range[0]
 
         # Convert the left range into a 0-1 range (float)
-        valueScaled = float(value) / float(leftSpan)
+        value_scaled = float(value) / float(left_span)
 
         # Convert the 0-1 range into a value in the right range.
-        return self.range[0] + (valueScaled * rightSpan)
+        return self.range[0] + (value_scaled * right_span)

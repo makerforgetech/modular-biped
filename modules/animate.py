@@ -2,10 +2,10 @@ import json
 
 
 class Animate:
-    def __init__(self, pan, tilt, path):
+    def __init__(self, pan, tilt, **kwargs):
         self.pan = pan
         self.tilt = tilt
-        self.path = path + '/'
+        self.path = kwargs.get('path', 'animations') + '/'
 
     def animate(self, filename):
         """

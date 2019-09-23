@@ -15,7 +15,7 @@ def test_basic_config():
 
 
 def test_basic_config_face():
-    vision = Vision(Vision.MODE_FACES)
+    vision = Vision(mode=Vision.MODE_FACES)
     assert vision.mode == Vision.MODE_FACES
     assert vision.index == 0
     assert type(vision.video).__name__ == 'MockVideoCapture'
@@ -37,7 +37,7 @@ def test_detect():
 
 
 def test_detect_faces():
-    vision = Vision(Vision.MODE_FACES)
+    vision = Vision(mode=Vision.MODE_FACES)
     matches = vision.detect()
     assert vision.static_back is None
     assert matches is not None

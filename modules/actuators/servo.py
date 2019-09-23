@@ -1,11 +1,10 @@
 import pigpio
-from time import sleep
 import threading
 
 
 class Servo:
 
-    def __init__(self, pin, pwm_range, **kwargs): #start_pos=50, power=None, buffer=0, delta=1.5):
+    def __init__(self, pin, pwm_range, **kwargs):
         self.pin = pin
         self.range = pwm_range
         self.power = kwargs.get('power', None)
@@ -13,10 +12,13 @@ class Servo:
         self.pi.set_mode(pin, pigpio.OUTPUT)
         self.start = kwargs.get('start_pos', 50)
         self.pos = self.translate(self.start)
-        self.buffer = kwargs.get('buffer', 0) # PWM amount to specify as acceleration / deceleration buffer
-        self.delta = kwargs.get('delta', 1.5)  # amount of change in acceleration / deceleration (as a multiple of current increment)
+        self.buffer = kwargs.get('buffer', 0)  # PWM amount to specify as acceleration / deceleration buffer
+        self.delta = kwargs.get('delta', 1.5)  # amount of change in acceleration / deceleration (as a multiple)
 
         self.move(self.start)
+
+    def __del__(self):
+        self.reset()
 
     def move_relative(self, percentage, safe=True):
         new = self.pos + (self.translate(percentage) - self.range[0])
@@ -31,7 +33,7 @@ class Servo:
             raise ValueError('Percentage %d out of range' % percentage)
 
     def move(self, percentage, safe=True):
-        if 0 <= percentage <= 100:
+        if 0 <= percentage <= 100 or safe:
             new = self.translate(percentage)
             if new > self.range[1] and safe:
                 new = self.range[1]

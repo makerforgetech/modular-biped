@@ -5,16 +5,16 @@ class Vision:
     MODE_MOTION = 0
     MODE_FACES = 1
 
-    def __init__(self, mode=MODE_MOTION, preview=False, index=0):
-        self.mode = mode
-        self.index = index
+    def __init__(self, **kwargs):
+        self.mode = kwargs.get('mode', Vision.MODE_MOTION)
+        self.index = kwargs.get('index', 0)
         self.video = cv2.VideoCapture(self.index)
         self.static_back = None
-        self.preview = preview
+        self.preview = kwargs.get('preview', False)
         self.dimensions = (640, 480)
         self.lines = []
 
-        if mode == Vision.MODE_FACES:
+        if self.mode == Vision.MODE_FACES:
             self.cascade_path = "/home/pi/really-useful-robot/haarcascade_frontalface_default.xml"
             self.cascade = cv2.CascadeClassifier(self.cascade_path)
 

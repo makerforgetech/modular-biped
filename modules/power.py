@@ -11,8 +11,11 @@ class Power:
         self.pi.set_mode(pin, pigpio.OUTPUT)
         self.timer = None
 
+    def __del__(self):
+        if self.timer is not None:
+            self.timer.cancel()
+
     def use(self):
-        print('on')
         self.active_count = self.active_count + 1
         self.pi.write(self.pin, 1)
         if self.timer is not None:
