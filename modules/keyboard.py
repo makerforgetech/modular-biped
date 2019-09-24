@@ -8,7 +8,7 @@ class Keyboard:
     KEY_RIGHT = 261
     KEY_SPACE = 32
     KEY_RETURN = 10
-    KEY_BACKSPACE = 127
+    KEY_BACKSPACE = 263
 
     def __init__(self, **kwargs):
         self.screen = curses.initscr()

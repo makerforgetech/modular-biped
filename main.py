@@ -32,14 +32,15 @@ def main():
     stepper = StepperMotor(Config.LEG_PINS, power=power)
     leg = LinearActuator(Config.LEG_PINS, Config.LEG_RANGE, Config.LEG_START_POS, power=power)
     animate = Animate(pan, tilt)
-
+         
+    
     # Vision / Tracking
-    vision = Vision()
-    tracking = Tracking(vision, pan, tilt)
+    #vision = Vision()
+    #tracking = Tracking(vision, pan, tilt)
 
     # Pixels
-    px = NeoPixel(Config.PIXEL_PIN, Config.PIXEL_COUNT)
-    px.set(0, (0, 0, 255))
+    #px = NeoPixel(Config.PIXEL_PIN, Config.PIXEL_COUNT)
+    #px.set(0, (0, 0, 255))
 
     # Keyboard Input
     key_mappings = {
@@ -56,6 +57,7 @@ def main():
     loop = True
     while loop:
         try:
+            #stepper.setDelay()
             # Manual keyboard input for puppeteering
             key = keyboard.handle_input()
             if key == ord('q'):
