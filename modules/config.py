@@ -1,3 +1,5 @@
+import board
+
 class Config:
     # Power Management
     POWER_ENABLE_PIN = 2
@@ -18,6 +20,6 @@ class Config:
     LEG_START_POS = 0
 
     # RGB NeoPixels
-    PIXEL_PIN = 18
+    PIXEL_PIN = board.D18
     PIXEL_COUNT = 5
 

@@ -60,6 +60,8 @@ def main():
             #stepper.setDelay()
             # Manual keyboard input for puppeteering
             key = keyboard.handle_input()
+            if 49 <= key <= 57:
+                stepper.manual_step(key-48)
             if key == ord('q'):
                 loop = False
             else:

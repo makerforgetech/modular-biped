@@ -23,9 +23,27 @@ halfStepSequence = (
 
 shortSequence = (
     (1, 0, 0, 0),
+    (0, 0, 1, 0),
     (1, 1, 0, 0),
     (0, 0, 1, 1),
-    (0, 0, 1, 0)
+)
+
+longSequence = (
+    (1, 0, 0, 0),
+    (1, 0, 1, 0),
+    (0, 0, 1, 0),
+    (1, 1, 1, 0),
+    (1, 1, 0, 0),
+    (1, 1, 1, 1),
+    (0, 0, 1, 1),
+    (1, 0, 1, 1)
+)
+
+testSequence = (
+    (1, 0, 0, 0),
+    (1, 1, 1, 0),
+    (0, 1, 1, 1),
+    (0, 0, 0, 1)
 )
 
 
@@ -40,8 +58,8 @@ class StepperMotor:
         self.pins = pins
         self.power = kwargs.get('power', None)
         self.pi = pi
-        self.delayAfterStep = kwargs.get('delayAfterStep', 0.000003)
-        self.deque = deque(kwargs.get('sequence', fullStepSequence))
+        self.delayAfterStep = kwargs.get('delayAfterStep', 0.0025)
+        self.deque = deque(kwargs.get('sequence', testSequence))
         
     def setDelay(self):
         while True:
@@ -49,6 +67,22 @@ class StepperMotor:
             self.c_step()
             self.delayAfterStep = self.delayAfterStep + 0.01
             print(self.delayAfterStep)
+            
+    def manual_step(self, key):
+        steps = {
+            1: (1, 0, 0, 0),
+            2: (1, 1, 0, 0),
+            3: (1, 1, 1, 0),
+            4: (1, 1, 1, 1),
+            5: (0, 1, 1, 1),
+            6: (0, 0, 1, 1),
+            7: (0, 0, 0, 1),
+            8: (1, 0, 0, 1),
+            9: (0, 1, 1, 0)}
+        
+        selected = steps.get(key)
+        print(selected)            
+        self.do_step(selected)
 
     def cc_step(self):
         """
@@ -70,7 +104,6 @@ class StepperMotor:
         #print(self.deque)
         if self.power:
             self.power.use()
-        #self.clear_pins()        
         self.pi.write(self.pins[0], step[0])
         self.pi.write(self.pins[1], step[1])
         self.pi.write(self.pins[2], step[2])
