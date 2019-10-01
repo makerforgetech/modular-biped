@@ -35,7 +35,7 @@ def main():
          
     
     # Vision / Tracking
-    #vision = Vision()
+    vision = Vision(preview=True)
     #tracking = Tracking(vision, pan, tilt)
 
     # Pixels
@@ -66,6 +66,7 @@ def main():
                 loop = False
             else:
                 print(key)
+            vision.detect()
             # tracking.track_largest_match()
         except (KeyboardInterrupt, ValueError) as e:
             loop = False

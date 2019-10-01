@@ -16,7 +16,7 @@ class Config:
 
     # Linear Actuators
     LEG_PINS = (6, 13, 19, 26)
-    LEG_RANGE = (0, 100)
+    LEG_RANGE = (0, 280)  # 14 * 20
     LEG_START_POS = 0
 
     # RGB NeoPixels

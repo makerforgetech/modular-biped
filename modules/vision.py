@@ -12,6 +12,7 @@ class Vision:
         self.static_back = None
         self.preview = kwargs.get('preview', False)
         self.dimensions = (640, 480)
+        self.flip = kwargs.get('flip', True)
         self.lines = []
 
         if self.mode == Vision.MODE_FACES:
@@ -30,6 +31,8 @@ class Vision:
         matches = []
 
         check, frame = self.video.read()
+        if self.flip:
+            frame = cv2.flip(frame, 0)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # face detection
         if self.mode == Vision.MODE_FACES:
@@ -98,7 +101,8 @@ class Vision:
                 cv2.line(frame, self.lines[key][0], self.lines[key][1], (255, 0, 0), 2)
 
         # Displaying color frame with contour of motion of object
-        cv2.imshow("Color Frame", frame)
+        cv2.imshow("Preview", frame)
+        cv2.waitKey(25)
 
     def add_lines(self, lines):
         """
