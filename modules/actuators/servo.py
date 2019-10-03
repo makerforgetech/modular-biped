@@ -1,6 +1,6 @@
 import pigpio
 import threading
-
+from time import sleep
 
 class Servo:
 
@@ -18,7 +18,7 @@ class Servo:
         self.move(self.start)
 
     def __del__(self):
-        self.reset()
+        pass #self.reset()
 
     def move_relative(self, percentage, safe=True):
         new = self.pos + (self.translate(percentage) - self.range[0])
@@ -27,7 +27,8 @@ class Servo:
         elif new < self.range[0] and safe:
             new = self.range[0]
         if self.range[0] <= new <= self.range[1]:
-            self.execute_move(self.calculate_move(self.pos, new))
+            this_move = self.calculate_move(self.pos, new)
+            self.execute_move(this_move)
             self.pos = new
         else:
             raise ValueError('Percentage %d out of range' % percentage)
@@ -56,9 +57,11 @@ class Servo:
             self.power.use()
         s = sequence.pop(0)
         self.pi.set_servo_pulsewidth(self.pin, s[0])
-        if len(sequence) > 0:
+        if len(sequence) > 1:
             timer = threading.Timer(s[1], self.execute_move, [sequence])
             timer.start()
+        else:
+            pass #sleep(s[1])
         if self.power:
             self.power.release()
 

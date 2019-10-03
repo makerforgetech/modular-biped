@@ -1,15 +1,18 @@
 import cv2
-
+from time import sleep
+from datetime import datetime
 
 class Tracking:
-    def __init__(self, vision, pan, tilt, bounds_percent=25):
+    def __init__(self, vision, pan, tilt, bounds_percent=15):
         self.vision = vision
         self.pan = pan
         self.tilt = tilt
         # define bounds around screen
         self.bounds_percent = bounds_percent
-        self.bounds = self.vision.dimensions[0] / (100 / bounds_percent)
+        self.bounds = int(self.vision.dimensions[0] / (100 / bounds_percent))
         self.vision.add_lines(self._define_boundary_lines())
+        self.ignore = 0
+        self.last_match = datetime.now() # @todo improve
 
     def track_largest_match(self):
         """
@@ -20,16 +23,34 @@ class Tracking:
         """
         largest = self._largest(self.vision.detect())
         if largest is None:
-            return
+            return False
+        
+        # Run through the buffer to ignore cached matches
+        if self.ignore > 0:
+            self.ignore = self.ignore -1
+            return False
+        
         (x, y, w, h) = largest
+        moved = False
         if x < self.bounds:
-            self.pan.move_relative(self.bounds_percent)
-        elif (x + w) > (self.vision.dimensions[0] - self.bounds):
             self.pan.move_relative(-self.bounds_percent)
+            moved = True
+        elif (x + w) > (self.vision.dimensions[0] - self.bounds):
+            self.pan.move_relative(self.bounds_percent)
+            moved = True
         if y < self.bounds:
             self.tilt.move_relative(self.bounds_percent)
+            moved = True
         elif (y + h) > (self.vision.dimensions[1] - self.bounds):
             self.tilt.move_relative(-self.bounds_percent)
+            moved = True
+        
+        if moved == True:        
+            self.vision.reset()
+            self.ignore = 5
+        
+        self.last_match = datetime.now()
+        return True
 
     def _define_boundary_lines(self):
         right = self.vision.dimensions[0]
@@ -48,11 +69,10 @@ class Tracking:
         :param matches:
         :return: (x, y, w, h) match
         """
-        largest = 0
+        largest = None
         if matches is not None:
-            for key in matches:
-                if self.vision.get_area(matches[key]) > self.vision.get_area(matches[largest]):
-                    largest = key
-
-            return matches[largest]
+            for match in matches:
+                if largest is None or self.vision.get_area(match) > self.vision.get_area(largest):
+                    largest = match
+            return largest
         return None

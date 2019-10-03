@@ -9,6 +9,8 @@ class Vision:
         self.mode = kwargs.get('mode', Vision.MODE_MOTION)
         self.index = kwargs.get('index', 0)
         self.video = cv2.VideoCapture(self.index)
+        #self.video.set(cv2.CAP_PROP_FPS, 1)
+        self.video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         self.static_back = None
         self.preview = kwargs.get('preview', False)
         self.dimensions = (640, 480)
@@ -23,6 +25,9 @@ class Vision:
         self.video.release()
         # Destroying all the windows
         cv2.destroyAllWindows()
+        
+    def reset(self):
+        self.static_back = None
 
     def detect(self):
         if not self.video.isOpened():
@@ -30,9 +35,11 @@ class Vision:
 
         matches = []
 
-        check, frame = self.video.read()
-        if self.flip:
+        check, frame = self.video.read()        
+        
+        if self.flip is True:
             frame = cv2.flip(frame, 0)
+            
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # face detection
         if self.mode == Vision.MODE_FACES:
@@ -45,7 +52,7 @@ class Vision:
             )
         # motion
         elif self.mode == Vision.MODE_MOTION:
-            check, frame = self.video.read()
+            #check, frame = self.video.read()
             # frame = cv2.flip(frame, -1)
 
             # Converting color image to gray_scale image
@@ -97,8 +104,8 @@ class Vision:
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
 
         if self.lines:
-            for key in self.lines:
-                cv2.line(frame, self.lines[key][0], self.lines[key][1], (255, 0, 0), 2)
+            for (start, end) in self.lines:
+                cv2.line(frame, start, end, (255, 0, 0), 2)
 
         # Displaying color frame with contour of motion of object
         cv2.imshow("Preview", frame)
@@ -118,4 +125,7 @@ class Vision:
         :param match: cv2 match
         :return: area calcualation
         """
-        return cv2.contourArea(match)
+        if match is not None:
+            x, y, w, h = match
+            return float(w) * float(h)
+        return 0
