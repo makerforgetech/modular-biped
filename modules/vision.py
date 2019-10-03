@@ -1,4 +1,5 @@
 import cv2
+from datetime import datetime
 
 
 class Vision:
@@ -16,6 +17,7 @@ class Vision:
         self.dimensions = (640, 480)
         self.flip = kwargs.get('flip', True)
         self.lines = []
+        self.last_match = datetime.now()  # @todo improve
 
         if self.mode == Vision.MODE_FACES:
             self.cascade_path = "/home/pi/really-useful-robot/haarcascade_frontalface_default.xml"
@@ -90,6 +92,9 @@ class Vision:
 
         if self.preview:
             self.render(frame, matches)
+
+        if len(matches) > 0:
+            self.last_match = datetime.now()
 
         return matches
 

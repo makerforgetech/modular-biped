@@ -1,7 +1,3 @@
-import cv2
-from time import sleep
-from datetime import datetime
-
 class Tracking:
     def __init__(self, vision, pan, tilt, bounds_percent=15):
         self.vision = vision
@@ -12,7 +8,6 @@ class Tracking:
         self.bounds = int(self.vision.dimensions[0] / (100 / bounds_percent))
         self.vision.add_lines(self._define_boundary_lines())
         self.ignore = 0
-        self.last_match = datetime.now() # @todo improve
 
     def track_largest_match(self):
         """
@@ -50,7 +45,6 @@ class Tracking:
             self.vision.reset()
             self.ignore = 5
 
-        self.last_match = datetime.now()
         return True
 
     def _define_boundary_lines(self):
