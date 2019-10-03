@@ -20,11 +20,12 @@ class Tracking:
         within the defined bounds on screen
 
         Incremental amount is the percentage of the screen defined as boundary
+        :return: boolean - was match detected
         """
         largest = self._largest(self.vision.detect())
         if largest is None:
             return False
-        
+
         # Run through the buffer to ignore cached matches
         if self.ignore > 0:
             self.ignore = self.ignore -1
@@ -38,17 +39,17 @@ class Tracking:
         elif (x + w) > (self.vision.dimensions[0] - self.bounds):
             self.pan.move_relative(self.bounds_percent)
             moved = True
-        if y < self.bounds:
-            self.tilt.move_relative(self.bounds_percent)
-            moved = True
-        elif (y + h) > (self.vision.dimensions[1] - self.bounds):
+        if (y + h) > (self.vision.dimensions[1] - self.bounds):
             self.tilt.move_relative(-self.bounds_percent)
             moved = True
-        
-        if moved == True:        
+        elif y < self.bounds:
+            self.tilt.move_relative(self.bounds_percent)
+            moved = True
+
+        if moved:
             self.vision.reset()
             self.ignore = 5
-        
+
         self.last_match = datetime.now()
         return True
 
