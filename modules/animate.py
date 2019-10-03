@@ -5,17 +5,20 @@ class Animate:
     def __init__(self, pan, tilt, **kwargs):
         self.pan = pan
         self.tilt = tilt
-        self.path = kwargs.get('path', 'animations') + '/'
+        self.path = kwargs.get('path', os.path.dirname(os.path.realpath(__file__)) + '/../animations') + '/'
 
     def animate(self, filename):
         """
         Move pan and tilt servos in sequence defined by given file
         :param filename: animation file in path specified in init
         """
+        filename = 'head_shake'
 
         file = self.path + filename + '.json'
-
-        if not os.path.exists(file):
+#        print(file)
+#        print(os.path.dirname(os.path.realpath(__file__)))
+#        print(os.path.exists(self.path))
+        if not os.path.isfile(file):
             raise ValueError('Animation does not exist: ' + filename)
 
         with open(file, 'r') as f:

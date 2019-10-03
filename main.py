@@ -6,6 +6,7 @@ except ModuleNotFoundError as e:
     from modules.mocks.mock_cv2 import MockCV2
 
 import datetime
+from time import sleep
 
 # Import modules
 # from modules import *
@@ -41,7 +42,7 @@ def main():
     motion = Sensor(Config.MOTION_PIN, pi=pi)
 
     # Vision / Tracking
-    vision = Vision(mode=Vision.MODE_FACES)
+    vision = Vision(preview=False, mode=Vision.MODE_FACES)
     tracking = Tracking(vision, pan, tilt)
 
     # Pixels
@@ -63,7 +64,7 @@ def main():
 
     # Initialise mode
     mode = MODE_TRACK_FACES
-    animate.animate('wake')
+    #animate.animate('wake')
     # px.blink(Config.PIXEL_EYES, (0, 0, 255))
 
     loop = True
@@ -80,12 +81,18 @@ def main():
             
             If waiting for keyboard input, disable motion and facial tracking
             """
+            #print(motion.read())
+            #print((datetime.datetime.now() - vision.last_match).total_seconds())
 
-            if mode == MODE_SLEEP and motion.read() == 1:
-                mode = MODE_TRACK_FACES
-                animate.animate('wake')
-                tilt.reset()
-                print("I sense you, I'm awake!")
+            if mode == MODE_SLEEP:
+                if motion.read() == 1:
+                    mode = MODE_TRACK_FACES
+                    #animate.animate('wake')
+                    tilt.reset()
+                    vision.last_match = datetime.datetime.now()
+                    print("I sense you, I'm awake!")
+                else:
+                    sleep(1)
 
             elif mode == MODE_TRACK_MOTION:
                 if vision.mode != Vision.MODE_MOTION:
@@ -98,8 +105,9 @@ def main():
                 if vision.mode != Vision.MODE_FACES:
                     vision = Vision(mode=Vision.MODE_FACES)
                 if not tracking.track_largest_match():
-                    mode = MODE_TRACK_MOTION
-                    print('No face, switching to motion')
+                    #mode = MODE_TRACK_MOTION
+                    #print('No face, switching to motion')
+                    pass
 
             elif mode == MODE_KEYBOARD:
                 if keyboard is None:
@@ -118,9 +126,12 @@ def main():
                 pan.reset()
                 tilt.move(0)
                 print('bored now, sleeping')
+                sleep(3)
 
     except (KeyboardInterrupt, ValueError) as e:
         print(e)
+        loop = False
+        quit()
 
     finally:
         pan.reset()
