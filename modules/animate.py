@@ -1,5 +1,5 @@
 import json
-
+import os.path
 
 class Animate:
     def __init__(self, pan, tilt, **kwargs):
@@ -12,7 +12,13 @@ class Animate:
         Move pan and tilt servos in sequence defined by given file
         :param filename: animation file in path specified in init
         """
-        with open(self.path + filename + '.json', 'r') as f:
+
+        file = self.path + filename + '.json'
+
+        if not os.path.exists(file):
+            raise ValueError('Animation does not exist: ' + filename)
+
+        with open(file, 'r') as f:
             parsed_json = json.load(f)
 
         # print(json.dumps(parsed_json, indent=4, sort_keys=True))
