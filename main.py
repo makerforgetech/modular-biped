@@ -67,8 +67,8 @@ def main():
     # px.blink(Config.PIXEL_EYES, (0, 0, 255))
 
     loop = True
-    while loop:
-        try:
+    try:
+        while loop:
             """
             Basic behaviour:
             
@@ -119,9 +119,12 @@ def main():
                 tilt.move(0)
                 print('bored now, sleeping')
 
-        except (KeyboardInterrupt, ValueError) as e:
-            loop = False
-            print(e)
+    except (KeyboardInterrupt, ValueError) as e:
+        print(e)
+
+    finally:
+        pan.reset()
+        tilt.reset()
 
 
 if __name__ == '__main__':
