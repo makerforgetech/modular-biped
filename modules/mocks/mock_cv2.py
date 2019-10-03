@@ -8,6 +8,8 @@ class MockVideoCapture():
         return True
     def read(self):
         return ('read', 'read2')
+    def set(self, attr, val):
+        return True
 
 
 class MockCascade():
@@ -24,6 +26,7 @@ class MockCV2:
     THRESH_BINARY = 'BINARY'
     RETR_EXTERNAL = 'RETR_EXTERNAL'
     CHAIN_APPROX_SIMPLE = 'CHAIN_APPROX_SIMPLE'
+    CAP_PROP_BUFFERSIZE = 100
 
 
     def VideoCapture(mode):
@@ -55,6 +58,9 @@ class MockCV2:
 
     def contourArea(contourArea):
         return 32
+
+    def flip(self, frame):
+        return frame
 
 # module = type(sys)('cv2')
 # module.VideoCapture = MockCV2.VideoCapture

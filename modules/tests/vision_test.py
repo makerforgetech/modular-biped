@@ -53,4 +53,4 @@ def test_add_lines():
 def test_get_area():
     vision = Vision()
     area = vision.get_area((0, 1, 2, 3))
-    assert area == 32
+    assert area == 6

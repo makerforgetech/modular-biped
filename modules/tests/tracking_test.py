@@ -11,9 +11,9 @@ def test_init():
     assert tracking.vision == vision
     assert tracking.pan == pan
     assert tracking.tilt == tilt
-    assert tracking.bounds_percent == 25
-    assert tracking.bounds == vision.dimensions[0] / (100 / 25)
-    assert set(vision.lines) == set([((160.0, 0), (160.0, 480)), ((480.0, 0), (480.0, 480)), ((0, 160.0), (640, 160.0)), ((0, 320.0), (640, 320.0))])
+    assert tracking.bounds_percent == 15
+    assert tracking.bounds == vision.dimensions[0] / (100 / 15)
+    assert set(vision.lines) == set([((96, 0), (96, 480)), ((544, 0), (544, 480)), ((0, 96), (640, 96)), ((0, 384), (640, 384))])
 
 
 def test_track_largest_match():
