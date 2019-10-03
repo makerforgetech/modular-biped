@@ -12,7 +12,7 @@ class Config:
     # Tilt Servo
     TILT_PIN = 17
     TILT_RANGE = (1560, 1880)
-    TILT_START_POS = 40
+    TILT_START_POS = 35
 
     # Linear Actuators
     LEG_PINS = (6, 13, 19, 26)
