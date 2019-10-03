@@ -3,6 +3,7 @@ import board
 class Config:
     # Power Management
     POWER_ENABLE_PIN = 2
+    SLEEP_TIMEOUT = 1  # Minutes
 
     # Pan Servo
     PAN_PIN = 27
@@ -23,3 +24,15 @@ class Config:
     PIXEL_PIN = board.D18
     PIXEL_COUNT = 5
 
+    PIXEL_EYES = [1, 2]
+    PIXEL_MOUTH = [3, 4]
+    PIXEL_FRONT = PIXEL_EYES + PIXEL_MOUTH
+    PIXEL_TOP = [5, 6, 7, 8]
+    PIXEL_LEFT = [9, 10]
+    PIXEL_RIGHT = [11, 12, 13, 14]
+    PIXEL_BACK = [15, 16, 17, 18]
+    PIXEL_HEAD = PIXEL_TOP + PIXEL_LEFT + PIXEL_RIGHT + PIXEL_BACK
+    PIXEL_ALL = PIXEL_FRONT + PIXEL_HEAD
+
+    # Microwave sensor pin
+    MOTION_PIN = 26
