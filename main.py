@@ -19,6 +19,7 @@ from modules.power import Power
 from modules.keyboard import Keyboard
 from modules.pixels import NeoPixel
 from modules.sensor import Sensor
+from modules.hotword import HotWord
 
 MODE_TRACK_MOTION = 0
 MODE_TRACK_FACES = 1
@@ -44,6 +45,9 @@ def main():
     # Vision / Tracking
     vision = Vision(preview=False, mode=Vision.MODE_FACES)
     tracking = Tracking(vision, pan, tilt)
+
+    # Voice
+    hotword = HotWord()
 
     # Pixels
     #px = NeoPixel(Config.PIXEL_PIN, Config.PIXEL_COUNT)
@@ -88,7 +92,7 @@ def main():
                 if motion.read() == 1:
                     mode = MODE_TRACK_FACES
                     #animate.animate('wake')
-                    tilt.reset()
+                    # tilt.reset()
                     vision.last_match = datetime.datetime.now()
                     print("I sense you, I'm awake!")
                 else:
@@ -123,8 +127,8 @@ def main():
             if (mode == MODE_TRACK_MOTION or mode == MODE_TRACK_FACES) and \
                     vision.last_match < datetime.datetime.now() - datetime.timedelta(minutes=Config.SLEEP_TIMEOUT):
                 mode = MODE_SLEEP
-                pan.reset()
-                tilt.move(0)
+                # pan.reset()
+                # tilt.move(0)
                 print('bored now, sleeping')
                 sleep(3)
 
