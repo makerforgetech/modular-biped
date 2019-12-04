@@ -20,6 +20,7 @@ from modules.keyboard import Keyboard
 from modules.pixels import NeoPixel
 from modules.sensor import Sensor
 #from modules.hotword import HotWord
+from modules.chirp import Chirp
 
 MODE_TRACK_MOTION = 0
 MODE_TRACK_FACES = 1
@@ -53,6 +54,9 @@ def main():
     #px = NeoPixel(Config.PIXEL_PIN, Config.PIXEL_COUNT)
     #px.set(Config.PIXEL_FRONT, (0, 0, 255))
     #px.set(Config.PIXEL_HEAD, (0, 255, 0))
+
+    # Output
+    chirp = Chirp()
 
     # Keyboard Input
     key_mappings = {
@@ -94,20 +98,22 @@ def main():
                     #animate.animate('wake')
                     #tilt.reset()
                     vision.last_match = datetime.datetime.now()
-                    print("I sense you, I'm awake!")
+                    chirp.send("Motion!")
                 else:
                     sleep(1)
 
             elif mode == MODE_TRACK_MOTION:
                 if vision.mode != Vision.MODE_MOTION:
                     vision = Vision(mode=Vision.MODE_MOTION)
+                    chirp.send('Looking for motion')
                 if tracking.track_largest_match():
                     mode = MODE_TRACK_FACES
-                    print('Found motion, switching to face recognition')
+                    chirp.send('Looking for faces')
 
             elif mode == MODE_TRACK_FACES:
                 if vision.mode != Vision.MODE_FACES:
                     vision = Vision(mode=Vision.MODE_FACES)
+                    chirp.send('Looking for faces')
                 if not tracking.track_largest_match():
                     #mode = MODE_TRACK_MOTION
                     #print('No face, switching to motion')
@@ -121,7 +127,7 @@ def main():
                 if key == ord('q'):
                     loop = False
                 else:
-                    print(key)
+                    chirp.send(key)
 
             # Sleep if nothing has been detected for a while
             if (mode == MODE_TRACK_MOTION or mode == MODE_TRACK_FACES) and \
@@ -129,11 +135,11 @@ def main():
                 mode = MODE_SLEEP
                 #pan.reset()
                 #tilt.move(0)
-                print('bored now, sleeping')
+                chirp.send('Sleeping')
                 sleep(3)
 
     except (KeyboardInterrupt, ValueError) as e:
-        print(e)
+        chirp.send(e)
         loop = False
         quit()
 
