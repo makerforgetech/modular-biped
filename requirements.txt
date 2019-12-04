@@ -1,1 +1,12 @@
 pygame
+
+# Chirp
+chirpsdk
+
+# Speech recognition
+SpeechRecognition
+pocketsphinx
+
+# Chat bot
+chatterbot
+chatterbot_corpus
