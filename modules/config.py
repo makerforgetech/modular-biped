@@ -5,6 +5,9 @@ class Config:
     POWER_ENABLE_PIN = 2
     SLEEP_TIMEOUT = 1  # Minutes
 
+    # Microwave sensor pin
+    MOTION_PIN = 4
+
     # Pan Servo
     PAN_PIN = 27
     PAN_RANGE = (560, 2450)
@@ -34,5 +37,4 @@ class Config:
     PIXEL_HEAD = PIXEL_TOP + PIXEL_LEFT + PIXEL_RIGHT + PIXEL_BACK
     PIXEL_ALL = PIXEL_FRONT + PIXEL_HEAD
 
-    # Microwave sensor pin
-    MOTION_PIN = 26
+

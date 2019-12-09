@@ -23,5 +23,7 @@ class Chirp:
 
     def send(self, message):
         print(message)
-        payload = message.encode('utf8')
-        self.chirp.send(payload, blocking=True)
+        if message:
+            payload = bytearray(message.encode('utf8'))
+            # payload = str(message).encode('utf8')
+            self.chirp.send(payload, blocking=True)

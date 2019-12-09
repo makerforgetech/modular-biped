@@ -19,8 +19,9 @@ from modules.power import Power
 from modules.keyboard import Keyboard
 from modules.pixels import NeoPixel
 from modules.sensor import Sensor
-#from modules.hotword import HotWord
+from modules.hotword2 import HotWord2
 from modules.chirp import Chirp
+from modules.speechinput import SpeechInput
 
 MODE_TRACK_MOTION = 0
 MODE_TRACK_FACES = 1
@@ -29,13 +30,12 @@ MODE_ANIMATE = 3
 MODE_OFF = 4
 MODE_KEYBOARD = 5
 
-
 def main():
     # GPIO Management
     pi = pigpio.pi()
 
     # Power Management
-    power = Power(Config.POWER_ENABLE_PIN, pi=pi)
+    power = None# Power(Config.POWER_ENABLE_PIN, pi=pi)
 
     # Actuators
     tilt = Servo(Config.TILT_PIN, Config.TILT_RANGE, start_pos=Config.TILT_START_POS, power=power, pi=pi)
@@ -48,7 +48,12 @@ def main():
     tracking = Tracking(vision, pan, tilt)
 
     # Voice
-    #hotword = HotWord()
+    hotword = HotWord2('modules/snowboy/Robot.pmdl')
+    hotword.start()
+    hotword.start_recog(sleep_time=0.03)
+    sleep(1)
+
+    speech = SpeechInput()
 
     # Pixels
     #px = NeoPixel(Config.PIXEL_PIN, Config.PIXEL_COUNT)
@@ -72,8 +77,11 @@ def main():
 
     # Initialise mode
     mode = MODE_TRACK_FACES
+
     #animate.animate('wake')
     # px.blink(Config.PIXEL_EYES, (0, 0, 255))
+
+    chirp.send('Hi!')
 
     loop = True
     try:
@@ -99,6 +107,7 @@ def main():
                     #tilt.reset()
                     vision.last_match = datetime.datetime.now()
                     chirp.send("Motion!")
+                    # listening = True
                 else:
                     sleep(1)
 
@@ -138,15 +147,20 @@ def main():
                 chirp.send('Sleeping')
                 sleep(3)
 
+            # repeat what I hear
+            voice_input = speech.detect()
+            if voice_input:
+                print(voice_input)
+
     except (KeyboardInterrupt, ValueError) as e:
-        chirp.send(e)
+        print(e)
         loop = False
         quit()
 
     finally:
         pan.reset()
         tilt.reset()
-
+        hotword.terminate()
 
 if __name__ == '__main__':
     main()

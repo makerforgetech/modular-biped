@@ -15,7 +15,7 @@ class Vision:
         self.static_back = None
         self.preview = kwargs.get('preview', False)
         self.dimensions = (640, 480)
-        self.flip = kwargs.get('flip', True)
+        self.flip = kwargs.get('flip', False)
         self.lines = []
         self.last_match = datetime.now()  # @todo improve
 

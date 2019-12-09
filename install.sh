@@ -10,8 +10,12 @@ pip3 install SpeechRecognition
 sudo apt-get install python-pyaudio python3-pyaudio
 sudo apt install bluealsa
 
+# google speech
+apt-get install flac
+
 # CHIRP
 sudo apt-get install python3-dev python3-setuptools portaudio19-dev libffi-dev libsndfile1
 
 # INSTALL ALL PYTHON DEPENDENCIES
 pip3 install -r requirements.txt
+

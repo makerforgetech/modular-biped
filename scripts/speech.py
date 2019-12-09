@@ -6,7 +6,7 @@ r = sr.Recognizer()
 #r.adjust_for_ambient_noise(source, duration=0.5)
 
 # print('loading audio')
-# harvard = sr.AudioFile('speech.wav')
+# harvard = sr.AudioFile('test.wav')
 # with harvard as source:
 #     audio = r.record(source)
 #
