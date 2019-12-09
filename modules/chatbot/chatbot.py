@@ -1,8 +1,11 @@
 from chatterbot import ChatBot
 from chatterbot.trainers import ChatterBotCorpusTrainer
+import logging
 
+logger = logging.getLogger()
+logger.setLevel(logging.CRITICAL)
 
-class ChatBot:
+class MyChatBot:
     
     def __init__(self, **kwargs):
         self.chatbot = ChatBot('Robot')

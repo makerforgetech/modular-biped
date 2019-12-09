@@ -22,6 +22,7 @@ from modules.sensor import Sensor
 from modules.hotword2 import HotWord2
 from modules.chirp import Chirp
 from modules.speechinput import SpeechInput
+# from modules.chatbot.chatbot import MyChatBot
 
 MODE_TRACK_MOTION = 0
 MODE_TRACK_FACES = 1
@@ -54,6 +55,9 @@ def main():
     sleep(1)
 
     speech = SpeechInput()
+
+    # Chat bot
+    # chatbot = MyChatBot()
 
     # Pixels
     #px = NeoPixel(Config.PIXEL_PIN, Config.PIXEL_COUNT)
@@ -151,6 +155,11 @@ def main():
             voice_input = speech.detect()
             if voice_input:
                 print(voice_input)
+                if voice_input == 'shut down':
+                    loop = False
+                    quit()
+                # print('response:')
+                # print(chatbot.get_response(voice_input)) # @todo This is awful, improve
 
     except (KeyboardInterrupt, ValueError) as e:
         print(e)
