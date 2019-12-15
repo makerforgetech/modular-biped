@@ -5,3 +5,4 @@ modules/__pycache__
 modules/.coverage
 *__pycache__
 *.AppleDouble*
+*.DS_Store
