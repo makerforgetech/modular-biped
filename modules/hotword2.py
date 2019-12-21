@@ -23,6 +23,9 @@ class HotWord2(threading.Thread):
         self.detectors = None  # Initialize when thread is run in self.run()
         self.run_kwargs = None  # Initialize when detectors start in self.start_recog()
 
+    def __del__(self):
+        self.terminate()
+
     def initialize_detectors(self):
         """
         Returns initialized Snowboy HotwordDetector objects

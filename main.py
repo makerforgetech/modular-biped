@@ -7,6 +7,7 @@ except ModuleNotFoundError as e:
 
 import datetime
 from time import sleep
+from pubsub import pub
 
 # Import modules
 # from modules import *
@@ -23,6 +24,7 @@ from modules.chirp import Chirp
 from modules.speechinput import SpeechInput
 # from modules.chatbot.chatbot import MyChatBot
 from modules.arduinoserial import ArduinoSerial
+from modules.led import LED
 
 MODE_TRACK_MOTION = 0
 MODE_TRACK_FACES = 1
@@ -48,11 +50,8 @@ def main():
     #test
     # serial.send(ArduinoSerial.DEVICE_SERVO, Config.HEAD_ROTATE_PIN, 90)
 
-    # serial.send(ArduinoSerial.DEVICE_LED, Config.LED_ALL, (124, 124, 124))
-    # sleep(5)
-    serial.send(ArduinoSerial.DEVICE_LED, Config.LED_ALL, (0, 0, 0))
-    sleep(.1)
-    serial.led_green()
+    led = LED()
+
     #serial.send(ArduinoSerial.DEVICE_PIN, 12, 1)
     #sleep(5)
     #serial.send(ArduinoSerial.DEVICE_PIN, 12, 0)
@@ -122,7 +121,7 @@ def main():
                     #tilt.reset()
                     vision.last_match = datetime.datetime.now()
                     print("Motion!")
-                    serial.led_green()
+                    led.eye('green')
                     # listening = True
                 else:
                     sleep(1)
@@ -161,7 +160,7 @@ def main():
                 #pan.reset()
                 #tilt.move(0)
                 print('Sleeping')
-                serial.led_red()
+                led.eye('red')
                 sleep(3)
 
             # repeat what I hear
@@ -172,11 +171,9 @@ def main():
                     loop = False
                     quit()
                 elif voice_input == 'light on':
-                    serial.send(ArduinoSerial.DEVICE_LED, Config.LED_ALL, (124, 124, 124))
+                    led.flashlight(True)
                 elif voice_input == 'light off':
-                    serial.send(ArduinoSerial.DEVICE_LED, Config.LED_ALL, (0, 0, 0))
-                    sleep(.1)
-                    serial.send(ArduinoSerial.DEVICE_LED, Config.LED_MIDDLE, (0, 5, 0))
+                    led.flashlight(False)
 
                 # print('response:')
                 # print(chatbot.get_response(voice_input)) # @todo This is awful, improve
@@ -186,12 +183,9 @@ def main():
         loop = False
         quit()
 
-    finally:
+    # finally:
         # pan.reset()
         # tilt.reset()
-        chirp.send('bye')
-        serial.send(ArduinoSerial.DEVICE_LED, Config.LED_ALL, (0, 0, 0))
-        hotword.terminate()
 
 if __name__ == '__main__':
     main()

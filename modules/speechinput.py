@@ -37,9 +37,6 @@ class SpeechInput:
             self.disable()
             return None
 
-
-
-
     def detect_from_file(self, file):
         f = sr.AudioFile(file)
         with f as source:

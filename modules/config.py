@@ -2,6 +2,7 @@ class Config:
     # Power Management
     POWER_ENABLE_PIN = 2
     SLEEP_TIMEOUT = 1  # Minutes
+    AUDIO_ENABLE_PIN = 12  # Arduino pin handling audio power
 
     # Microwave sensor pin
     MOTION_PIN = 4

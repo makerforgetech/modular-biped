@@ -9,6 +9,7 @@ from pubsub import pub
 # pip3 install chirpsdk
 # create ~/.chirprc with credentials from https://developers.chirp.io/applications
 
+from modules.config import Config
 
 class Chirp:
     """
@@ -19,13 +20,14 @@ class Chirp:
         self.chirp.start(send=True, receive=True)
 
     def __del__(self):
+        self.send('bye')
         self.chirp.stop()
 
     def send(self, message):
         print(message)
         if message:
-            pub.sendMessage('audio_on')
+            pub.sendMessage('serial', Config.AUDIO_ENABLE_PIN, 1)
             payload = bytearray(message.encode('utf8'))
             # payload = str(message).encode('utf8')
             self.chirp.send(payload, blocking=True)
-            pub.sendMessage('audio_off')
+            pub.sendMessage('serial', Config.AUDIO_ENABLE_PIN, 1)
