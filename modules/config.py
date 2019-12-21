@@ -20,6 +20,6 @@ class Config:
     LED_ALL = range(LED_COUNT)
 
     # HotWord (uses Snowboy.ai)
-    HOTWORD_MODEL = 'modules/snowboy/Robot.pmdl'
+    HOTWORD_MODEL = 'modules/snowboy/resources/models/robot.pmdl'
     HOTWORD_SLEEP_TIME = 0.03
 
