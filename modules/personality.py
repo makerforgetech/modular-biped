@@ -41,12 +41,12 @@ class Personality:
         self.contentment -= randint(0, 3)
 
     def behave(self):
-        if self.last_behave > datetime.datetime.now() - datetime.timedelay(Personality.BEHAVE_INTERVAL):
+        if self.last_behave > datetime.datetime.now() - datetime.timedelta(Personality.BEHAVE_INTERVAL):
             return
 
         self.last_behave = datetime.datetime.now()
 
-        if self.do_output and self.last_output < datetime.datetime.now() - datetime.timedelay(Personality.OUTPUT_INTERVAL):
+        if self.do_output and self.last_output < datetime.datetime.now() - datetime.timedelta(Personality.OUTPUT_INTERVAL):
             self.last_output = datetime.datetime.now()
             self.output()
 

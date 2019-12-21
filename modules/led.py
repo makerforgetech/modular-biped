@@ -21,11 +21,12 @@ class LED:
 
     def __init__(self, count):
         self.count = count
-        pub.subscribe('led', self.set)
+        pub.subscribe(self.set, 'led')
         self.set(Config.LED_ALL, LED.COLOUR_OFF)
-        self.set(Config.LED_MIDDLE, LED.COLOR_GREEN)
+        sleep(0.1)
+        self.set(Config.LED_MIDDLE, LED.COLOUR_GREEN)
 
-    def __del__(self):
+    def exit(self):
         self.set(Config.LED_ALL, LED.COLOUR_OFF)
 
     def set(self, identifiers, color):
@@ -37,7 +38,7 @@ class LED:
         :param number: pixel number (starting from 0) - can be list
         :param color: (R, G, B)
         """
-        pub.sendMessage('serial', ArduinoSerial.DEVICE_LED, identifiers, color)
+        pub.sendMessage('serial', type=ArduinoSerial.DEVICE_LED, identifier=identifiers, message=color)
 
     def flashlight(self, on):
         if on:
@@ -49,4 +50,5 @@ class LED:
 
     def eye(self, color):
         if color in LED.COLOUR_MAP.keys():
+            print(LED.COLOUR_MAP[color])
             self.set(Config.LED_MIDDLE, LED.COLOUR_MAP[color])

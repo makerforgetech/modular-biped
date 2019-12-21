@@ -24,7 +24,7 @@ class HotWord(threading.Thread):
         self.detectors = None  # Initialize when thread is run in self.run()
         self.run_kwargs = None  # Initialize when detectors start in self.start_recog()
 
-    def __del__(self):
+    def exit(self):
         self.terminate()
 
     def initialize_detectors(self):

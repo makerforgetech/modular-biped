@@ -46,12 +46,12 @@ def main():
     # pan = Servo(Config.PAN_PIN, Config.PAN_RANGE, start_pos=Config.PAN_START_POS, power=power, pi=pi)
 
     # Arduino connection
-    serial = ArduinoSerial(ArduinoSerial.MODE_ROBUST)
+    serial = ArduinoSerial()
 
     #test
     # serial.send(ArduinoSerial.DEVICE_SERVO, Config.HEAD_ROTATE_PIN, 90)
 
-    led = LED()
+    led = LED(Config.LED_COUNT)
 
     #serial.send(ArduinoSerial.DEVICE_PIN, 12, 1)
     #sleep(5)
@@ -93,7 +93,7 @@ def main():
     # Initialise mode
     mode = MODE_TRACK_FACES
 
-    personality = Personality()
+    personality = Personality(debug=True)
 
     #animate.animate('wake')
     # px.blink(Config.PIXEL_EYES, (0, 0, 255))
@@ -115,7 +115,7 @@ def main():
             If waiting for keyboard input, disable motion and facial tracking
             """
 
-            personality.behave(debug=True)
+            personality.behave()
             #print(motion.read())
             #print((datetime.datetime.now() - vision.last_match).total_seconds())
 
@@ -188,7 +188,11 @@ def main():
         loop = False
         quit()
 
-    # finally:
+    finally:
+        led.exit()
+        chirp.send('off')
+        chirp.exit()
+        hotword.exit()
         # pan.reset()
         # tilt.reset()
 
