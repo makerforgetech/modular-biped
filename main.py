@@ -19,7 +19,7 @@ from modules.animate import Animate
 from modules.power import Power
 from modules.keyboard import Keyboard
 from modules.sensor import Sensor
-from modules.hotword2 import HotWord2
+from modules.hotword import HotWord
 from modules.chirp import Chirp
 from modules.speechinput import SpeechInput
 # from modules.chatbot.chatbot import MyChatBot
@@ -64,10 +64,10 @@ def main():
     # tracking = Tracking(vision, pan, tilt)
 
     # Voice
-    hotword = HotWord2('modules/snowboy/Robot.pmdl')
-    hotword.start()
-    hotword.start_recog(sleep_time=0.03)
-    sleep(1)
+    hotword = HotWord(Config.HOTWORD_MODEL)
+    hotword.start()  # @todo can these be moved into hotword?
+    hotword.start_recog(sleep_time=Config.HOTWORD_SLEEP_TIME)
+    sleep(1)  # @todo is this needed?
 
     speech = SpeechInput()
 
