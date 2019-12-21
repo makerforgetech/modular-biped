@@ -48,14 +48,14 @@ def main():
     #test
     # serial.send(ArduinoSerial.DEVICE_SERVO, Config.HEAD_ROTATE_PIN, 90)
 
-    serial.send(ArduinoSerial.DEVICE_LED, Config.LED_ALL, (124, 124, 124))
-    sleep(5)
+    # serial.send(ArduinoSerial.DEVICE_LED, Config.LED_ALL, (124, 124, 124))
+    # sleep(5)
     serial.send(ArduinoSerial.DEVICE_LED, Config.LED_ALL, (0, 0, 0))
     sleep(.1)
-    serial.send(ArduinoSerial.DEVICE_LED, Config.LED_MIDDLE, (0, 5, 0))
-    serial.send(ArduinoSerial.DEVICE_PIN, 12, 1)
-    sleep(5)
-    serial.send(ArduinoSerial.DEVICE_PIN, 12, 0)
+    serial.led_green()
+    #serial.send(ArduinoSerial.DEVICE_PIN, 12, 1)
+    #sleep(5)
+    #serial.send(ArduinoSerial.DEVICE_PIN, 12, 0)
 
     # animate = Animate(pan, tilt)
     motion = Sensor(Config.MOTION_PIN, pi=pi)
@@ -96,7 +96,7 @@ def main():
     #animate.animate('wake')
     # px.blink(Config.PIXEL_EYES, (0, 0, 255))
 
-    chirp.send('Hi!')
+    # chirp.send('Hi!')
 
     loop = True
     try:
@@ -121,7 +121,8 @@ def main():
                     #animate.animate('wake')
                     #tilt.reset()
                     vision.last_match = datetime.datetime.now()
-                    chirp.send("Motion!")
+                    print("Motion!")
+                    serial.led_green()
                     # listening = True
                 else:
                     sleep(1)
@@ -129,7 +130,7 @@ def main():
             elif mode == MODE_TRACK_MOTION:
                 if vision.mode != Vision.MODE_MOTION:
                     vision = Vision(mode=Vision.MODE_MOTION)
-                    chirp.send('Looking for motion')
+                    print('Looking for motion')
                 # if tracking.track_largest_match():
                 #     mode = MODE_TRACK_FACES
                 #     chirp.send('Looking for faces')
@@ -137,7 +138,7 @@ def main():
             elif mode == MODE_TRACK_FACES:
                 if vision.mode != Vision.MODE_FACES:
                     vision = Vision(mode=Vision.MODE_FACES)
-                    chirp.send('Looking for faces')
+                    print('Looking for faces')
                 # if not tracking.track_largest_match():
                 #     #mode = MODE_TRACK_MOTION
                 #     #print('No face, switching to motion')
@@ -159,7 +160,8 @@ def main():
                 mode = MODE_SLEEP
                 #pan.reset()
                 #tilt.move(0)
-                chirp.send('Sleeping')
+                print('Sleeping')
+                serial.led_red()
                 sleep(3)
 
             # repeat what I hear
@@ -169,6 +171,13 @@ def main():
                 if voice_input == 'shut down':
                     loop = False
                     quit()
+                elif voice_input == 'light on':
+                    serial.send(ArduinoSerial.DEVICE_LED, Config.LED_ALL, (124, 124, 124))
+                elif voice_input == 'light off':
+                    serial.send(ArduinoSerial.DEVICE_LED, Config.LED_ALL, (0, 0, 0))
+                    sleep(.1)
+                    serial.send(ArduinoSerial.DEVICE_LED, Config.LED_MIDDLE, (0, 5, 0))
+
                 # print('response:')
                 # print(chatbot.get_response(voice_input)) # @todo This is awful, improve
 
@@ -180,6 +189,7 @@ def main():
     finally:
         # pan.reset()
         # tilt.reset()
+        chirp.send('bye')
         serial.send(ArduinoSerial.DEVICE_LED, Config.LED_ALL, (0, 0, 0))
         hotword.terminate()
 

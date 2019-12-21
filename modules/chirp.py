@@ -1,5 +1,5 @@
 from chirpsdk import ChirpSDK
-
+from pubsub import pub
 # Mac:
 # brew install portaudio libsndfile
 # Raspbian:
@@ -24,6 +24,8 @@ class Chirp:
     def send(self, message):
         print(message)
         if message:
+            pub.sendMessage('audio_on')
             payload = bytearray(message.encode('utf8'))
             # payload = str(message).encode('utf8')
             self.chirp.send(payload, blocking=True)
+            pub.sendMessage('audio_off')

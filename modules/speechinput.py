@@ -14,6 +14,11 @@ class SpeechInput:
 
     def enable(self):
         self.listening = True
+        pub.sendMessage('led_blue')
+
+    def disable(self):
+        self.listening = False
+        pub.sendMessage('led_green')
 
     def detect(self):
         if not self.listening:
@@ -26,9 +31,10 @@ class SpeechInput:
         print('done listening')
         try:
             val = self.recognizer.recognize_google(audio)
-            self.listening = False
+            self.disable()
             return val
         except sr.UnknownValueError:
+            self.disable()
             return None
 
 

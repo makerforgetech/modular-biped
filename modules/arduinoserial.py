@@ -5,7 +5,8 @@ from modules.robust_serial.robust_serial import write_order, Order, write_i8, wr
 from modules.robust_serial.utils import open_serial_port
 # MODE_SIMPLE
 import serial
-
+from pubsub import pub
+from time import sleep
 
 class ArduinoSerial:
     """
@@ -29,6 +30,12 @@ class ArduinoSerial:
             self.mode = ArduinoSerial.MODE_SIMPLE
             self.arduino = serial.Serial('/dev/ttyACM0', 9600)
 
+        pub.subscribe(self.enable_audio, 'audio_on')
+        pub.subscribe(self.disable_audio, 'audio_off')
+        pub.subscribe(self.led_blue, 'led_blue')
+        pub.subscribe(self.led_green, 'led_green')
+        pub.subscribe(self.led_red, 'led_red')
+
     @staticmethod
     def initialise():
         try:
@@ -51,6 +58,24 @@ class ArduinoSerial:
 
         print("Connected to Arduino")
         return serial_file
+
+    def enable_audio(self):
+        self.send(ArduinoSerial.DEVICE_PIN, 12, 1)
+
+    def disable_audio(self):
+        self.send(ArduinoSerial.DEVICE_PIN, 12, 0)
+
+    def led_blue(self):
+        print('led_blue')
+        self.send(ArduinoSerial.DEVICE_LED, 0, (0, 0, 5))
+
+    def led_green(self):
+        print('led_green')
+        self.send(ArduinoSerial.DEVICE_LED, 0, (0, 5, 0))
+
+    def led_red(self):
+        print('led_red')
+        self.send(ArduinoSerial.DEVICE_LED, 0, (5, 0, 0))
 
     # send(ArduinoSerial.DEVICE_SERVO, 18, 20)
     # send(ArduinoSerial.DEVICE_LED, 1, (20,20,20))
