@@ -3,6 +3,7 @@ import threading
 import queue
 from pubsub import pub
 
+
 class HotWord(threading.Thread):
     """
     Wrapper class around detectors to run them in a separate thread

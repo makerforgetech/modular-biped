@@ -1,6 +1,7 @@
 from random import randint
 from time import sleep
 from pubsub import pub
+import datetime
 
 """
 To update the personality status, publish to the 'behaviour' topic one of the defined INPUT_TYPE constants:
@@ -17,11 +18,19 @@ class Personality:
     INPUT_TYPE_FUN = 1
     INPUT_TYPE_STARTLING = 1
 
-    def __init__(self):
+    BEHAVE_INTERVAL = 2
+    OUTPUT_INTERVAL = 30
+
+    def __init__(self, **kwargs):
         self.happiness = 50
         self.contentment = 50
         self.attention = 50
         self.wakefulness = 100
+
+        self.do_output = kwargs.get('debug', False)
+
+        self.last_behave = datetime.datetime.now()
+        self.last_output = datetime.datetime.now()
 
         pub.subscribe(self.input, 'behaviour')
 
@@ -32,6 +41,15 @@ class Personality:
         self.contentment -= randint(0, 3)
 
     def behave(self):
+        if self.last_behave > datetime.datetime.now() - datetime.timedelay(Personality.BEHAVE_INTERVAL):
+            return
+
+        self.last_behave = datetime.datetime.now()
+
+        if self.do_output and self.last_output < datetime.datetime.now() - datetime.timedelay(Personality.OUTPUT_INTERVAL):
+            self.last_output = datetime.datetime.now()
+            self.output()
+
         feelings = []
         if self.happiness < 10:
             feelings.append('sad')

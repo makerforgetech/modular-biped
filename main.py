@@ -25,6 +25,7 @@ from modules.speechinput import SpeechInput
 # from modules.chatbot.chatbot import MyChatBot
 from modules.arduinoserial import ArduinoSerial
 from modules.led import LED
+from modules.personality import Personality
 
 MODE_TRACK_MOTION = 0
 MODE_TRACK_FACES = 1
@@ -92,6 +93,8 @@ def main():
     # Initialise mode
     mode = MODE_TRACK_FACES
 
+    personality = Personality()
+
     #animate.animate('wake')
     # px.blink(Config.PIXEL_EYES, (0, 0, 255))
 
@@ -111,6 +114,8 @@ def main():
             
             If waiting for keyboard input, disable motion and facial tracking
             """
+
+            personality.behave(debug=True)
             #print(motion.read())
             #print((datetime.datetime.now() - vision.last_match).total_seconds())
 
