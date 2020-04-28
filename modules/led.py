@@ -44,7 +44,7 @@ class LED:
         if on:
             self.set(Config.LED_ALL, LED.COLOUR_WHITE)
         else:
-            self.set(Config.LED_ALL, LED.COLOUR_WHITE)
+            self.set(Config.LED_ALL, LED.COLOUR_OFF)
             sleep(0.1)
             self.eye('green')
 
