@@ -55,7 +55,7 @@ class ArduinoSerial:
         if type == ArduinoSerial.DEVICE_SERVO:
             write_order(self.serial_file, Order.SERVO)
             write_i8(self.serial_file, identifier)
-            write_i8(self.serial_file, message)
+            write_i16(self.serial_file, int(message))
         elif type == ArduinoSerial.DEVICE_LED:
             write_order(self.serial_file, Order.LED)
             if isinstance(identifier, list) or isinstance(identifier, range):
@@ -78,5 +78,4 @@ class ArduinoSerial:
             write_i8(self.serial_file, identifier)
             write_i8(self.serial_file, message)
 
-
-        print(read_order(self.serial_file))
+        print(self.serial_file)

@@ -39,14 +39,15 @@ def main():
     pi = pigpio.pi()
 
     # Power Management
-    power = None# Power(Config.POWER_ENABLE_PIN, pi=pi)
-
-    # Actuators
-    # tilt = Servo(Config.TILT_PIN, Config.TILT_RANGE, start_pos=Config.TILT_START_POS, power=power, pi=pi)
-    # pan = Servo(Config.PAN_PIN, Config.PAN_RANGE, start_pos=Config.PAN_START_POS, power=power, pi=pi)
+    # power = None# Power(Config.POWER_ENABLE_PIN, pi=pi)
 
     # Arduino connection
     serial = ArduinoSerial()
+
+    # Actuators
+    tilt = Servo(Config.TILT_PIN, Config.TILT_RANGE, start_pos=Config.TILT_START_POS, serial=serial)
+    pan = Servo(Config.PAN_PIN, Config.PAN_RANGE, start_pos=Config.PAN_START_POS, serial=serial)
+    neck = Servo(Config.NECK_PIN, Config.NECK_RANGE, start_pos=Config.NECK_START_POS, serial=serial)
 
     #test
     # serial.send(ArduinoSerial.DEVICE_SERVO, Config.HEAD_ROTATE_PIN, 90)
@@ -80,18 +81,21 @@ def main():
 
     # Keyboard Input
     key_mappings = {
-        # Keyboard.KEY_LEFT: (pan.move_relative, 5),
-        # Keyboard.KEY_RIGHT: (pan.move_relative, -5),
-        # Keyboard.KEY_UP: (tilt.move_relative, 30),
-        # Keyboard.KEY_DOWN: (tilt.move_relative, -30),
-        # Keyboard.KEY_BACKSPACE: (stepper.c_step, None),
-        # Keyboard.KEY_RETURN: (stepper.cc_step, None),
+        Keyboard.KEY_LEFT: (pan.move_relative, 5),
+        Keyboard.KEY_RIGHT: (pan.move_relative, -5),
+        Keyboard.KEY_UP: (tilt.move_relative, 5),
+        Keyboard.KEY_DOWN: (tilt.move_relative, -5),
+        Keyboard.KEY_BACKSPACE: (neck.move_relative, 5),
+        Keyboard.KEY_RETURN: (neck.move_relative, -5),
+        ord('l'): (led.flashlight, True),
+        ord('o'): (led.flashlight, False),
+        ord('c'): (chirp.send, 'hi')
         # ord('h'): (animate.animate, 'head_shake')
     }
     keyboard = None
 
     # Initialise mode
-    mode = MODE_TRACK_FACES
+    mode = MODE_KEYBOARD
 
     personality = Personality(debug=True)
 
@@ -155,8 +159,8 @@ def main():
                 key = keyboard.handle_input()
                 if key == ord('q'):
                     loop = False
-                else:
-                    chirp.send(key)
+                #else:
+                #    chirp.send(key)
 
             # Sleep if nothing has been detected for a while
             if (mode == MODE_TRACK_MOTION or mode == MODE_TRACK_FACES) and \
@@ -190,7 +194,7 @@ def main():
 
     finally:
         led.exit()
-        chirp.send('off')
+        #chirp.send('off')
         chirp.exit()
         hotword.exit()
         # pan.reset()

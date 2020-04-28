@@ -1,5 +1,7 @@
 import pigpio
 import threading
+from modules.config import Config
+from modules.arduinoserial import ArduinoSerial
 from time import sleep
 
 class Servo:
@@ -8,12 +10,17 @@ class Servo:
         self.pin = pin
         self.range = pwm_range
         self.power = kwargs.get('power', None)
-        self.pi = kwargs.get('pi', pigpio.pi())
-        self.pi.set_mode(pin, pigpio.OUTPUT)
+
         self.start = kwargs.get('start_pos', 50)
         self.pos = self.translate(self.start)
         self.buffer = kwargs.get('buffer', 0)  # PWM amount to specify as acceleration / deceleration buffer
         self.delta = kwargs.get('delta', 1.5)  # amount of change in acceleration / deceleration (as a multiple)
+
+        # Accepts either serial connection or PI pin
+        self.serial = kwargs.get('serial', None)
+        if self.serial is None:
+            self.pi = kwargs.get('pi', pigpio.pi())
+            self.pi.set_mode(pin, pigpio.OUTPUT)
 
         self.move(self.start)
 
@@ -56,7 +63,11 @@ class Servo:
         if self.power:
             self.power.use()
         s = sequence.pop(0)
-        self.pi.set_servo_pulsewidth(self.pin, s[0])
+        if self.serial:
+            print(int(s[0]))
+            self.serial.send(ArduinoSerial.DEVICE_SERVO, self.pin, s[0])  # ,int(round(s[0], 0))
+        else:
+            self.pi.set_servo_pulsewidth(self.pin, s[0])
         if len(sequence) > 1:
             timer = threading.Timer(s[1], self.execute_move, [sequence])
             timer.start()

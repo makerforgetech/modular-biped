@@ -7,9 +7,10 @@
 
 bool is_connected = false; ///< True if the connection with the master is available
  
-Servo lowerNeck;                 
-Servo upperNeck;
-Servo rotate;
+Servo neck;
+Servo pan;
+Servo tilt;
+bool servos_attached = false;
 
 #define LED_COUNT 9
 
@@ -18,14 +19,7 @@ CRGB leds[LED_COUNT];
 void setup() 
 {
   Serial.begin(SERIAL_BAUD);
-  lowerNeck.attach(SERVO_NECK_L);
-  upperNeck.attach(SERVO_NECK_H);
-  rotate.attach(SERVO_HEAD);
 
-  lowerNeck.write(SERVO_NECK_L_INIT);
-  upperNeck.write(SERVO_NECK_H_INIT);
-  rotate.write(SERVO_HEAD_INIT);
-  
   FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, LED_COUNT);
 
   // Red until connected to Pi
@@ -43,7 +37,23 @@ void setup()
     get_messages_from_serial();
   }
 } 
- 
+
+void attachServos()
+{
+  // @todo store all servos in dynamic array.
+  neck.attach(SERVO_NECK);
+  tilt.attach(SERVO_TILT);
+  pan.attach(SERVO_PAN);
+  servos_attached = true;
+
+}
+void detachServos()
+{
+  neck.attach(SERVO_NECK);
+  tilt.attach(SERVO_TILT);
+  pan.attach(SERVO_PAN);
+  servos_attached = false;
+}
  
 void loop() 
 {
@@ -98,15 +108,19 @@ void get_messages_from_serial()
             write_order(SERVO);
             write_i16(servo_angle);
           }
-          if (servo_identifier == SERVO_NECK_L) {
-            lowerNeck.write(servo_angle);
+          // Attach servos if they are not already
+          if (servos_attached == false) attachServos();
+          // Write to appropriate servo, or if no match then detach all servos
+          if (servo_identifier == SERVO_PAN) {
+            pan.write(servo_angle);
           }
-          else if (servo_identifier == SERVO_NECK_H) {
-            upperNeck.write(servo_angle);
+          else if (servo_identifier == SERVO_TILT) {
+            tilt.write(servo_angle);
           }
-          else if (servo_identifier == SERVO_HEAD) {
-            rotate.write(servo_angle);
+          else if (servo_identifier == SERVO_NECK) {
+            neck.write(servo_angle);
           }
+          else detachServos();
           break;
         }
         case MOTOR:

@@ -32,6 +32,11 @@ class Keyboard:
         if self.mappings is not None:
             if key in self.mappings:
                 method_info = self.mappings.get(key)
+                print('method')
+                print(method_info[0])
+                print('param')
+                print(method_info[1])
+                print('end')
                 if method_info[1] is not None:
                     method_info[0](method_info[1])
                 else:
