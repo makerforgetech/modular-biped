@@ -14,9 +14,9 @@ class Config:
     TILT_PIN = 4
     PAN_PIN = 5
 
-    TILT_RANGE = [0, 180]
+    TILT_RANGE = [81, 117]
     PAN_RANGE = [0, 180]
-    NECK_RANGE = [0, 180]
+    NECK_RANGE = [45, 117]
 
     TILT_START_POS = 50
     PAN_START_POS = 50
