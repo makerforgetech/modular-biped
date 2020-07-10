@@ -6,7 +6,8 @@ except ModuleNotFoundError as e:
     from modules.mocks.mock_cv2 import MockCV2
 
 import datetime
-from time import sleep
+from time import sleep, time
+import random
 from pubsub import pub
 
 # Import modules
@@ -33,6 +34,7 @@ MODE_SLEEP = 2
 MODE_ANIMATE = 3
 MODE_OFF = 4
 MODE_KEYBOARD = 5
+MODE_RANDOM_BEHAVIOUR = 6
 
 def main():
     # GPIO Management
@@ -68,7 +70,7 @@ def main():
     # Voice
     hotword = HotWord(Config.HOTWORD_MODEL)
     hotword.start()  # @todo can these be moved into hotword?
-    hotword.start_recog(sleep_time=Config.HOTWORD_SLEEP_TIME)
+    #hotword.start_recog(sleep_time=Config.HOTWORD_SLEEP_TIME)
     sleep(1)  # @todo is this needed?
 
     speech = SpeechInput()
@@ -95,7 +97,7 @@ def main():
     keyboard = None
 
     # Initialise mode
-    mode = MODE_KEYBOARD
+    mode = MODE_RANDOM_BEHAVIOUR
 
     personality = Personality(debug=True)
 
@@ -103,6 +105,11 @@ def main():
     # px.blink(Config.PIXEL_EYES, (0, 0, 255))
 
     # chirp.send('Hi!')
+
+    start = time()  # random behaviour trigger
+    random.seed()
+    delay = random.randint(1, 5)
+    action = 1
 
     loop = True
     try:
@@ -123,7 +130,29 @@ def main():
             #print(motion.read())
             #print((datetime.datetime.now() - vision.last_match).total_seconds())
 
-            if mode == MODE_SLEEP:
+            if mode == MODE_RANDOM_BEHAVIOUR:
+                if time() - start > delay:
+                    if action == 1:
+                        chirp.send('test')
+                    elif action == 2:
+                        pan.move_relative(15)
+                    elif action == 3:
+                        pan.move_relative(-15)
+                    elif action == 4:
+                        tilt.move_relative(15)
+                    elif action == 5:
+                        tilt.move_relative(-15)
+                    elif action == 6:
+                        led.set(Config.LED_MIDDLE, (random.randint(0, 5), random.randint(0, 5), random.randint(0, 5)))
+
+                    action = action + 1
+                    if action == 7:
+                        action = 1
+                    start = time()
+                    delay = random.randint(5, 30)
+                    print(delay)
+
+            elif mode == MODE_SLEEP:
                 if motion.read() == 1:
                     mode = MODE_TRACK_FACES
                     #animate.animate('wake')
@@ -159,6 +188,8 @@ def main():
                 key = keyboard.handle_input()
                 if key == ord('q'):
                     loop = False
+                elif key == ord('d'):
+                    serial.send(ArduinoSerial.DEVICE_SERVO, 8, 0)
                 #else:
                 #    chirp.send(key)
 
