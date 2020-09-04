@@ -1,5 +1,5 @@
 # really-useful-robot
-Honestly it doesn't do anything worthwhile... 
+Robot development platform
 
 
 Trigger word for voice recognition:
