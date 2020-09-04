@@ -1,8 +1,13 @@
 import pigpio
 import threading
 from modules.config import Config
-from modules.arduinoserial import ArduinoSerial
+
 from time import sleep
+
+try:
+    from modules.arduinoserial import ArduinoSerial
+except ModuleNotFoundError as e:
+    pass
 
 class Servo:
 
