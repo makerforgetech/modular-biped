@@ -7,3 +7,4 @@ modules/.coverage
 *.AppleDouble*
 *.DS_Store
 designs/reference
+.coverage
