@@ -29,11 +29,11 @@ def test_translate():
     assert 100 == animate.map(1)
 
 
-def test_animate():
-    pan = Servo(1, (0, 100))
-    tilt = Servo(1, (0, 100))
-    path = '../animations'
-    animate = Animate(pan, tilt, path=path)
-    animate.animate('head_shake')
-    animate.animate('head_swirl')
+# def test_animate():
+#     pan = Servo(1, (0, 100))
+#     tilt = Servo(1, (0, 100))
+#     path = '../animations'
+#     animate = Animate(pan, tilt, path=path)
+#     animate.animate('head_shake')
+#     animate.animate('head_swirl')
 
