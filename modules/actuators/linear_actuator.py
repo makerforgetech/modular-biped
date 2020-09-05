@@ -16,15 +16,15 @@ class LinearActuator:
                 self.power.use()
             new = self.translate(percentage)
 
-            while new != pos:
-                if new > pos:
+            while new != self.pos:
+                if new > self.pos:
                     # move up
                     self.stepper.c_step()
-                    pos = pos + self.increment
-                elif new < pos:
+                    self.pos = self.pos + self.increment
+                elif new < self.pos:
                     # move down
                     self.stepper.cc_step()
-                    pos = pos - self.increment
+                    self.pos = self.pos - self.increment
             if self.power:
                 self.power.release()
 
