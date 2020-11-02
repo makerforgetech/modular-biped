@@ -13,7 +13,7 @@ class Servo:
 
         self.start = kwargs.get('start_pos', 50)
         self.pos = self.translate(self.start)
-        self.buffer = kwargs.get('buffer', 0)  # PWM amount to specify as acceleration / deceleration buffer
+        self.buffer = kwargs.get('buffer', 5)  # PWM amount to specify as acceleration / deceleration buffer
         self.delta = kwargs.get('delta', 1.5)  # amount of change in acceleration / deceleration (as a multiple)
 
         # Accepts either serial connection or PI pin

@@ -3,7 +3,6 @@ from modules.config import Config
 from modules.arduinoserial import ArduinoSerial
 from time import sleep
 
-
 class LED:
     COLOUR_OFF = (0, 0, 0)
     COLOUR_RED = (5, 0, 0)
@@ -28,6 +27,7 @@ class LED:
 
     def exit(self):
         self.set(Config.LED_ALL, LED.COLOUR_OFF)
+        sleep(1)
 
     def set(self, identifiers, color):
         """

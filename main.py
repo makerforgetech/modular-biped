@@ -9,6 +9,8 @@ import datetime
 from time import sleep, time
 import random
 from pubsub import pub
+import signal
+
 
 # Import modules
 # from modules import *
@@ -36,6 +38,7 @@ MODE_OFF = 4
 MODE_KEYBOARD = 5
 MODE_RANDOM_BEHAVIOUR = 6
 
+
 def main():
     # GPIO Management
     pi = pigpio.pi()
@@ -51,11 +54,8 @@ def main():
     pan = Servo(Config.PAN_PIN, Config.PAN_RANGE, start_pos=Config.PAN_START_POS, serial=serial)
     neck = Servo(Config.NECK_PIN, Config.NECK_RANGE, start_pos=Config.NECK_START_POS, serial=serial)
 
-    #test
-    # serial.send(ArduinoSerial.DEVICE_SERVO, Config.HEAD_ROTATE_PIN, 90)
-
     led = LED(Config.LED_COUNT)
-
+    signal.signal(signal.SIGTERM, led.exit)
     #serial.send(ArduinoSerial.DEVICE_PIN, 12, 1)
     #sleep(5)
     #serial.send(ArduinoSerial.DEVICE_PIN, 12, 0)
@@ -106,10 +106,12 @@ def main():
 
     # chirp.send('Hi!')
 
-    start = time()  # random behaviour trigger
-    random.seed()
-    delay = random.randint(1, 5)
-    action = 1
+    if mode == MODE_RANDOM_BEHAVIOUR:
+        start = time()  # random behaviour trigger
+        random.seed()
+        delay = random.randint(1, 5)
+        action = 1
+        chirp.send('hi')
 
     loop = True
     try:
@@ -132,8 +134,9 @@ def main():
 
             if mode == MODE_RANDOM_BEHAVIOUR:
                 if time() - start > delay:
+
                     if action == 1:
-                        chirp.send('test')
+                        led.eye('green')
                     elif action == 2:
                         pan.move_relative(15)
                     elif action == 3:
@@ -149,7 +152,7 @@ def main():
                     if action == 7:
                         action = 1
                     start = time()
-                    delay = random.randint(5, 30)
+                    delay = random.randint(2, 15)
                     print(delay)
 
             elif mode == MODE_SLEEP:
