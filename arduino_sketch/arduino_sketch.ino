@@ -148,7 +148,7 @@ void get_messages_from_serial()
         return;
       }
     }
-    write_order(RECEIVED); // Confirm the reception
+    write_order(RECEIVED); // Confirm the receipt
   }
 }
 

@@ -82,8 +82,8 @@ class ArduinoSerial:
         elif type == ArduinoSerial.DEVICE_PIN_READ:
             write_order(self.serial_file, Order.READ)
             write_i8(self.serial_file, identifier)
-            bytes_array = bytearray(self.serial_file.read(1))
-            byte = bytes_array[0]
-            return byte
+            value = read_i8(self.serial_file)
+            read_order(self.serial_file)
+            return value
 
         print(self.serial_file)

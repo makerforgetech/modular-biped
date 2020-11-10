@@ -10,6 +10,7 @@ from time import sleep, time
 import random
 from pubsub import pub
 import signal
+import subprocess
 
 
 # Import modules
@@ -29,6 +30,7 @@ from modules.speechinput import SpeechInput
 from modules.arduinoserial import ArduinoSerial
 from modules.led import LED
 from modules.personality import Personality
+from modules.battery import Battery
 
 MODE_TRACK_MOTION = 0
 MODE_TRACK_FACES = 1
@@ -111,11 +113,22 @@ def main():
         random.seed()
         delay = random.randint(1, 5)
         action = 1
-        chirp.send('hi')
+        # chirp.send('hi')
+
+    battery = Battery(0, serial)
 
     loop = True
     try:
         while loop:
+
+            # print(serial.send(ArduinoSerial.DEVICE_PIN_READ, 0, None))
+            if not battery.safe_voltage():
+                subprocess.call(['shutdown', '-h'], shell=False)
+                loop = False
+                quit()
+            sleep(1)
+            continue
+
             """
             Basic behaviour:
             
@@ -131,6 +144,8 @@ def main():
             personality.behave()
             #print(motion.read())
             #print((datetime.datetime.now() - vision.last_match).total_seconds())
+
+
 
             if mode == MODE_RANDOM_BEHAVIOUR:
                 if time() - start > delay:
@@ -153,6 +168,8 @@ def main():
                         action = 1
                     start = time()
                     delay = random.randint(2, 15)
+
+                    # vision.detect()
                     print(delay)
 
             elif mode == MODE_SLEEP:
