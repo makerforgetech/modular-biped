@@ -12,6 +12,7 @@ class ArduinoSerial:
     DEVICE_LED = 0
     DEVICE_SERVO = 1
     DEVICE_PIN = 2
+    DEVICE_PIN_READ = 3
 
     def __init__(self, **kwargs):
         self.serial_file = ArduinoSerial.initialise()
@@ -77,5 +78,12 @@ class ArduinoSerial:
             write_order(self.serial_file, Order.PIN)
             write_i8(self.serial_file, identifier)
             write_i8(self.serial_file, message)
+
+        elif type == ArduinoSerial.DEVICE_PIN_READ:
+            write_order(self.serial_file, Order.READ)
+            write_i8(self.serial_file, identifier)
+            bytes_array = bytearray(self.serial_file.read(1))
+            byte = bytes_array[0]
+            return byte
 
         print(self.serial_file)

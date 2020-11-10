@@ -4,10 +4,11 @@
 #define SERIAL_BAUD 115200  // Baudrate
 
 #define LED_PIN 13
+#define LED_COUNT 9
 
-#define SERVO_NECK 3
-#define SERVO_TILT 4
-#define SERVO_PAN 5
+#define SERVO_COUNT 7
+#define SERVO_PIN_OFFSET 3
+
 
 // If DEBUG is set to true, the arduino will send back all the received messages
 #define DEBUG false

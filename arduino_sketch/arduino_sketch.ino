@@ -6,27 +6,20 @@
 #include "parameters.h"
 
 bool is_connected = false; ///< True if the connection with the master is available
- 
-Servo neck;
-Servo pan;
-Servo tilt;
-bool servos_attached = false;
-
-#define LED_COUNT 9
 
 CRGB leds[LED_COUNT];
- 
+Servo servos[SERVO_COUNT];
+
 void setup() 
 {
   Serial.begin(SERIAL_BAUD);
 
   FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, LED_COUNT);
 
-  // Red until connected to Pi
   for (int i = 0; i < LED_COUNT; i++){
     leds[i] = CRGB(0,0,0);
   }
-  leds[1] = CRGB(5,0,0);
+  leds[0] = CRGB(1,0,0);
   FastLED.show();
 
   // Wait until the arduino is connected to master
@@ -36,23 +29,6 @@ void setup()
     wait_for_bytes(1, 1000);
     get_messages_from_serial();
   }
-} 
-
-void attachServos()
-{
-  // @todo store all servos in dynamic array.
-  neck.attach(SERVO_NECK);
-  tilt.attach(SERVO_TILT);
-  pan.attach(SERVO_PAN);
-  servos_attached = true;
-
-}
-void detachServos()
-{
-  neck.attach(SERVO_NECK);
-  tilt.attach(SERVO_TILT);
-  pan.attach(SERVO_PAN);
-  servos_attached = false;
 }
  
 void loop() 
@@ -108,19 +84,7 @@ void get_messages_from_serial()
             write_order(SERVO);
             write_i16(servo_angle);
           }
-          // Attach servos if they are not already
-          if (servos_attached == false) attachServos();
-          // Write to appropriate servo, or if no match then detach all servos
-          if (servo_identifier == SERVO_PAN) {
-            pan.write(servo_angle);
-          }
-          else if (servo_identifier == SERVO_TILT) {
-            tilt.write(servo_angle);
-          }
-          else if (servo_identifier == SERVO_NECK) {
-            neck.write(servo_angle);
-          }
-          else detachServos();
+          move_servo(servo_identifier, servo_angle);
           break;
         }
         case MOTOR:
@@ -167,6 +131,14 @@ void get_messages_from_serial()
             digitalWrite(pin, value);
             break;
         }
+        case READ:
+        {
+            int pin = read_i8();
+            pinMode(pin, INPUT);
+            int value = analogRead(pin);
+            write_i8(value);
+            break;
+        }
         // Unknown order
         default:
         {
@@ -178,6 +150,12 @@ void get_messages_from_serial()
     }
     write_order(RECEIVED); // Confirm the reception
   }
+}
+
+void move_servo(int identifier, int angle) {
+    int index = identifier - SERVO_PIN_OFFSET;
+    servos[index].attach(identifier);
+    servos[index].write(angle);
 }
 
 Order read_order()
@@ -251,4 +229,3 @@ void write_i32(int32_t num)
 	int8_t buffer[4] = {(int8_t) (num & 0xff), (int8_t) (num >> 8 & 0xff), (int8_t) (num >> 16 & 0xff), (int8_t) (num >> 24 & 0xff)};
   Serial.write((uint8_t*)&buffer, 4*sizeof(int8_t));
 }
-

@@ -19,6 +19,7 @@ class Order(Enum):
     STOP = 6
     LED = 7
     PIN = 8
+    READ = 9
 
 def read_order(f):
     """

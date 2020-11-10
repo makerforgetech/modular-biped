@@ -11,7 +11,8 @@ enum Order {
   RECEIVED = 5,
   STOP = 6,
   LED = 7,
-  PIN = 8
+  PIN = 8,
+  READ = 9
 };
 
 typedef enum Order Order;
