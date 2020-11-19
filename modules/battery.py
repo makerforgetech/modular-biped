@@ -2,7 +2,7 @@ from modules.arduinoserial import ArduinoSerial
 
 class Battery:
 
-    BATTERY_THRESHOLD = 40
+    BATTERY_THRESHOLD = -60  # max 100 (12.3v), min -60 (8.8v)
     MAX_READINGS = 10
 
     def __init__(self, pin, serial, **kwargs):
@@ -11,7 +11,7 @@ class Battery:
         self.serial = serial
 
     def check(self):
-        val = self.serial.send(ArduinoSerial.DEVICE_PIN_READ, 0, None)
+        val = self.serial.send(ArduinoSerial.DEVICE_PIN_READ, 0, 0)
         if val == 5.0:
             return 0
         self.readings.append(val)

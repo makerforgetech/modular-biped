@@ -126,7 +126,7 @@ def main():
                 subprocess.call(['shutdown', '-h'], shell=False)
                 loop = False
                 quit()
-            sleep(1)
+            sleep(2)
             continue
 
             """
