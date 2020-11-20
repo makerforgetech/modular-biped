@@ -6,7 +6,7 @@
 #define LED_PIN 13
 #define LED_COUNT 9
 
-#define SERVO_COUNT 7
+#define SERVO_COUNT 9
 #define SERVO_PIN_OFFSET 3
 
 

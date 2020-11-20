@@ -56,6 +56,15 @@ def main():
     pan = Servo(Config.PAN_PIN, Config.PAN_RANGE, start_pos=Config.PAN_START_POS, serial=serial)
     neck = Servo(Config.NECK_PIN, Config.NECK_RANGE, start_pos=Config.NECK_START_POS, serial=serial)
 
+    leg_r_hip = Servo(Config.LEG_R_HIP_PIN, Config.LEG_HIP_RANGE, start_pos=Config.LEG_HIP_START_POS, serial=serial)
+    leg_r_knee = Servo(Config.LEG_R_KNEE_PIN, Config.LEG_KNEE_RANGE, start_pos=Config.LEG_KNEE_START_POS, serial=serial)
+    leg_r_ankle = Servo(Config.LEG_R_ANKLE_PIN, Config.LEG_ANKLE_RANGE, start_pos=Config.LEG_ANKLE_START_POS, serial=serial)
+
+    leg_l_hip = Servo(Config.LEG_L_HIP_PIN, Config.LEG_HIP_RANGE, start_pos=Config.LEG_HIP_START_POS, serial=serial)
+    leg_l_knee = Servo(Config.LEG_L_KNEE_PIN, Config.LEG_KNEE_RANGE, start_pos=Config.LEG_KNEE_START_POS, serial=serial)
+    leg_l_ankle = Servo(Config.LEG_L_ANKLE_PIN, Config.LEG_ANKLE_RANGE, start_pos=Config.LEG_ANKLE_START_POS,
+                        serial=serial)
+
     led = LED(Config.LED_COUNT)
     signal.signal(signal.SIGTERM, led.exit)
     #serial.send(ArduinoSerial.DEVICE_PIN, 12, 1)
