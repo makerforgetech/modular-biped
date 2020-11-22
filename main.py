@@ -115,7 +115,7 @@ def main():
     #animate.animate('wake')
     # px.blink(Config.PIXEL_EYES, (0, 0, 255))
 
-    # chirp.send('Hi!')
+    chirp.send('Hi!')
 
     if mode == MODE_RANDOM_BEHAVIOUR:
         start = time()  # random behaviour trigger
@@ -136,7 +136,6 @@ def main():
                 loop = False
                 quit()
             sleep(2)
-            continue
 
             """
             Basic behaviour:
@@ -158,9 +157,13 @@ def main():
 
             if mode == MODE_RANDOM_BEHAVIOUR:
                 if time() - start > delay:
-
+                    m = motion.read()
+                    if m <= 0:
+                        led.eye('blue')
+                        continue
+                    led.eye('green')
                     if action == 1:
-                        led.eye('green')
+                        led.set(Config.LED_MIDDLE, (random.randint(0, 5), random.randint(0, 5), random.randint(0, 5)))
                     elif action == 2:
                         pan.move_relative(15)
                     elif action == 3:
@@ -169,11 +172,9 @@ def main():
                         tilt.move_relative(15)
                     elif action == 5:
                         tilt.move_relative(-15)
-                    elif action == 6:
-                        led.set(Config.LED_MIDDLE, (random.randint(0, 5), random.randint(0, 5), random.randint(0, 5)))
 
                     action = action + 1
-                    if action == 7:
+                    if action == 6:
                         action = 1
                     start = time()
                     delay = random.randint(2, 15)

@@ -83,7 +83,7 @@ class ArduinoSerial:
             write_order(self.serial_file, Order.READ)
             write_i8(self.serial_file, identifier)
             value = read_i8(self.serial_file)
-            read_order(self.serial_file)
             return value
+
 
         print(self.serial_file)
