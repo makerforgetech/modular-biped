@@ -7,8 +7,11 @@
 
 bool is_connected = false; ///< True if the connection with the master is available
 
+int servo_increment = 5;
+
 CRGB leds[LED_COUNT];
 Servo servos[SERVO_COUNT];
+int servo_angles[SERVO_COUNT];
 
 void setup() 
 {
@@ -34,6 +37,32 @@ void setup()
 void loop() 
 {
     get_messages_from_serial();
+    increment_servos();
+}
+
+void increment_servos()
+{
+    for (int index = 0; index < SERVO_COUNT; index++ )
+    {
+       int curr = servos[index].read();
+       int end = servo_angles[index];
+       if (curr < end)
+       {
+            if (end - curr < servo_increment)
+            {
+                servos[index].write(end);
+            }
+            else servos[index].write(servos[index].read() + servo_increment);
+       }
+       else if (curr > end)
+       {
+            if (curr - end < servo_increment)
+            {
+                servos[index].write(end);
+            }
+            else servos[index].write(servos[index].read() - servo_increment);
+       }
+    }
 }
 
 void get_messages_from_serial()
@@ -155,7 +184,8 @@ void get_messages_from_serial()
 void move_servo(int identifier, int angle) {
     int index = identifier - SERVO_PIN_OFFSET;
     servos[index].attach(identifier);
-    servos[index].write(angle);
+//    servos[index].write(angle);
+    servo_angles[index] = angle; // Don't move it but queue the move
 }
 
 Order read_order()
