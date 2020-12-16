@@ -5,6 +5,10 @@
 #include "order.h"
 #include "parameters.h"
 
+/** IMPORTANT
+ * To upload over serial pins, reset the Arduino at the point that the IDE starts 'uploading' (after compile), otherwise a sync error will display.
+ */
+
 bool is_connected = false; ///< True if the connection with the master is available
 
 int servo_increment = 5;
