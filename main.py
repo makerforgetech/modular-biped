@@ -75,8 +75,8 @@ def main():
     motion = Sensor(Config.MOTION_PIN, pi=pi)
 
     # Vision / Tracking
-    vision = Vision(preview=True, mode=Vision.MODE_FACES)
-    # tracking = Tracking(vision, pan, tilt)
+    vision = Vision(preview=False, mode=Vision.MODE_FACES, rotate=True)
+    tracking = Tracking(vision, pan, tilt)
 
     # Voice
     hotword = HotWord(Config.HOTWORD_MODEL)
@@ -115,7 +115,7 @@ def main():
     #animate.animate('wake')
     # px.blink(Config.PIXEL_EYES, (0, 0, 255))
 
-    chirp.send('Hi!')
+    # chirp.send('Hi!')
 
     if mode == MODE_RANDOM_BEHAVIOUR:
         start = time()  # random behaviour trigger
@@ -124,19 +124,14 @@ def main():
         action = 1
         # chirp.send('hi')
 
+    battery_check_time = time()
+
     battery = Battery(0, serial)
 
     loop = True
     try:
         while loop:
-
-            # print(serial.send(ArduinoSerial.DEVICE_PIN_READ, 0, None))
-            if not battery.safe_voltage():
-                subprocess.call(['shutdown', '-h'], shell=False)
-                loop = False
-                quit()
-            sleep(2)
-
+            sleep(0.5)
             """
             Basic behaviour:
             
@@ -149,38 +144,49 @@ def main():
             If waiting for keyboard input, disable motion and facial tracking
             """
 
-            personality.behave()
-            #print(motion.read())
-            #print((datetime.datetime.now() - vision.last_match).total_seconds())
+            # personality.behave()
 
-
+            if battery_check_time < time() - 1:
+                battery_check_time = time()
+                if not battery.safe_voltage():
+                    subprocess.call(['shutdown', '-h'], shell=False)
+                    loop = False
+                    quit()
 
             if mode == MODE_RANDOM_BEHAVIOUR:
                 if time() - start > delay:
-                    m = motion.read()
-                    if m <= 0:
-                        led.eye('blue')
-                        continue
-                    led.eye('green')
-                    if action == 1:
-                        led.set(Config.LED_MIDDLE, (random.randint(0, 5), random.randint(0, 5), random.randint(0, 5)))
-                    elif action == 2:
-                        pan.move_relative(15)
-                    elif action == 3:
-                        pan.move_relative(-15)
-                    elif action == 4:
-                        tilt.move_relative(15)
-                    elif action == 5:
-                        tilt.move_relative(-15)
 
-                    action = action + 1
-                    if action == 6:
-                        action = 1
-                    start = time()
-                    delay = random.randint(2, 15)
+                    if tracking.track_largest_match():
+                        led.eye('green')
+                        continue
+                    elif motion.read() <= 0:
+                        led.eye('red')
+                        continue
+                    else:
+                        pan.move(Config.PAN_START_POS)
+                        tilt.move(Config.TILT_START_POS)
+                        led.eye('blue')
+
+                    # if action == 1:
+                    #     pass
+                    #     # led.set(Config.LED_MIDDLE, (random.randint(0, 5), random.randint(0, 5), random.randint(0, 5)))
+                    # elif action == 2:
+                    #     pan.move_relative(15)
+                    # elif action == 3:
+                    #     pan.move_relative(-15)
+                    # elif action == 4:
+                    #     tilt.move_relative(15)
+                    # elif action == 5:
+                    #     tilt.move_relative(-15)
+                    #
+                    # action = action + 1
+                    # if action == 6:
+                    #     action = 1
+                    # start = time()
+                    # delay = random.randint(2, 15)
 
                     # vision.detect()
-                    print(delay)
+                    # print(delay)
 
             elif mode == MODE_SLEEP:
                 if motion.read() == 1:

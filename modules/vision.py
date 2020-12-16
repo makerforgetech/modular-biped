@@ -14,8 +14,13 @@ class Vision:
         self.video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         self.static_back = None
         self.preview = kwargs.get('preview', False)
-        self.dimensions = (640, 480)
+
         self.flip = kwargs.get('flip', False)
+        self.rotate = kwargs.get('rotate', False)
+        if self.rotate:
+            self.dimensions = (480, 640)
+        else:
+            self.dimensions = (640, 480)
         self.lines = []
         self.last_match = datetime.now()  # @todo improve
 
@@ -41,6 +46,9 @@ class Vision:
         
         if self.flip is True:
             frame = cv2.flip(frame, 0)
+
+        if self.rotate is True:
+            frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
             
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # face detection
