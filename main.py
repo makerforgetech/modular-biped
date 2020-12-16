@@ -128,10 +128,6 @@ def main():
 
     battery = Battery(0, serial)
 
-    pan.move_relative(15)
-    sleep(5)
-    pan.move_relative(-15)
-
     loop = True
     try:
         while loop:
