@@ -1,5 +1,5 @@
 class Tracking:
-    def __init__(self, vision, pan, tilt, bounds_percent=15):
+    def __init__(self, vision, pan, tilt, bounds_percent=10):
         self.vision = vision
         self.pan = pan
         self.tilt = tilt
@@ -24,21 +24,21 @@ class Tracking:
         # Run through the buffer to ignore cached matches
         if self.ignore > 0:
             self.ignore = self.ignore -1
-            return False
+            return True
         
         (x, y, w, h) = largest
         moved = False
         if x < self.bounds:
-            self.pan.move_relative(-self.bounds_percent)
-            moved = True
-        elif (x + w) > (self.vision.dimensions[0] - self.bounds):
             self.pan.move_relative(self.bounds_percent)
             moved = True
+        elif (x + w) > (self.vision.dimensions[0] - self.bounds):
+            self.pan.move_relative(-self.bounds_percent)
+            moved = True
         if (y + h) > (self.vision.dimensions[1] - self.bounds):
-            self.tilt.move_relative(-self.bounds_percent)
+            self.tilt.move_relative(self.bounds_percent)
             moved = True
         elif y < self.bounds:
-            self.tilt.move_relative(self.bounds_percent)
+            self.tilt.move_relative(-self.bounds_percent)
             moved = True
 
         if moved:
