@@ -63,6 +63,7 @@ void increment_servos()
             else servos[index].write(servos[index].read() - servo_increment);
        }
     }
+    delay(50);
 }
 
 void get_messages_from_serial()
