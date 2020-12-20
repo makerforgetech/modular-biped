@@ -131,7 +131,7 @@ def main():
     loop = True
     try:
         while loop:
-            sleep(0.5)
+            sleep(1 / Config.LOOP_FREQUENCY)
             """
             Basic behaviour:
             
@@ -154,18 +154,33 @@ def main():
                     quit()
 
             if mode == MODE_RANDOM_BEHAVIOUR:
-                if time() - start > delay:
+                v = vision.detect()
+                print(v)
+                # motion.read()
+                # led.set(Config.LED_MIDDLE, (random.randint(0, 5), random.randint(0, 5), random.randint(0, 5)))
 
-                    if tracking.track_largest_match():
-                        led.eye('green')
-                        continue
-                    elif motion.read() <= 0:
-                        led.eye('red')
-                        continue
-                    else:
-                        pan.move(Config.PAN_START_POS)
-                        tilt.move(Config.TILT_START_POS)
-                        led.eye('blue')
+                if len(v) > 0:  # tracking.track_largest_match():
+                    led.eye('green')
+                elif motion.read() <= 0:
+                    led.eye('red')
+                else:
+                    # pan.move(Config.PAN_START_POS)
+                    # tilt.move(Config.TILT_START_POS)
+                    led.eye('blue')
+
+                if time() - start > delay:
+                    # print(vision.detect())
+                    # # motion.read()
+                    # # led.set(Config.LED_MIDDLE, (random.randint(0, 5), random.randint(0, 5), random.randint(0, 5)))
+                    #
+                    # if len(vision.detect()) > 0: #tracking.track_largest_match():
+                    #     led.eye('green')
+                    # elif motion.read() <= 0:
+                    #     led.eye('red')
+                    # else:
+                    #     # pan.move(Config.PAN_START_POS)
+                    #     # tilt.move(Config.TILT_START_POS)
+                    #     led.eye('blue')
 
                     # if action == 1:
                     #     pass
@@ -182,8 +197,8 @@ def main():
                     # action = action + 1
                     # if action == 6:
                     #     action = 1
-                    # start = time()
-                    # delay = random.randint(2, 15)
+                    start = time()
+                    delay = random.randint(2, 15)
 
                     # vision.detect()
                     # print(delay)

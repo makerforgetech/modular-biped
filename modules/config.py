@@ -1,4 +1,8 @@
 class Config:
+    # Application settings
+    LOOP_FREQUENCY = 2
+
+
     # Power Management
     POWER_ENABLE_PIN = 2
     SLEEP_TIMEOUT = 1  # Minutes
