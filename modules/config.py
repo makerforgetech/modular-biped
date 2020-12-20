@@ -46,8 +46,6 @@ class Config:
 
     # RGB NeoPixels
     LED_COUNT = 7
-    LED_MIDDLE = 0
-    LED_ALL = range(LED_COUNT)
 
     # HotWord (uses Snowboy.ai)
     HOTWORD_MODEL = 'modules/snowboy/resources/models/robot.pmdl'

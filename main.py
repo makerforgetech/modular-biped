@@ -146,7 +146,7 @@ def main():
 
             # personality.behave()
 
-            if battery_check_time < time() - 1:
+            if battery_check_time < time() - 2:
                 battery_check_time = time()
                 if not battery.safe_voltage():
                     subprocess.call(['shutdown', '-h'], shell=False)
@@ -154,19 +154,21 @@ def main():
                     quit()
 
             if mode == MODE_RANDOM_BEHAVIOUR:
-                v = vision.detect()
-                print(v)
-                # motion.read()
                 # led.set(Config.LED_MIDDLE, (random.randint(0, 5), random.randint(0, 5), random.randint(0, 5)))
 
-                if len(v) > 0:  # tracking.track_largest_match():
-                    led.eye('green')
+                if tracking.track_largest_match():
+                    # led.eye('green')
+                    pub.sendMessage('led:eye', color="green")
+                    # pub.sendMessage('led:spinner', color=None)
                 elif motion.read() <= 0:
-                    led.eye('red')
+                    pub.sendMessage('led:eye', color="red")
+                    # led.eye('red')
                 else:
                     # pan.move(Config.PAN_START_POS)
                     # tilt.move(Config.TILT_START_POS)
-                    led.eye('blue')
+                    # pub.sendMessage('led:spinner', color='blue')
+                    pub.sendMessage('led:eye', color="blue")
+                    # led.eye('blue')
 
                 if time() - start > delay:
                     # print(vision.detect())
@@ -203,56 +205,56 @@ def main():
                     # vision.detect()
                     # print(delay)
 
-            elif mode == MODE_SLEEP:
-                if motion.read() == 1:
-                    mode = MODE_TRACK_FACES
-                    #animate.animate('wake')
-                    #tilt.reset()
-                    vision.last_match = datetime.datetime.now()
-                    print("Motion!")
-                    led.eye('green')
-                    # listening = True
-                else:
-                    sleep(1)
-
-            elif mode == MODE_TRACK_MOTION:
-                if vision.mode != Vision.MODE_MOTION:
-                    vision = Vision(mode=Vision.MODE_MOTION)
-                    print('Looking for motion')
-                # if tracking.track_largest_match():
-                #     mode = MODE_TRACK_FACES
-                #     chirp.send('Looking for faces')
-
-            elif mode == MODE_TRACK_FACES:
-                if vision.mode != Vision.MODE_FACES:
-                    vision = Vision(mode=Vision.MODE_FACES)
-                    print('Looking for faces')
-                # if not tracking.track_largest_match():
-                #     #mode = MODE_TRACK_MOTION
-                #     #print('No face, switching to motion')
-                #     pass
-
-            elif mode == MODE_KEYBOARD:
-                if keyboard is None:
-                    keyboard = Keyboard(mappings=key_mappings)
-                # Manual keyboard input for puppeteering
-                key = keyboard.handle_input()
-                if key == ord('q'):
-                    loop = False
-                elif key == ord('d'):
-                    serial.send(ArduinoSerial.DEVICE_SERVO, 8, 0)
-                #else:
-                #    chirp.send(key)
-
-            # Sleep if nothing has been detected for a while
-            if (mode == MODE_TRACK_MOTION or mode == MODE_TRACK_FACES) and \
-                    vision.last_match < datetime.datetime.now() - datetime.timedelta(minutes=Config.SLEEP_TIMEOUT):
-                mode = MODE_SLEEP
-                #pan.reset()
-                #tilt.move(0)
-                print('Sleeping')
-                led.eye('red')
-                sleep(3)
+            # elif mode == MODE_SLEEP:
+            #     if motion.read() == 1:
+            #         mode = MODE_TRACK_FACES
+            #         #animate.animate('wake')
+            #         #tilt.reset()
+            #         vision.last_match = datetime.datetime.now()
+            #         print("Motion!")
+            #         led.eye('green')
+            #         # listening = True
+            #     else:
+            #         sleep(1)
+            #
+            # elif mode == MODE_TRACK_MOTION:
+            #     if vision.mode != Vision.MODE_MOTION:
+            #         vision = Vision(mode=Vision.MODE_MOTION)
+            #         print('Looking for motion')
+            #     # if tracking.track_largest_match():
+            #     #     mode = MODE_TRACK_FACES
+            #     #     chirp.send('Looking for faces')
+            #
+            # elif mode == MODE_TRACK_FACES:
+            #     if vision.mode != Vision.MODE_FACES:
+            #         vision = Vision(mode=Vision.MODE_FACES)
+            #         print('Looking for faces')
+            #     # if not tracking.track_largest_match():
+            #     #     #mode = MODE_TRACK_MOTION
+            #     #     #print('No face, switching to motion')
+            #     #     pass
+            #
+            # elif mode == MODE_KEYBOARD:
+            #     if keyboard is None:
+            #         keyboard = Keyboard(mappings=key_mappings)
+            #     # Manual keyboard input for puppeteering
+            #     key = keyboard.handle_input()
+            #     if key == ord('q'):
+            #         loop = False
+            #     elif key == ord('d'):
+            #         serial.send(ArduinoSerial.DEVICE_SERVO, 8, 0)
+            #     #else:
+            #     #    chirp.send(key)
+            #
+            # # Sleep if nothing has been detected for a while
+            # if (mode == MODE_TRACK_MOTION or mode == MODE_TRACK_FACES) and \
+            #         vision.last_match < datetime.datetime.now() - datetime.timedelta(minutes=Config.SLEEP_TIMEOUT):
+            #     mode = MODE_SLEEP
+            #     #pan.reset()
+            #     #tilt.move(0)
+            #     print('Sleeping')
+            #     led.eye('red')
+            #     sleep(3)
 
             # repeat what I hear
             voice_input = speech.detect()

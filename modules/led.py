@@ -1,5 +1,4 @@
 from pubsub import pub
-from modules.config import Config
 from modules.arduinoserial import ArduinoSerial
 from time import sleep
 
@@ -18,18 +17,22 @@ class LED:
         'off': COLOUR_OFF
     }
 
-    def __init__(self, count):
+    def __init__(self, count, **kwargs):
         self.count = count
+        self.middle = kwargs.get('middle', 0)
+        self.all = range(self.count)
         pub.subscribe(self.set, 'led')
-        self.set(Config.LED_ALL, LED.COLOUR_OFF)
+        pub.subscribe(self.eye, 'led:eye')
+        pub.subscribe(self.eye, 'led:flashlight')
+        self.set(self.all, LED.COLOUR_OFF)
         sleep(0.1)
-        self.set(Config.LED_MIDDLE, LED.COLOUR_GREEN)
+        self.set(self.middle, LED.COLOUR_GREEN)
         self.leds = []
         for x in range(0, count):
             self.leds.insert(x, LED.COLOUR_OFF)
 
     def exit(self):
-        self.set(Config.LED_ALL, LED.COLOUR_OFF)
+        self.set(self.all, LED.COLOUR_OFF)
         sleep(1)
 
     def set(self, identifiers, color):
@@ -41,18 +44,18 @@ class LED:
         :param identifiers: pixel number (starting from 0) - can be list
         :param color: (R, G, B)
         """
-        pub.sendMessage('serial', type=ArduinoSerial.DEVICE_LED, identifier=identifiers, message=color)
+        pub.sendMessage('serial', type='led', identifier=identifiers, message=color)
 
     def flashlight(self, on):
         if on:
-            self.set(Config.LED_ALL, LED.COLOUR_WHITE)
+            self.set(self.all, LED.COLOUR_WHITE)
         else:
-            self.set(Config.LED_ALL, LED.COLOUR_OFF)
+            self.set(self.all, LED.COLOUR_OFF)
             sleep(0.1)
             self.eye('green')
 
     def eye(self, color):
-        if color in LED.COLOUR_MAP.keys() and self.leds[Config.LED_MIDDLE] != color:
-            print(LED.COLOUR_MAP[color])
-            self.leds[Config.LED_MIDDLE] = color
-            self.set(Config.LED_MIDDLE, LED.COLOUR_MAP[color])
+        if color in LED.COLOUR_MAP.keys() and self.leds[self.middle] != color:
+            # print(LED.COLOUR_MAP[color])
+            self.leds[self.middle] = color
+            self.set(self.middle, LED.COLOUR_MAP[color])

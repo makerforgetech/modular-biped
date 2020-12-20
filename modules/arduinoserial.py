@@ -52,12 +52,12 @@ class ArduinoSerial:
         :param identifier: an identifier or list / range of identifiers, pin or LED number
         :param message: the packet to send to the arduino
         """
-        print('serial sending ' + str(type) + ' - ' + str(identifier) + ' = ' + str(message))
-        if type == ArduinoSerial.DEVICE_SERVO:
+        print('serial:' + str(type) + ' id: ' + str(identifier) + ' val: ' + str(message))
+        if type == ArduinoSerial.DEVICE_SERVO or type == 'servo':
             write_order(self.serial_file, Order.SERVO)
             write_i8(self.serial_file, identifier)
             write_i16(self.serial_file, int(message))
-        elif type == ArduinoSerial.DEVICE_LED:
+        elif type == ArduinoSerial.DEVICE_LED or type == 'led':
             write_order(self.serial_file, Order.LED)
             if isinstance(identifier, list) or isinstance(identifier, range):
                 # write the number of leds to update
@@ -74,16 +74,16 @@ class ArduinoSerial:
             else:
                 write_i16(self.serial_file, message)
 
-        elif type == ArduinoSerial.DEVICE_PIN:
+        elif type == ArduinoSerial.DEVICE_PIN or type == 'pin':
             write_order(self.serial_file, Order.PIN)
             write_i8(self.serial_file, identifier)
             write_i8(self.serial_file, message)
 
-        elif type == ArduinoSerial.DEVICE_PIN_READ:
+        elif type == ArduinoSerial.DEVICE_PIN_READ or type == 'pin_read':
             write_order(self.serial_file, Order.READ)
             write_i8(self.serial_file, identifier)
             value = read_i8(self.serial_file)
             return value
 
 
-        print(self.serial_file)
+        # print(self.serial_file)

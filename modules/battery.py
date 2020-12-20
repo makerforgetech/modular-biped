@@ -20,9 +20,7 @@ class Battery:
 
         avg = sum(self.readings) / len(self.readings)
 
-        # print(val)
-        # print(self.readings)
-        print(avg)
+        print('bat:' + str(avg))
         return avg
 
     def safe_voltage(self):
