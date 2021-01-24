@@ -24,7 +24,7 @@ class Config:
 
     TILT_START_POS = 50
     PAN_START_POS = 50
-    NECK_START_POS = 50
+    NECK_START_POS = 75
 
     # Right Leg
     LEG_R_HIP_PIN = 6
@@ -40,9 +40,13 @@ class Config:
     LEG_KNEE_RANGE = [0, 180]
     LEG_ANKLE_RANGE = [0, 180]
 
-    LEG_HIP_START_POS = 50
-    LEG_KNEE_START_POS = 50
-    LEG_ANKLE_START_POS = 50
+    LEG_L_HIP_START_POS = 50
+    LEG_L_KNEE_START_POS = 45
+    LEG_L_ANKLE_START_POS = 50
+
+    LEG_R_HIP_START_POS = 55
+    LEG_R_KNEE_START_POS = 55
+    LEG_R_ANKLE_START_POS = 50
 
     # RGB NeoPixels
     LED_COUNT = 7

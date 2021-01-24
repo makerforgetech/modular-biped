@@ -12,7 +12,6 @@ from pubsub import pub
 import signal
 import subprocess
 
-
 # Import modules
 # from modules import *
 from modules.config import Config
@@ -31,6 +30,7 @@ from modules.arduinoserial import ArduinoSerial
 from modules.led import LED
 from modules.personality import Personality
 from modules.battery import Battery
+from modules.braillespeak import Braillespeak
 
 MODE_TRACK_MOTION = 0
 MODE_TRACK_FACES = 1
@@ -56,20 +56,21 @@ def main():
     pan = Servo(Config.PAN_PIN, Config.PAN_RANGE, start_pos=Config.PAN_START_POS, serial=serial)
     neck = Servo(Config.NECK_PIN, Config.NECK_RANGE, start_pos=Config.NECK_START_POS, serial=serial)
 
-    leg_r_hip = Servo(Config.LEG_R_HIP_PIN, Config.LEG_HIP_RANGE, start_pos=Config.LEG_HIP_START_POS, serial=serial)
-    leg_r_knee = Servo(Config.LEG_R_KNEE_PIN, Config.LEG_KNEE_RANGE, start_pos=Config.LEG_KNEE_START_POS, serial=serial)
-    leg_r_ankle = Servo(Config.LEG_R_ANKLE_PIN, Config.LEG_ANKLE_RANGE, start_pos=Config.LEG_ANKLE_START_POS, serial=serial)
+    leg_r_hip = Servo(Config.LEG_R_HIP_PIN, Config.LEG_HIP_RANGE, start_pos=Config.LEG_R_HIP_START_POS, serial=serial)
+    leg_r_knee = Servo(Config.LEG_R_KNEE_PIN, Config.LEG_KNEE_RANGE, start_pos=Config.LEG_R_KNEE_START_POS, serial=serial)
+    leg_r_ankle = Servo(Config.LEG_R_ANKLE_PIN, Config.LEG_ANKLE_RANGE, start_pos=Config.LEG_R_ANKLE_START_POS,
+                        serial=serial)
 
-    leg_l_hip = Servo(Config.LEG_L_HIP_PIN, Config.LEG_HIP_RANGE, start_pos=Config.LEG_HIP_START_POS, serial=serial)
-    leg_l_knee = Servo(Config.LEG_L_KNEE_PIN, Config.LEG_KNEE_RANGE, start_pos=Config.LEG_KNEE_START_POS, serial=serial)
-    leg_l_ankle = Servo(Config.LEG_L_ANKLE_PIN, Config.LEG_ANKLE_RANGE, start_pos=Config.LEG_ANKLE_START_POS,
+    leg_l_hip = Servo(Config.LEG_L_HIP_PIN, Config.LEG_HIP_RANGE, start_pos=Config.LEG_L_HIP_START_POS, serial=serial)
+    leg_l_knee = Servo(Config.LEG_L_KNEE_PIN, Config.LEG_KNEE_RANGE, start_pos=Config.LEG_L_KNEE_START_POS, serial=serial)
+    leg_l_ankle = Servo(Config.LEG_L_ANKLE_PIN, Config.LEG_ANKLE_RANGE, start_pos=Config.LEG_L_ANKLE_START_POS,
                         serial=serial)
 
     led = LED(Config.LED_COUNT)
     signal.signal(signal.SIGTERM, led.exit)
-    #serial.send(ArduinoSerial.DEVICE_PIN, 12, 1)
-    #sleep(5)
-    #serial.send(ArduinoSerial.DEVICE_PIN, 12, 0)
+    # serial.send(ArduinoSerial.DEVICE_PIN, 12, 1)
+    # sleep(5)
+    # serial.send(ArduinoSerial.DEVICE_PIN, 12, 0)
 
     # animate = Animate(pan, tilt)
     motion = Sensor(Config.MOTION_PIN, pi=pi)
@@ -81,7 +82,7 @@ def main():
     # Voice
     hotword = HotWord(Config.HOTWORD_MODEL)
     hotword.start()  # @todo can these be moved into hotword?
-    #hotword.start_recog(sleep_time=Config.HOTWORD_SLEEP_TIME)
+    # hotword.start_recog(sleep_time=Config.HOTWORD_SLEEP_TIME)
     sleep(1)  # @todo is this needed?
 
     speech = SpeechInput()
@@ -90,7 +91,8 @@ def main():
     # chatbot = MyChatBot()
 
     # Output
-    chirp = Chirp()
+    # speak = Chirp()
+    speak = Braillespeak(Config.AUDIO_ENABLE_PIN, duration=80/1000)
 
     # Keyboard Input
     key_mappings = {
@@ -100,33 +102,52 @@ def main():
         Keyboard.KEY_DOWN: (tilt.move_relative, -5),
         Keyboard.KEY_BACKSPACE: (neck.move_relative, 5),
         Keyboard.KEY_RETURN: (neck.move_relative, -5),
+
+        # LEFT LEG MOVEMENT
+        ord('t'): (leg_l_hip.move_relative, -5),
+        ord('g'): (leg_l_knee.move_relative, -5),
+        ord('b'): (leg_l_ankle.move_relative, -5),
+        ord('w'): (leg_l_hip.move_relative, 5),
+        ord('s'): (leg_l_knee.move_relative, 5),
+        ord('x'): (leg_l_ankle.move_relative, 5),
+
+        # RIGHT LEG MOVEMENT
+        ord('e'): (leg_r_hip.move_relative, -5),
+        ord('d'): (leg_r_knee.move_relative, -5),
+        ord('c'): (leg_r_ankle.move_relative, -5),
+        ord('r'): (leg_r_hip.move_relative, 5),
+        ord('f'): (leg_r_knee.move_relative, 5),
+        ord('v'): (leg_r_ankle.move_relative, 5),
+
         ord('l'): (led.flashlight, True),
         ord('o'): (led.flashlight, False),
-        ord('c'): (chirp.send, 'hi')
+        ord('c'): (speak.send, 'hi')
         # ord('h'): (animate.animate, 'head_shake')
     }
     keyboard = None
 
     # Initialise mode
-    mode = MODE_RANDOM_BEHAVIOUR
+    mode = MODE_KEYBOARD
 
     personality = Personality(debug=True)
 
-    #animate.animate('wake')
+    # animate.animate('wake')
     # px.blink(Config.PIXEL_EYES, (0, 0, 255))
 
-    # chirp.send('Hi!')
+    # speak.send('Hi!')
 
     if mode == MODE_RANDOM_BEHAVIOUR:
         start = time()  # random behaviour trigger
         random.seed()
         delay = random.randint(1, 5)
         action = 1
-        # chirp.send('hi')
+        speak.send('hi')
 
     battery_check_time = time()
 
     battery = Battery(0, serial)
+
+    # pub.sendMessage('speak', message='hello')
 
     loop = True
     try:
@@ -134,13 +155,13 @@ def main():
             sleep(1 / Config.LOOP_FREQUENCY)
             """
             Basic behaviour:
-            
+
             If asleep, wait for movement using microwave sensor then wake
             If awake, look for motion. 
             |-- If motion detected move to top of largest moving object then look for faces
                |-- If faces detected, track largest face 
             |-- If no motion detected for defined period, go to sleep
-            
+
             If waiting for keyboard input, disable motion and facial tracking
             """
 
@@ -223,7 +244,7 @@ def main():
             #         print('Looking for motion')
             #     # if tracking.track_largest_match():
             #     #     mode = MODE_TRACK_FACES
-            #     #     chirp.send('Looking for faces')
+            #     #     speak.send('Looking for faces')
             #
             # elif mode == MODE_TRACK_FACES:
             #     if vision.mode != Vision.MODE_FACES:
@@ -234,17 +255,17 @@ def main():
             #     #     #print('No face, switching to motion')
             #     #     pass
             #
-            # elif mode == MODE_KEYBOARD:
-            #     if keyboard is None:
-            #         keyboard = Keyboard(mappings=key_mappings)
-            #     # Manual keyboard input for puppeteering
-            #     key = keyboard.handle_input()
-            #     if key == ord('q'):
-            #         loop = False
-            #     elif key == ord('d'):
-            #         serial.send(ArduinoSerial.DEVICE_SERVO, 8, 0)
-            #     #else:
-            #     #    chirp.send(key)
+            elif mode == MODE_KEYBOARD:
+                if keyboard is None:
+                    keyboard = Keyboard(mappings=key_mappings)
+                # Manual keyboard input for puppeteering
+                key = keyboard.handle_input()
+                if key == ord('q'):
+                    loop = False
+                # elif key == ord('d'):
+                #     serial.send(ArduinoSerial.DEVICE_SERVO, 8, 0)
+                # else:
+                #    pub.sendMessage('speak', message=key)
             #
             # # Sleep if nothing has been detected for a while
             # if (mode == MODE_TRACK_MOTION or mode == MODE_TRACK_FACES) and \
@@ -278,11 +299,12 @@ def main():
 
     finally:
         led.exit()
-        #chirp.send('off')
-        chirp.exit()
+        # speak.send('off')
+        speak.exit()
         hotword.exit()
         # pan.reset()
         # tilt.reset()
+
 
 if __name__ == '__main__':
     main()
