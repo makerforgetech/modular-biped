@@ -3,13 +3,15 @@ import threading
 from modules.config import Config
 from modules.arduinoserial import ArduinoSerial
 from time import sleep
+from pubsub import pub
 
 class Servo:
 
-    def __init__(self, pin, pwm_range, **kwargs):
+    def __init__(self, pin, identifier, pwm_range, **kwargs):
         self.pin = pin
+        self.identifier = identifier
         self.range = pwm_range
-        self.power = kwargs.get('power', None)
+        self.power = kwargs.get('power', True)
 
         self.start = kwargs.get('start_pos', 50)
         self.pos = self.translate(self.start)
@@ -17,12 +19,15 @@ class Servo:
         self.delta = kwargs.get('delta', 1.5)  # amount of change in acceleration / deceleration (as a multiple)
 
         # Accepts either serial connection or PI pin
-        self.serial = kwargs.get('serial', None)
+        self.serial = kwargs.get('serial', True)
         if self.serial is None:
             self.pi = kwargs.get('pi', pigpio.pi())
             self.pi.set_mode(pin, pigpio.OUTPUT)
 
         self.move(self.start)
+
+        pub.subscribe(self.move, 'servo:' + identifier + ':move')
+        pub.subscribe(self.move_relative, 'servo:' + identifier + ':move_relative')
 
     def __del__(self):
         pass #self.reset()
@@ -61,11 +66,11 @@ class Servo:
         :return:
         """
         if self.power:
-            self.power.use()
+            pub.sendMessage('power:use')
         s = sequence.pop(0)
         if self.serial:
             print(int(s[0]))
-            self.serial.send(ArduinoSerial.DEVICE_SERVO, self.pin, s[0])  # ,int(round(s[0], 0))
+            pub.sendMessage('serial', type=ArduinoSerial.DEVICE_SERVO, identifier=self.pin, message=s[0])
         else:
             self.pi.set_servo_pulsewidth(self.pin, s[0])
         if len(sequence) > 1:
@@ -74,7 +79,7 @@ class Servo:
         else:
             pass #sleep(s[1])
         if self.power:
-            self.power.release()
+            pub.sendMessage('power:release')
 
     def calculate_move(self, old, new, time=0.1, translate=False):
         if translate:

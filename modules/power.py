@@ -37,4 +37,3 @@ class Power:
         if self.active_count <= 0:
             print('off')
             self.pi.write(self.pin, 0)
-

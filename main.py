@@ -32,122 +32,96 @@ from modules.personality import Personality
 from modules.battery import Battery
 from modules.braillespeak import Braillespeak
 
-MODE_TRACK_MOTION = 0
-MODE_TRACK_FACES = 1
-MODE_SLEEP = 2
-MODE_ANIMATE = 3
-MODE_OFF = 4
-MODE_KEYBOARD = 5
-MODE_RANDOM_BEHAVIOUR = 6
-
 
 def main():
-    # GPIO Management
-    pi = pigpio.pi()
-
-    # Power Management
-    # power = None# Power(Config.POWER_ENABLE_PIN, pi=pi)
+    # GPIO
+    gpio = pigpio.pi()
 
     # Arduino connection
     serial = ArduinoSerial()
 
-    # Actuators
-    tilt = Servo(Config.TILT_PIN, Config.TILT_RANGE, start_pos=Config.TILT_START_POS, serial=serial)
-    pan = Servo(Config.PAN_PIN, Config.PAN_RANGE, start_pos=Config.PAN_START_POS, serial=serial)
-    neck = Servo(Config.NECK_PIN, Config.NECK_RANGE, start_pos=Config.NECK_START_POS, serial=serial)
-
-    leg_r_hip = Servo(Config.LEG_R_HIP_PIN, Config.LEG_HIP_RANGE, start_pos=Config.LEG_R_HIP_START_POS, serial=serial)
-    leg_r_knee = Servo(Config.LEG_R_KNEE_PIN, Config.LEG_KNEE_RANGE, start_pos=Config.LEG_R_KNEE_START_POS, serial=serial)
-    leg_r_ankle = Servo(Config.LEG_R_ANKLE_PIN, Config.LEG_ANKLE_RANGE, start_pos=Config.LEG_R_ANKLE_START_POS,
-                        serial=serial)
-
-    leg_l_hip = Servo(Config.LEG_L_HIP_PIN, Config.LEG_HIP_RANGE, start_pos=Config.LEG_L_HIP_START_POS, serial=serial)
-    leg_l_knee = Servo(Config.LEG_L_KNEE_PIN, Config.LEG_KNEE_RANGE, start_pos=Config.LEG_L_KNEE_START_POS, serial=serial)
-    leg_l_ankle = Servo(Config.LEG_L_ANKLE_PIN, Config.LEG_ANKLE_RANGE, start_pos=Config.LEG_L_ANKLE_START_POS,
-                        serial=serial)
+    servos = dict()
+    for key in Config.servos:
+        s = Config.servos[key]
+        servos[key] = Servo(s['pin'], key, s['range'], start_post=s['start'])
 
     led = LED(Config.LED_COUNT)
-    signal.signal(signal.SIGTERM, led.exit)
-    # serial.send(ArduinoSerial.DEVICE_PIN, 12, 1)
-    # sleep(5)
-    # serial.send(ArduinoSerial.DEVICE_PIN, 12, 0)
+    signal.signal(signal.SIGTERM, led.exit) # @todo not sure what this is for anymore - should have added comments
 
-    # animate = Animate(pan, tilt)
-    motion = Sensor(Config.MOTION_PIN, pi=pi)
+    if Config.MOTION_PIN is not None:
+        motion = Sensor(Config.MOTION_PIN, pi=gpio)
 
     # Vision / Tracking
     vision = Vision(preview=False, mode=Vision.MODE_FACES, rotate=True)
-    tracking = Tracking(vision, pan, tilt)
+    tracking = Tracking(vision)
 
     # Voice
-    hotword = HotWord(Config.HOTWORD_MODEL)
-    hotword.start()  # @todo can these be moved into hotword?
-    # hotword.start_recog(sleep_time=Config.HOTWORD_SLEEP_TIME)
-    sleep(1)  # @todo is this needed?
-
-    speech = SpeechInput()
+    if Config.HOTWORD_MODEL is not None:
+        hotword = HotWord(Config.HOTWORD_MODEL)
+        hotword.start()  # @todo can these be moved into hotword?
+        # hotword.start_recog(sleep_time=Config.HOTWORD_SLEEP_TIME)
+        sleep(1)  # @todo is this needed?
+        speech = SpeechInput()
 
     # Chat bot
     # chatbot = MyChatBot()
 
     # Output
     # speak = Chirp()
-    speak = Braillespeak(Config.AUDIO_ENABLE_PIN, duration=80/1000)
+    if Config.AUDIO_ENABLE_PIN is not None:
+        speak = Braillespeak(Config.AUDIO_ENABLE_PIN, duration=80/1000)
 
     # Keyboard Input
     key_mappings = {
-        Keyboard.KEY_LEFT: (pan.move_relative, 5),
-        Keyboard.KEY_RIGHT: (pan.move_relative, -5),
-        Keyboard.KEY_UP: (tilt.move_relative, 5),
-        Keyboard.KEY_DOWN: (tilt.move_relative, -5),
-        Keyboard.KEY_BACKSPACE: (neck.move_relative, 5),
-        Keyboard.KEY_RETURN: (neck.move_relative, -5),
+        # @todo these won't work because the mapping is not correct yet. Need to research this
+        # Keyboard.KEY_LEFT: (pub.sendMessage, ['servo:pan:move_relative', 5]),
+        # Keyboard.KEY_RIGHT: (pub.sendMessage, {'servo:pan:move_relative', -5}),
+        # Keyboard.KEY_UP: (pub.sendMessage('servo:tilt:move_relative', 5)),
+        # Keyboard.KEY_DOWN: (pub.sendMessage('servo:tilt:move_relative', -5)),
+        # Keyboard.KEY_BACKSPACE: (pub.sendMessage('servo:neck:move_relative',  5)),
+        # Keyboard.KEY_RETURN: (pub.sendMessage('servo:neck:move_relative', -5)),
 
         # LEFT LEG MOVEMENT
-        ord('t'): (leg_l_hip.move_relative, -5),
-        ord('g'): (leg_l_knee.move_relative, -5),
-        ord('b'): (leg_l_ankle.move_relative, -5),
-        ord('w'): (leg_l_hip.move_relative, 5),
-        ord('s'): (leg_l_knee.move_relative, 5),
-        ord('x'): (leg_l_ankle.move_relative, 5),
+        # ord('t'): (leg_l_hip.move_relative, -5),
+        # ord('g'): (leg_l_knee.move_relative, -5),
+        # ord('b'): (leg_l_ankle.move_relative, -5),
+        # ord('w'): (leg_l_hip.move_relative, 5),
+        # ord('s'): (leg_l_knee.move_relative, 5),
+        # ord('x'): (leg_l_ankle.move_relative, 5),
+        #
+        # # RIGHT LEG MOVEMENT
+        # ord('e'): (leg_r_hip.move_relative, -5),
+        # ord('d'): (leg_r_knee.move_relative, -5),
+        # ord('c'): (leg_r_ankle.move_relative, -5),
+        # ord('r'): (leg_r_hip.move_relative, 5),
+        # ord('f'): (leg_r_knee.move_relative, 5),
+        # ord('v'): (leg_r_ankle.move_relative, 5),
 
-        # RIGHT LEG MOVEMENT
-        ord('e'): (leg_r_hip.move_relative, -5),
-        ord('d'): (leg_r_knee.move_relative, -5),
-        ord('c'): (leg_r_ankle.move_relative, -5),
-        ord('r'): (leg_r_hip.move_relative, 5),
-        ord('f'): (leg_r_knee.move_relative, 5),
-        ord('v'): (leg_r_ankle.move_relative, 5),
-
-        ord('l'): (led.flashlight, True),
-        ord('o'): (led.flashlight, False),
-        ord('c'): (speak.send, 'hi')
+        # ord('l'): (pub.sendMessage('led:flashlight', on=True)),
+        # ord('o'): (pub.sendMessage('led:flashlight', on=False)),
+        # ord('c'): (pub.sendMessage('speak', message='hi'))
         # ord('h'): (animate.animate, 'head_shake')
+    }
+
+    voice_mappings = {
+        'shut down': quit
+        # 'light on': (pub.sendMessage('led:flashlight', on=True)),
+        # 'light off': (pub.sendMessage('led:flashlight', on=False)),
     }
     keyboard = None
 
-    # Initialise mode
-    mode = MODE_KEYBOARD
-
     personality = Personality(debug=True)
 
-    # animate.animate('wake')
-    # px.blink(Config.PIXEL_EYES, (0, 0, 255))
-
-    # speak.send('Hi!')
-
-    if mode == MODE_RANDOM_BEHAVIOUR:
+    if Config.MODE == Config.MODE_RANDOM_BEHAVIOUR:
         start = time()  # random behaviour trigger
         random.seed()
         delay = random.randint(1, 5)
         action = 1
-        speak.send('hi')
+        pub.sendMessage('speak', message='hi')
 
     battery_check_time = time()
 
     battery = Battery(0, serial)
-
-    # pub.sendMessage('speak', message='hello')
 
     loop = True
     try:
@@ -174,123 +148,58 @@ def main():
                     loop = False
                     quit()
 
-            if mode == MODE_RANDOM_BEHAVIOUR:
-                # led.set(Config.LED_MIDDLE, (random.randint(0, 5), random.randint(0, 5), random.randint(0, 5)))
-
+            if Config.MODE == Config.MODE_RANDOM_BEHAVIOUR:
                 if tracking.track_largest_match():
-                    # led.eye('green')
                     pub.sendMessage('led:eye', color="green")
-                    # pub.sendMessage('led:spinner', color=None)
                 elif motion.read() <= 0:
                     pub.sendMessage('led:eye', color="red")
-                    # led.eye('red')
                 else:
-                    # pan.move(Config.PAN_START_POS)
-                    # tilt.move(Config.TILT_START_POS)
-                    # pub.sendMessage('led:spinner', color='blue')
                     pub.sendMessage('led:eye', color="blue")
-                    # led.eye('blue')
 
                 if time() - start > delay:
-                    # print(vision.detect())
-                    # # motion.read()
-                    # # led.set(Config.LED_MIDDLE, (random.randint(0, 5), random.randint(0, 5), random.randint(0, 5)))
-                    #
-                    # if len(vision.detect()) > 0: #tracking.track_largest_match():
-                    #     led.eye('green')
-                    # elif motion.read() <= 0:
-                    #     led.eye('red')
-                    # else:
-                    #     # pan.move(Config.PAN_START_POS)
-                    #     # tilt.move(Config.TILT_START_POS)
-                    #     led.eye('blue')
-
-                    # if action == 1:
-                    #     pass
-                    #     # led.set(Config.LED_MIDDLE, (random.randint(0, 5), random.randint(0, 5), random.randint(0, 5)))
-                    # elif action == 2:
-                    #     pan.move_relative(15)
-                    # elif action == 3:
-                    #     pan.move_relative(-15)
-                    # elif action == 4:
-                    #     tilt.move_relative(15)
-                    # elif action == 5:
-                    #     tilt.move_relative(-15)
-                    #
                     # action = action + 1
                     # if action == 6:
                     #     action = 1
                     start = time()
                     delay = random.randint(2, 15)
-
-                    # vision.detect()
-                    # print(delay)
-
-            # elif mode == MODE_SLEEP:
-            #     if motion.read() == 1:
-            #         mode = MODE_TRACK_FACES
-            #         #animate.animate('wake')
-            #         #tilt.reset()
-            #         vision.last_match = datetime.datetime.now()
-            #         print("Motion!")
-            #         led.eye('green')
-            #         # listening = True
-            #     else:
-            #         sleep(1)
-            #
-            # elif mode == MODE_TRACK_MOTION:
-            #     if vision.mode != Vision.MODE_MOTION:
-            #         vision = Vision(mode=Vision.MODE_MOTION)
-            #         print('Looking for motion')
-            #     # if tracking.track_largest_match():
-            #     #     mode = MODE_TRACK_FACES
-            #     #     speak.send('Looking for faces')
-            #
-            # elif mode == MODE_TRACK_FACES:
-            #     if vision.mode != Vision.MODE_FACES:
-            #         vision = Vision(mode=Vision.MODE_FACES)
-            #         print('Looking for faces')
-            #     # if not tracking.track_largest_match():
-            #     #     #mode = MODE_TRACK_MOTION
-            #     #     #print('No face, switching to motion')
-            #     #     pass
-            #
-            elif mode == MODE_KEYBOARD:
+            elif Config.MODE == Config.MODE_KEYBOARD:
                 if keyboard is None:
                     keyboard = Keyboard(mappings=key_mappings)
                 # Manual keyboard input for puppeteering
                 key = keyboard.handle_input()
                 if key == ord('q'):
                     loop = False
-                # elif key == ord('d'):
-                #     serial.send(ArduinoSerial.DEVICE_SERVO, 8, 0)
-                # else:
-                #    pub.sendMessage('speak', message=key)
-            #
-            # # Sleep if nothing has been detected for a while
-            # if (mode == MODE_TRACK_MOTION or mode == MODE_TRACK_FACES) and \
-            #         vision.last_match < datetime.datetime.now() - datetime.timedelta(minutes=Config.SLEEP_TIMEOUT):
-            #     mode = MODE_SLEEP
-            #     #pan.reset()
-            #     #tilt.move(0)
-            #     print('Sleeping')
-            #     led.eye('red')
-            #     sleep(3)
 
-            # repeat what I hear
-            voice_input = speech.detect()
-            if voice_input:
-                print(voice_input)
-                if voice_input == 'shut down':
-                    loop = False
-                    quit()
-                elif voice_input == 'light on':
-                    led.flashlight(True)
-                elif voice_input == 'light off':
-                    led.flashlight(False)
+                # crouch
+                elif key == ord('1'):
+                    servos['leg_l_hip'].move_relative(5)
+                    servos['leg_l_knee'].move_relative(-5)
+                    servos['leg_l_ankle'].move_relative(-5)
+                    servos['leg_r_hip'].move_relative(-5)
+                    servos['leg_r_knee'].move_relative(5)
+                    servos['leg_r_ankle'].move_relative(5)
 
-                # print('response:')
-                # print(chatbot.get_response(voice_input)) # @todo This is awful, improve
+                # stand
+                elif key == ord('2'):
+                    servos['leg_l_hip'].move_relative(-5)
+                    servos['leg_l_knee'].move_relative(5)
+                    servos['leg_l_ankle'].move_relative(5)
+                    servos['leg_r_hip'].move_relative(5)
+                    servos['leg_r_knee'].move_relative(-5)
+                    servos['leg_r_ankle'].move_relative(-5)
+
+            if Config.HOTWORD_MODEL is not None:
+                # repeat what I hear
+                voice_input = speech.detect()
+                if voice_input:
+                    print(voice_input)
+                    if voice_mappings is not None:
+                        if key in voice_mappings:
+                            method_info = voice_mappings.get(key)
+                            if method_info[1] is not None:
+                                method_info[0](method_info[1])
+                            else:
+                                method_info[0]()
 
     except (KeyboardInterrupt, ValueError) as e:
         print(e)

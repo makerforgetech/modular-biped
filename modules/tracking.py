@@ -1,8 +1,8 @@
+from pubsub import pub
+
 class Tracking:
-    def __init__(self, vision, pan, tilt, bounds_percent=10):
+    def __init__(self, vision, bounds_percent=10):
         self.vision = vision
-        self.pan = pan
-        self.tilt = tilt
         # define bounds around screen
         self.bounds_percent = bounds_percent
         self.bounds = int(self.vision.dimensions[0] / (100 / bounds_percent))
@@ -29,16 +29,16 @@ class Tracking:
         (x, y, w, h) = largest
         moved = False
         if x < self.bounds:
-            self.pan.move_relative(self.bounds_percent)
+            pub.sendMessage('servo:pan:move_relative', percent=self.bounds_percent)
             moved = True
         elif (x + w) > (self.vision.dimensions[0] - self.bounds):
-            self.pan.move_relative(-self.bounds_percent)
+            pub.sendMessage('servo:pan:move_relative', percent=-self.bounds_percent)
             moved = True
         if (y + h) > (self.vision.dimensions[1] - self.bounds):
-            self.tilt.move_relative(self.bounds_percent)
+            pub.sendMessage('servo:tilt:move_relative', percent=self.bounds_percent)
             moved = True
         elif y < self.bounds:
-            self.tilt.move_relative(-self.bounds_percent)
+            pub.sendMessage('servo:tilt:move_relative', percent=-self.bounds_percent)
             moved = True
 
         if moved:
