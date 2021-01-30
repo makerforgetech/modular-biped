@@ -43,7 +43,7 @@ def main():
     servos = dict()
     for key in Config.servos:
         s = Config.servos[key]
-        servos[key] = Servo(s['pin'], key, s['range'], start_post=s['start'])
+        servos[key] = Servo(s['pin'], key, s['range'], start_pos=s['start'])
 
     led = LED(Config.LED_COUNT)
     signal.signal(signal.SIGTERM, led.exit) # @todo not sure what this is for anymore - should have added comments
@@ -76,10 +76,10 @@ def main():
         # @todo these won't work because the mapping is not correct yet. Need to research this
         # Keyboard.KEY_LEFT: (pub.sendMessage, ['servo:pan:move_relative', 5]),
         # Keyboard.KEY_RIGHT: (pub.sendMessage, {'servo:pan:move_relative', -5}),
-        # Keyboard.KEY_UP: (pub.sendMessage('servo:tilt:move_relative', 5)),
-        # Keyboard.KEY_DOWN: (pub.sendMessage('servo:tilt:move_relative', -5)),
-        # Keyboard.KEY_BACKSPACE: (pub.sendMessage('servo:neck:move_relative',  5)),
-        # Keyboard.KEY_RETURN: (pub.sendMessage('servo:neck:move_relative', -5)),
+        Keyboard.KEY_UP: (servos['tilt'].move_relative, 5),
+        Keyboard.KEY_DOWN: (servos['tilt'].move_relative, -5),
+        Keyboard.KEY_BACKSPACE: (servos['neck'].move_relative, 5),
+        Keyboard.KEY_RETURN: (servos['neck'].move_relative, -5),
 
         # LEFT LEG MOVEMENT
         # ord('t'): (leg_l_hip.move_relative, -5),
@@ -172,38 +172,62 @@ def main():
 
                 # crouch
                 elif key == ord('1'):
-                    servos['leg_l_hip'].move_relative(5)
-                    servos['leg_l_knee'].move_relative(-5)
-                    servos['leg_l_ankle'].move_relative(-5)
-                    servos['leg_r_hip'].move_relative(-5)
-                    servos['leg_r_knee'].move_relative(5)
-                    servos['leg_r_ankle'].move_relative(5)
+                    servos['leg_l_hip'].move(Config.servos['leg_l_hip']['start'])
+                    servos['leg_r_hip'].move(Config.servos['leg_r_hip']['start'])
+                    servos['leg_l_knee'].move(Config.servos['leg_l_knee']['start'])
+                    servos['leg_r_knee'].move(Config.servos['leg_r_knee']['start'])
+                    servos['leg_l_ankle'].move(Config.servos['leg_l_ankle']['start'])
+                    servos['leg_r_ankle'].move(Config.servos['leg_r_ankle']['start'])
+                    print('crouch')
+                    # delay(.5)
+                    # servos['leg_l_knee'].move_relative(-5)
+                    # delay(.5)
+                    # servos['leg_l_ankle'].move_relative(-5)
+                    # delay(.5)
+                    # servos['leg_r_hip'].move_relative(-5)
+                    # delay(.5)
+                    # servos['leg_r_knee'].move_relative(5)
+                    # delay(.5)
+                    # servos['leg_r_ankle'].move_relative(5)
+                    # delay(.5)
 
                 # stand
                 elif key == ord('2'):
-                    servos['leg_l_hip'].move_relative(-5)
-                    servos['leg_l_knee'].move_relative(5)
-                    servos['leg_l_ankle'].move_relative(5)
-                    servos['leg_r_hip'].move_relative(5)
-                    servos['leg_r_knee'].move_relative(-5)
-                    servos['leg_r_ankle'].move_relative(-5)
+                    servos['leg_l_hip'].move(Config.servos['leg_l_hip']['standing'])
+                    servos['leg_r_hip'].move(Config.servos['leg_r_hip']['standing'])
+                    servos['leg_l_knee'].move(Config.servos['leg_l_knee']['standing'])
+                    servos['leg_r_knee'].move(Config.servos['leg_r_knee']['standing'])
+                    servos['leg_l_ankle'].move(Config.servos['leg_l_ankle']['standing'])
+                    servos['leg_r_ankle'].move(Config.servos['leg_r_ankle']['standing'])
+                    print('stand')
 
-            if Config.HOTWORD_MODEL is not None:
-                # repeat what I hear
-                voice_input = speech.detect()
-                if voice_input:
-                    print(voice_input)
-                    if voice_mappings is not None:
-                        if key in voice_mappings:
-                            method_info = voice_mappings.get(key)
-                            if method_info[1] is not None:
-                                method_info[0](method_info[1])
-                            else:
-                                method_info[0]()
+                elif key == ord('3'):
+                    servos['neck'].move(Config.servos['neck']['extended'])
+                    servos['tilt'].move(Config.servos['tilt']['extended'])
+                    print('neck up')
 
-    except (KeyboardInterrupt, ValueError) as e:
+                elif key == ord('4'):
+                    servos['neck'].move(Config.servos['neck']['start'])
+                    servos['tilt'].move(Config.servos['tilt']['start'])
+                    print('neck down')
+
+            # if Config.HOTWORD_MODEL is not None:
+            #     # repeat what I hear
+            #     voice_input = speech.detect()
+            #     if voice_input:
+            #         print(voice_input)
+            #         if voice_mappings is not None:
+            #             if key in voice_mappings:
+            #                 method_info = voice_mappings.get(key)
+            #                 if method_info[1] is not None:
+            #                     method_info[0](method_info[1])
+            #                 else:
+            #                     method_info[0]()
+
+    except (Exception) as e:
         print(e)
         loop = False
+        delay(5)
         quit()
 
     finally:

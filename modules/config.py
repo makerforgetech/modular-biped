@@ -11,10 +11,10 @@ class Config:
     MODE_KEYBOARD = 5
     MODE_RANDOM_BEHAVIOUR = 6
 
-    MODE = MODE_RANDOM_BEHAVIOUR
+    MODE = MODE_KEYBOARD
 
     # GPIO
-    gpio = pigpio.pi()
+    # gpio = pigpio.pi()
 
     # Power Management
     POWER_ENABLE_PIN = None
@@ -27,15 +27,15 @@ class Config:
     MOTION_PIN = 4
 
     servos = dict()
-    servos['neck'] = {'pin': 3, 'range': [45, 117], 'start': 75}
-    servos['tilt'] = {'pin': 4, 'range': [81, 117], 'start': 50}
-    servos['pan'] = {'pin': 5, 'range': [0, 180], 'start': 50}
-    servos['leg_l_hip'] = {'pin': 9, 'range': [0, 180], 'start': 50, 'standing': 50}
-    servos['leg_l_knee'] = {'pin': 10, 'range': [0, 180], 'start': 45, 'standing': 45}
-    servos['leg_l_ankle'] = {'pin': 11, 'range': [0, 180], 'start': 50, 'standing': 50}
-    servos['leg_r_hip'] = {'pin': 6, 'range': [0, 180], 'start': 50, 'standing': 50}
-    servos['leg_r_kne'] = {'pin': 7, 'range': [0, 180], 'start': 55, 'standing': 55}
-    servos['leg_r_ankle'] = {'pin': 8, 'range': [0, 180], 'start': 50, 'standing': 50}
+    servos['neck'] = {'pin': 3, 'range': [36, 170], 'start': 95, 'extended': 65}
+    servos['tilt'] = {'pin': 4, 'range': [36, 125], 'start': 55, 'extended': 50}
+    servos['pan'] = {'pin': 5, 'range': [0, 180], 'start': 55}
+    servos['leg_l_hip'] = {'pin': 9, 'range': [0, 180], 'start': 80, 'standing': 50}
+    servos['leg_l_knee'] = {'pin': 10, 'range': [0, 180], 'start': 0, 'standing': 45}
+    servos['leg_l_ankle'] = {'pin': 11, 'range': [0, 180], 'start': 35, 'standing': 50}
+    servos['leg_r_hip'] = {'pin': 6, 'range': [0, 180], 'start': 20, 'standing': 50}
+    servos['leg_r_knee'] = {'pin': 7, 'range': [0, 180], 'start': 100, 'standing': 55}
+    servos['leg_r_ankle'] = {'pin': 8, 'range': [0, 180], 'start': 65, 'standing': 50}
 
 
     # Head and neck
