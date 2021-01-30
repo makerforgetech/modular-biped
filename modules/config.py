@@ -11,7 +11,7 @@ class Config:
     MODE_KEYBOARD = 5
     MODE_RANDOM_BEHAVIOUR = 6
 
-    MODE = MODE_KEYBOARD
+    MODE = MODE_RANDOM_BEHAVIOUR
 
     # GPIO
     # gpio = pigpio.pi()

@@ -29,16 +29,16 @@ class Tracking:
         (x, y, w, h) = largest
         moved = False
         if x < self.bounds:
-            pub.sendMessage('servo:pan:move_relative', percent=self.bounds_percent)
+            pub.sendMessage('servo:pan:move_relative', percentage=self.bounds_percent)
             moved = True
         elif (x + w) > (self.vision.dimensions[0] - self.bounds):
-            pub.sendMessage('servo:pan:move_relative', percent=-self.bounds_percent)
+            pub.sendMessage('servo:pan:move_relative', percentage=-self.bounds_percent)
             moved = True
         if (y + h) > (self.vision.dimensions[1] - self.bounds):
-            pub.sendMessage('servo:tilt:move_relative', percent=self.bounds_percent)
+            pub.sendMessage('servo:tilt:move_relative', percentage=self.bounds_percent)
             moved = True
         elif y < self.bounds:
-            pub.sendMessage('servo:tilt:move_relative', percent=-self.bounds_percent)
+            pub.sendMessage('servo:tilt:move_relative', percentage=-self.bounds_percent)
             moved = True
 
         if moved:

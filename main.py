@@ -112,11 +112,13 @@ def main():
 
     personality = Personality(debug=True)
 
-    if Config.MODE == Config.MODE_RANDOM_BEHAVIOUR:
+    if Config.MODE == Config.MODE_RANDOM_BEHAVIOUR or Config.MODE == Config.MODE_KEYBOARD:
         start = time()  # random behaviour trigger
         random.seed()
         delay = random.randint(1, 5)
         action = 1
+        servos['neck'].move(Config.servos['neck']['extended'])
+        servos['tilt'].move(Config.servos['tilt']['extended'])
         pub.sendMessage('speak', message='hi')
 
     battery_check_time = time()
