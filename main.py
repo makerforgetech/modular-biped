@@ -74,8 +74,8 @@ def main():
     # Keyboard Input
     key_mappings = {
         # @todo these won't work because the mapping is not correct yet. Need to research this
-        # Keyboard.KEY_LEFT: (pub.sendMessage, ['servo:pan:move_relative', 5]),
-        # Keyboard.KEY_RIGHT: (pub.sendMessage, {'servo:pan:move_relative', -5}),
+        # Keyboard.KEY_LEFT: (pub.sendMessage, ['servo:pan:mv', 5]),
+        # Keyboard.KEY_RIGHT: (pub.sendMessage, {'servo:pan:mv', -5}),
         Keyboard.KEY_UP: (servos['tilt'].move_relative, 5),
         Keyboard.KEY_DOWN: (servos['tilt'].move_relative, -5),
         Keyboard.KEY_BACKSPACE: (servos['neck'].move_relative, 5),
@@ -125,6 +125,8 @@ def main():
 
     battery = Battery(0, serial)
 
+    animate = Animate()
+
     loop = True
     try:
         while loop:
@@ -172,46 +174,22 @@ def main():
                 if key == ord('q'):
                     loop = False
 
-                # crouch
                 elif key == ord('1'):
-                    servos['leg_l_hip'].move(Config.servos['leg_l_hip']['start'])
-                    servos['leg_r_hip'].move(Config.servos['leg_r_hip']['start'])
-                    servos['leg_l_knee'].move(Config.servos['leg_l_knee']['start'])
-                    servos['leg_r_knee'].move(Config.servos['leg_r_knee']['start'])
-                    servos['leg_l_ankle'].move(Config.servos['leg_l_ankle']['start'])
-                    servos['leg_r_ankle'].move(Config.servos['leg_r_ankle']['start'])
-                    print('crouch')
-                    # delay(.5)
-                    # servos['leg_l_knee'].move_relative(-5)
-                    # delay(.5)
-                    # servos['leg_l_ankle'].move_relative(-5)
-                    # delay(.5)
-                    # servos['leg_r_hip'].move_relative(-5)
-                    # delay(.5)
-                    # servos['leg_r_knee'].move_relative(5)
-                    # delay(.5)
-                    # servos['leg_r_ankle'].move_relative(5)
-                    # delay(.5)
-
-                # stand
+                    pub.sendMessage("animate", action="sit")
+                    print('sit')
                 elif key == ord('2'):
-                    servos['leg_l_hip'].move(Config.servos['leg_l_hip']['standing'])
-                    servos['leg_r_hip'].move(Config.servos['leg_r_hip']['standing'])
-                    servos['leg_l_knee'].move(Config.servos['leg_l_knee']['standing'])
-                    servos['leg_r_knee'].move(Config.servos['leg_r_knee']['standing'])
-                    servos['leg_l_ankle'].move(Config.servos['leg_l_ankle']['standing'])
-                    servos['leg_r_ankle'].move(Config.servos['leg_r_ankle']['standing'])
+                    pub.sendMessage("animate", action="stand")
                     print('stand')
-
                 elif key == ord('3'):
-                    servos['neck'].move(Config.servos['neck']['extended'])
-                    servos['tilt'].move(Config.servos['tilt']['extended'])
+                    pub.sendMessage("animate", action="wake")
                     print('neck up')
-
                 elif key == ord('4'):
-                    servos['neck'].move(Config.servos['neck']['start'])
-                    servos['tilt'].move(Config.servos['tilt']['start'])
+                    pub.sendMessage("animate", action="sleep")
                     print('neck down')
+                elif key == ord('5'):
+                    pub.sendMessage("animate", action="head_shake")
+                elif key == ord('6'):
+                    pub.sendMessage("animate", action="head_nod")
 
             # if Config.HOTWORD_MODEL is not None:
             #     # repeat what I hear

@@ -26,8 +26,8 @@ class Servo:
 
         self.move(self.start)
 
-        pub.subscribe(self.move, 'servo:' + identifier + ':move')
-        pub.subscribe(self.move_relative, 'servo:' + identifier + ':move_relative')
+        pub.subscribe(self.move, 'servo:' + identifier + ':mvabs')
+        pub.subscribe(self.move_relative, 'servo:' + identifier + ':mv')
 
     def __del__(self):
         pass #self.reset()
