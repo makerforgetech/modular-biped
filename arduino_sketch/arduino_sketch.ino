@@ -188,8 +188,12 @@ void get_messages_from_serial()
 
 void move_servo(int identifier, int angle) {
     int index = identifier - SERVO_PIN_OFFSET;
-    servos[index].attach(identifier);
-//    servos[index].write(angle);
+
+    // attach after write to hopefully stop initial position 'spasm' https://forum.arduino.cc/index.php?topic=346406.0
+    if (servos[index].attached() == false) {
+        servos[index].write(angle);
+        servos[index].attach(identifier);
+    }
     servo_angles[index] = angle; // Don't move it but queue the move
 }
 

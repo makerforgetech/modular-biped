@@ -1,12 +1,12 @@
 [
-  {"servo:tilt:mv": -5},
-  {"sleep": 0.5},
-  {"servo:tilt:mv": 10},
-  {"sleep": 0.5},
   {"servo:tilt:mv": -10},
   {"sleep": 0.5},
-  {"servo:tilt:mv": 10},
-  {"sleep": 0.5},
-  {"servo:tilt:mv": -5},
+  {"servo:tilt:mv": 20},
+  {"sleep": 0.2},
+  {"servo:tilt:mv": -20},
+  {"sleep": 0.2},
+  {"servo:tilt:mv": 20},
+  {"sleep": 0.2},
+  {"servo:tilt:mv": -10},
   {"sleep": 0.5}
 ]
