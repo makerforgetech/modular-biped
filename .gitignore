@@ -6,3 +6,4 @@ modules/.coverage
 *__pycache__
 *.AppleDouble*
 *.DS_Store
+designs
