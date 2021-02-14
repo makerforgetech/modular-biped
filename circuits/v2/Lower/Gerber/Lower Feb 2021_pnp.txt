@@ -1,0 +1,38 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=Lower Feb 2021
+*Date=18:33:23
+*CreatedBy=Fritzing 0.9.3b.04.19.5c895d327c44a3114e5fcc9d8260daf0cbb52806
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;;THT;53.3494;-48.7198;-180;Bottom;PWR
+2;;THT;13.9794;-46.1798;0;Bottom;Srv Pwr Relay
+3;;THT;29.2194;-20.7798;-90;Bottom;Srv3
+4;;THT;29.2194;-30.9398;-90;Bottom;Srv7
+5;;THT;29.2194;-36.0198;-90;Bottom;Srv9
+6;220;THT;6.35941;-37.2898;0;Bottom;R2
+7;;THT;26.6794;-9.34983;-90;Bottom;Serial
+8;;THT;29.2194;-18.2398;-90;Bottom;Srv2
+9;;THT;29.2194;-25.8598;-90;Bottom;Srv5
+10;;THT;29.2194;-15.6998;-90;Bottom;Srv1
+11;;THT;29.2194;-33.4798;-90;Bottom;Srv8
+12;;THT;46.9994;-29.6698;90;Bottom;FUSE
+13;;THT;29.2194;-28.3998;-90;Bottom;Srv6
+14;;THT;45.7294;-46.1798;0;Bottom;J1
+15;;THT;30.4894;-9.34983;90;Bottom;Pi PWR
+16;;THT;29.2194;-23.3198;-90;Bottom;Srv4
+17;;;24.0792;-36.9982;0;Bottom;Via2
+18;;;14.9352;-33.9502;0;Bottom;Via1
+19;;THT;53.3494;-41.0998;0;Bottom;Mon
+20;;;11.4394;-18.2398;-180;Bottom;Arduino Pro Mini
+21;;THT;44.463;-20.261;-180;Bottom;5v
+22;220;THT;13.9794;-37.2898;0;Bottom;R1
+23;;THT;44.463;-7.56097;-180;Bottom;5.1v Pi
