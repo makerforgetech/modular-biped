@@ -34,6 +34,10 @@ from modules.braillespeak import Braillespeak
 
 
 def main():
+
+    # POWER
+    power = Power(Config.POWER_ENABLE_PIN)
+
     # GPIO
     gpio = pigpio.pi()
 
@@ -68,7 +72,7 @@ def main():
 
     # Output
     # speak = Chirp()
-    if Config.AUDIO_ENABLE_PIN is not None:
+    if Config.AUDIO_ENABLE_PIN is not None:  # @todo change this
         speak = Braillespeak(Config.AUDIO_ENABLE_PIN, duration=80/1000)
 
     # Keyboard Input

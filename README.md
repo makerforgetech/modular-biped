@@ -4,6 +4,8 @@ This platform has been created to allow modular development and experimentation 
 ## Installation
 `./install.sh`
 
+Disable audio (see Neopixels section below)
+
 ## Running
 `./startup.sh`
 

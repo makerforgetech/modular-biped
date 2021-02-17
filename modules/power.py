@@ -1,15 +1,16 @@
-import pigpio
 import threading
-
+from pubsub import pub
+from modules.arduinoserial import ArduinoSerial
 
 class Power:
     def __init__(self, pin, **kwargs):
         self.pin = pin
         self.active_count = 0
-        self.pi = kwargs.get('pi', pigpio.pi())
         self.thread = kwargs.get('thread', True)
-        self.pi.set_mode(pin, pigpio.OUTPUT)
         self.timer = None
+        pub.subscribe(self.use, 'power:use')
+        pub.subscribe(self.release, 'power:release')
+        pub.sendMessage('serial', type=ArduinoSerial.DEVICE_PIN, identifier=self.pin, message=1)  # high is off, low is on
 
     def __del__(self):
         if self.timer is not None:
@@ -17,7 +18,7 @@ class Power:
 
     def use(self):
         self.active_count = self.active_count + 1
-        self.pi.write(self.pin, 1)
+        pub.sendMessage('serial', type=ArduinoSerial.DEVICE_PIN, identifier=self.pin, message=0)
         if self.timer is not None:
             self.timer.cancel()
 
@@ -36,4 +37,4 @@ class Power:
     def _off(self):
         if self.active_count <= 0:
             print('off')
-            self.pi.write(self.pin, 0)
+            pub.sendMessage('serial', type=ArduinoSerial.DEVICE_PIN, identifier=self.pin, message=1)

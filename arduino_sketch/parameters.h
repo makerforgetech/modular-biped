@@ -7,7 +7,7 @@
 #define LED_COUNT 9
 
 #define SERVO_COUNT 9
-#define SERVO_PIN_OFFSET 3
+#define SERVO_PIN_OFFSET 2
 
 
 // If DEBUG is set to true, the arduino will send back all the received messages

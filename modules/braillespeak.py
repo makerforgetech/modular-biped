@@ -3,6 +3,7 @@ from pubsub import pub
 from modules.arduinoserial import ArduinoSerial
 import pysine
 
+# @todo refactor to use pi buzzer
 class Braillespeak:
     """
     Communicate with tones, letters converted to tone pairs
