@@ -21,7 +21,7 @@ class Config:
     SLEEP_TIMEOUT = 1  # Minutes
 
     # Audio
-    AUDIO_ENABLE_PIN = None  # Arduino pin handling audio power @todo remove old audio code
+    BUZZER_PIN = 27
 
     # Microwave sensor pin
     MOTION_PIN = 13

@@ -72,8 +72,8 @@ def main():
 
     # Output
     # speak = Chirp()
-    if Config.AUDIO_ENABLE_PIN is not None:  # @todo change this
-        speak = Braillespeak(Config.AUDIO_ENABLE_PIN, duration=80/1000)
+    if Config.BUZZER_PIN is not None:
+        speak = Braillespeak(Config.BUZZER_PIN, duration=80/1000)
 
     # Keyboard Input
     key_mappings = {

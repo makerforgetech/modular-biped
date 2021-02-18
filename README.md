@@ -2,12 +2,17 @@
 This platform has been created to allow modular development and experimentation of robotics in python / C++ using the Raspberry Pi and Arduino.
 
 ## Installation
-`./install.sh`
+```
+chmod 777 install.sh
+./install.sh
+```
 
 Disable audio (see Neopixels section below)
 
 ## Running
-`./startup.sh`
+```
+./startup.sh
+```
 
 ## Features
 

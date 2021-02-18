@@ -1,6 +1,9 @@
 from pubsub import pub
 from modules.arduinoserial import ArduinoSerial
 from time import sleep
+import board
+import neopixel
+
 
 class LED:
     COLOUR_OFF = (0, 0, 0)
@@ -24,6 +27,7 @@ class LED:
         pub.subscribe(self.set, 'led')
         pub.subscribe(self.eye, 'led:eye')
         pub.subscribe(self.eye, 'led:flashlight')
+        self.pixels = neopixel.NeoPixel(board.D12, count)
         self.set(self.all, LED.COLOUR_OFF)
         sleep(0.1)
         self.set(self.middle, LED.COLOUR_GREEN)
@@ -44,7 +48,8 @@ class LED:
         :param identifiers: pixel number (starting from 0) - can be list
         :param color: (R, G, B)
         """
-        pub.sendMessage('serial', type='led', identifier=identifiers, message=color)
+        for i in identifiers:
+            self.pixels[identifiers[i]] = color
 
     def flashlight(self, on):
         if on:

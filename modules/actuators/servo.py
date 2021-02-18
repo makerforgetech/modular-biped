@@ -78,8 +78,8 @@ class Servo:
             timer.start()
         else:
             pass #sleep(s[1])
-        if self.power:
-            pub.sendMessage('power:release')  # @todo change to only release if back at start position
+        if self.power and self.pos == self.start:
+            pub.sendMessage('power:release')
 
     def calculate_move(self, old, new, time=0.1, translate=False):
         if translate:

@@ -20,3 +20,6 @@ sudo python3 -m pip install --force-reinstall adafruit-blinka
 # INSTALL ALL PYTHON DEPENDENCIES
 pip3 install -r requirements.txt
 
+# Activate other scripts
+chmod 777 startup.sh
+chmod 777 stop.sh
