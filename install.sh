@@ -27,3 +27,6 @@ sudo pip3 install -r requirements.txt
 # Activate other scripts
 chmod 777 startup.sh
 chmod 777 stop.sh
+
+# Snowboy hotword
+npm install --save snowboy
