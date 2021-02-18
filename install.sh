@@ -17,8 +17,12 @@ sudo apt-get install python3-dev python3-setuptools portaudio19-dev libffi-dev l
 sudo pip3 install rpi_ws281x adafruit-circuitpython-neopixel
 sudo python3 -m pip install --force-reinstall adafruit-blinka
 
+# OpenCV
+sudo apt-get install libatlas-base-dev
+
 # INSTALL ALL PYTHON DEPENDENCIES
-pip3 install -r requirements.txt
+sudo python3 -m pip install -r requirements.txt
+sudo pip3 install -r requirements.txt
 
 # Activate other scripts
 chmod 777 startup.sh

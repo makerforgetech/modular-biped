@@ -211,14 +211,15 @@ def main():
     except (Exception) as e:
         print(e)
         loop = False
-        delay(5)
+        sleep(5)
         quit()
 
     finally:
         led.exit()
         # speak.send('off')
         speak.exit()
-        hotword.exit()
+        if Config.HOTWORD_MODEL is not None:
+            hotword.exit()
         # pan.reset()
         # tilt.reset()
 

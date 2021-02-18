@@ -13,6 +13,11 @@ class Braillespeak:
         self.speaker = False
         self.duration = kwargs.get('duration', 100 / 1000)  # ms to seconds
 
+        if self.speaker is False:
+            GPIO.setmode(GPIO.BCM)
+            GPIO.setup(pin, GPIO.IN)
+            GPIO.setup(pin, GPIO.OUT)
+
         # https://pages.mtu.edu/~suits/notefreqs.html
         self.notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25]  # C4 - C5
 

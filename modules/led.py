@@ -48,6 +48,8 @@ class LED:
         :param identifiers: pixel number (starting from 0) - can be list
         :param color: (R, G, B)
         """
+        if type(identifiers) is int:
+            identifiers = [identifiers]
         for i in identifiers:
             self.pixels[identifiers[i]] = color
 
