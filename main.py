@@ -22,8 +22,11 @@ from modules.animate import Animate
 from modules.power import Power
 from modules.keyboard import Keyboard
 from modules.sensor import Sensor
-from modules.hotword import HotWord
-from modules.chirp import Chirp
+try:
+    from modules.hotword import HotWord
+except ModuleNotFoundError as e:
+    pass
+# from modules.chirp import Chirp
 from modules.speechinput import SpeechInput
 # from modules.chatbot.chatbot import MyChatBot
 from modules.arduinoserial import ArduinoSerial
@@ -67,11 +70,7 @@ def main():
         sleep(1)  # @todo is this needed?
         speech = SpeechInput()
 
-    # Chat bot
-    # chatbot = MyChatBot()
-
     # Output
-    # speak = Chirp()
     if Config.BUZZER_PIN is not None:
         speak = Braillespeak(Config.BUZZER_PIN, duration=80/1000)
 
