@@ -37,8 +37,9 @@ class LED:
         # Set subscribers
         pub.subscribe(self.set, 'led')
         pub.subscribe(self.eye, 'led:eye')
+        pub.subscribe(self.off, 'led:off')
         pub.subscribe(self.eye, 'led:flashlight')
-        pub.subscribe(self.animation, 'led:animate')
+        pub.subscribe(self.animate, 'led:animate')
 
     def exit(self):
         """
@@ -66,7 +67,7 @@ class LED:
         if type(color) is str:
             color = LED.COLOR_MAP[color]
         for i in identifiers:
-            self.pixels[identifiers[i]] = color
+            self.pixels[i] = color
         sleep(0.1)
 
     def flashlight(self, on):
@@ -78,19 +79,18 @@ class LED:
             self.eye('green')
 
     def off(self):
+        if self.animation:
+            print('ANIMATION STOPPING')
+            self.thread.join()
+            self.animation = False
         self.set(self.all, LED.COLOR_OFF)
+        sleep(2)
 
     def eye(self, color):
         if color in LED.COLOR_MAP.keys() and self.pixels[self.middle] != color:
             self.set(self.middle, LED.COLOR_MAP[color])
 
     def animate(self, identifiers, color, animation):
-        if not color and self.animation:
-            print('ANIMATION STOPPING')
-            self.thread.join()
-            self.animation = False
-            return
-
         if self.animation:
             print('ANIMATION ALREADY STARTED')
             return
@@ -104,10 +104,10 @@ class LED:
             'rainbow_cycle': self.rainbow_cycle
         }
 
+        self.animation = True
         if animation in animations:
             self.thread = threading.Thread(target=animations[animation], args=(identifiers, color,))
         self.thread.start()
-        self.animation = True
 
     def spinner(self, identifiers, color, index=1):
         """
@@ -127,7 +127,7 @@ class LED:
             index = 1
 
         if self.animation:
-            self.spinner(color, index)
+            self.spinner(identifiers, color, index)
 
     def breathe(self, identifiers, color):
         """
@@ -140,7 +140,8 @@ class LED:
         :param identifiers: pins to apply animation
         :param color: string map of COLOR_MAP or tuple (R, G, B)
         """
-
+        if type(color) is str:
+            color = LED.COLOR_MAP[color]
         while self.animation:
             for dc in range(0, max(color), 1):  # Increase brightness to max of color
                 self.set(identifiers, (dc if color[0] > 0 else 0, dc if color[0] > 0 else 0, dc if color[0] > 0 else 0))
@@ -164,16 +165,16 @@ class LED:
             p -= 170
             return (0, p * 3, 255 - p * 3)
 
-    def rainbow(self, identifiers, wait_ms=20, iterations=1):
+    def rainbow(self, identifiers, color, wait_ms=20, iterations=1):
         """Draw rainbow that fades across all pixels at once."""
         for j in range(256 * iterations):
             for i in range(self.count):
                 self.set(i, LED._wheel((i + j) & 255))
-            sleep(wait_ms / 1000.0)
+            sleep(wait_ms / 1000)
 
-    def rainbow_cycle(self, identifiers, wait_ms=20, iterations=5):
+    def rainbow_cycle(self, identifiers, color, wait_ms=20, iterations=5):
         """Draw rainbow that uniformly distributes itself across all pixels."""
         for j in range(256 * iterations):
             for i in range(self.count):
                 self.set(i, LED._wheel((int(i * 256 / self.count) + j) & 255))
-            sleep(wait_ms / 1000.0)
+            sleep(wait_ms / 1000)
