@@ -185,6 +185,9 @@ class LED:
         for j in range(256 * iterations):
             for i in range(self.count):
                 self.set(i, LED._wheel((i + j) & 255))
+            t = threading.currentThread()
+            if not getattr(t, "animation", True):
+                return
             sleep(wait_ms / 1000)
 
     def rainbow_cycle(self, identifiers, color, wait_ms=20, iterations=5):
@@ -192,4 +195,7 @@ class LED:
         for j in range(256 * iterations):
             for i in range(self.count):
                 self.set(i, LED._wheel((int(i * 256 / self.count) + j) & 255))
+            t = threading.currentThread()
+            if not getattr(t, "animation", True):
+                return
             sleep(wait_ms / 1000)
