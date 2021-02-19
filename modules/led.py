@@ -1,7 +1,12 @@
 from pubsub import pub
 from time import sleep
-import board
-import neopixel
+
+try:
+    import board
+    import neopixel
+except:
+    pass
+
 import threading
 
 
@@ -27,8 +32,10 @@ class LED:
         self.all = range(self.count)
         self.animation = False
         self.thread = None
-        self.pixels = neopixel.NeoPixel(board.D12, count)
-
+        try:
+            self.pixels = neopixel.NeoPixel(board.D12, count)
+        except:
+            pass
         # Default states
         self.set(self.all, LED.COLOR_OFF)
         sleep(0.1)
@@ -67,7 +74,11 @@ class LED:
         if type(color) is str:
             color = LED.COLOR_MAP[color]
         for i in identifiers:
-            self.pixels[i] = color
+            print(str(i) + str(color))
+            try:
+                self.pixels[i] = color
+            except:
+                pass
         sleep(0.1)
 
     def flashlight(self, on):
@@ -79,10 +90,11 @@ class LED:
             self.eye('green')
 
     def off(self):
-        if self.animation:
+        if self.thread:
             print('ANIMATION STOPPING')
-            self.thread.join()
             self.animation = False
+            self.thread.animation = False
+            self.thread.join()
         self.set(self.all, LED.COLOR_OFF)
         sleep(2)
 
@@ -109,6 +121,7 @@ class LED:
             self.thread = threading.Thread(target=animations[animation], args=(identifiers, color,))
         self.thread.start()
 
+
     def spinner(self, identifiers, color, index=1):
         """
         Create a spinner effect around outer LEDs of 7 LED ring.
@@ -126,7 +139,8 @@ class LED:
         if index == 0:
             index = 1
 
-        if self.animation:
+        t = threading.currentThread()
+        if getattr(t, "animation", True):
             self.spinner(identifiers, color, index)
 
     def breathe(self, identifiers, color):
@@ -142,7 +156,8 @@ class LED:
         """
         if type(color) is str:
             color = LED.COLOR_MAP[color]
-        while self.animation:
+        t = threading.currentThread()
+        if getattr(t, "animation", True):
             for dc in range(0, max(color), 1):  # Increase brightness to max of color
                 self.set(identifiers, (dc if color[0] > 0 else 0, dc if color[0] > 0 else 0, dc if color[0] > 0 else 0))
                 sleep(0.05)
