@@ -26,6 +26,7 @@ class Power:
         self.active_count = self.active_count - 1
         if self.active_count <= 0:
             self.active_count = 0  # just ensure that it hasn't gone below 0
+            pub.sendMessage('serial', type=ArduinoSerial.DEVICE_PIN, identifier=self.pin, message=1)
             if self.thread:
                 if self.timer is not None:
                     self.timer.cancel()
