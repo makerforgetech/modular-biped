@@ -28,7 +28,7 @@ class LED:
     def __init__(self, count, **kwargs):
         # Initialise
         self.count = count
-        self.middle = kwargs.get('middle', 0)
+        self.middle = kwargs.get('middle', 6)
         self.all = range(self.count)
         self.animation = False
         self.thread = None

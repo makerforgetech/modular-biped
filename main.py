@@ -122,7 +122,8 @@ def main():
         action = 1
         servos['neck'].move(Config.servos['neck']['extended'])
         servos['tilt'].move(Config.servos['tilt']['extended'])
-        pub.sendMessage('speak', message='hi')
+        if Config.MODE == Config.MODE_RANDOM_BEHAVIOUR:
+            pub.sendMessage('speak', message='hi')
 
     battery_check_time = time()
 
