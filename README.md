@@ -25,7 +25,7 @@ Control of up to 9 servos via an arduino serial connection
 ### Battery monitor
 Both external and software integrated via the arduino serial connection
 
-### Auto boot & shutdown
+### Auto shutdown
 Add the startup command to the boot file on the pi (edit `/etc/rc.local`)
 This can then be stopped by running the `./stop.sh` command in the project directory.
 
@@ -51,6 +51,18 @@ Mic DOUT to BCM 20 (pin 38)
 Mic LRCL to BCM 19 (pin 35)
 ```
 https://learn.adafruit.com/adafruit-i2s-mems-microphone-breakout/raspberry-pi-wiring-test
+
+
+```
+cd ~
+sudo pip3 install --upgrade adafruit-python-shell
+wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/i2smic.py
+sudo python3 i2smic.py
+```
+
+####Test
+`arecord -l`
+`arecord -D plughw:0 -c2 -r 48000 -f S32_LE -t wav -V stereo -v file_stereo.wav`
 
 ### Voice Recognition
 Trigger word for voice recognition:
