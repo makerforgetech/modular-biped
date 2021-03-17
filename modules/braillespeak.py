@@ -1,16 +1,22 @@
 import time
 from pubsub import pub
-from modules.arduinoserial import ArduinoSerial
+import RPi.GPIO as GPIO
 import pysine
 
 class Braillespeak:
     """
     Communicate with tones, letters converted to tone pairs
     """
-    def __init__(self, audio_en_pin, **kwargs):
+    def __init__(self, pin, **kwargs):
         pub.subscribe(self.send, 'speak')
-        self.audio_en_pin = audio_en_pin
+        self.pin = pin
+        self.speaker = False
         self.duration = kwargs.get('duration', 100 / 1000)  # ms to seconds
+
+        if self.speaker is False:
+            GPIO.setmode(GPIO.BCM)
+            GPIO.setup(pin, GPIO.IN)
+            GPIO.setup(pin, GPIO.OUT)
 
         # https://pages.mtu.edu/~suits/notefreqs.html
         self.notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25]  # C4 - C5
@@ -47,19 +53,32 @@ class Braillespeak:
     def exit(self):
         pass
 
+    def buzz(self, frequency, length):  # create the function "buzz" and feed it the pitch and duration)
+        #https://github.com/gumslone/raspi_buzzer_player/blob/master/buzzer_player.py
+        period = 1.0 / frequency  # in physics, the period (sec/cyc) is the inverse of the frequency (cyc/sec)
+        delayValue = period / 2  # calculate the time for half of the wave
+        numCycles = int(length * frequency)  # the number of waves to produce is the duration times the frequency
+
+        for i in range(numCycles):  # start a loop from 0 to the variable "cycles" calculated above
+            GPIO.output(self.pin, True)  # set pin to high
+            time.sleep(delayValue)  # wait with pin high
+            GPIO.output(self.pin, False)  # set pin to low
+            time.sleep(delayValue)  # wait with pin low
+
     def handle_char(self, char):
         if char == ' ':
             time.sleep(self.duration)
             return
 
         for n in self.brailleLetters[ord(char) - 97]:
-            pysine.sine(frequency=self.notes[n], duration=self.duration)
+            if self.speaker:
+                pysine.sine(frequency=self.notes[n], duration=self.duration)
+            else:
+                self.buzz(self.notes[n], self.duration)
         time.sleep(self.duration / 2)
 
     def send(self, message):
         print(message)
         if message:
-            pub.sendMessage('serial', type=ArduinoSerial.DEVICE_PIN, identifier=self.audio_en_pin, message=1)
             for t in message:
                 self.handle_char(t)
-            pub.sendMessage('serial', type=ArduinoSerial.DEVICE_PIN, identifier=self.audio_en_pin, message=0)

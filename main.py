@@ -22,8 +22,11 @@ from modules.animate import Animate
 from modules.power import Power
 from modules.keyboard import Keyboard
 from modules.sensor import Sensor
-from modules.hotword import HotWord
-from modules.chirp import Chirp
+try:
+    from modules.hotword import HotWord
+except ModuleNotFoundError as e:
+    pass
+# from modules.chirp import Chirp
 from modules.speechinput import SpeechInput
 # from modules.chatbot.chatbot import MyChatBot
 from modules.arduinoserial import ArduinoSerial
@@ -34,6 +37,10 @@ from modules.braillespeak import Braillespeak
 
 
 def main():
+
+    # POWER
+    power = Power(Config.POWER_ENABLE_PIN)
+
     # GPIO
     gpio = pigpio.pi()
 
@@ -63,13 +70,9 @@ def main():
         sleep(1)  # @todo is this needed?
         speech = SpeechInput()
 
-    # Chat bot
-    # chatbot = MyChatBot()
-
     # Output
-    # speak = Chirp()
-    if Config.AUDIO_ENABLE_PIN is not None:
-        speak = Braillespeak(Config.AUDIO_ENABLE_PIN, duration=80/1000)
+    if Config.BUZZER_PIN is not None:
+        speak = Braillespeak(Config.BUZZER_PIN, duration=80/1000)
 
     # Keyboard Input
     key_mappings = {
@@ -119,7 +122,8 @@ def main():
         action = 1
         servos['neck'].move(Config.servos['neck']['extended'])
         servos['tilt'].move(Config.servos['tilt']['extended'])
-        pub.sendMessage('speak', message='hi')
+        if Config.MODE == Config.MODE_RANDOM_BEHAVIOUR:
+            pub.sendMessage('speak', message='hi')
 
     battery_check_time = time()
 
@@ -207,14 +211,15 @@ def main():
     except (Exception) as e:
         print(e)
         loop = False
-        delay(5)
+        sleep(5)
         quit()
 
     finally:
         led.exit()
         # speak.send('off')
         speak.exit()
-        hotword.exit()
+        if Config.HOTWORD_MODEL is not None:
+            hotword.exit()
         # pan.reset()
         # tilt.reset()
 

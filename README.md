@@ -2,11 +2,17 @@
 This platform has been created to allow modular development and experimentation of robotics in python / C++ using the Raspberry Pi and Arduino.
 
 ## Installation
-pip3 install -r requirements.txt
+```
+chmod 777 install.sh
+./install.sh
+```
+
+Disable audio (see Neopixels section below)
 
 ## Running
-`./startup.sh`
-
+```
+./startup.sh
+```
 
 ## Features
 
@@ -69,9 +75,6 @@ WS1820B support is included via the Pi GPIO pin 12. Unfortunately to support thi
 ```
 sudo vim /boot/config.txt
 #dtparam=audio=on
-
-sudo pip3 install rpi_ws281x adafruit-circuitpython-neopixel
-sudo python3 -m pip install --force-reinstall adafruit-blinka
 ```
 
 This is also why the application must be executed with `sudo`
