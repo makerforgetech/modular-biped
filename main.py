@@ -113,6 +113,7 @@ def main():
     }
     keyboard = None
 
+    animate = Animate()
     personality = Personality(debug=True)
 
     if Config.MODE == Config.MODE_RANDOM_BEHAVIOUR or Config.MODE == Config.MODE_KEYBOARD:
@@ -120,8 +121,7 @@ def main():
         random.seed()
         delay = random.randint(1, 5)
         action = 1
-        servos['neck'].move(Config.servos['neck']['extended'])
-        servos['tilt'].move(Config.servos['tilt']['extended'])
+        pub.sendMessage("animate", action="stand")
         if Config.MODE == Config.MODE_RANDOM_BEHAVIOUR:
             pub.sendMessage('speak', message='hi')
 
@@ -129,7 +129,7 @@ def main():
 
     battery = Battery(0, serial)
 
-    animate = Animate()
+
 
     loop = True
     try:
@@ -215,6 +215,9 @@ def main():
         quit()
 
     finally:
+        pub.sendMessage("animate", action="sit")
+        pub.sendMessage("animate", action="sleep")
+        pub.sendMessage("power:exit")
         led.exit()
         # speak.send('off')
         speak.exit()

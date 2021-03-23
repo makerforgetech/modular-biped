@@ -10,11 +10,15 @@ class Power:
         self.timer = None
         pub.subscribe(self.use, 'power:use')
         pub.subscribe(self.release, 'power:release')
+        pub.subscribe(self.exit, 'power:exit')
         pub.sendMessage('serial', type=ArduinoSerial.DEVICE_PIN, identifier=self.pin, message=1)  # high is off, low is on
 
     def __del__(self):
         if self.timer is not None:
             self.timer.cancel()
+
+    def exit(self):
+        pub.sendMessage('serial', type=ArduinoSerial.DEVICE_PIN, identifier=self.pin, message=1)
 
     def use(self):
         self.active_count = self.active_count + 1
