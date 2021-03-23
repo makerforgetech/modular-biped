@@ -13,6 +13,10 @@ Disable audio (see Neopixels section below)
 ```
 ./startup.sh
 ```
+To execute manual control via keyboard:
+```
+./manual_startup.sh
+```
 
 ## Features
 

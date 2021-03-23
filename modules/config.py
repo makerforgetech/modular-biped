@@ -11,8 +11,6 @@ class Config:
     MODE_KEYBOARD = 5
     MODE_RANDOM_BEHAVIOUR = 6
 
-    MODE = MODE_KEYBOARD
-
     # GPIO
     # gpio = pigpio.pi()
 
@@ -27,9 +25,9 @@ class Config:
     MOTION_PIN = 13
 
     servos = dict()
-    servos['neck'] = {'pin': 2, 'range': [36, 170], 'start': 95}
+    servos['neck'] = {'pin': 2, 'range': [36, 170], 'start': 120}
     servos['tilt'] = {'pin': 3, 'range': [36, 125], 'start': 55}
-    #servos['pan'] = {'pin': 4, 'range': [0, 180], 'start': 55}
+    #servos['pan'] = {'pin': 4, 'range': [0, 180], 'start': 60}
     servos['leg_l_hip'] = {'pin': 8, 'range': [0, 180], 'start': 80}
     servos['leg_l_knee'] = {'pin': 9, 'range': [0, 180], 'start': 5}
     servos['leg_l_ankle'] = {'pin': 10, 'range': [0, 180], 'start': 35}

@@ -26,6 +26,9 @@ try:
     from modules.hotword import HotWord
 except ModuleNotFoundError as e:
     pass
+
+import sys
+
 # from modules.chirp import Chirp
 from modules.speechinput import SpeechInput
 # from modules.chatbot.chatbot import MyChatBot
@@ -37,6 +40,10 @@ from modules.braillespeak import Braillespeak
 
 
 def main():
+
+    mode = Config.MODE_RANDOM_BEHAVIOUR
+    if len(sys.argv) > 1 and sys.argv[1] == 'manual':
+        mode = Config.MODE_KEYBOARD
 
     # POWER
     power = Power(Config.POWER_ENABLE_PIN)
@@ -116,13 +123,13 @@ def main():
     animate = Animate()
     personality = Personality(debug=True)
 
-    if Config.MODE == Config.MODE_RANDOM_BEHAVIOUR or Config.MODE == Config.MODE_KEYBOARD:
+    if mode == Config.MODE_RANDOM_BEHAVIOUR or mode == Config.MODE_KEYBOARD:
         start = time()  # random behaviour trigger
         random.seed()
         delay = random.randint(1, 5)
         action = 1
         pub.sendMessage("animate", action="stand")
-        if Config.MODE == Config.MODE_RANDOM_BEHAVIOUR:
+        if mode == Config.MODE_RANDOM_BEHAVIOUR:
             pub.sendMessage('speak', message='hi')
 
     battery_check_time = time()
@@ -156,7 +163,7 @@ def main():
                     loop = False
                     quit()
 
-            if Config.MODE == Config.MODE_RANDOM_BEHAVIOUR:
+            if mode == Config.MODE_RANDOM_BEHAVIOUR:
                 if tracking.track_largest_match():
                     pub.sendMessage('led:eye', color="green")
                 elif motion.read() <= 0:
@@ -170,7 +177,7 @@ def main():
                     #     action = 1
                     start = time()
                     delay = random.randint(2, 15)
-            elif Config.MODE == Config.MODE_KEYBOARD:
+            elif mode == Config.MODE_KEYBOARD:
                 if keyboard is None:
                     keyboard = Keyboard(mappings=key_mappings)
                 # Manual keyboard input for puppeteering
