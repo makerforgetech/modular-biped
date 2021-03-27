@@ -1,7 +1,7 @@
 import time
 from pubsub import pub
 import RPi.GPIO as GPIO
-import pysine
+#import pysine  #@todo this breaks the microphone (https://trello.com/c/qNVW2I5O/44-audio-reactions)
 
 class Braillespeak:
     """
@@ -72,7 +72,8 @@ class Braillespeak:
 
         for n in self.brailleLetters[ord(char) - 97]:
             if self.speaker:
-                pysine.sine(frequency=self.notes[n], duration=self.duration)
+                pass
+                #pysine.sine(frequency=self.notes[n], duration=self.duration)
             else:
                 self.buzz(self.notes[n], self.duration)
         time.sleep(self.duration / 2)

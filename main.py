@@ -38,7 +38,6 @@ from modules.personality import Personality
 from modules.battery import Battery
 from modules.braillespeak import Braillespeak
 
-
 def main():
 
     mode = Config.MODE_RANDOM_BEHAVIOUR
@@ -60,7 +59,7 @@ def main():
         servos[key] = Servo(s['pin'], key, s['range'], start_pos=s['start'])
 
     led = LED(Config.LED_COUNT)
-    signal.signal(signal.SIGTERM, led.exit) # @todo not sure what this is for anymore - should have added comments
+#    signal.signal(signal.SIGTERM, led.exit) # @todo not sure what this is for anymore - should have added comments
 
     if Config.MOTION_PIN is not None:
         motion = Sensor(Config.MOTION_PIN, pi=gpio)
@@ -227,7 +226,6 @@ def main():
         pub.sendMessage("power:exit")
         led.exit()
         # speak.send('off')
-        speak.exit()
         if Config.HOTWORD_MODEL is not None:
             hotword.exit()
         # pan.reset()
