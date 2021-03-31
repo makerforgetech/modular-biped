@@ -21,3 +21,5 @@ pysine
 
 #cv2
 opencv-python
+face-recognition
+imutils

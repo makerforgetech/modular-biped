@@ -1,6 +1,7 @@
-import cv2
 from datetime import datetime
+import cv2
 
+from modules.visionutils.faces import Faces
 
 class Vision:
     MODE_MOTION = 0
@@ -27,6 +28,7 @@ class Vision:
         if self.mode == Vision.MODE_FACES:
             self.cascade_path = "/home/pi/really-useful-robot/haarcascade_frontalface_default.xml"
             self.cascade = cv2.CascadeClassifier(self.cascade_path)
+            self.faces = Faces(detector=self.cascade)
 
     def __del__(self):
         self.video.release()
@@ -48,9 +50,10 @@ class Vision:
             frame = cv2.flip(frame, 0)
 
         if self.rotate is True:
-            frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+            frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
             
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # face detection
         if self.mode == Vision.MODE_FACES:
             # frame = cv2.flip(frame, 0)
@@ -58,8 +61,10 @@ class Vision:
                 gray,
                 scaleFactor=1.1,
                 minNeighbors=5,
-                minSize=(30, 30)
+                minSize=(30, 30),
+                flags=cv2.CASCADE_SCALE_IMAGE
             )
+            names =  self.faces.detect(rgb, matches)
         # motion
         elif self.mode == Vision.MODE_MOTION:
             #check, frame = self.video.read()
@@ -99,7 +104,7 @@ class Vision:
                 matches.append((x, y, w, h))
 
         if self.preview:
-            self.render(frame, matches)
+            self.render(frame, matches, names)
 
         if len(matches) > 0:
             self.last_match = datetime.now()
@@ -111,10 +116,16 @@ class Vision:
         # if key == ord('q'):
         #     break
 
-    def render(self, frame, matches):
+    def render(self, frame, matches, names):
+        index = 0
         for (x, y, w, h) in matches:
-            # making green rectangle around the moving object
+            #making green rectangle around the moving object
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
+            if names is not None and names[index] is not None:
+                y = y - 15 if y - 15 > 15 else y + 15
+                cv2.putText(frame, names[index], (x, y), cv2.FONT_HERSHEY_SIMPLEX,
+                        .8, (0, 255, 255), 2)
+            index = index + 1
 
         if self.lines:
             for (start, end) in self.lines:

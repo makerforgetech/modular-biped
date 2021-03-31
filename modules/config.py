@@ -1,3 +1,4 @@
+#! /usr/bin/python
 
 class Config:
     # Application settings
@@ -76,4 +77,3 @@ class Config:
     # HotWord (uses Snowboy.ai)
     HOTWORD_MODEL = 'modules/snowboy/resources/models/robot.pmdl'
     HOTWORD_SLEEP_TIME = 0.03
-

@@ -226,11 +226,6 @@ def main():
         pub.sendMessage("power:exit")
         led.exit()
         # speak.send('off')
-        if Config.HOTWORD_MODEL is not None:
-            hotword.exit()
-        # pan.reset()
-        # tilt.reset()
-
 
 if __name__ == '__main__':
     main()
