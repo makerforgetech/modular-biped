@@ -1,6 +1,6 @@
 [
-  {"servo:neck:mvabs": 95},
+  {"servo:neck:mvabs": 120},
   {"servo:tilt:mvabs": 55},
-  {"servo:pan:mvabs": 55},
+  {"servo:pan:mvabs": 60},
   {"sleep": 2}
 ]

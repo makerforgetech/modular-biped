@@ -26,6 +26,9 @@ try:
     from modules.hotword import HotWord
 except ModuleNotFoundError as e:
     pass
+
+import sys
+
 # from modules.chirp import Chirp
 from modules.speechinput import SpeechInput
 # from modules.chatbot.chatbot import MyChatBot
@@ -35,8 +38,11 @@ from modules.personality import Personality
 from modules.battery import Battery
 from modules.braillespeak import Braillespeak
 
-
 def main():
+
+    mode = Config.MODE_RANDOM_BEHAVIOUR
+    if len(sys.argv) > 1 and sys.argv[1] == 'manual':
+        mode = Config.MODE_KEYBOARD
 
     # POWER
     power = Power(Config.POWER_ENABLE_PIN)
@@ -53,7 +59,7 @@ def main():
         servos[key] = Servo(s['pin'], key, s['range'], start_pos=s['start'])
 
     led = LED(Config.LED_COUNT)
-    signal.signal(signal.SIGTERM, led.exit) # @todo not sure what this is for anymore - should have added comments
+#    signal.signal(signal.SIGTERM, led.exit) # @todo not sure what this is for anymore - should have added comments
 
     if Config.MOTION_PIN is not None:
         motion = Sensor(Config.MOTION_PIN, pi=gpio)
@@ -113,23 +119,23 @@ def main():
     }
     keyboard = None
 
+    animate = Animate()
     personality = Personality(debug=True)
 
-    if Config.MODE == Config.MODE_RANDOM_BEHAVIOUR or Config.MODE == Config.MODE_KEYBOARD:
+    if mode == Config.MODE_RANDOM_BEHAVIOUR or mode == Config.MODE_KEYBOARD:
         start = time()  # random behaviour trigger
         random.seed()
         delay = random.randint(1, 5)
         action = 1
-        servos['neck'].move(Config.servos['neck']['extended'])
-        servos['tilt'].move(Config.servos['tilt']['extended'])
-        if Config.MODE == Config.MODE_RANDOM_BEHAVIOUR:
+        pub.sendMessage("animate", action="stand")
+        if mode == Config.MODE_RANDOM_BEHAVIOUR:
             pub.sendMessage('speak', message='hi')
 
     battery_check_time = time()
 
     battery = Battery(0, serial)
 
-    animate = Animate()
+
 
     loop = True
     try:
@@ -156,7 +162,7 @@ def main():
                     loop = False
                     quit()
 
-            if Config.MODE == Config.MODE_RANDOM_BEHAVIOUR:
+            if mode == Config.MODE_RANDOM_BEHAVIOUR:
                 if tracking.track_largest_match():
                     pub.sendMessage('led:eye', color="green")
                 elif motion.read() <= 0:
@@ -170,7 +176,7 @@ def main():
                     #     action = 1
                     start = time()
                     delay = random.randint(2, 15)
-            elif Config.MODE == Config.MODE_KEYBOARD:
+            elif mode == Config.MODE_KEYBOARD:
                 if keyboard is None:
                     keyboard = Keyboard(mappings=key_mappings)
                 # Manual keyboard input for puppeteering
@@ -215,9 +221,11 @@ def main():
         quit()
 
     finally:
+        pub.sendMessage("animate", action="sit")
+        pub.sendMessage("animate", action="sleep")
+        pub.sendMessage("power:exit")
         led.exit()
         # speak.send('off')
-        speak.exit()
         if Config.HOTWORD_MODEL is not None:
             hotword.exit()
         # pan.reset()
