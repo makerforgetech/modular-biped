@@ -1,5 +1,5 @@
-import cv2
 from datetime import datetime
+import cv2
 
 from modules.visionutils.faces import Faces
 
@@ -50,7 +50,7 @@ class Vision:
             frame = cv2.flip(frame, 0)
 
         if self.rotate is True:
-            frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+            frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
             
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -119,9 +119,9 @@ class Vision:
     def render(self, frame, matches, names):
         index = 0
         for (x, y, w, h) in matches:
-            # making green rectangle around the moving object
+            #making green rectangle around the moving object
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
-            if names and names[index]:
+            if names is not None and names[index] is not None:
                 y = y - 15 if y - 15 > 15 else y + 15
                 cv2.putText(frame, names[index], (x, y), cv2.FONT_HERSHEY_SIMPLEX,
                         .8, (0, 255, 255), 2)

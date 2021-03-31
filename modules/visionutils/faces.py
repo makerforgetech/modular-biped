@@ -13,23 +13,16 @@ class Faces:
         # Initialize 'currentname' to trigger only when a new person is identified.
         self.unknown_label = "Unknown"
         # Determine faces from encodings.pickle file model created from train_model.py
-        encodingsP = "../../encodings.pickle"
+        encodingsP = "/home/pi/really-useful-robot/encodings.pickle"
         # use this xml file
-        cascade = "haarcascade_frontalface_default.xml"
+        cascade = "/home/pi/really-useful-robot/haarcascade_frontalface_default.xml"
+        self.last_face = None
 
         self.data = pickle.loads(open(encodingsP, "rb").read())
         self.detector = kwargs.get('detector', cv2.CascadeClassifier(cascade))
 
-    def __del__(self):
-        self.video.release()
-        # Destroying all the windows
-        cv2.destroyAllWindows()
-
-    def reset(self):
-        self.static_back = None
-
     def detect(self, rgb, matches):
-        if not rgb or not matches:
+        if rgb is None or matches is None:
             raise Exception('Inputs not found')
 
 
@@ -70,9 +63,9 @@ class Faces:
                 name = max(counts, key=counts.get)
 
                 # If someone in your dataset is identified, print their name on the screen
-                if currentname != name:
-                    currentname = name
-                    print(currentname)
+                if self.last_face != name:
+                    self.last_face = name
+                    print(self.last_face)
 
             # update the list of names
             names.append(name)
