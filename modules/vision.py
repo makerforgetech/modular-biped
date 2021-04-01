@@ -64,6 +64,8 @@ class Vision:
                 minSize=(30, 30),
                 flags=cv2.CASCADE_SCALE_IMAGE
             )
+            if len(matches) < 1:
+                return matches
             names =  self.faces.detect(rgb, matches)
         # motion
         elif self.mode == Vision.MODE_MOTION:

@@ -2,11 +2,16 @@
 import face_recognition
 import pickle
 import cv2
+import time
+from collections import Counter
+import shutil
 
 
 class Faces:
     MODE_MOTION = 0
     MODE_FACES = 1
+
+    MATCH_THRESHOLD_PERCENT = 40
 
     def __init__(self, **kwargs):
 
@@ -15,10 +20,12 @@ class Faces:
         # Determine faces from encodings.pickle file model created from train_model.py
         encodingsP = "/home/pi/really-useful-robot/encodings.pickle"
         # use this xml file
-        cascade = "/home/pi/really-useful-robot/haarcascade_frontalface_default.xml"
+        cascade = "/home/pi/really-useful-robot/haarcascade_frontalface_default.xml" #@todo refactor link to use constant or detect automatically
         self.last_face = None
+        self.last_save = None
 
         self.data = pickle.loads(open(encodingsP, "rb").read())
+        self.faceCounts = Counter(self.data['names'])
         self.detector = kwargs.get('detector', cv2.CascadeClassifier(cascade))
 
     def detect(self, rgb, matches):
@@ -51,8 +58,8 @@ class Faces:
                 matchedIdxs = [i for (i, b) in enumerate(matched_faces) if b]
                 counts = {}
 
-                # loop over the matched indexes and maintain a count for
-                # each recognized face face
+                # loop over the matched indexes and maintain a count for each recognized face
+                # returns the number of matches against each name (e.g. {'Dan': 44, 'Lily': 1})
                 for i in matchedIdxs:
                     name = self.data["names"][i]
                     counts[name] = counts.get(name, 0) + 1
@@ -60,14 +67,33 @@ class Faces:
                 # determine the recognized face with the largest number
                 # of votes (note: in the event of an unlikely tie Python
                 # will select first entry in the dictionary)
-                name = max(counts, key=counts.get)
+                biggestHit = max(counts, key=counts.get)
+                # print(biggestHit + ':   ' + str(counts[biggestHit]) + '(min: ' + str(self.faceCounts[biggestHit] / 100 * Faces.MATCH_THRESHOLD_PERCENT) + ')')
+                if counts[biggestHit] > (self.faceCounts[biggestHit] /100 * Faces.MATCH_THRESHOLD_PERCENT):
+                    # print('MATCH: ' + biggestHit)
+                    name = biggestHit
 
                 # If someone in your dataset is identified, print their name on the screen
                 if self.last_face != name:
                     self.last_face = name
-                    print(self.last_face)
 
             # update the list of names
             names.append(name)
+
+        space = True
+        ## Check disk space every 500 seconds to ensure we're not filling the drive
+        if self.last_save is None or self.last_save < time.time() - 500:
+            total, used, free = shutil.disk_usage("/")
+            if (free // (2 ** 30)) < 2:
+                print("NO SPACE!")
+                space = False
+
+        # Assuming there is space, save the camera frame to the match's folder
+        if space and self.last_save is None or self.last_save < time.time() - 5:
+            self.last_save = time.time()
+            for name in names:
+                # print("SAVING to " + name)
+                # Periodically save frames for match improvements
+                cv2.imwrite('matches/' + name + '/' + str(time.time() * 1000) + '.jpg', rgb)
 
         return names
