@@ -33,12 +33,16 @@ class Personality:
         self.last_output = datetime.datetime.now()
 
         pub.subscribe(self.input, 'behaviour')
+        pub.subscribe(self.face, 'vision:detect:face')
 
     def cycle(self):
         self.attention += randint(-20,20)
         self.happiness += randint(-2, 2)
         self.wakefulness -= randint(0, 3)
         self.contentment -= randint(0, 3)
+
+    def face(self, name):
+        print('Event received, detected ' + name)
 
     def behave(self):
         if self.last_behave > datetime.datetime.now() - datetime.timedelta(Personality.BEHAVE_INTERVAL):

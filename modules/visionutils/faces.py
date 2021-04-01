@@ -5,6 +5,7 @@ import cv2
 import time
 from collections import Counter
 import shutil
+from pubsub import pub
 
 
 class Faces:
@@ -12,11 +13,9 @@ class Faces:
     MODE_FACES = 1
 
     MATCH_THRESHOLD_PERCENT = 40
+    UNKNOWN_LABEL = 'Unknown'
 
     def __init__(self, **kwargs):
-
-        # Initialize 'currentname' to trigger only when a new person is identified.
-        self.unknown_label = "Unknown"
         # Determine faces from encodings.pickle file model created from train_model.py
         encodingsP = "/home/pi/really-useful-robot/encodings.pickle"
         # use this xml file
@@ -48,7 +47,7 @@ class Faces:
             # encodings
             matched_faces = face_recognition.compare_faces(self.data["encodings"],
                                                      encoding)
-            name = self.unknown_label  # if face is not recognized, then print Unknown
+            name = Faces.UNKNOWN_LABEL  # if face is not recognized, then print Unknown
 
             # check to see if we have found a match
             if True in matched_faces:
@@ -73,12 +72,13 @@ class Faces:
                     # print('MATCH: ' + biggestHit)
                     name = biggestHit
 
-                # If someone in your dataset is identified, print their name on the screen
-                if self.last_face != name:
-                    self.last_face = name
+            if self.last_face != name:
+                self.last_face = name
+                pub.sendMessage('vision:detect:face', name=name)
 
             # update the list of names
             names.append(name)
+
 
         space = True
         ## Check disk space every 500 seconds to ensure we're not filling the drive
