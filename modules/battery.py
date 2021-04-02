@@ -12,7 +12,12 @@ class Battery:
 
     def check(self):
         val = self.serial.send(ArduinoSerial.DEVICE_PIN_READ, 0, 0)
-        if val == 5.0:
+        # @todo this just stops the servos from working properly. This whole thing is a bit of a mess
+        # escape = 5
+        # while val == ArduinoSerial.ORDER_RECEIVED and escape > 0:
+        #     escape = escape-1
+        #     val = self.serial.send(ArduinoSerial.DEVICE_PIN_READ, 0, 0)
+        if val == ArduinoSerial.ORDER_RECEIVED:
             return 0
         self.readings.append(val)
         if len(self.readings) > Battery.MAX_READINGS:

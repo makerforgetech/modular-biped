@@ -120,13 +120,14 @@ def main():
     keyboard = None
 
     animate = Animate()
-    personality = Personality(debug=True)
+    personality = Personality(debug=False)
 
     if mode == Config.MODE_RANDOM_BEHAVIOUR or mode == Config.MODE_KEYBOARD:
         start = time()  # random behaviour trigger
         random.seed()
         delay = random.randint(1, 5)
         action = 1
+        pub.sendMessage("animate", action="wake")
         pub.sendMessage("animate", action="stand")
         if mode == Config.MODE_RANDOM_BEHAVIOUR:
             pub.sendMessage('speak', message='hi')
@@ -135,12 +136,19 @@ def main():
 
     battery = Battery(0, serial)
 
-
-
     loop = True
     try:
         while loop:
             sleep(1 / Config.LOOP_FREQUENCY)
+
+            ## Check battery voltage every 2 seconds (or each iteration in sleep mode) and shut down if low
+            if battery_check_time < time() - 2:
+                battery_check_time = time()
+                if not battery.safe_voltage():
+                    subprocess.call(['shutdown', '-h'], shell=False)
+                    loop = False
+                    quit()
+
             """
             Basic behaviour:
 
@@ -152,20 +160,20 @@ def main():
 
             If waiting for keyboard input, disable motion and facial tracking
             """
+            motion_detected = motion.read()
 
-            # personality.behave()
+            if motion_detected:
+                pub.sendMessage('motion')
 
-            if battery_check_time < time() - 2:
-                battery_check_time = time()
-                if not battery.safe_voltage():
-                    subprocess.call(['shutdown', '-h'], shell=False)
-                    loop = False
-                    quit()
+            personality.cycle()
+            if personality.sleeping:
+                sleep(5)
+                continue
 
             if mode == Config.MODE_RANDOM_BEHAVIOUR:
                 if tracking.track_largest_match():
                     pub.sendMessage('led:eye', color="green")
-                elif motion.read() <= 0:
+                elif motion_detected <= 0:
                     pub.sendMessage('led:eye', color="red")
                 else:
                     pub.sendMessage('led:eye', color="blue")
@@ -225,6 +233,7 @@ def main():
         pub.sendMessage("animate", action="sleep")
         pub.sendMessage("power:exit")
         led.exit()
+        hotword.exit()
         # speak.send('off')
 
 if __name__ == '__main__':

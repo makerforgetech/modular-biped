@@ -39,7 +39,7 @@ class LED:
         # Default states
         self.set(self.all, LED.COLOR_OFF)
         sleep(0.1)
-        self.set(self.middle, LED.COLOR_GREEN)
+        self.set(self.middle, LED.COLOR_BLUE)
 
         # Set subscribers
         pub.subscribe(self.set, 'led')
@@ -74,7 +74,7 @@ class LED:
         if type(color) is str:
             color = LED.COLOR_MAP[color]
         for i in identifiers:
-            print(str(i) + str(color))
+            #print(str(i) + str(color))
             try:
                 self.pixels[i] = color
             except:

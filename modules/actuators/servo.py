@@ -69,7 +69,7 @@ class Servo:
             pub.sendMessage('power:use')
         s = sequence.pop(0)
         if self.serial:
-            print(int(s[0]))
+            # print(int(s[0]))
             pub.sendMessage('serial', type=ArduinoSerial.DEVICE_SERVO, identifier=self.pin, message=s[0])
         else:
             self.pi.set_servo_pulsewidth(self.pin, s[0])

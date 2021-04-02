@@ -14,6 +14,7 @@ class ArduinoSerial:
     DEVICE_PIN = 2
     DEVICE_PIN_READ = 3
 
+    ORDER_RECEIVED = 5
     def __init__(self, **kwargs):
         self.serial_file = ArduinoSerial.initialise()
         self.file = None

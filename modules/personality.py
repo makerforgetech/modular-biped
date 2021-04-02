@@ -20,6 +20,7 @@ class Personality:
 
     BEHAVE_INTERVAL = 2
     OUTPUT_INTERVAL = 30
+    SLEEP_TIMEOUT = 5 * 60
 
     def __init__(self, **kwargs):
         self.happiness = 50
@@ -31,15 +32,54 @@ class Personality:
 
         self.last_behave = datetime.datetime.now()
         self.last_output = datetime.datetime.now()
+        self.last_motion = datetime.datetime.now()
+        self.sleeping = False
 
         pub.subscribe(self.input, 'behaviour')
         pub.subscribe(self.face, 'vision:detect:face')
+        pub.subscribe(self.motion, 'motion')
 
     def cycle(self):
         self.attention += randint(-20,20)
         self.happiness += randint(-2, 2)
         self.wakefulness -= randint(0, 3)
         self.contentment -= randint(0, 3)
+        self.handle_sleep()
+
+    def handle_sleep(self):
+        # if sleeping and motion detected in the last 5 seconds, then wake
+        if self.sleeping and self.last_motion is not None and self.last_motion > datetime.datetime.now() - datetime.timedelta(
+                seconds=5):
+            if self.do_output:
+                print('WAKING')
+            self.sleeping = False
+            pub.sendMessage('wake')
+            pub.sendMessage('led:eye', color="blue")
+            pub.sendMessage("animate", action="wake")
+            pub.sendMessage("animate", action="stand")
+
+        if self.do_output:
+            print(self.sleeping)
+            if self.last_motion is not None:
+                print(self.last_motion)
+                print(datetime.datetime.now() - datetime.timedelta(seconds=Personality.SLEEP_TIMEOUT))
+                print(
+                    self.last_motion < datetime.datetime.now() - datetime.timedelta(seconds=Personality.SLEEP_TIMEOUT))
+
+        # if not sleeping and motion not detected for SLEEP_TIMEOUT, sleep
+        if not self.sleeping and self.last_motion is not None and self.last_motion < datetime.datetime.now() - datetime.timedelta(
+                seconds=Personality.SLEEP_TIMEOUT):
+            if self.do_output:
+                print('SLEEPING')
+            self.sleeping = True
+            pub.sendMessage('sleep')
+            pub.sendMessage("animate", action="sleep")
+            pub.sendMessage("animate", action="sit")
+            pub.sendMessage("power:exit")
+            pub.sendMessage("led:off")
+
+    def motion(self):
+        self.last_motion = datetime.datetime.now()
 
     def face(self, name):
         print('Event received, detected ' + name)

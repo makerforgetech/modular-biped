@@ -94,6 +94,6 @@ class Faces:
             for name in names:
                 # print("SAVING to " + name)
                 # Periodically save frames for match improvements
-                cv2.imwrite('matches/' + name + '/' + str(time.time() * 1000) + '.jpg', rgb)
+                cv2.imwrite('/home/pi/really-useful-robot/matches/' + name + '/' + str(time.time() * 1000) + '.jpg', rgb)
 
         return names
