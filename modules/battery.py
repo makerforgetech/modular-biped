@@ -1,5 +1,8 @@
 from modules.arduinoserial import ArduinoSerial
 
+# battery value logging
+import datetime
+
 class Battery:
 
     BATTERY_THRESHOLD = -60  # max 100 (12.3v), min -60 (8.8v)
@@ -26,6 +29,8 @@ class Battery:
         avg = sum(self.readings) / len(self.readings)
 
         print('bat:' + str(avg))
+        with open('/home/pi/really-useful-robot/battery.csv', 'a') as fd:
+            fd.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ', ' + str(val) + '\n')
         return avg
 
     def safe_voltage(self):
