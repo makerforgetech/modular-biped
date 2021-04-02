@@ -7,3 +7,5 @@ modules/.coverage
 *.AppleDouble*
 *.DS_Store
 designs
+matches/
+encodings.pickle
