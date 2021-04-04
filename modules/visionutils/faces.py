@@ -27,7 +27,7 @@ class Faces:
         self.faceCounts = Counter(self.data['names'])
         self.detector = kwargs.get('detector', cv2.CascadeClassifier(cascade))
 
-    def detect(self, rgb, matches):
+    def detect(self, rgb, matches, final_match):
         if rgb is None or matches is None:
             raise Exception('Inputs not found')
 
@@ -90,9 +90,10 @@ class Faces:
 
         # Assuming there is space, save the camera frame to the match's folder
         if space and self.last_save is None or self.last_save < time.time() - 5:
-            self.last_save = time.time()
+            if final_match:
+                self.last_save = time.time()
             for name in names:
-                # print("SAVING to " + name)
+                #print("SAVING to " + name)
                 # Periodically save frames for match improvements
                 cv2.imwrite('/home/pi/really-useful-robot/matches/' + name + '/' + str(time.time() * 1000) + '.jpg', rgb)
 

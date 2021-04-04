@@ -1,6 +1,9 @@
 from datetime import datetime
 import cv2
+from imutils.video import FPS # for FSP only
 from modules.visionutils.faces import Faces
+
+from pubsub import pub
 
 class Vision:
     MODE_MOTION = 0
@@ -13,7 +16,7 @@ class Vision:
         #self.video.set(cv2.CAP_PROP_FPS, 1)
         self.video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         self.static_back = None
-        self.preview = kwargs.get('preview', False)
+        self.preview = kwargs.get('preview', True)
 
         self.flip = kwargs.get('flip', False)
         self.rotate = kwargs.get('rotate', False)
@@ -23,16 +26,22 @@ class Vision:
             self.dimensions = (640, 480)
         self.lines = []
         self.last_match = datetime.now()  # @todo improve
+        pub.subscribe(self.exit, "exit")
+
+        # start the FPS counter
+        self.fps = FPS().start()
 
         if self.mode == Vision.MODE_FACES:
             self.cascade_path = "/home/pi/really-useful-robot/haarcascade_frontalface_default.xml"
             self.cascade = cv2.CascadeClassifier(self.cascade_path)
             self.faces = Faces(detector=self.cascade)
 
-    def __del__(self):
+    def exit(self):
         self.video.release()
         # Destroying all the windows
         cv2.destroyAllWindows()
+        self.fps.stop()
+        print("[INFO] approx. FPS: {:.2f}".format(self.fps.fps()))
         
     def reset(self):
         self.static_back = None
@@ -40,6 +49,10 @@ class Vision:
     def detect(self):
         if not self.video.isOpened():
             raise Exception('Unable to load camera')
+
+        # update the FPS counter
+        self.fps.update()
+
 
         matches = []
 
@@ -66,9 +79,11 @@ class Vision:
                 return matches
 
             names = []
+            cnt = 0
             for (x, y, w, h) in matches:
                 cropped = frame[y:y+h,x:x+w]
-                names = names + self.faces.detect(cropped, [(0, 0, w, h)])
+                cnt = cnt + 1
+                names = names + self.faces.detect(cropped, [(0, 0, w, h)], cnt == len(matches))
         # motion
         elif self.mode == Vision.MODE_MOTION:
             #check, frame = self.video.read()

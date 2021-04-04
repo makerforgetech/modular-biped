@@ -139,7 +139,7 @@ def main():
     loop = True
     try:
         while loop:
-            sleep(1 / Config.LOOP_FREQUENCY)
+            # sleep(1 / Config.LOOP_FREQUENCY)
 
             ## Check battery voltage every 2 seconds (or each iteration in sleep mode) and shut down if low
             if battery_check_time < time() - 2:
@@ -229,6 +229,7 @@ def main():
         quit()
 
     finally:
+        pub.sendMessage("exit")
         pub.sendMessage("animate", action="sit")
         pub.sendMessage("animate", action="sleep")
         pub.sendMessage("power:exit")
