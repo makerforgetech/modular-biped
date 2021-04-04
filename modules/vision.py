@@ -1,6 +1,5 @@
 from datetime import datetime
 import cv2
-
 from modules.visionutils.faces import Faces
 
 class Vision:
@@ -53,7 +52,6 @@ class Vision:
             frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
             
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # face detection
         if self.mode == Vision.MODE_FACES:
             # frame = cv2.flip(frame, 0)
@@ -66,7 +64,11 @@ class Vision:
             )
             if len(matches) < 1:
                 return matches
-            names =  self.faces.detect(rgb, matches)
+
+            names = []
+            for (x, y, w, h) in matches:
+                cropped = frame[y:y+h,x:x+w]
+                names = names + self.faces.detect(cropped, [(0, 0, w, h)])
         # motion
         elif self.mode == Vision.MODE_MOTION:
             #check, frame = self.video.read()

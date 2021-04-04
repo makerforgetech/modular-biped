@@ -60,14 +60,14 @@ class Faces:
                 # loop over the matched indexes and maintain a count for each recognized face
                 # returns the number of matches against each name (e.g. {'Dan': 44, 'Lily': 1})
                 for i in matchedIdxs:
-                    name = self.data["names"][i]
-                    counts[name] = counts.get(name, 0) + 1
+                    nm = self.data["names"][i]
+                    counts[nm] = counts.get(nm, 0) + 1
 
                 # determine the recognized face with the largest number
                 # of votes (note: in the event of an unlikely tie Python
                 # will select first entry in the dictionary)
                 biggestHit = max(counts, key=counts.get)
-                # print(biggestHit + ':   ' + str(counts[biggestHit]) + '(min: ' + str(self.faceCounts[biggestHit] / 100 * Faces.MATCH_THRESHOLD_PERCENT) + ')')
+                # print(biggestHit + ': ' + str(counts[biggestHit]) + '(min: ' + str(self.faceCounts[biggestHit] / 100 * Faces.MATCH_THRESHOLD_PERCENT) + ')')
                 if counts[biggestHit] > (self.faceCounts[biggestHit] /100 * Faces.MATCH_THRESHOLD_PERCENT):
                     # print('MATCH: ' + biggestHit)
                     name = biggestHit

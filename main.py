@@ -65,7 +65,7 @@ def main():
         motion = Sensor(Config.MOTION_PIN, pi=gpio)
 
     # Vision / Tracking
-    vision = Vision(preview=False, mode=Vision.MODE_FACES, rotate=True)
+    vision = Vision(mode=Vision.MODE_FACES, rotate=True)
     tracking = Tracking(vision)
 
     # Voice
