@@ -22,8 +22,8 @@ class Battery:
         avg = sum(self.readings) / len(self.readings)
 
         # print('bat:' + str(avg))
-        with open('/home/pi/really-useful-robot/battery.csv', 'a') as fd:
-            fd.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ', ' + str(val) + '\n')
+        # with open('/home/pi/really-useful-robot/battery.csv', 'a') as fd:
+        #     fd.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ', ' + str(val) + '\n')
         return avg
 
     def safe_voltage(self):

@@ -47,6 +47,7 @@ class LED:
         pub.subscribe(self.off, 'led:off')
         pub.subscribe(self.eye, 'led:flashlight')
         pub.subscribe(self.animate, 'led:animate')
+        pub.subscribe(self.exit, 'exit')
 
     def exit(self):
         """

@@ -1,5 +1,7 @@
 #! /usr/bin/python
 
+from pubsub import pub
+
 class Config:
     # Application settings
     LOOP_FREQUENCY = 2
@@ -77,3 +79,8 @@ class Config:
     # HotWord (uses Snowboy.ai)
     HOTWORD_MODEL = 'modules/snowboy/resources/models/robot.pmdl'
     HOTWORD_SLEEP_TIME = 0.03
+
+    @staticmethod
+    def exit(signum, frame):
+        pub.sendMessage('exit')
+        raise Exception('Exit command received!')

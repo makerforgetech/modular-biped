@@ -23,6 +23,7 @@ class HotWord(threading.Thread):
         self.vars_are_changed = True
         self.detectors = None  # Initialize when thread is run in self.run()
         self.run_kwargs = None  # Initialize when detectors start in self.start_recog()
+        pub.subscribe(self.exit, 'exit')
 
     def exit(self):
         self.terminate()

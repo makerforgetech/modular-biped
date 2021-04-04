@@ -59,7 +59,9 @@ def main():
         servos[key] = Servo(s['pin'], key, s['range'], start_pos=s['start'])
 
     led = LED(Config.LED_COUNT)
-#    signal.signal(signal.SIGTERM, led.exit) # @todo not sure what this is for anymore - should have added comments
+
+    # Send exit command when script is terminated
+    signal.signal(signal.SIGTERM, Config.exit) # @todo doesn't work all the time, throwing exception for now
 
     if Config.MOTION_PIN is not None:
         motion = Sensor(Config.MOTION_PIN, pi=gpio)
@@ -145,6 +147,7 @@ def main():
             if battery_check_time < time() - 2:
                 battery_check_time = time()
                 if not battery.safe_voltage():
+                    print("BATTERY WARNING! SHUTTING DOWN!")
                     subprocess.call(['shutdown', '-h'], shell=False)
                     loop = False
                     quit()
@@ -233,8 +236,6 @@ def main():
         pub.sendMessage("animate", action="sit")
         pub.sendMessage("animate", action="sleep")
         pub.sendMessage("power:exit")
-        led.exit()
-        hotword.exit()
         # speak.send('off')
 
 if __name__ == '__main__':

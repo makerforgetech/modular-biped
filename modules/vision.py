@@ -16,7 +16,7 @@ class Vision:
         #self.video.set(cv2.CAP_PROP_FPS, 1)
         self.video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         self.static_back = None
-        self.preview = kwargs.get('preview', True)
+        self.preview = kwargs.get('preview', False)
 
         self.flip = kwargs.get('flip', False)
         self.rotate = kwargs.get('rotate', False)
@@ -36,7 +36,10 @@ class Vision:
             self.cascade = cv2.CascadeClassifier(self.cascade_path)
             self.faces = Faces(detector=self.cascade)
 
+        self.running = True
+
     def exit(self):
+        self.running = False
         self.video.release()
         # Destroying all the windows
         cv2.destroyAllWindows()
@@ -47,6 +50,8 @@ class Vision:
         self.static_back = None
 
     def detect(self):
+        if not self.running:
+            return
         if not self.video.isOpened():
             raise Exception('Unable to load camera')
 
