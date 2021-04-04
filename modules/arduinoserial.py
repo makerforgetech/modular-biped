@@ -1,6 +1,6 @@
 from __future__ import print_function, division, absolute_import
 import time
-from modules.robust_serial.robust_serial import write_order, Order, write_i8, write_i16, read_i8, read_order
+from modules.robust_serial.robust_serial import write_order, Order, write_i8, write_i16, read_i8, read_i16, read_i32, read_order
 from modules.robust_serial.utils import open_serial_port
 from pubsub import pub
 
@@ -58,6 +58,7 @@ class ArduinoSerial:
             write_order(self.serial_file, Order.SERVO)
             write_i8(self.serial_file, identifier)
             write_i16(self.serial_file, int(message))
+            # write_order(self.serial_file, Order.READ) # @todo remove all 'Order received' outputs from the arduino
         elif type == ArduinoSerial.DEVICE_LED or type == 'led':
             write_order(self.serial_file, Order.LED)
             if isinstance(identifier, list) or isinstance(identifier, range):
@@ -83,8 +84,4 @@ class ArduinoSerial:
         elif type == ArduinoSerial.DEVICE_PIN_READ or type == 'pin_read':
             write_order(self.serial_file, Order.READ)
             write_i8(self.serial_file, identifier)
-            value = read_i8(self.serial_file)
-            return value
-
-
-        # print(self.serial_file)
+            return read_i16(self.serial_file)

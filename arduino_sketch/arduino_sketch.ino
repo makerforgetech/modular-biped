@@ -169,8 +169,8 @@ void get_messages_from_serial()
         {
             int pin = read_i8();
             pinMode(pin, INPUT);
-            int value = analogRead(pin);
-            write_i8(value);
+            long value = analogRead(pin);
+            write_i16(value);
             break;
         }
         // Unknown order
@@ -182,7 +182,7 @@ void get_messages_from_serial()
         return;
       }
     }
-    write_order(RECEIVED); // Confirm the receipt
+    //write_order(RECEIVED); // Confirm the receipt
   }
 }
 
