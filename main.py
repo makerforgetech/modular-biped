@@ -136,24 +136,11 @@ def main():
         if mode == Config.MODE_RANDOM_BEHAVIOUR:
             pub.sendMessage('speak', message='hi')
 
-    battery_check_time = time()
-
-    battery = Battery(0, serial)
+    Battery(0, serial)
 
     loop = True
     try:
         while loop:
-            # sleep(1 / Config.LOOP_FREQUENCY)
-
-            ## Check battery voltage every 2 seconds (or each iteration in sleep mode) and shut down if low
-            if battery_check_time < time() - 2:
-                battery_check_time = time()
-                if not battery.safe_voltage():
-                    print("BATTERY WARNING! SHUTTING DOWN!")
-                    subprocess.call(['shutdown', '-h'], shell=False)
-                    loop = False
-                    quit()
-
             """
             Basic behaviour:
 
@@ -165,6 +152,8 @@ def main():
 
             If waiting for keyboard input, disable motion and facial tracking
             """
+            pub.sendMessage('loop') # Execute any loop behaviours in modules (such as battery voltage check)
+
             motion_detected = motion.read()
 
             if motion_detected:
