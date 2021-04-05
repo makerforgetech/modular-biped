@@ -1,7 +1,5 @@
 
 #include <Servo.h> 
-#include <FastLED.h>
-
 #include "order.h"
 #include "parameters.h"
 
@@ -13,21 +11,12 @@ bool is_connected = false; ///< True if the connection with the master is availa
 
 int servo_increment = 5;
 
-CRGB leds[LED_COUNT];
 Servo servos[SERVO_COUNT];
 int servo_angles[SERVO_COUNT];
 
 void setup() 
 {
   Serial.begin(SERIAL_BAUD);
-
-  FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, LED_COUNT);
-
-  for (int i = 0; i < LED_COUNT; i++){
-    leds[i] = CRGB(0,0,0);
-  }
-  leds[0] = CRGB(1,0,0);
-  FastLED.show();
 
   // Wait until the arduino is connected to master
   while(!is_connected)
@@ -99,16 +88,6 @@ void get_messages_from_serial()
     {
       switch(order_received)
       {
-        case STOP:
-        {
-          //motor_speed = 0;
-          //stop();
-          if(DEBUG)
-          {
-            write_order(STOP);
-          }
-          break;
-        }
         case SERVO:
         {
           int servo_identifier = read_i8();
@@ -119,42 +98,6 @@ void get_messages_from_serial()
             write_i16(servo_angle);
           }
           move_servo(servo_identifier, servo_angle);
-          break;
-        }
-        case MOTOR:
-        {
-          // between -100 and 100
-          //motor_speed = read_i8();
-          if(DEBUG)
-          {
-            write_order(MOTOR);
-            //write_i8(motor_speed);
-          }
-          break;
-        }
-        case LED:
-        {
-          int led_count = read_i8();
-          int identifiers[led_count];
-          for (int i = 0; i < led_count; i++) {
-            identifiers[i] = read_i8();
-          }
-          int led_color_r = read_i8();
-          int led_color_g = read_i8();
-          int led_color_b = read_i8();
-          if(DEBUG)
-          {
-            write_order(LED);
-            write_i8(led_count);
-            write_i8(led_color_r);
-            write_i8(led_color_g);
-            write_i8(led_color_b);
-          }
-          for (int i = 0; i < led_count; i++) {
-            leds[identifiers[i]] = CRGB(led_color_r, led_color_g, led_color_b);
-          }
-
-          FastLED.show();
           break;
         }
         case PIN:

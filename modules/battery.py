@@ -1,4 +1,7 @@
 from modules.arduinoserial import ArduinoSerial
+from time import time, sleep
+import subprocess
+from pubsub import pub
 
 # battery value logging
 import datetime
@@ -6,27 +9,39 @@ import datetime
 class Battery:
 
     BATTERY_THRESHOLD = 670  # max 760 (12.6v), min 670 (10.5v)
-    MAX_READINGS = 10
+    BATTERY_LOW = 690  # max 760 (12.6v), min 670 (10.5v)
+    READING_INTERVAL = 60 # seconds
 
     def __init__(self, pin, serial, **kwargs):
         self.pin = pin
-        self.readings = []
         self.serial = serial
+        self.interval = time() # Don't trigger immediately because a false reading will shut the system down before we can stop the script
+        pub.subscribe(self.loop, 'loop')
+
+    def loop(self):
+        if self.interval < time() - Battery.READING_INTERVAL:
+            self.interval = time()
+            if self.low_voltage():
+                pub.sendMessage('led:full', color='red')
+                if not self.safe_voltage():
+                    print("BATTERY WARNING! SHUTTING DOWN!")
+                    pub.sendMessage('exit')
+                    sleep(5)
+                    subprocess.call(['shutdown', '-h'], shell=False)
 
     def check(self):
-        val = self.serial.send(ArduinoSerial.DEVICE_PIN_READ, 0, 0)
-        self.readings.append(val)
-        if len(self.readings) > Battery.MAX_READINGS:
-            self.readings.pop(0)
+        val =  self.serial.send(ArduinoSerial.DEVICE_PIN_READ, 0, 0)
+        print('bat:' + str(val))
+        with open('/home/pi/really-useful-robot/battery.csv', 'a') as fd:
+            fd.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ', ' + str(val) + '\n')
+        return val
 
-        avg = sum(self.readings) / len(self.readings)
-
-        # print('bat:' + str(avg))
-        # with open('/home/pi/really-useful-robot/battery.csv', 'a') as fd:
-        #     fd.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ', ' + str(val) + '\n')
-        return avg
+    def low_voltage(self):
+        if self.check() < Battery.BATTERY_LOW:
+            return True
+        return False
 
     def safe_voltage(self):
-        if self.check() < Battery.BATTERY_THRESHOLD and len(self.readings) == Battery.MAX_READINGS:
+        if self.check() < Battery.BATTERY_THRESHOLD:
             return False
         return True

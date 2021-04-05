@@ -43,6 +43,7 @@ class LED:
 
         # Set subscribers
         pub.subscribe(self.set, 'led')
+        pub.subscribe(self.full, 'led:full')
         pub.subscribe(self.eye, 'led:eye')
         pub.subscribe(self.off, 'led:off')
         pub.subscribe(self.eye, 'led:flashlight')
@@ -98,6 +99,10 @@ class LED:
             self.thread.join()
         self.set(self.all, LED.COLOR_OFF)
         sleep(2)
+
+    def full(self, color):
+        if color in LED.COLOR_MAP.keys():
+            self.set(self.all, LED.COLOR_MAP[color])
 
     def eye(self, color):
         if color in LED.COLOR_MAP.keys() and self.pixels[self.middle] != color:
