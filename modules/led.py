@@ -43,7 +43,7 @@ class LED:
 
         # Set subscribers
         pub.subscribe(self.set, 'led')
-        pub.subscribe(self.eye, 'led:all')
+        pub.subscribe(self.full, 'led:full')
         pub.subscribe(self.eye, 'led:eye')
         pub.subscribe(self.off, 'led:off')
         pub.subscribe(self.eye, 'led:flashlight')
@@ -100,7 +100,7 @@ class LED:
         self.set(self.all, LED.COLOR_OFF)
         sleep(2)
 
-    def all(self, color):
+    def full(self, color):
         if color in LED.COLOR_MAP.keys():
             self.set(self.all, LED.COLOR_MAP[color])
 

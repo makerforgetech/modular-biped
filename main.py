@@ -136,7 +136,7 @@ def main():
         if mode == Config.MODE_RANDOM_BEHAVIOUR:
             pub.sendMessage('speak', message='hi')
 
-    Battery(0, serial)
+    battery = Battery(0, serial) # note: needs ref for pubsub to work
 
     loop = True
     try:

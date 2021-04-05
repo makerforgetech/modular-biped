@@ -15,19 +15,19 @@ class Battery:
     def __init__(self, pin, serial, **kwargs):
         self.pin = pin
         self.serial = serial
-        self.interval = time()
+        self.interval = time() # Don't trigger immediately because a false reading will shut the system down before we can stop the script
         pub.subscribe(self.loop, 'loop')
 
     def loop(self):
         if self.interval < time() - Battery.READING_INTERVAL:
             self.interval = time()
             if self.low_voltage():
-                pub.sendMessage('led:all', 'red')
-            if not self.safe_voltage():
-                print("BATTERY WARNING! SHUTTING DOWN!")
-                pub.sendMessage('exit')
-                sleep(5)
-                subprocess.call(['shutdown', '-h'], shell=False)
+                pub.sendMessage('led:full', color='red')
+                if not self.safe_voltage():
+                    print("BATTERY WARNING! SHUTTING DOWN!")
+                    pub.sendMessage('exit')
+                    sleep(5)
+                    subprocess.call(['shutdown', '-h'], shell=False)
 
     def check(self):
         val =  self.serial.send(ArduinoSerial.DEVICE_PIN_READ, 0, 0)
@@ -37,11 +37,11 @@ class Battery:
         return val
 
     def low_voltage(self):
-        if self.check() < Battery.BATTERY_LOW and len(self.readings) == Battery.MAX_READINGS:
+        if self.check() < Battery.BATTERY_LOW:
             return True
         return False
 
     def safe_voltage(self):
-        if self.check() < Battery.BATTERY_THRESHOLD and len(self.readings) == Battery.MAX_READINGS:
+        if self.check() < Battery.BATTERY_THRESHOLD:
             return False
         return True
