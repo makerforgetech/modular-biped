@@ -25,6 +25,7 @@ class Vision:
         else:
             self.dimensions = (640, 480)
         self.lines = []
+        self.current_match = False
         self.last_match = datetime.now()  # @todo improve
         pub.subscribe(self.exit, "exit")
 
@@ -81,6 +82,9 @@ class Vision:
                 flags=cv2.CASCADE_SCALE_IMAGE
             )
             if len(matches) < 1:
+                if self.current_match:
+                    self.current_match = False
+                    pub.sendMessage('vision:nomatch')
                 return matches
 
             names = []
@@ -131,6 +135,7 @@ class Vision:
             self.render(frame, matches, names)
 
         if len(matches) > 0:
+            self.current_match = True
             self.last_match = datetime.now()
 
         return matches

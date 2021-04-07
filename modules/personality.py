@@ -1,7 +1,9 @@
 from random import randint
 from time import sleep
 from pubsub import pub
-import datetime
+from datetime import datetime, timedelta
+
+from modules.config import Config
 
 """
 To update the personality status, publish to the 'behaviour' topic one of the defined INPUT_TYPE constants:
@@ -23,6 +25,7 @@ class Personality:
     SLEEP_TIMEOUT = 5 * 60
 
     def __init__(self, **kwargs):
+        self.mode = kwargs.get('mode', Config.MODE_LIVE)
         self.happiness = 50
         self.contentment = 50
         self.attention = 50
@@ -30,26 +33,41 @@ class Personality:
 
         self.do_output = kwargs.get('debug', False)
 
-        self.last_behave = datetime.datetime.now()
-        self.last_output = datetime.datetime.now()
-        self.last_motion = datetime.datetime.now()
+        self.last_behave = datetime.now()
+        self.last_output = datetime.now()
+        self.last_motion = datetime.now()
+        self.last_face = None
+        self.face_detected = None
         self.sleeping = False
 
+        pub.subscribe(self.loop, 'loop:1')
         pub.subscribe(self.input, 'behaviour')
         pub.subscribe(self.face, 'vision:detect:face')
+        pub.subscribe(self.noface, 'vision:nomatch')
         pub.subscribe(self.motion, 'motion')
 
-    def cycle(self):
+        pub.sendMessage('led:eye', color="blue")
+        if self.mode == Config.MODE_LIVE:
+            pub.sendMessage('wake')
+            pub.sendMessage("animate", action="wake")
+            pub.sendMessage("animate", action="stand")
+            # pub.sendMessage('speak', message='hi')
+
+    def loop(self):
         self.attention += randint(-20,20)
         self.happiness += randint(-2, 2)
         self.wakefulness -= randint(0, 3)
         self.contentment -= randint(0, 3)
         self.handle_sleep()
 
+        if not self.sleeping and not self.face_detected and self.last_motion < datetime.now() - timedelta(seconds=2):
+            pub.sendMessage('led:eye', color="red")
+
     def handle_sleep(self):
-        # if sleeping and motion detected in the last 5 seconds, then wake
-        if self.sleeping and self.last_motion is not None and self.last_motion > datetime.datetime.now() - datetime.timedelta(
-                seconds=5):
+        if self.sleeping:
+            sleep(5)
+        # if sleeping and motion detected in the last X seconds, then wake
+        if self.sleeping and self.last_motion > datetime.now() - timedelta(seconds=10):
             if self.do_output:
                 print('WAKING')
             self.sleeping = False
@@ -62,12 +80,11 @@ class Personality:
             print(self.sleeping)
             if self.last_motion is not None:
                 print(self.last_motion)
-                print(datetime.datetime.now() - datetime.timedelta(seconds=Personality.SLEEP_TIMEOUT))
-                print(
-                    self.last_motion < datetime.datetime.now() - datetime.timedelta(seconds=Personality.SLEEP_TIMEOUT))
+                print(datetime.now() - timedelta(seconds=Personality.SLEEP_TIMEOUT))
+                print(self.last_motion < datetime.now() - timedelta(seconds=Personality.SLEEP_TIMEOUT))
 
         # if not sleeping and motion not detected for SLEEP_TIMEOUT, sleep
-        if not self.sleeping and self.last_motion is not None and self.last_motion < datetime.datetime.now() - datetime.timedelta(
+        if not self.sleeping and self.last_motion < datetime.now() - timedelta(
                 seconds=Personality.SLEEP_TIMEOUT):
             if self.do_output:
                 print('SLEEPING')
@@ -79,19 +96,26 @@ class Personality:
             pub.sendMessage("led:off")
 
     def motion(self):
-        self.last_motion = datetime.datetime.now()
+        self.last_motion = datetime.now()
+        if not self.face_detected:
+            pub.sendMessage('led:eye', color="blue")
+
+    def noface(self):
+        self.face_detected = False
 
     def face(self, name):
-        print('Event received, detected ' + name)
+        print('Face detected: ' + str(name) + ' - ' + str(datetime.now()))
+        self.face_detected = True
+        pub.sendMessage('led:eye', color="green")
 
     def behave(self):
-        if self.last_behave > datetime.datetime.now() - datetime.timedelta(Personality.BEHAVE_INTERVAL):
+        if self.last_behave > datetime.now() - timedelta(Personality.BEHAVE_INTERVAL):
             return
 
-        self.last_behave = datetime.datetime.now()
+        self.last_behave = datetime.now()
 
-        if self.do_output and self.last_output < datetime.datetime.now() - datetime.timedelta(Personality.OUTPUT_INTERVAL):
-            self.last_output = datetime.datetime.now()
+        if self.do_output and self.last_output < datetime.now() - timedelta(Personality.OUTPUT_INTERVAL):
+            self.last_output = datetime.now()
             self.output()
 
         feelings = []

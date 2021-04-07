@@ -1,5 +1,5 @@
 import curses
-
+from pubsub import pub
 
 class Keyboard:
     KEY_UP = 259
@@ -16,12 +16,35 @@ class Keyboard:
         curses.cbreak()
         self.screen.keypad(True)
         self.mappings = kwargs.get('mappings', None)
+        pub.subscribe(self.loop, 'loop')
 
     def __del__(self):
         curses.nocbreak()
         self.screen.keypad(0)
         curses.echo()
         curses.endwin()
+
+    def loop(self):
+        # Manual keyboard input for puppeteering
+        key = self.handle_input()
+        if key == ord('q'):
+            pub.sendMessage("exit")
+        elif key == ord('1'):
+            pub.sendMessage("animate", action="sit")
+            print('sit')
+        elif key == ord('2'):
+            pub.sendMessage("animate", action="stand")
+            print('stand')
+        elif key == ord('3'):
+            pub.sendMessage("animate", action="wake")
+            print('neck up')
+        elif key == ord('4'):
+            pub.sendMessage("animate", action="sleep")
+            print('neck down')
+        elif key == ord('5'):
+            pub.sendMessage("animate", action="head_shake")
+        elif key == ord('6'):
+            pub.sendMessage("animate", action="head_nod")
 
     def input(self):
         char = self.screen.getch()

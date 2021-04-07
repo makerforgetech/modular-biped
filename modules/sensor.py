@@ -1,12 +1,16 @@
 import pigpio
-
+from pubsub import pub
 
 class Sensor:
     def __init__(self, pin, **kwargs):
         self.pi = kwargs.get('pi', pigpio.pi())
         self.pin = pin
         self.value = None
-        self.read()
+        pub.subscribe(self.loop, 'loop:1')
+
+    def loop(self):
+        if self.read():
+            pub.sendMessage('motion')
 
     def read(self):
         self.value = self.pi.read(self.pin)

@@ -1,13 +1,20 @@
 from pubsub import pub
 
 class Tracking:
-    def __init__(self, vision, bounds_percent=10):
+    def __init__(self, vision, bounds_percent=10, **kwargs):
         self.vision = vision
         # define bounds around screen
         self.bounds_percent = bounds_percent
         self.bounds = int(self.vision.dimensions[0] / (100 / bounds_percent))
         self.vision.add_lines(self._define_boundary_lines())
         self.ignore = 0
+        self.active = kwargs.get('active', False)
+        pub.subscribe(self.loop, 'loop')
+
+    def loop(self):
+        if not self.active:
+            return
+        self.track_largest_match()
 
     def track_largest_match(self):
         """

@@ -12,7 +12,7 @@ class Config:
     MODE_ANIMATE = 3
     MODE_OFF = 4
     MODE_KEYBOARD = 5
-    MODE_RANDOM_BEHAVIOUR = 6
+    MODE_LIVE = 6
 
     # GPIO
     # gpio = pigpio.pi()
@@ -28,7 +28,8 @@ class Config:
     MOTION_PIN = 13
 
     servos = dict()
-    servos['neck'] = {'pin': 2, 'range': [36, 170], 'start': 120}
+    # Everything is percentages except the range values.
+    servos['neck'] = {'pin': 2, 'range': [36, 170], 'start': 90}
     servos['tilt'] = {'pin': 3, 'range': [36, 125], 'start': 55}
     #servos['pan'] = {'pin': 4, 'range': [0, 180], 'start': 60}
     servos['leg_l_hip'] = {'pin': 8, 'range': [0, 180], 'start': 80}

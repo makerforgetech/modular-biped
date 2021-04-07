@@ -25,9 +25,9 @@ class Battery:
                 pub.sendMessage('led:full', color='red')
                 if not self.safe_voltage():
                     print("BATTERY WARNING! SHUTTING DOWN!")
-                    pub.sendMessage('exit')
-                    sleep(5)
-                    subprocess.call(['shutdown', '-h'], shell=False)
+                    # pub.sendMessage('exit')
+                    # sleep(5)
+                    # subprocess.call(['shutdown', '-h'], shell=False)
 
     def check(self):
         val =  self.serial.send(ArduinoSerial.DEVICE_PIN_READ, 0, 0)

@@ -40,7 +40,7 @@ from modules.braillespeak import Braillespeak
 
 def main():
 
-    mode = Config.MODE_RANDOM_BEHAVIOUR
+    mode = Config.MODE_LIVE
     if len(sys.argv) > 1 and sys.argv[1] == 'manual':
         mode = Config.MODE_KEYBOARD
 
@@ -68,7 +68,11 @@ def main():
 
     # Vision / Tracking
     vision = Vision(mode=Vision.MODE_FACES, rotate=True)
-    tracking = Tracking(vision)
+
+    tracking_active = False
+    if mode == Config.MODE_LIVE:
+        tracking_active = True
+    tracking = Tracking(vision, active=tracking_active)
 
     # Voice
     if Config.HOTWORD_MODEL is not None:
@@ -84,124 +88,27 @@ def main():
     if Config.BUZZER_PIN is not None:
         speak = Braillespeak(Config.BUZZER_PIN, duration=80/1000)
 
-    # Keyboard Input
-    key_mappings = {
-        # @todo these won't work because the mapping is not correct yet. Need to research this
-        # Keyboard.KEY_LEFT: (pub.sendMessage, ['servo:pan:mv', 5]),
-        # Keyboard.KEY_RIGHT: (pub.sendMessage, {'servo:pan:mv', -5}),
-        Keyboard.KEY_UP: (servos['tilt'].move_relative, 5),
-        Keyboard.KEY_DOWN: (servos['tilt'].move_relative, -5),
-        Keyboard.KEY_BACKSPACE: (servos['neck'].move_relative, 5),
-        Keyboard.KEY_RETURN: (servos['neck'].move_relative, -5),
-
-        # LEFT LEG MOVEMENT
-        # ord('t'): (leg_l_hip.move_relative, -5),
-        # ord('g'): (leg_l_knee.move_relative, -5),
-        # ord('b'): (leg_l_ankle.move_relative, -5),
-        # ord('w'): (leg_l_hip.move_relative, 5),
-        # ord('s'): (leg_l_knee.move_relative, 5),
-        # ord('x'): (leg_l_ankle.move_relative, 5),
-        #
-        # # RIGHT LEG MOVEMENT
-        # ord('e'): (leg_r_hip.move_relative, -5),
-        # ord('d'): (leg_r_knee.move_relative, -5),
-        # ord('c'): (leg_r_ankle.move_relative, -5),
-        # ord('r'): (leg_r_hip.move_relative, 5),
-        # ord('f'): (leg_r_knee.move_relative, 5),
-        # ord('v'): (leg_r_ankle.move_relative, 5),
-
-        # ord('l'): (pub.sendMessage('led:flashlight', on=True)),
-        # ord('o'): (pub.sendMessage('led:flashlight', on=False)),
-        # ord('c'): (pub.sendMessage('speak', message='hi'))
-        # ord('h'): (animate.animate, 'head_shake')
-    }
-
     voice_mappings = {
         'shut down': quit
         # 'light on': (pub.sendMessage('led:flashlight', on=True)),
         # 'light off': (pub.sendMessage('led:flashlight', on=False)),
     }
     keyboard = None
+    if mode == Config.MODE_KEYBOARD:
+        keyboard = Keyboard()
 
     animate = Animate()
-    personality = Personality(debug=False)
-
-    if mode == Config.MODE_RANDOM_BEHAVIOUR or mode == Config.MODE_KEYBOARD:
-        start = time()  # random behaviour trigger
-        random.seed()
-        delay = random.randint(1, 5)
-        action = 1
-        pub.sendMessage("animate", action="wake")
-        pub.sendMessage("animate", action="stand")
-        if mode == Config.MODE_RANDOM_BEHAVIOUR:
-            pub.sendMessage('speak', message='hi')
+    personality = Personality(mode=mode, debug=False)
 
     battery = Battery(0, serial) # note: needs ref for pubsub to work
-
+    second_loop = time()
     loop = True
     try:
         while loop:
-            """
-            Basic behaviour:
-
-            If asleep, wait for movement using microwave sensor then wake
-            If awake, look for motion. 
-            |-- If motion detected move to top of largest moving object then look for faces
-               |-- If faces detected, track largest face 
-            |-- If no motion detected for defined period, go to sleep
-
-            If waiting for keyboard input, disable motion and facial tracking
-            """
-            pub.sendMessage('loop') # Execute any loop behaviours in modules (such as battery voltage check)
-
-            motion_detected = motion.read()
-
-            if motion_detected:
-                pub.sendMessage('motion')
-
-            personality.cycle()
-            if personality.sleeping:
-                sleep(5)
-                continue
-
-            if mode == Config.MODE_RANDOM_BEHAVIOUR:
-                if tracking.track_largest_match():
-                    pub.sendMessage('led:eye', color="green")
-                elif motion_detected <= 0:
-                    pub.sendMessage('led:eye', color="red")
-                else:
-                    pub.sendMessage('led:eye', color="blue")
-
-                if time() - start > delay:
-                    # action = action + 1
-                    # if action == 6:
-                    #     action = 1
-                    start = time()
-                    delay = random.randint(2, 15)
-            elif mode == Config.MODE_KEYBOARD:
-                if keyboard is None:
-                    keyboard = Keyboard(mappings=key_mappings)
-                # Manual keyboard input for puppeteering
-                key = keyboard.handle_input()
-                if key == ord('q'):
-                    loop = False
-
-                elif key == ord('1'):
-                    pub.sendMessage("animate", action="sit")
-                    print('sit')
-                elif key == ord('2'):
-                    pub.sendMessage("animate", action="stand")
-                    print('stand')
-                elif key == ord('3'):
-                    pub.sendMessage("animate", action="wake")
-                    print('neck up')
-                elif key == ord('4'):
-                    pub.sendMessage("animate", action="sleep")
-                    print('neck down')
-                elif key == ord('5'):
-                    pub.sendMessage("animate", action="head_shake")
-                elif key == ord('6'):
-                    pub.sendMessage("animate", action="head_nod")
+            pub.sendMessage('loop')
+            if time() - second_loop > 1:
+                second_loop = time()
+                pub.sendMessage('loop:1')
 
             # if Config.HOTWORD_MODEL is not None:
             #     # repeat what I hear
