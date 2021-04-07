@@ -21,13 +21,18 @@ class Battery:
     def loop(self):
         if self.interval < time() - Battery.READING_INTERVAL:
             self.interval = time()
-            if self.low_voltage():
+            val = self.check()
+            if val == 0:
                 pub.sendMessage('led:full', color='red')
-                if not self.safe_voltage():
+                print('Battery read error!')
+                return
+            if self.low_voltage(val):
+                pub.sendMessage('led:full', color='red')
+                if not self.safe_voltage(val):
                     print("BATTERY WARNING! SHUTTING DOWN!")
-                    # pub.sendMessage('exit')
-                    # sleep(5)
-                    # subprocess.call(['shutdown', '-h'], shell=False)
+                    pub.sendMessage('exit')
+                    sleep(5)
+                    subprocess.call(['shutdown', '-h'], shell=False)
 
     def check(self):
         val =  self.serial.send(ArduinoSerial.DEVICE_PIN_READ, 0, 0)
@@ -36,12 +41,12 @@ class Battery:
             fd.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ', ' + str(val) + '\n')
         return val
 
-    def low_voltage(self):
-        if self.check() < Battery.BATTERY_LOW:
+    def low_voltage(self, val):
+        if val < Battery.BATTERY_LOW:
             return True
         return False
 
-    def safe_voltage(self):
-        if self.check() < Battery.BATTERY_THRESHOLD:
+    def safe_voltage(self, val):
+        if val < Battery.BATTERY_THRESHOLD:
             return False
         return True
