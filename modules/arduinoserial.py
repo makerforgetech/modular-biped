@@ -3,12 +3,13 @@ import time
 from modules.robust_serial.robust_serial import write_order, Order, write_i8, write_i16, read_i8, read_i16, read_i32, read_order
 from modules.robust_serial.utils import open_serial_port
 from pubsub import pub
-
+import logging
 
 class ArduinoSerial:
     """
     Communicate with Arduino over Serial
     """
+    type_map=['led', 'servo',' pin', 'read']
     DEVICE_LED = 0
     DEVICE_SERVO = 1
     DEVICE_PIN = 2
@@ -30,7 +31,7 @@ class ArduinoSerial:
         is_connected = False
         # Initialize communication with Arduino
         while not is_connected:
-            print("Waiting for arduino...")
+            logging.info("SERIAL: Waiting for arduino...")
             write_order(serial_file, Order.HELLO)
             bytes_array = bytearray(serial_file.read(1))
             if not bytes_array:
@@ -40,7 +41,7 @@ class ArduinoSerial:
             if byte in [Order.HELLO.value, Order.ALREADY_CONNECTED.value]:
                 is_connected = True
 
-        print("Connected to Arduino")
+        logging.info("SERIAL: Connected to Arduino")
         return serial_file
 
     def send(self, type, identifier, message):
@@ -53,7 +54,7 @@ class ArduinoSerial:
         :param identifier: an identifier or list / range of identifiers, pin or LED number
         :param message: the packet to send to the arduino
         """
-        print('serial:' + str(type) + ' id: ' + str(identifier) + ' val: ' + str(message))
+        logging.info('SERIAL: ' + str(ArduinoSerial.type_map[type]) + ' id: ' + str(identifier) + ' val: ' + str(message))
         if type == ArduinoSerial.DEVICE_SERVO or type == 'servo':
             write_order(self.serial_file, Order.SERVO)
             write_i8(self.serial_file, identifier)

@@ -1,3 +1,6 @@
+import logging
+logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(levelname)s: %(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
 try:
     import pigpio
 except ModuleNotFoundError as e:
@@ -28,6 +31,8 @@ except ModuleNotFoundError as e:
     pass
 
 import sys
+import os
+
 
 # from modules.chirp import Chirp
 from modules.speechinput import SpeechInput
@@ -39,8 +44,8 @@ from modules.battery import Battery
 from modules.braillespeak import Braillespeak
 
 def main():
-
     mode = Config.MODE_LIVE
+    path = os.path.dirname(__file__)
     if len(sys.argv) > 1 and sys.argv[1] == 'manual':
         mode = Config.MODE_KEYBOARD
 
@@ -67,7 +72,7 @@ def main():
         motion = Sensor(Config.MOTION_PIN, pi=gpio)
 
     # Vision / Tracking
-    vision = Vision(mode=Vision.MODE_FACES, rotate=True)
+    vision = Vision(mode=Vision.MODE_FACES, rotate=True, path=path)
 
     tracking_active = False
     if mode == Config.MODE_LIVE:
@@ -100,8 +105,10 @@ def main():
     animate = Animate()
     personality = Personality(mode=mode, debug=False)
 
-    battery = Battery(0, serial) # note: needs ref for pubsub to work
+    battery = Battery(0, serial, path=path) # note: needs ref for pubsub to work
+
     second_loop = time()
+    minute_loop = time()
     loop = True
     try:
         while loop:
@@ -109,6 +116,9 @@ def main():
             if time() - second_loop > 1:
                 second_loop = time()
                 pub.sendMessage('loop:1')
+            if time() - minute_loop > 60:
+                minute_loop = time()
+                pub.sendMessage('loop:60')
 
             # if Config.HOTWORD_MODEL is not None:
             #     # repeat what I hear

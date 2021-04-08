@@ -11,6 +11,7 @@ class Vision:
 
     def __init__(self, **kwargs):
         self.mode = kwargs.get('mode', Vision.MODE_MOTION)
+        self.path = kwargs.get('path', '/')
         self.index = kwargs.get('index', 0)
         self.video = cv2.VideoCapture(self.index)
         #self.video.set(cv2.CAP_PROP_FPS, 1)
@@ -33,9 +34,9 @@ class Vision:
         self.fps = FPS().start()
 
         if self.mode == Vision.MODE_FACES:
-            self.cascade_path = "/home/pi/really-useful-robot/haarcascade_frontalface_default.xml"
+            self.cascade_path = self.path + "/haarcascade_frontalface_default.xml"
             self.cascade = cv2.CascadeClassifier(self.cascade_path)
-            self.faces = Faces(detector=self.cascade)
+            self.faces = Faces(detector=self.cascade, path=self.path)
 
         self.running = True
 

@@ -7,7 +7,6 @@ from collections import Counter
 import shutil
 from pubsub import pub
 
-
 class Faces:
     MODE_MOTION = 0
     MODE_FACES = 1
@@ -16,16 +15,21 @@ class Faces:
     UNKNOWN_LABEL = 'Unknown'
 
     def __init__(self, **kwargs):
+        self.path = kwargs.get('path', '/')
         # Determine faces from encodings.pickle file model created from train_model.py
-        encodingsP = "/home/pi/really-useful-robot/encodings.pickle"
+        encodingsP = self.path + "/encodings.pickle"
         # use this xml file
-        cascade = "/home/pi/really-useful-robot/haarcascade_frontalface_default.xml" #@todo refactor link to use constant or detect automatically
+        cascade = self.path + "/haarcascade_frontalface_default.xml"
         self.last_face = None
         self.last_save = None
 
         self.data = pickle.loads(open(encodingsP, "rb").read())
         self.faceCounts = Counter(self.data['names'])
         self.detector = kwargs.get('detector', cv2.CascadeClassifier(cascade))
+        pub.subscribe(self.nomatch, 'vision:nomatch')
+
+    def nomatch(self):
+        self.last_face = None
 
     def detect(self, rgb, matches, final_match):
         if rgb is None or matches is None:
@@ -95,6 +99,6 @@ class Faces:
             for name in names:
                 #print("SAVING to " + name)
                 # Periodically save frames for match improvements
-                cv2.imwrite('/home/pi/really-useful-robot/matches/' + name + '/' + str(time.time() * 1000) + '.jpg', rgb)
+                cv2.imwrite(self.path + '/matches/' + name + '/' + str(time.time() * 1000) + '.jpg', rgb)
 
         return names
