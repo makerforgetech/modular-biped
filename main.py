@@ -33,7 +33,6 @@ except ModuleNotFoundError as e:
 import sys
 import os
 
-
 # from modules.chirp import Chirp
 from modules.speechinput import SpeechInput
 # from modules.chatbot.chatbot import MyChatBot
