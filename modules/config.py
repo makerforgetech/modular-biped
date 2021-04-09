@@ -78,10 +78,9 @@ class Config:
     LED_COUNT = 7
 
     # HotWord (uses Snowboy.ai)
-    HOTWORD_MODEL = 'modules/snowboy/resources/models/robot.pmdl'
+    HOTWORD_MODEL = None #'modules/snowboy/resources/models/robot.pmdl'
     HOTWORD_SLEEP_TIME = 0.03
 
     @staticmethod
     def exit(signum, frame):
-        pub.sendMessage('exit')
         raise Exception('Exit command received!')

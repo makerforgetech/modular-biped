@@ -11,29 +11,32 @@ class SpeechInput:
         self.listening = False
 
         pub.subscribe(self.enable, 'hotword')
+        pub.subscribe(self.detect, 'loop:1')
 
     def enable(self):
+        pub.sendMessage('log', msg='[Speech] Listening')
         self.listening = True
-        pub.sendMessage('led_blue')
 
     def disable(self):
+        pub.sendMessage('log', msg='[Speech] Not Listening')
         self.listening = False
-        pub.sendMessage('led_green')
 
     def detect(self):
         if not self.listening:
             return None
-        print('setting up speech recognition')
+        pub.sendMessage('log', msg='[Speech] Initialising Detection')
         with self.mic as source:
             self.recognizer.adjust_for_ambient_noise(source)
-            print('listening')
+            pub.sendMessage('log', msg='[Speech] Detecting...')
             audio = self.recognizer.listen(source)
-        print('done listening')
+        pub.sendMessage('log', msg='[Speech] End Detection')
         try:
             val = self.recognizer.recognize_google(audio)
+            pub.sendMessage('log', msg='[Speech] I heard: ' + str(val))
             self.disable()
             return val
-        except sr.UnknownValueError:
+        except sr.UnknownValueError as e:
+            pub.sendMessage('log:error', msg='[Speech] Detection Error: ' + str(e))
             self.disable()
             return None
 

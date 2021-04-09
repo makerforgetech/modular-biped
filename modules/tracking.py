@@ -10,6 +10,11 @@ class Tracking:
         self.ignore = 0
         self.active = kwargs.get('active', False)
         pub.subscribe(self.loop, 'loop')
+        pub.subscribe(self.set_state, 'wake', active=True)
+        pub.subscribe(self.set_state, 'sleep', active=False)
+
+    def set_state(self, active):
+        self.active = active
 
     def loop(self):
         if not self.active:
@@ -37,15 +42,21 @@ class Tracking:
         moved = False
         if x < self.bounds:
             pub.sendMessage('servo:pan:mv', percentage=self.bounds_percent)
+            pub.sendMessage('log:info', msg="[Tracking] moved left")
             moved = True
         elif (x + w) > (self.vision.dimensions[0] - self.bounds):
             pub.sendMessage('servo:pan:mv', percentage=-self.bounds_percent)
+            pub.sendMessage('log:info', msg="[Tracking] moved right")
             moved = True
         if (y + h) > (self.vision.dimensions[1] - self.bounds):
             pub.sendMessage('servo:tilt:mv', percentage=self.bounds_percent)
+            pub.sendMessage('servo:neck:mv', percentage=self.bounds_percent)
+            pub.sendMessage('log:info', msg="[Tracking] moved up")
             moved = True
         elif y < self.bounds:
             pub.sendMessage('servo:tilt:mv', percentage=-self.bounds_percent)
+            pub.sendMessage('servo:neck:mv', percentage=-self.bounds_percent) # move neck as well to add clearance
+            pub.sendMessage('log:info', msg="[Tracking] moved down")
             moved = True
 
         if moved:
