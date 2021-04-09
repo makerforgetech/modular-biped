@@ -1,4 +1,10 @@
+import os
+from pubsub import pub
+import logging
+logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(levelname)s: %(asctime)s %(message)s',
+                            datefmt='%m/%d/%Y %I:%M:%S %p') # this doesn't work unless it's here
 from modules.logwrapper import LogWrapper
+
 try:
     import pigpio
 except ModuleNotFoundError as e:
@@ -7,7 +13,6 @@ except ModuleNotFoundError as e:
     from modules.mocks.mock_cv2 import MockCV2
 
 from time import sleep, time
-from pubsub import pub
 import signal
 
 import schedule
@@ -28,7 +33,7 @@ except ModuleNotFoundError as e:
     pass
 
 import sys
-import os
+
 
 from modules.speechinput import SpeechInput
 from modules.arduinoserial import ArduinoSerial
@@ -44,11 +49,10 @@ def mode():
 
 def main():
     path = os.path.dirname(__file__)
+    log = LogWrapper(path=os.path.dirname(__file__))
 
     # Throw exception to safely exit script when terminated
     signal.signal(signal.SIGTERM, Config.exit)
-
-    log = LogWrapper(path=path)
 
     # POWER
     power = Power(Config.POWER_ENABLE_PIN)

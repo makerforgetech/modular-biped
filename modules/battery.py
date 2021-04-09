@@ -22,19 +22,19 @@ class Battery:
         val = self.check()
         if val == 0:
             pub.sendMessage('led:full', color='red')
-            print('Battery read error!')
+            pub.sendMessage('log:error', msg="[Battery] Battery Read Error - Value: " + str(val))
             return
         if self.low_voltage(val):
             pub.sendMessage('led:full', color='red')
             if not self.safe_voltage(val):
-                print("BATTERY WARNING! SHUTTING DOWN!")
+                pub.sendMessage('log:critical', msg="[Battery] EMERGENCY SHUTDOWN! Value: " + str(val))
                 pub.sendMessage('exit')
                 sleep(5)
                 subprocess.call(['shutdown', '-h'], shell=False)
 
     def check(self):
         val =  self.serial.send(ArduinoSerial.DEVICE_PIN_READ, 0, 0)
-        print('bat:' + str(val))
+        pub.sendMessage('log', msg="[Battery] Reading: " + str(val))
         with open(self.path + '/battery.csv', 'a') as fd:
             fd.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ', ' + str(val) + '\n')
         return val

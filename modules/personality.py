@@ -25,7 +25,7 @@ class Personality:
 
     BEHAVE_INTERVAL = 2
     OUTPUT_INTERVAL = 30
-    SLEEP_TIMEOUT = 5 * 60
+    SLEEP_TIMEOUT =  5 * 60
 
     STATE_SLEEPING = 0
     STATE_IDLE = 1
@@ -47,6 +47,7 @@ class Personality:
         self.face_detected = None
 
         self.state = Personality.STATE_SLEEPING
+        self.eye = 'blue'
         self.state_change = datetime.now()
 
         pub.subscribe(self.loop, 'loop:1')
@@ -56,7 +57,7 @@ class Personality:
         pub.subscribe(self.noface, 'vision:nomatch')
         pub.subscribe(self.motion, 'motion')
 
-        pub.sendMessage('led:eye', color="blue")
+        self.set_eye('blue')
         if self.mode == Config.MODE_LIVE:
             self.set_state(Personality.STATE_IDLE)
 
@@ -68,7 +69,7 @@ class Personality:
         self.handle_sleep()
 
         if not self._asleep() and not self.face_detected and self.last_motion < self._past(2):
-            pub.sendMessage('led:eye', color="red")
+            self.set_eye('red')
 
         if self.state == Personality.STATE_ALERT and self._lt(self.last_face, self._past(30)):
             self.set_state(Personality.STATE_IDLE)
@@ -77,7 +78,8 @@ class Personality:
         # @todo Test
         # This will attempt to process anything in the 'matches/verified' directory, or return if nothing to process
         if self._asleep() and Personality.is_night():
-            pub.sendMessage('vision:train')
+            pub.sendMessage('log', msg="[Personality] Training model")
+            pass #pub.sendMessage('vision:train')
 
     def handle_sleep(self):
         if self._asleep():
@@ -94,21 +96,21 @@ class Personality:
     def motion(self):
         self.last_motion = datetime.now()
         if not self.face_detected and self._lt(self.last_face, self._past(2)):
-            pub.sendMessage('led:eye', color="blue")
+            self.set_eye('blue')
 
     def noface(self):
         pub.sendMessage('log:info', msg='[Personality] No face matches found')
         self.face_detected = False
 
     def face(self, name):
-        pub.sendMessage('log:info', msg='[Personality] Face detected: ' + str(name) + ' - ' + str(datetime.now()))
+        pub.sendMessage('log:info', msg='[Personality] Face detected: ' + str(name))
         self.face_detected = True
         if name == 'Unknown':
-            pub.sendMessage('led:eye', color="purple")
+            self.set_eye('purple')
         else:
             self.set_state(Personality.STATE_ALERT)
-            pub.sendMessage('led:eye', color="green")
-            pub.sendMessage('speak', message='hi')
+            self.set_eye('green')
+            # pub.sendMessage('speak', message='hi')
 
     def behave(self):
         if self.last_behave > self._past(Personality.BEHAVE_INTERVAL):
@@ -131,11 +133,18 @@ class Personality:
             feelings.append('ok')
         return feelings
 
+    def set_eye(self, color):
+        if self.eye == color:
+            return
+        pub.sendMessage('led:eye', color=color)
+        self.eye = color
+
     def set_state(self, state):
         if self.state == state:
             return
 
         self.state = state
+        pub.sendMessage('log', msg="[Personality] State: " + str(state))
         self.state_change = datetime.now()
         if state == Personality.STATE_SLEEPING:
             pub.sendMessage("sleep")
@@ -143,14 +152,15 @@ class Personality:
             pub.sendMessage("animate", action="sit")
             pub.sendMessage("power:exit")
             pub.sendMessage("led:off")
-            pub.sendMessage("led:animate", identifiers=6, color='white', animation='breathe')
+            # pub.sendMessage("led:animate", identifiers=6, color='white', animation='breathe')
         elif state == Personality.STATE_IDLE:
             pub.sendMessage('wake')
             pub.sendMessage('animate', action="wake")
             pub.sendMessage('animate', action="sit")
-            pub.sendMessage('led:eye', color="blue")
+            self.set_eye('blue')
         elif state == Personality.STATE_ALERT:
-            pub.sendMessage('animate', action="stand")
+            pass
+            # pub.sendMessage('animate', action="stand")
 
     def _asleep(self):
         return self.state == Personality.STATE_SLEEPING
@@ -186,9 +196,9 @@ class Personality:
     @staticmethod
     def is_night():
         t = localtime()
-        if t.tm_hour < Personality.NIGHT_HOURS[1] or t.tm_hour > Personality.NIGHT_HOURS[0]:
-            return True
-        return False
+        if Personality.NIGHT_HOURS[1] < t.tm_hour < Personality.NIGHT_HOURS[0]:
+            return False
+        return True
 
     def _lt(self, date, compare):
         return date is None or date < compare

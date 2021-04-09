@@ -15,7 +15,7 @@ class LED:
     COLOR_GREEN = (0, 5, 0)
     COLOR_BLUE = (0, 0, 5)
     COLOR_PURPLE = (5, 0, 5)
-    COLOR_WHITE = (255, 255, 255)
+    COLOR_WHITE = (5, 5, 5)
 
     COLOR_MAP = {
         'red': COLOR_RED,
@@ -94,7 +94,7 @@ class LED:
 
     def off(self):
         if self.thread:
-            pub.sendMessage('log', '[LED] Animation stopping')
+            pub.sendMessage('log', msg='[LED] Animation stopping')
             self.animation = False
             self.thread.animation = False
             self.thread.join()
@@ -107,7 +107,7 @@ class LED:
 
     def eye(self, color):
         if color in LED.COLOR_MAP.keys() and self.pixels[self.middle] != color:
-            pub.sendMessage('log', '[LED] Setting eye colour: ' + color)
+            pub.sendMessage('log', msg='[LED] Setting eye colour: ' + color)
             self.set(self.middle, LED.COLOR_MAP[color])
 
     def animate(self, identifiers, color, animation):
@@ -119,10 +119,10 @@ class LED:
         :return:
         """
         if self.animation:
-            pub.sendMessage('log', '[LED] Animation already started. Command ignored')
+            pub.sendMessage('log', msg='[LED] Animation already started. Command ignored')
             return
 
-        pub.sendMessage('log', '[LED] Animation starting: ' + animation)
+        pub.sendMessage('log', msg='[LED] Animation starting: ' + animation)
 
         animations = {
             'spinner': self.spinner,
