@@ -8,8 +8,8 @@ import datetime
 
 class Battery:
 
-    BATTERY_THRESHOLD = 670  # max 760 (12.6v), min 670 (10.5v)
-    BATTERY_LOW = 690  # max 760 (12.6v), min 670 (10.5v)
+    BATTERY_THRESHOLD = 670  # 760 (11.7v), min 670 (10.5v)
+    BATTERY_LOW = 690
     READING_INTERVAL = 60 # seconds
 
     def __init__(self, pin, serial, **kwargs):

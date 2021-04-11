@@ -18,7 +18,7 @@ class TrainModel:
 
 	def train(self):
 		# our images are located in the dataset folder
-		imagePaths = list(paths.list_images(self.dataset))
+		imagePaths = list(paths.list_images(self.path))
 
 		if len(imagePaths) < 1:
 			pub.sendMessage('log', msg='[TrainModel] Nothing to process')
@@ -31,13 +31,17 @@ class TrainModel:
 
 		# loop over the image paths
 		for (i, imagePath) in enumerate(imagePaths):
+			if '.AppleDouble' in imagePath:
+				continue
 			# extract the person name from the image path
-			pub.sendMessage('log', msg='[TrainModel] processing image {}/{}'.format(i + 1, len(imagePaths)))
+			pub.sendMessage('log', msg='[TrainModel] processing image {}/{} - {}'.format(i + 1, len(imagePaths), imagePath))
 			name = imagePath.split(os.path.sep)[-2]
 
 			# load the input image and convert it from RGB (OpenCV ordering)
 			# to dlib ordering (RGB)
 			image = cv2.imread(imagePath)
+			if image is None:
+				continue
 			rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
 			# detect the (x, y)-coordinates of the bounding boxes
@@ -63,6 +67,6 @@ class TrainModel:
 		f.write(pickle.dumps(data))
 		f.close()
 		pub.sendMessage('log', msg='[TrainModel] Saved to ' + self.output)
-		trained_dir = os.path.abspath(os.path.join(self.dataset, os.pardir)) +'/trained'
-		shutil.move(self.dataset, trained_dir)
-		pub.sendMessage('log', msg='[TrainModel] Moved ' + self.dataset + ' to ' + trained_dir)
+		# trained_dir = os.path.abspath(os.path.join(self.path, os.pardir)) +'/trained'
+		# shutil.move(self.path, trained_dir)
+		# pub.sendMessage('log', msg='[TrainModel] Moved ' + self.path + ' to ' + trained_dir)

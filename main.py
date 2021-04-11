@@ -1,7 +1,7 @@
 import os
 from pubsub import pub
 import logging
-logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(levelname)s: %(asctime)s %(message)s',
+logging.basicConfig(filename=os.path.dirname(__file__) + '/app.log', level=logging.DEBUG, format='%(levelname)s: %(asctime)s %(message)s',
                             datefmt='%m/%d/%Y %I:%M:%S %p') # this doesn't work unless it's here
 from modules.logwrapper import LogWrapper
 
@@ -14,7 +14,6 @@ except ModuleNotFoundError as e:
 
 from time import sleep, time
 import signal
-
 import schedule
 
 # Import modules
@@ -76,7 +75,7 @@ def main():
     if mode() == Config.MODE_LIVE:
         # Vision / Tracking
         vision = Vision(mode=Vision.MODE_FACES, rotate=True, path=path)
-        tracking = Tracking(vision, active=True)
+        tracking = Tracking(vision)
         training = TrainModel(dataset=path + '/matches/verified', output='encodings.pickle.new')
     elif mode() == Config.MODE_KEYBOARD:
         keyboard = Keyboard()
@@ -95,11 +94,11 @@ def main():
         speak = Braillespeak(Config.BUZZER_PIN, duration=80/1000)
 
     animate = Animate()
-    personality = Personality(mode=mode)
+    personality = Personality(mode=mode())
     battery = Battery(0, serial, path=path) # note: needs ref for pubsub to work
 
     # Nightly loop (for facial recognition model training)
-    schedule.every().day.at("01:00").do(pub.sendMessage, 'loop:nightly')
+    schedule.every().day.at("10:30").do(pub.sendMessage, 'loop:nightly')
     # Other more frequent loops
     second_loop = time()
     minute_loop = time()
@@ -114,6 +113,7 @@ def main():
             if time() - minute_loop > 60:
                 minute_loop = time()
                 pub.sendMessage('loop:60')
+                schedule.run_pending()
 
     except (Exception) as e:
         pub.sendMessage('log:error', msg=e)

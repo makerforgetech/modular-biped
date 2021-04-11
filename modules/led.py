@@ -175,12 +175,12 @@ class LED:
         if getattr(t, "animation", True):
             for dc in range(0, max(color), 1):  # Increase brightness to max of color
                 self.set(identifiers, (dc if color[0] > 0 else 0, dc if color[0] > 0 else 0, dc if color[0] > 0 else 0))
-                sleep(0.05)
-            sleep(1)
+                sleep(0.10)
+            sleep(2)
             for dc in range(max(color), 0, -1):  # Decrease brightness to 0
                 self.set(identifiers, (dc if color[0] > 0 else 0, dc if color[0] > 0 else 0, dc if color[0] > 0 else 0))
-                sleep(0.05)
-            sleep(1)
+                sleep(0.10)
+            sleep(2)
 
     @staticmethod
     def _wheel(p):
