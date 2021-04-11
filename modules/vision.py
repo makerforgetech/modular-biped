@@ -46,7 +46,7 @@ class Vision:
         # Destroying all the windows
         cv2.destroyAllWindows()
         self.fps.stop()
-        print("[INFO] approx. FPS: {:.2f}".format(self.fps.fps()))
+        pub.sendMessage("log", msg="[Vision] Approx. FPS: {:.2f}".format(self.fps.fps()))
         
     def reset(self):
         self.static_back = None
@@ -56,7 +56,6 @@ class Vision:
             return
         if not self.video.isOpened():
             raise Exception('Unable to load camera')
-
         # update the FPS counter
         self.fps.update()
 

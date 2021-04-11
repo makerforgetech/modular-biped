@@ -3,7 +3,6 @@ import time
 from modules.robust_serial.robust_serial import write_order, Order, write_i8, write_i16, read_i8, read_i16, read_i32, read_order
 from modules.robust_serial.utils import open_serial_port
 from pubsub import pub
-import logging
 
 class ArduinoSerial:
     """
@@ -31,7 +30,7 @@ class ArduinoSerial:
         is_connected = False
         # Initialize communication with Arduino
         while not is_connected:
-            logging.info("SERIAL: Waiting for arduino...")
+            pub.sendMessage('log', msg="[ArduinoSerial] Waiting for arduino...")
             write_order(serial_file, Order.HELLO)
             bytes_array = bytearray(serial_file.read(1))
             if not bytes_array:
@@ -41,7 +40,7 @@ class ArduinoSerial:
             if byte in [Order.HELLO.value, Order.ALREADY_CONNECTED.value]:
                 is_connected = True
 
-        logging.info("SERIAL: Connected to Arduino")
+        pub.sendMessage('log', msg="[ArduinoSerial] Connected to Arduino")
         return serial_file
 
     def send(self, type, identifier, message):
@@ -54,12 +53,11 @@ class ArduinoSerial:
         :param identifier: an identifier or list / range of identifiers, pin or LED number
         :param message: the packet to send to the arduino
         """
-        logging.info('SERIAL: ' + str(ArduinoSerial.type_map[type]) + ' id: ' + str(identifier) + ' val: ' + str(message))
+        pub.sendMessage('log', msg='[ArduinoSerial] ' + str(ArduinoSerial.type_map[type]) + ' id: ' + str(identifier) + ' val: ' + str(message))
         if type == ArduinoSerial.DEVICE_SERVO or type == 'servo':
             write_order(self.serial_file, Order.SERVO)
             write_i8(self.serial_file, identifier)
             write_i16(self.serial_file, int(message))
-            # write_order(self.serial_file, Order.READ) # @todo remove all 'Order received' outputs from the arduino
         elif type == ArduinoSerial.DEVICE_LED or type == 'led':
             write_order(self.serial_file, Order.LED)
             if isinstance(identifier, list) or isinstance(identifier, range):

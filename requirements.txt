@@ -23,3 +23,6 @@ pysine
 opencv-python
 face-recognition
 imutils
+
+# nightly loop
+schedule

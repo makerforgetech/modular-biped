@@ -51,7 +51,7 @@ class HotWord(threading.Thread):
                         self.initialize_detectors()
                         self.vars_are_changed = False
                     # Start detectors - blocks until interrupted by self.interrupted variable
-                    print('running hotword')
+                    pub.sendMessage('log', msg='[Hotword] Running')
                     self.detectors.start(detected_callback=self.detected_callback, interrupt_check=lambda: self.interrupted, **self.run_kwargs)
                 elif command == "Terminate":
                     # Program ending - terminate thread
@@ -61,7 +61,7 @@ class HotWord(threading.Thread):
                 self.detectors.terminate()
 
     def detected_callback(self):
-        print('detected')
+        pub.sendMessage('log', msg='[Hotword] Detected')
         pub.sendMessage('hotword')
 
     def start_recog(self, **kwargs):

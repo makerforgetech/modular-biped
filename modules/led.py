@@ -9,18 +9,19 @@ except:
 
 import threading
 
-
 class LED:
     COLOR_OFF = (0, 0, 0)
     COLOR_RED = (5, 0, 0)
     COLOR_GREEN = (0, 5, 0)
     COLOR_BLUE = (0, 0, 5)
-    COLOR_WHITE = (255, 255, 255)
+    COLOR_PURPLE = (5, 0, 5)
+    COLOR_WHITE = (5, 5, 5)
 
     COLOR_MAP = {
         'red': COLOR_RED,
         'green': COLOR_GREEN,
         'blue': COLOR_BLUE,
+        'purple': COLOR_PURPLE,
         'white': COLOR_WHITE,
         'off': COLOR_OFF
     }
@@ -93,7 +94,7 @@ class LED:
 
     def off(self):
         if self.thread:
-            print('ANIMATION STOPPING')
+            pub.sendMessage('log', msg='[LED] Animation stopping')
             self.animation = False
             self.thread.animation = False
             self.thread.join()
@@ -106,14 +107,22 @@ class LED:
 
     def eye(self, color):
         if color in LED.COLOR_MAP.keys() and self.pixels[self.middle] != color:
+            pub.sendMessage('log', msg='[LED] Setting eye colour: ' + color)
             self.set(self.middle, LED.COLOR_MAP[color])
 
     def animate(self, identifiers, color, animation):
+        """
+        Trigger one of the LED animations
+        :param identifiers: single index or array or indexes
+        :param color: string map of COLOR_MAP or tuple (R, G, B)
+        :param animation: string name of animation listed in map below
+        :return:
+        """
         if self.animation:
-            print('ANIMATION ALREADY STARTED')
+            pub.sendMessage('log', msg='[LED] Animation already started. Command ignored')
             return
 
-        print('ANIMATION STARTING: ' + animation)
+        pub.sendMessage('log', msg='[LED] Animation starting: ' + animation)
 
         animations = {
             'spinner': self.spinner,
@@ -166,12 +175,12 @@ class LED:
         if getattr(t, "animation", True):
             for dc in range(0, max(color), 1):  # Increase brightness to max of color
                 self.set(identifiers, (dc if color[0] > 0 else 0, dc if color[0] > 0 else 0, dc if color[0] > 0 else 0))
-                sleep(0.05)
-            sleep(1)
+                sleep(0.10)
+            sleep(2)
             for dc in range(max(color), 0, -1):  # Decrease brightness to 0
                 self.set(identifiers, (dc if color[0] > 0 else 0, dc if color[0] > 0 else 0, dc if color[0] > 0 else 0))
-                sleep(0.05)
-            sleep(1)
+                sleep(0.10)
+            sleep(2)
 
     @staticmethod
     def _wheel(p):
