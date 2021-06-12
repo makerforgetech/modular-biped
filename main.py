@@ -62,6 +62,9 @@ def main():
     # Arduino connection
     serial = ArduinoSerial()
 
+    power.use()
+    sleep(2)  # @todo possible fix for PD bug
+
     servos = dict()
     for key in Config.servos:
         s = Config.servos[key]
@@ -76,7 +79,7 @@ def main():
         # Vision / Tracking
         vision = Vision(mode=Vision.MODE_FACES, rotate=True, path=path)
         tracking = Tracking(vision)
-        training = TrainModel(dataset=path + '/matches/verified', output='encodings.pickle.new')
+        training = TrainModel(dataset=path + '/matches/trained', output='encodings.pickle.new')
     elif mode() == Config.MODE_KEYBOARD:
         keyboard = Keyboard()
 
@@ -95,7 +98,8 @@ def main():
 
     animate = Animate()
     personality = Personality(mode=mode())
-    battery = Battery(0, serial, path=path) # note: needs ref for pubsub to work
+    # @todo 2k resistor needs switching to > 3k for 20v+ support.
+    #battery = Battery(0, serial, path=path) # note: needs ref for pubsub to work
 
     # Nightly loop (for facial recognition model training)
     schedule.every().day.at("10:30").do(pub.sendMessage, 'loop:nightly')

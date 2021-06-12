@@ -17,6 +17,8 @@ class Keyboard:
         self.screen.keypad(True)
         self.mappings = kwargs.get('mappings', None)
         pub.subscribe(self.loop, 'loop')
+        self.animations = {'a': 'sleep', 's': 'wake', 'd': 'look_up', 'f': 'look_down', 'g': 'head_shake', 'h': 'head_nod', 'j': 'neck_forward', 'k': 'head_right', 'l': 'head_left',
+                           'z': 'sit', 'x': 'stand', 'c': 'raised', 'v': 'tiptoes'}
 
     def __del__(self):
         curses.nocbreak()
@@ -31,20 +33,20 @@ class Keyboard:
             pub.sendMessage("exit")
         elif key == ord('1'):
             pub.sendMessage("animate", action="sit")
-            print('sit')
-        elif key == ord('2'):
-            pub.sendMessage("animate", action="stand")
-            print('stand')
-        elif key == ord('3'):
-            pub.sendMessage("animate", action="wake")
-            print('neck up')
-        elif key == ord('4'):
             pub.sendMessage("animate", action="sleep")
-            print('neck down')
-        elif key == ord('5'):
-            pub.sendMessage("animate", action="head_shake")
-        elif key == ord('6'):
-            pub.sendMessage("animate", action="head_nod")
+            print('sit and sleep')
+        elif key == ord('1'):
+            pub.sendMessage("animate", action="wake")
+            pub.sendMessage("animate", action="stand")
+            print('stand and wake')
+        elif chr(key) in self.animations:
+            print(key)
+            print(chr(key))
+            an = self.animations[chr(key)]
+            print(an)
+            pub.sendMessage("animate", action=an)
+        else:
+            print(key)
 
     def input(self):
         char = self.screen.getch()

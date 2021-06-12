@@ -5,5 +5,5 @@
   {"servo:leg_r_knee:mvabs": 100},
   {"servo:leg_l_ankle:mvabs": 35},
   {"servo:leg_r_ankle:mvabs": 65},
-  {"sleep": 2}
+  {"sleep": 1}
 ]

@@ -69,9 +69,10 @@ class Servo:
         """
         s = sequence.pop(0)
 
-        # ignore request if position matches current position
-        if s[0] == self.pos:
-            return
+        # @todo this prevents initial set of position
+        # # ignore request if position matches current position
+        # if s[0] == self.pos:
+        #     return
 
         if self.power:
             pub.sendMessage('power:use')

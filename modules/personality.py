@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, randrange
 from time import sleep, localtime
 from pubsub import pub
 from datetime import datetime, timedelta
@@ -25,7 +25,7 @@ class Personality:
 
     BEHAVE_INTERVAL = 2
     OUTPUT_INTERVAL = 30
-    SLEEP_TIMEOUT =  5 * 60
+    SLEEP_TIMEOUT =  2 * 60
 
     STATE_SLEEPING = 0
     STATE_IDLE = 1
@@ -51,6 +51,7 @@ class Personality:
         self.state_change = datetime.now()
 
         pub.subscribe(self.loop, 'loop:1')
+        pub.subscribe(self.minute_loop, 'loop:60')
         pub.subscribe(self.nightly_loop, 'loop:nightly')
         pub.subscribe(self.input, 'behaviour')
         pub.subscribe(self.face, 'vision:detect:face')
@@ -67,7 +68,9 @@ class Personality:
         if not self._asleep() and not self.face_detected and self.last_motion < self._past(2):
             self.set_eye('red')
 
-        if self.state == Personality.STATE_ALERT and self._lt(self.last_face, self._past(30)):
+        if self.state == Personality.STATE_ALERT and self._lt(self.last_face, self._past(2*60)):
+            # reset to idle position after 2 minutes inactivity
+            pub.sendMessage('animate', action="wake")
             self.set_state(Personality.STATE_IDLE)
 
     def nightly_loop(self):
@@ -75,6 +78,20 @@ class Personality:
         if self._asleep() and Personality.is_night():
             pub.sendMessage('log', msg="[Personality] Training model")
             pub.sendMessage('vision:train')
+
+    def minute_loop(self):
+        if randrange(5) is 1:
+            # Random action to simulate behaviour, then reset. WIP.
+            actions = ['sleep', 'look_up', 'look_down', 'head_shake', 'head_nod', 'neck_forward', 'head_right',
+                       'head_left', 'speak']
+            action = actions[randrange(len(actions)-1)]
+            pub.sendMessage('log', msg='[Personality] Random action: ' + str(action))
+            if action is 'speak':
+                pub.sendMessage('speak', 'hi')
+            else:
+                pub.sendMessage('animate', action=action)
+            sleep(randrange(3))
+            pub.sendMessage('animate', action="wake")
 
     def handle_sleep(self):
         if self._asleep():
