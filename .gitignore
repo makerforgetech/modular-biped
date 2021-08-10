@@ -9,3 +9,5 @@ modules/.coverage
 designs
 matches/
 encodings.pickle
+app.log*
+battery*.csv

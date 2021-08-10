@@ -5,6 +5,7 @@ class Tracking:
         self.vision = vision
         # define bounds around screen
         self.bounds_percent = bounds_percent
+        self.move_percent = bounds_percent
         self.bounds = int(self.vision.dimensions[0] / (100 / bounds_percent))
         self.vision.add_lines(self._define_boundary_lines())
         self.ignore = 0
@@ -41,21 +42,21 @@ class Tracking:
         (x, y, w, h) = largest
         moved = False
         if x < self.bounds:
-            pub.sendMessage('servo:pan:mv', percentage=self.bounds_percent)
+            pub.sendMessage('servo:pan:mv', percentage=self.move_percent)
             pub.sendMessage('log:info', msg="[Tracking] moved left")
             moved = True
         elif (x + w) > (self.vision.dimensions[0] - self.bounds):
-            pub.sendMessage('servo:pan:mv', percentage=-self.bounds_percent)
+            pub.sendMessage('servo:pan:mv', percentage=-self.move_percent)
             pub.sendMessage('log:info', msg="[Tracking] moved right")
             moved = True
         if (y + h) > (self.vision.dimensions[1] - self.bounds):
-            pub.sendMessage('servo:tilt:mv', percentage=self.bounds_percent)
-            pub.sendMessage('servo:neck:mv', percentage=self.bounds_percent)
+            pub.sendMessage('servo:tilt:mv', percentage=self.move_percent)
+            pub.sendMessage('servo:neck:mv', percentage=self.move_percent)
             pub.sendMessage('log:info', msg="[Tracking] moved up")
             moved = True
         elif y < self.bounds:
-            pub.sendMessage('servo:tilt:mv', percentage=-self.bounds_percent)
-            pub.sendMessage('servo:neck:mv', percentage=-self.bounds_percent) # move neck as well to add clearance
+            pub.sendMessage('servo:tilt:mv', percentage=-self.move_percent)
+            pub.sendMessage('servo:neck:mv', percentage=-self.move_percent) # move neck as well to add clearance
             pub.sendMessage('log:info', msg="[Tracking] moved down")
             moved = True
 

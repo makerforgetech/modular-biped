@@ -18,7 +18,7 @@ class Keyboard:
         self.mappings = kwargs.get('mappings', None)
         pub.subscribe(self.loop, 'loop')
         self.animations = {'a': 'sleep', 's': 'wake', 'd': 'look_up', 'f': 'look_down', 'g': 'head_shake', 'h': 'head_nod', 'j': 'neck_forward', 'k': 'head_right', 'l': 'head_left',
-                           'z': 'sit', 'x': 'stand', 'c': 'raised', 'v': 'tiptoes'}
+                           'z': 'sit', 'x': 'stand', 'c': 'raised', 'v': 'tiptoes', 'p': 'speak'}
 
     def __del__(self):
         curses.nocbreak()

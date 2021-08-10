@@ -44,6 +44,7 @@ class Personality:
         self.last_output = datetime.now()
         self.last_motion = datetime.now()
         self.last_face = None
+        self.last_face_name = None
         self.face_detected = None
 
         self.state = Personality.STATE_SLEEPING
@@ -87,7 +88,7 @@ class Personality:
             action = actions[randrange(len(actions)-1)]
             pub.sendMessage('log', msg='[Personality] Random action: ' + str(action))
             if action is 'speak':
-                pub.sendMessage('speak', 'hi')
+                pub.sendMessage('speak', message='hi')
             else:
                 pub.sendMessage('animate', action=action)
             sleep(randrange(3))
@@ -120,9 +121,13 @@ class Personality:
         if name == 'Unknown':
             self.set_eye('purple')
         else:
-            self.set_state(Personality.STATE_ALERT)
+            # self.set_state(Personality.STATE_ALERT)  # This overrides the tracking so we can't trigger this here
             self.set_eye('green')
-            # pub.sendMessage('speak', message='hi')
+            if self.last_face_name != name:
+                pub.sendMessage('speak', message=name)
+
+        if name != 'Unknown':
+            self.last_face_name = name
 
     def behave(self):
         if self.last_behave > self._past(Personality.BEHAVE_INTERVAL):

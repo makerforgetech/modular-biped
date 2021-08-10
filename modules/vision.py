@@ -85,7 +85,8 @@ class Vision:
                 if self.current_match:
                     self.current_match = False
                     pub.sendMessage('vision:nomatch')
-                return matches
+                if self.preview is False:
+                    return matches
 
             names = []
             cnt = 0

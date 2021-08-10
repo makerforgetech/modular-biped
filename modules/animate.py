@@ -32,3 +32,5 @@ class Animate:
                 pub.sendMessage(cmd, action=args[0])
             elif 'led:' in cmd:
                 pub.sendMessage(cmd, color=args[0])
+            elif 'speak' == cmd:
+                pub.sendMessage(cmd, message=args[0])

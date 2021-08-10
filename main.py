@@ -77,7 +77,7 @@ def main():
 
     if mode() == Config.MODE_LIVE:
         # Vision / Tracking
-        vision = Vision(mode=Vision.MODE_FACES, rotate=True, path=path)
+        vision = Vision(mode=Vision.MODE_FACES, rotate=True, path=path, preview=False)
         tracking = Tracking(vision)
         training = TrainModel(dataset=path + '/matches/trained', output='encodings.pickle.new')
     elif mode() == Config.MODE_KEYBOARD:
@@ -108,6 +108,7 @@ def main():
     minute_loop = time()
     loop = True
     pub.sendMessage('log', msg="[Main] Loop started")
+    # pub.sendMessage('speak', message='hi')
     try:
         while loop:
             pub.sendMessage('loop')
