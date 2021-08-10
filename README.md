@@ -101,4 +101,5 @@ https://learn.adafruit.com/neopixels-on-raspberry-pi/python-usage
 Prefabricated PCBs are available for this project in the `circuits` folder. This allows the connection between the core components as described above.
 
 ![Top](circuits/v2/Upper/Top%20Feb%202021_pcb.png)
-![Bottom](circuits/v2/Lower/Lower Feb 2021_pcb.png)
+
+![Bottom](circuits/v2/Lower/Lower%20Feb%202021_pcb.png)
