@@ -1,0 +1,13 @@
+sounds/*
+PIGPIO/
+modules/__pycache__
+.idea/
+modules/.coverage
+*__pycache__
+*.AppleDouble*
+*.DS_Store
+designs
+matches/
+encodings.pickle
+app.log*
+battery*.csv

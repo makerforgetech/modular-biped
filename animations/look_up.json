@@ -1,0 +1,6 @@
+[
+  {"servo:neck:mvabs": 40},
+  {"sleep": 0.5},
+  {"servo:tilt:mvabs": 0},
+  {"sleep": 1}
+]
