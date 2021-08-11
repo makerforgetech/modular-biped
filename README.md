@@ -34,9 +34,12 @@ Add the startup command to the boot file on the pi (edit `/etc/rc.local`)
 This can then be stopped by running the `./stop.sh` command in the project directory.
 
 GPIO 26 is also wired to allow shutdown when brought to ground via a switch.
+
 Guide:
 https://howchoo.com/g/mwnlytk3zmm/how-to-add-a-power-button-to-your-raspberry-pi
-Script
+
+Script:
+
 ```
 #!/usr/bin/env python
 
