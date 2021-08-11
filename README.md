@@ -34,8 +34,22 @@ Add the startup command to the boot file on the pi (edit `/etc/rc.local`)
 This can then be stopped by running the `./stop.sh` command in the project directory.
 
 GPIO 26 is also wired to allow shutdown when brought to ground via a switch.
-Example script:
+Guide:
 https://howchoo.com/g/mwnlytk3zmm/how-to-add-a-power-button-to-your-raspberry-pi
+Script
+```
+#!/usr/bin/env python
+
+import RPi.GPIO as GPIO
+import subprocess
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(26, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.wait_for_edge(26, GPIO.FALLING)
+
+subprocess.call(['pkill', '-f', 'main.py'], shell=False) # kill main script safely
+subprocess.call(['shutdown', '-h', 'now'], shell=False)
+```
 
 ### Buzzer
 A buzzer is connected to GPIO 27 to allow for tones to be played in absence of audio output (see Neopixel below).
