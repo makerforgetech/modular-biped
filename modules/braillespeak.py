@@ -79,7 +79,7 @@ class Braillespeak:
         time.sleep(self.duration / 2)
 
     def send(self, message):
-        print(message)
+        print(message.lower())
         if message:
-            for t in message:
+            for t in message.lower():
                 self.handle_char(t)

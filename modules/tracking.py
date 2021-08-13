@@ -11,6 +11,7 @@ class Tracking:
         self.ignore = 0
         self.active = kwargs.get('active', False)
         pub.subscribe(self.loop, 'loop')
+        pub.subscribe(self.set_state, 'rest', active=True)
         pub.subscribe(self.set_state, 'wake', active=True)
         pub.subscribe(self.set_state, 'sleep', active=False)
 

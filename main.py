@@ -79,7 +79,7 @@ def main():
         # Vision / Tracking
         vision = Vision(mode=Vision.MODE_FACES, rotate=True, path=path, preview=False)
         tracking = Tracking(vision)
-        training = TrainModel(dataset=path + '/matches/trained', output='encodings.pickle.new')
+        training = TrainModel(dataset=path + '/matches/trained', output='encodings.pickle')
     elif mode() == Config.MODE_KEYBOARD:
         keyboard = Keyboard()
 
@@ -110,6 +110,9 @@ def main():
     pub.sendMessage('log', msg="[Main] Loop started")
     # pub.sendMessage('speak', message='hi')
     try:
+        #pub.sendMessage('log', msg="[Personality] Training model")
+        #pub.sendMessage('vision:train')
+
         while loop:
             pub.sendMessage('loop')
             if time() - second_loop > 1:

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import cv2
 from imutils.video import FPS # for FSP only
 from modules.visionutils.faces import Faces
@@ -18,6 +18,7 @@ class Vision:
         self.video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         self.static_back = None
         self.preview = kwargs.get('preview', False)
+        self.accuracy = kwargs.get('accuracy', 10) # Was 5
 
         self.flip = kwargs.get('flip', False)
         self.rotate = kwargs.get('rotate', False)
@@ -77,9 +78,8 @@ class Vision:
             matches = self.cascade.detectMultiScale(
                 gray,
                 scaleFactor=1.1,
-                minNeighbors=5,
-                minSize=(30, 30),
-                flags=cv2.CASCADE_SCALE_IMAGE
+                minNeighbors=self.accuracy,
+                minSize=(30, 30)
             )
             if len(matches) < 1:
                 if self.current_match:
@@ -163,7 +163,7 @@ class Vision:
 
         # Displaying color frame with contour of motion of object
         cv2.imshow("Preview", frame)
-        cv2.waitKey(25)
+        cv2.waitKey(1)
 
     def add_lines(self, lines):
         """

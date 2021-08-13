@@ -26,10 +26,12 @@ class Personality:
     BEHAVE_INTERVAL = 2
     OUTPUT_INTERVAL = 30
     SLEEP_TIMEOUT =  2 * 60
+    REST_TIMEOUT = 30
 
     STATE_SLEEPING = 0
-    STATE_IDLE = 1
-    STATE_ALERT = 2
+    STATE_RESTING = 1
+    STATE_IDLE = 2
+    STATE_ALERT = 3
 
     NIGHT_HOURS = [22, 8] # night start and end. Will not wake during this time
 
@@ -81,7 +83,7 @@ class Personality:
             pub.sendMessage('vision:train')
 
     def minute_loop(self):
-        if randrange(5) is 1:
+        if not self._asleep() and randrange(5) is 1:
             # Random action to simulate behaviour, then reset. WIP.
             actions = ['sleep', 'look_up', 'look_down', 'head_shake', 'head_nod', 'neck_forward', 'head_right',
                        'head_left', 'speak']
@@ -100,11 +102,15 @@ class Personality:
 
         # if sleeping and motion detected in the last X seconds, then wake (during the day)
         if self._asleep() and not Personality.is_night() and self.last_motion > self._past(10):
-            self.set_state(Personality.STATE_IDLE)
+            self.set_state(Personality.STATE_RESTING)
 
         # if not sleeping and motion not detected for SLEEP_TIMEOUT, sleep
         if not self._asleep() and self._lt(self.last_motion, self._past(Personality.SLEEP_TIMEOUT)):
             self.set_state(Personality.STATE_SLEEPING)
+
+        # if not resting and faces not detected for REST_TIMEOUT, rest
+        if not self._resting() and self._lt(self.last_face, self._past(Personality.REST_TIMEOUT)):
+            self.set_state(Personality.STATE_RESTING)
 
     def motion(self):
         self.last_motion = datetime.now()
@@ -118,6 +124,8 @@ class Personality:
     def face(self, name):
         pub.sendMessage('log:info', msg='[Personality] Face detected: ' + str(name))
         self.face_detected = True
+        self.last_face = datetime.now()
+        self.set_state(Personality.STATE_IDLE)
         if name == 'Unknown':
             self.set_eye('purple')
         else:
@@ -168,9 +176,14 @@ class Personality:
             pub.sendMessage("animate", action="sit")
             pub.sendMessage("power:exit")
             pub.sendMessage("led:off")
-
+        elif state == Personality.STATE_RESTING:
+            pub.sendMessage('rest')
+            pub.sendMessage("animate", action="sit")
+            pub.sendMessage("animate", action="sleep")
+            pub.sendMessage("power:exit")
+            self.set_eye('blue')
         elif state == Personality.STATE_IDLE:
-            if self.state == Personality.STATE_SLEEPING:
+            if self.state == Personality.STATE_RESTING:
                 pub.sendMessage('wake')
                 pub.sendMessage('animate', action="wake")
             pub.sendMessage('animate', action="sit")
@@ -182,6 +195,9 @@ class Personality:
 
     def _asleep(self):
         return self.state == Personality.STATE_SLEEPING
+
+    def _resting(self):
+        return self.state == Personality.STATE_SLEEPING or self.state == Personality.STATE_RESTING
 
     def input(self, type):
         if type == Personality.INPUT_TYPE_INTERESTING:
