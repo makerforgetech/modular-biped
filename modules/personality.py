@@ -83,7 +83,7 @@ class Personality:
             pub.sendMessage('vision:train')
 
     def minute_loop(self):
-        if not self._asleep() and randrange(5) is 1:
+        if not self._resting() and randrange(5) is 1:
             # Random action to simulate behaviour, then reset. WIP.
             actions = ['sleep', 'look_up', 'look_down', 'head_shake', 'head_nod', 'neck_forward', 'head_right',
                        'head_left', 'speak']

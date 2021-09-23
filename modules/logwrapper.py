@@ -25,5 +25,5 @@ class LogWrapper:
     def log(self, type, msg):
         # Translate type string to log level (0 - 50)
         logging.log(LogWrapper.levels.index(type)*10, msg)
-        if type == 'error' or type == 'warning':
-            print('LogWrapper: ' + type + ' - ' + msg)
+        # if type == 'error' or type == 'warning':
+        # print('LogWrapper: ' + type + ' - ' + str(msg))
