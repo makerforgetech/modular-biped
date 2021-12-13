@@ -1,5 +1,8 @@
 from random import randint, randrange
 from pubsub import pub
+from time import sleep, localtime
+
+from modules.config import Config
 
 class Random:
     def __init__(self, state):

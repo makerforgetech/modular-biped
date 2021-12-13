@@ -81,6 +81,13 @@ class Config:
     HOTWORD_MODEL = None #'modules/snowboy/resources/models/robot.pmdl'
     HOTWORD_SLEEP_TIME = 0.03
 
+    STATE_SLEEPING = 0
+    STATE_RESTING = 1
+    STATE_IDLE = 2
+    STATE_ALERT = 3
+
+    NIGHT_HOURS = [22, 8]  # night start and end. Will not wake during this time
+
     @staticmethod
     def exit(signum, frame):
         raise Exception('Exit command received!')

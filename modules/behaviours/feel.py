@@ -1,4 +1,7 @@
 from pubsub import pub
+from datetime import datetime, timedelta
+from random import randint, randrange
+from modules.config import Config
 
 class Feel:
     INPUT_TYPE_INTERESTING = 0
@@ -27,7 +30,7 @@ class Feel:
         self.contentment -= randint(0, 3)
 
     def behave(self):
-        if self.last_behave > self.past(Personality.BEHAVE_INTERVAL):
+        if self.last_behave > self.past(Feel.BEHAVE_INTERVAL):
             return
 
         self.last_behave = datetime.now()
@@ -48,22 +51,22 @@ class Feel:
         return feelings
 
     def input(self, type):
-        if type == Personality.INPUT_TYPE_INTERESTING:
+        if type == Feel.INPUT_TYPE_INTERESTING:
             self.attention = 100
             self.happiness += 30
             self.wakefulness += 30
             self.contentment += 30
-        if type == Personality.INPUT_TYPE_SCARY:
+        if type == Feel.INPUT_TYPE_SCARY:
             self.attention = 100
             self.happiness = 20
             self.wakefulness += 50
             self.contentment -= 30
-        if type == Personality.INPUT_TYPE_FUN:
+        if type == Feel.INPUT_TYPE_FUN:
             self.attention = 100
             self.happiness = 100
             self.wakefulness += 50
             self.contentment += 50
-        if type == Personality.INPUT_TYPE_STARTLING:
+        if type == Feel.INPUT_TYPE_STARTLING:
             self.attention = 100
             self.happiness -= 40
             self.wakefulness += 50

@@ -7,6 +7,6 @@ class Dream:
 
     def behave_nightly(self):
         # This will attempt to process anything in the 'matches/verified' directory, or return if nothing to process
-        if self.state.is_asleep() and Personality.is_night():
+        if self.state.is_asleep() and self.state.is_night():
             pub.sendMessage('log', msg="[Personality] Training model")
             pub.sendMessage('vision:train')
