@@ -26,18 +26,13 @@ class Tracking:
     def show_position(self, largest):
         """
         Show the position of the largest match in the eye LEDs
-        :return:
+        @todo move to personality module
         """
         if largest is None:
-            # pub.sendMessage('led', identifiers=['left', 'right', 'middle'], color='off')
             return
 
         (x, y, w, h) = largest
-        # print(largest)
-        # print(self.vision.dimensions)
-        # print(str(x + (w / 2)) + ' | ' +  str(self.vision.dimensions[0] / 2))
         if x + (w / 2) < (self.vision.dimensions[0] / 2) - 40:
-            # pub.sendMessage('led', identifiers='left', color='off')
             pub.sendMessage('led', identifiers=['left', 'middle'], color='off')
             pub.sendMessage('led', identifiers='right', color='green')
         elif x + (w / 2) > (self.vision.dimensions[0] / 2) + 40:

@@ -9,7 +9,7 @@ class Sensor:
         pub.subscribe(self.loop, 'loop:1')
 
     def loop(self):
-        if self.read() == 1:
+        if self.read():
             pub.sendMessage('motion')
 
     def read(self):
@@ -21,4 +21,4 @@ class Sensor:
         :param edge: pigpio.EITHER_EDGE, pigpio.FALLING_EDGE, pigpio.RISING_EDGE
         :param callback: method to call when change detected
         """
-        self.pi.callback(self.pin, edge, callback)
+        return self.pi.callback(self.pin, edge, callback)
