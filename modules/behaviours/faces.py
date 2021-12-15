@@ -9,6 +9,7 @@ class Faces:
         self.state = state # the personality instance
         self.last_face = None
         self.last_face_name = None
+        self.current_faces = []
         self.face_detected = None
         pub.subscribe(self.face, 'vision:detect:face')
         pub.subscribe(self.noface, 'vision:nomatch')
@@ -27,7 +28,8 @@ class Faces:
         else:
             # self.set_state(Config.STATE_ALERT)  # This overrides the tracking so we can't trigger this here
             self.state.set_eye('green')
-            if self.last_face_name != name:
+            if name not in self.current_faces:
+                self.current_faces.append(name)
                 pub.sendMessage('speak', message=name)
 
         if name != 'Unknown':

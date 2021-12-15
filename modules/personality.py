@@ -8,7 +8,7 @@ from modules.config import Config
 from modules.behaviours.dream import Dream
 from modules.behaviours.faces import Faces
 from modules.behaviours.motion import Motion
-from modules.behaviours.random import Random
+from modules.behaviours.boredom import Boredom
 from modules.behaviours.feel import Feel
 from modules.behaviours.sleep import Sleep
 
@@ -36,12 +36,12 @@ class Personality:
 
         pub.subscribe(self.loop, 'loop:1')
 
-        behaviours = {'random': Random(self),
-                           'dream': Dream(self),
-                           'faces': Faces(self),
-                           'motion': Motion(self),
-                           'sleep': Sleep(self),
-                           'feel': Feel(self)}
+        behaviours = { 'boredom': Boredom(self),
+                       'dream': Dream(self),
+                       'faces': Faces(self),
+                       'motion': Motion(self),
+                       'sleep': Sleep(self),
+                       'feel': Feel(self)}
 
         self.behaviours = SimpleNamespace(**behaviours)
 
@@ -57,6 +57,7 @@ class Personality:
     def set_eye(self, color):
         if self.eye == color:
             return
+        pub.sendMessage('led', identifiers=['left', 'right'], color='off')
         pub.sendMessage('led:eye', color=color)
         self.eye = color
 
@@ -84,8 +85,7 @@ class Personality:
             pub.sendMessage('animate', action="sit")
             self.set_eye('blue')
         elif state == Config.STATE_ALERT:
-            pass
-            # pub.sendMessage('animate', action="stand")
+            pub.sendMessage('animate', action="stand")
         self.state = state
 
     def is_asleep(self):
@@ -93,12 +93,6 @@ class Personality:
 
     def is_resting(self):
         return self.state == Config.STATE_SLEEPING or self.state == Config.STATE_RESTING
-
-    def is_night(self):
-        t = localtime()
-        if Config.NIGHT_HOURS[1] < t.tm_hour < Config.NIGHT_HOURS[0]:
-            return False
-        return True
 
     def lt(self, date, compare):
         return date is None or date < compare

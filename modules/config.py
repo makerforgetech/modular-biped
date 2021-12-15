@@ -1,5 +1,5 @@
 #! /usr/bin/python
-
+from time import localtime
 from pubsub import pub
 
 class Config:
@@ -91,3 +91,10 @@ class Config:
     @staticmethod
     def exit(signum, frame):
         raise Exception('Exit command received!')
+
+    @staticmethod
+    def is_night():
+        t = localtime()
+        if Config.NIGHT_HOURS[1] < t.tm_hour < Config.NIGHT_HOURS[0]:
+            return False
+        return True

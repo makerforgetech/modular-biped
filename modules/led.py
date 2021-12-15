@@ -1,5 +1,6 @@
 from pubsub import pub
 from time import sleep
+from colour import Color
 
 try:
     import board
@@ -16,6 +17,7 @@ class LED:
     COLOR_BLUE = (0, 0, 5)
     COLOR_PURPLE = (5, 0, 5)
     COLOR_WHITE = (5, 5, 5)
+    COLOR_RED_TO_GREEN_100 = list(Color("red").range_to(Color("green"),100))
 
     COLOR_MAP = {
         'red': COLOR_RED,
@@ -29,7 +31,15 @@ class LED:
     def __init__(self, count, **kwargs):
         # Initialise
         self.count = count
-        self.middle = kwargs.get('middle', 6)
+        self.positions = {
+            'right' : 0,
+            'top_right': 1,
+            'top_left' : 2,
+            'left' : 3,
+            'bottom_left' : 4,
+            'bottom_right' : 5,
+            'middle': 6
+        }
         self.all = range(self.count)
         self.animation = False
         self.thread = None
@@ -40,7 +50,7 @@ class LED:
         # Default states
         self.set(self.all, LED.COLOR_OFF)
         sleep(0.1)
-        self.set(self.middle, LED.COLOR_BLUE)
+        self.set(self.positions['middle'], LED.COLOR_BLUE)
 
         # Set subscribers
         pub.subscribe(self.set, 'led')
@@ -73,14 +83,25 @@ class LED:
         # convert single identifier to list
         if type(identifiers) is int:
             identifiers = [identifiers]
+        elif type(identifiers) is str:
+            identifiers = [self.positions[identifiers]]
         # lookup color if string
-        if type(color) is str:
+        if type(color) is int:
+            # Make color gradiant use possible @todo refactor
+            if color >= 100:
+                color = 99 # max in range
+            color = LED.COLOR_RED_TO_GREEN_100[color].rgb
+            color = (color[0]*2, color[1]*2, color[2]*2) # increase values to be used as LED RGB
+        elif type(color) is str:
             color = LED.COLOR_MAP[color]
         for i in identifiers:
+            if type(i) is str:
+                i = self.positions[i]
             #print(str(i) + str(color))
             try:
                 self.pixels[i] = color
             except:
+                pub.sendMessage('log', msg='[LED] Error in set pixels')
                 pass
         sleep(0.1)
 
@@ -106,9 +127,9 @@ class LED:
             self.set(self.all, LED.COLOR_MAP[color])
 
     def eye(self, color):
-        if color in LED.COLOR_MAP.keys() and self.pixels[self.middle] != color:
+        if color in LED.COLOR_MAP.keys() and self.pixels[self.positions['middle']] != color:
             pub.sendMessage('log', msg='[LED] Setting eye colour: ' + color)
-            self.set(self.middle, LED.COLOR_MAP[color])
+            self.set(self.positions['middle'], LED.COLOR_MAP[color])
 
     def animate(self, identifiers, color, animation):
         """

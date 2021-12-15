@@ -3,7 +3,7 @@ from time import sleep, localtime
 from modules.config import Config
 class Sleep:
     SLEEP_TIMEOUT = 2 * 60
-    REST_TIMEOUT = 30
+    REST_TIMEOUT = 2 * 60
 
     def __init__(self, state):
         self.state = state  # the personality instance
@@ -14,7 +14,7 @@ class Sleep:
             sleep(5)
 
         # if sleeping and motion detected in the last X seconds, then wake (during the day)
-        if self.state.is_asleep() and not self.state.is_night() and self.state.behaviours.motion.last_motion > self.state.past(10):
+        if self.state.is_asleep() and not Config.is_night() and self.state.behaviours.motion.last_motion > self.state.past(10):
             self.state.set_state(Config.STATE_RESTING)
 
         # if not sleeping and motion not detected for SLEEP_TIMEOUT, sleep

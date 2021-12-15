@@ -9,7 +9,7 @@ class Sensor:
         pub.subscribe(self.loop, 'loop:1')
 
     def loop(self):
-        if self.read():
+        if self.read() == 1:
             pub.sendMessage('motion')
 
     def read(self):

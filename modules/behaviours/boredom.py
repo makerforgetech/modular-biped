@@ -1,13 +1,11 @@
 from random import randint, randrange
 from pubsub import pub
-from time import sleep, localtime
+from time import sleep
 
-from modules.config import Config
-
-class Random:
+class Boredom:
     def __init__(self, state):
         self.state = state  # the personality instance
-        pub.subscribe(self.behave_minute, 'loop:minute')
+        pub.subscribe(self.behave_minute, 'loop:60')
 
     def behave_minute(self):
         if not self.state.is_resting() and randrange(5) is 1:
@@ -15,7 +13,7 @@ class Random:
             actions = ['sleep', 'look_up', 'look_down', 'head_shake', 'head_nod', 'neck_forward', 'head_right',
                        'head_left', 'speak']
             action = actions[randrange(len(actions)-1)]
-            pub.sendMessage('log', msg='[Personality] Random action: ' + str(action))
+            pub.sendMessage('log', msg='[Personality] Boredom action: ' + str(action))
             if action is 'speak':
                 pub.sendMessage('speak', message='hi')
             else:
