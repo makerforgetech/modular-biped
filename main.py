@@ -77,7 +77,7 @@ def main():
 
     if mode() == Config.MODE_LIVE:
         # Vision / Tracking
-        vision = Vision(mode=Vision.MODE_FACES, rotate=True, path=path, preview=False)
+        vision = Vision(mode=Vision.MODE_FACES, rotate=False, path=path, preview=False)
         tracking = Tracking(vision)
         training = TrainModel(dataset=path + '/matches/trained', output='encodings.pickle')
     elif mode() == Config.MODE_KEYBOARD:
@@ -124,6 +124,7 @@ def main():
                 schedule.run_pending()
 
     except (Exception) as e:
+        print(e)
         pub.sendMessage('log:error', msg=e)
         loop = False
         sleep(5)

@@ -23,6 +23,25 @@ class Tracking:
             return
         self.track_largest_match()
 
+    def show_position(self, largest):
+        """
+        Show the position of the largest match in the eye LEDs
+        @todo move to personality module
+        """
+        if largest is None:
+            return
+
+        (x, y, w, h) = largest
+        if x + (w / 2) < (self.vision.dimensions[0] / 2) - 40:
+            pub.sendMessage('led', identifiers=['left', 'middle'], color='off')
+            pub.sendMessage('led', identifiers='right', color='green')
+        elif x + (w / 2) > (self.vision.dimensions[0] / 2) + 40:
+            pub.sendMessage('led', identifiers=['right', 'middle'], color='off')
+            pub.sendMessage('led', identifiers='left', color='green')
+        else:
+            pub.sendMessage('led', identifiers=['left', 'right'], color='off')
+            pub.sendMessage('led', identifiers='middle', color='green')
+
     def track_largest_match(self):
         """
         Move the pan and tilt servos an incremental amount to attempt to keep the largest match
@@ -32,6 +51,7 @@ class Tracking:
         :return: boolean - was match detected
         """
         largest = self._largest(self.vision.detect())
+        self.show_position(largest)
         if largest is None:
             return False
 
