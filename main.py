@@ -90,7 +90,8 @@ def main():
         hotword.start_recog(sleep_time=Config.HOTWORD_SLEEP_TIME)
         sleep(1)  # @todo is this needed?
         # @todo this is throwing errors: ALSA lib confmisc.c:1281:(snd_func_refer) Unable to find definition 'defaults.bluealsa.device'
-        speech = SpeechInput()
+
+    speech = SpeechInput()
 
     # Output
     if Config.BUZZER_PIN is not None:
