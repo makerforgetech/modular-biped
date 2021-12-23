@@ -17,6 +17,7 @@ class LED:
     COLOR_BLUE = (0, 0, 5)
     COLOR_PURPLE = (5, 0, 5)
     COLOR_WHITE = (5, 5, 5)
+    COLOR_WHITE_FULL = (255, 255, 255)
     COLOR_RED_TO_GREEN_100 = list(Color("red").range_to(Color("green"),100))
 
     COLOR_MAP = {
@@ -25,6 +26,7 @@ class LED:
         'blue': COLOR_BLUE,
         'purple': COLOR_PURPLE,
         'white': COLOR_WHITE,
+        'white_full': COLOR_WHITE_FULL,
         'off': COLOR_OFF
     }
 
@@ -41,8 +43,10 @@ class LED:
             'middle': 6
         }
         self.all = range(self.count)
+        self.all_eye = range(6)
         self.animation = False
         self.thread = None
+        self.overridden = False  # prevent any further changes until released (for flashlight)
         try:
             self.pixels = neopixel.NeoPixel(board.D12, count)
         except:
@@ -60,6 +64,7 @@ class LED:
         pub.subscribe(self.eye, 'led:flashlight')
         pub.subscribe(self.animate, 'led:animate')
         pub.subscribe(self.exit, 'exit')
+        pub.subscribe(self.speech, 'speech')
 
     def exit(self):
         """
@@ -71,6 +76,12 @@ class LED:
         self.set(self.all, LED.COLOR_OFF)
         sleep(1)
 
+    def speech(self, msg):
+        if 'light on' in msg:
+            self.flashlight(True)
+        if 'light off' in msg:
+            self.flashlight(False)
+
     def set(self, identifiers, color):
         """
         Set color of pixel
@@ -80,6 +91,8 @@ class LED:
         :param identifiers: pixel number (starting from 0) - can be list
         :param color: string map of COLOR_MAP or tuple (R, G, B)
         """
+        if self.overridden:
+            return
         # convert single identifier to list
         if type(identifiers) is int:
             identifiers = [identifiers]
@@ -108,10 +121,10 @@ class LED:
     def flashlight(self, on):
         if on:
             self.set(self.all, LED.COLOR_WHITE)
+            self.overridden = True
         else:
+            self.overridden = False
             self.set(self.all, LED.COLOR_OFF)
-            sleep(0.1)
-            self.eye('green')
 
     def off(self):
         if self.thread:
@@ -120,7 +133,7 @@ class LED:
             self.thread.animation = False
             self.thread.join()
         self.set(self.all, LED.COLOR_OFF)
-        sleep(2)
+        sleep(.5)
 
     def full(self, color):
         if color in LED.COLOR_MAP.keys():

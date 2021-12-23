@@ -92,11 +92,9 @@ def main():
         # @todo this is throwing errors: ALSA lib confmisc.c:1281:(snd_func_refer) Unable to find definition 'defaults.bluealsa.device'
 
     speech = SpeechInput()
-
     # Output
     if Config.BUZZER_PIN is not None:
         speak = Braillespeak(Config.BUZZER_PIN, duration=80/1000)
-
     animate = Animate()
     personality = Personality(mode=mode())
     # @todo 2k resistor needs switching to > 3k for 20v+ support.
@@ -111,11 +109,9 @@ def main():
     pub.sendMessage('log', msg="[Main] Loop started")
     # pub.sendMessage('speak', message='hi')
     try:
-        #pub.sendMessage('log', msg="[Personality] Training model")
-        #pub.sendMessage('vision:train')
-
         while loop:
             pub.sendMessage('loop')
+            sleep(10) # needed for voice recognition for some reason @todo fix!
             if time() - second_loop > 1:
                 second_loop = time()
                 pub.sendMessage('loop:1')

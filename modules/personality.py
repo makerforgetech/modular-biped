@@ -11,6 +11,7 @@ from modules.behaviours.motion import Motion
 from modules.behaviours.boredom import Boredom
 from modules.behaviours.feel import Feel
 from modules.behaviours.sleep import Sleep
+from modules.behaviours.respond import Respond
 
 from types import SimpleNamespace
 
@@ -41,7 +42,8 @@ class Personality:
                        'faces': Faces(self),
                        'motion': Motion(self),
                        'sleep': Sleep(self),
-                       'feel': Feel(self)}
+                       'feel': Feel(self),
+                       'respond': Respond(self)}
 
         self.behaviours = SimpleNamespace(**behaviours)
 
@@ -79,7 +81,7 @@ class Personality:
             pub.sendMessage("power:exit")
             self.set_eye('blue')
         elif state == Config.STATE_IDLE:
-            if self.state == Config.STATE_RESTING:
+            if self.is_resting():
                 pub.sendMessage('wake')
                 pub.sendMessage('animate', action="wake")
             pub.sendMessage('animate', action="sit")
