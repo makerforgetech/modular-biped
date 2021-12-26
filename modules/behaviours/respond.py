@@ -18,7 +18,8 @@ class Respond:
             action = 'head_nod'
         if 'you like' in msg:
             actions = ['head_shake', 'head_nod', 'speak']
-            action = actions[randrange(len(actions) - 1)]
+            action = actions[abs(hash(msg.split('like ')[1])) % len(actions)-1] # choose from the number of actions by hashing the item, so the answer is always the same
+            # action = actions[randrange(len(actions) - 1)]
 
         if action:
             pub.sendMessage('log', msg='[Personality] Respond action: ' + str(action))

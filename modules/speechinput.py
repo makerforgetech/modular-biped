@@ -82,7 +82,7 @@ class SpeechInput:
             # instead of `r.recognize_google(audio)`
             text = recognizer.recognize_google(audio)
             pub.sendMessage('log', msg='[Speech] I heard: ' + text)
-            pub.sendMessage('speech', msg=text)
+            pub.sendMessage('speech', msg=text.lower())
             print("Google Speech Recognition thinks you said " + text)
         except sr.UnknownValueError:
             print("Google Speech Recognition could not understand audio")
