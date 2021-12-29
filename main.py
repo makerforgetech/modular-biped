@@ -40,6 +40,7 @@ from modules.led import LED
 from modules.personality import Personality
 from modules.battery import Battery
 from modules.braillespeak import Braillespeak
+from modules.buzzer import Buzzer
 
 def mode():
     if len(sys.argv) > 1 and sys.argv[1] == 'manual':
@@ -90,12 +91,13 @@ def main():
         hotword.start_recog(sleep_time=Config.HOTWORD_SLEEP_TIME)
         sleep(1)  # @todo is this needed?
         # @todo this is throwing errors: ALSA lib confmisc.c:1281:(snd_func_refer) Unable to find definition 'defaults.bluealsa.device'
-        speech = SpeechInput()
 
+    speech = SpeechInput()
     # Output
     if Config.BUZZER_PIN is not None:
         speak = Braillespeak(Config.BUZZER_PIN, duration=80/1000)
 
+    buzzer = Buzzer(Config.BUZZER_PIN)
     animate = Animate()
     personality = Personality(mode=mode())
     # @todo 2k resistor needs switching to > 3k for 20v+ support.
@@ -110,9 +112,6 @@ def main():
     pub.sendMessage('log', msg="[Main] Loop started")
     # pub.sendMessage('speak', message='hi')
     try:
-        #pub.sendMessage('log', msg="[Personality] Training model")
-        #pub.sendMessage('vision:train')
-
         while loop:
             pub.sendMessage('loop')
             if time() - second_loop > 1:
