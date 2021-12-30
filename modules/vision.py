@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import cv2
 from imutils.video import FPS # for FSP only
 from modules.visionutils.faces import Faces
+from modules.visionutils.video_stream import VideoStream
 
 from pubsub import pub
 
@@ -13,9 +14,9 @@ class Vision:
         self.mode = kwargs.get('mode', Vision.MODE_MOTION)
         self.path = kwargs.get('path', '/')
         self.index = kwargs.get('index', 0)
-        self.video = cv2.VideoCapture(self.index)
+        self.video = VideoStream().start()
         #self.video.set(cv2.CAP_PROP_FPS, 1)
-        self.video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        # self.video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         self.static_back = None
         self.preview = kwargs.get('preview', False)
         self.accuracy = kwargs.get('accuracy', 10) # Was 5
@@ -43,7 +44,7 @@ class Vision:
 
     def exit(self):
         self.running = False
-        self.video.release()
+        self.video.stop()
         # Destroying all the windows
         cv2.destroyAllWindows()
         self.fps.stop()
@@ -55,15 +56,15 @@ class Vision:
     def detect(self):
         if not self.running:
             return
-        if not self.video.isOpened():
-            raise Exception('Unable to load camera')
+        # if not self.video.stream.isOpened():
+        #     raise Exception('Unable to load camera')
         # update the FPS counter
         self.fps.update()
 
 
         matches = []
 
-        check, frame = self.video.read()        
+        frame = self.video.read()
         
         if self.flip is True:
             frame = cv2.flip(frame, 0)

@@ -9,7 +9,7 @@ class Tracking:
         self.bounds = int(self.vision.dimensions[0] / (100 / bounds_percent))
         self.vision.add_lines(self._define_boundary_lines())
         self.ignore = 0
-        self.active = kwargs.get('active', False)
+        self.active = kwargs.get('active', True)
         pub.subscribe(self.loop, 'loop')
         pub.subscribe(self.set_state, 'rest', active=True)
         pub.subscribe(self.set_state, 'wake', active=True)
