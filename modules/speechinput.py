@@ -9,7 +9,8 @@ class SpeechInput:
     """
     def __init__(self, **kwargs):
         self.recognizer = sr.Recognizer()
-        self.mic = sr.Microphone(device_index=1) # @todo work with i2s, overriden to USB mic for now
+
+        self.mic = sr.Microphone(device_index=kwargs.get('device_index', 0))
         self.listening = False
 
         pub.subscribe(self.start, 'wake')

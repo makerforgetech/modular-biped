@@ -95,7 +95,7 @@ def main():
         sleep(1)  # @todo is this needed?
         # @todo this is throwing errors: ALSA lib confmisc.c:1281:(snd_func_refer) Unable to find definition 'defaults.bluealsa.device'
 
-    speech = SpeechInput()
+    speech = SpeechInput(device_index=1) # @todo overriden device_index to USB mic for now as i2s mics don't work
     # Output
     if Config.BUZZER_PIN is not None:
         speak = Braillespeak(Config.BUZZER_PIN, duration=80/1000)
