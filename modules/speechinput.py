@@ -11,7 +11,6 @@ class SpeechInput:
         self.recognizer = sr.Recognizer()
         self.recognizer.pause_threshold = 1
         self.device = kwargs.get('device_index', 0)
-        print('device ' + str(self.device))
         self.mic = sr.Microphone(device_index=self.device)
         self.listening = False
 
@@ -41,17 +40,16 @@ class SpeechInput:
                 pub.sendMessage('log', msg='[Speech] Detecting...')
 
                 audio = self.recognizer.listen(source, timeout=10, phrase_time_limit=5)
-                pub.sendMessage('led:eye', color='white')
+                pub.sendMessage('led', identifiers='top5', color='white')
                 pub.sendMessage('log', msg='[Speech] End Detection')
                 try:
                     val = self.recognizer.recognize_google(audio)
                     pub.sendMessage('log', msg='[Speech] I heard: ' + str(val))
                     pub.sendMessage('speech', msg=val.lower())
-                    pub.sendMessage('led:eye', color='red')
                 except sr.UnknownValueError as e:
                     pub.sendMessage('log:error', msg='[Speech] Detection Error: ' + str(e))
                 finally:
-                    pub.sendMessage('led:eye', color='off')
+                    pub.sendMessage('led', identifiers='top5', color='off')
 
     def stop(self):
         self.listening = False
