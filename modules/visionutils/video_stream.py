@@ -1,5 +1,6 @@
 import cv2
 from threading import Thread
+from pubsub import pub
 
 # Define VideoStream class to handle streaming of video from webcam in separate processing thread
 # Source - Adrian Rosebrock, PyImageSearch: https://www.pyimagesearch.com/2015/12/28/increasing-raspberry-pi-fps-with-python-and-opencv/
@@ -19,6 +20,7 @@ class VideoStream:
 
         # Variable to control when the camera is stopped
         self.stopped = False
+        pub.subscribe(self.stop, 'exit')
 
     def start(self):
         # Start the thread that reads frames from the video stream

@@ -120,7 +120,7 @@ class LED:
 
     def flashlight(self, on):
         if on:
-            self.set(self.all, LED.COLOR_WHITE)
+            self.set(self.all, LED.COLOR_WHITE_FULL)
             self.overridden = True
         else:
             self.overridden = False

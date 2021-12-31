@@ -78,7 +78,10 @@ def main():
 
     if mode() == Config.MODE_LIVE:
         # Vision / Tracking
-        vision = Vision(mode=Vision.MODE_FACES, rotate=False, path=path, preview=False)
+        preview = False
+        if len(sys.argv) > 1 and sys.argv[1] == 'preview':
+            preview = True
+        vision = Vision(mode=Vision.MODE_FACES, path=path, preview=preview)
         tracking = Tracking(vision)
         training = TrainModel(dataset=path + '/matches/trained', output='encodings.pickle')
     elif mode() == Config.MODE_KEYBOARD:
@@ -92,7 +95,7 @@ def main():
         sleep(1)  # @todo is this needed?
         # @todo this is throwing errors: ALSA lib confmisc.c:1281:(snd_func_refer) Unable to find definition 'defaults.bluealsa.device'
 
-    speech = SpeechInput().start()
+    speech = SpeechInput()
     # Output
     if Config.BUZZER_PIN is not None:
         speak = Braillespeak(Config.BUZZER_PIN, duration=80/1000)
@@ -130,7 +133,7 @@ def main():
         quit()
 
     finally:
-        speech.stop()
+        # speech.stop()
         pub.sendMessage("exit")
         pub.sendMessage("animate", action="sit")
         pub.sendMessage("animate", action="sleep")
