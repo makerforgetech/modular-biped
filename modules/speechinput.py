@@ -9,8 +9,10 @@ class SpeechInput:
     """
     def __init__(self, **kwargs):
         self.recognizer = sr.Recognizer()
-
-        self.mic = sr.Microphone(device_index=kwargs.get('device_index', 0))
+        self.recognizer.pause_threshold = 1
+        self.device = kwargs.get('device_index', 0)
+        print('device ' + str(self.device))
+        self.mic = sr.Microphone(device_index=self.device)
         self.listening = False
 
         pub.subscribe(self.start, 'wake')
@@ -37,7 +39,8 @@ class SpeechInput:
 
             while self.listening:
                 pub.sendMessage('log', msg='[Speech] Detecting...')
-                audio = self.recognizer.listen(source)
+
+                audio = self.recognizer.listen(source, timeout=10, phrase_time_limit=5)
                 pub.sendMessage('led:eye', color='white')
                 pub.sendMessage('log', msg='[Speech] End Detection')
                 try:
