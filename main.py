@@ -82,7 +82,7 @@ def main():
         if len(sys.argv) > 1 and sys.argv[1] == 'preview':
             preview = True
         vision = Vision(mode=Vision.MODE_FACES, path=path, preview=preview)
-        tracking = Tracking(vision)
+        tracking = Tracking(vision, thread=False)
         training = TrainModel(dataset=path + '/matches/trained', output='encodings.pickle')
     elif mode() == Config.MODE_KEYBOARD:
         keyboard = Keyboard()
@@ -133,7 +133,6 @@ def main():
         quit()
 
     finally:
-        # speech.stop()
         pub.sendMessage("exit")
         pub.sendMessage("animate", action="sit")
         pub.sendMessage("animate", action="sleep")
