@@ -27,6 +27,7 @@ class Feel:
         pub.subscribe(self.loop_minute, 'loop:60')
         # pub.subscribe(self.face, 'vision:detect:face') # every loop if a face is detected
         # pub.subscribe(self.motion, 'motion') # every second when detected
+        pub.subscribe(self.speech, 'speech') # Speech input detected
 
     def loop(self):
 
@@ -109,6 +110,10 @@ class Feel:
         elif val < RANGE_MIN:
             val = RANGE_MIN
         return val
+
+    def speech(self):
+        # It's fun to talk to someone
+        self.input(Feel.INPUT_TYPE_FUN)
 
     # def motion(self):
     #     self.input(Feel.INPUT_TYPE_COMPANY)
