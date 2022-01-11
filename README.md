@@ -17,6 +17,10 @@ To execute manual control via keyboard:
 ```
 ./manual_startup.sh
 ```
+To execute startup including a preview of the video feed (not available via SSH):
+```
+./preview_startup.sh
+```
 
 ## Features
 
@@ -86,8 +90,12 @@ sudo python3 i2smic.py
 `arecord -D plughw:0 -c2 -r 48000 -f S32_LE -t wav -V stereo -v file_stereo.wav`
 
 ### Voice Recognition
-Trigger word for voice recognition:
+Trigger word for voice recognition (currently unused):
 https://snowboy.kitt.ai/
+
+Voice recognition is enabled whenever a face is visible. 
+Ensure that the `device_index` specified in `modules/speechinput.py` matches your microphone. 
+See `scripts/speech.py` to list input devices and test. 
 
 ### Serial communication with Arduino
 

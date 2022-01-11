@@ -14,9 +14,9 @@ r = sr.Recognizer()
 # print(r.recognize_sphinx(audio))
 # print('done')
 
-with sr.AudioFile('file_stereo_i2s.wav') as source:
-    audio = r.record(source)
-print(r.recognize_google(audio))
+# with sr.AudioFile('file_stereo_i2s.wav') as source:
+#     audio = r.record(source)
+# print(r.recognize_google(audio))
 
 mic = sr.Microphone()
 for index, name in enumerate(sr.Microphone.list_microphone_names()):

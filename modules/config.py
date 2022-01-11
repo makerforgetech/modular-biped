@@ -75,7 +75,7 @@ class Config:
     # LEG_R_ANKLE_START_POS = 50
 
     # RGB NeoPixels
-    LED_COUNT = 7
+    LED_COUNT = 12
 
     # HotWord (uses Snowboy.ai)
     HOTWORD_MODEL = None #'modules/snowboy/resources/models/robot.pmdl'

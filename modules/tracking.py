@@ -1,4 +1,5 @@
 from pubsub import pub
+from threading import Thread
 
 class Tracking:
     def __init__(self, vision, bounds_percent=10, **kwargs):
@@ -10,15 +11,34 @@ class Tracking:
         self.vision.add_lines(self._define_boundary_lines())
         self.ignore = 0
         self.active = kwargs.get('active', False)
-        pub.subscribe(self.loop, 'loop')
+
+        self.use_thread = kwargs.get('thread', True) # Faster but uses max resources
+
+        if not self.use_thread:
+            pub.subscribe(self.loop, 'loop')
         pub.subscribe(self.set_state, 'rest', active=True)
         pub.subscribe(self.set_state, 'wake', active=True)
         pub.subscribe(self.set_state, 'sleep', active=False)
+        pub.subscribe(self.set_state, 'exit', active=False)
 
     def set_state(self, active):
         self.active = active
+        if active and self.use_thread:
+            Thread(target=self.loop_thread, args=()).start()
+
+    def loop_thread(self):
+        """
+        Begin tracking largest match at maximum available speed.
+        Pass 'thread=True' in kwargs to enable this
+        """
+        while self.active:
+            self.track_largest_match()
 
     def loop(self):
+        """
+        Use standard application loop to track largest match. More resource efficient but slightly slower response time.
+        Pass 'thread=False' to use this mode
+        """
         if not self.active:
             return
         self.track_largest_match()

@@ -40,7 +40,12 @@ class LED:
             'left' : 3,
             'bottom_left' : 4,
             'bottom_right' : 5,
-            'middle': 6
+            'middle': 6,
+            'top1': 7,
+            'top2': 8,
+            'top3': 9,
+            'top4': 10,
+            'top5': 11
         }
         self.all = range(self.count)
         self.all_eye = range(6)
@@ -104,7 +109,7 @@ class LED:
             if color >= 100:
                 color = 99 # max in range
             color = LED.COLOR_RED_TO_GREEN_100[color].rgb
-            color = (color[0]*2, color[1]*2, color[2]*2) # increase values to be used as LED RGB
+            color = (color[0]*5, color[1]*5, color[2]*5) # increase values to be used as LED RGB
         elif type(color) is str:
             color = LED.COLOR_MAP[color]
         for i in identifiers:
@@ -120,7 +125,7 @@ class LED:
 
     def flashlight(self, on):
         if on:
-            self.set(self.all, LED.COLOR_WHITE)
+            self.set(self.all, LED.COLOR_WHITE_FULL)
             self.overridden = True
         else:
             self.overridden = False

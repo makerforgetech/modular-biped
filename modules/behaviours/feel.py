@@ -35,10 +35,10 @@ class Feel:
         self.wakefulness = self.limit(self.wakefulness - randint(1, 2))
         self.contentment = self.limit(self.contentment - randint(5, 10))
 
-        pub.sendMessage('led', identifiers='top_right', color=self.wakefulness) # top right
-        pub.sendMessage('led', identifiers='top_left', color=self.attention) # top left
-        pub.sendMessage('led', identifiers='bottom_left', color=self.happiness) # bottom left
-        pub.sendMessage('led', identifiers='bottom_right', color=self.contentment) # bottom right
+        pub.sendMessage('led', identifiers='top1', color=self.wakefulness) # top right
+        pub.sendMessage('led', identifiers='top2', color=self.attention) # top left
+        pub.sendMessage('led', identifiers='top3', color=self.happiness) # bottom left
+        pub.sendMessage('led', identifiers='top4', color=self.contentment) # bottom right
 
     def loop_minute(self):
         # print(f"[Feelings] {str(self.attention)} {str(self.happiness)} {str(self.wakefulness)} {str(self.contentment)}")
