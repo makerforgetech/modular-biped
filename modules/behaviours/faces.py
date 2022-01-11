@@ -22,7 +22,7 @@ class Faces:
         pub.sendMessage('log:info', msg='[Personality] Face detected: ' + str(name))
         self.face_detected = True
         self.last_face = datetime.now()
-        self.state.set_state(Config.STATE_IDLE)
+        # self.state.set_state(Config.STATE_IDLE)
         if name == 'Unknown':
             self.state.set_eye('purple')
         else:

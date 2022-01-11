@@ -57,6 +57,8 @@ class Feel:
 
     def get_feelings(self):
         feelings = []
+        if self.attention == 100 and self.wakefulness == 100:
+            feelings.append('excited')
         if self.happiness < 10:
             feelings.append('sad')
         if self.attention < 30:
