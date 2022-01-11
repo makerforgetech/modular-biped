@@ -78,7 +78,8 @@ class Faces:
 
             if self.last_face != name:
                 self.last_face = name
-                pub.sendMessage('vision:detect:face', name=name)
+
+            pub.sendMessage('vision:detect:face', name=name)
 
             # update the list of names
             names.append(name)
