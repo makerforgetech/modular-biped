@@ -104,6 +104,8 @@ class LED:
         elif type(identifiers) is str:
             identifiers = [self.positions[identifiers]]
         # lookup color if string
+        if type(color) is float:
+            color = int(color)
         if type(color) is int:
             # Make color gradiant use possible @todo refactor
             if color >= 100:
@@ -118,7 +120,8 @@ class LED:
             #print(str(i) + str(color))
             try:
                 self.pixels[i] = color
-            except:
+            except Exception as e:
+                print(e)
                 pub.sendMessage('log', msg='[LED] Error in set pixels')
                 pass
         sleep(0.1)

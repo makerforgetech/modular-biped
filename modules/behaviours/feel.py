@@ -17,10 +17,10 @@ class Feel:
     OUTPUT_INTERVAL = 30
 
     def __init__(self, state):
-        self.happiness = RANGE_MAX / 2
-        self.contentment = RANGE_MAX / 2
-        self.attention = RANGE_MAX / 2
-        self.wakefulness = RANGE_MAX / 2
+        self.happiness = Feel.RANGE_MAX / 2
+        self.contentment = Feel.RANGE_MAX / 2
+        self.attention = Feel.RANGE_MAX / 2
+        self.wakefulness = Feel.RANGE_MAX / 2
 
         self.state = state  # the personality instance
         pub.subscribe(self.loop, 'loop:1')
@@ -44,7 +44,7 @@ class Feel:
         self.happiness = self.limit(self.happiness - randint(5, 10))
         self.wakefulness = self.limit(self.wakefulness - randint(1, 2))
         self.contentment = self.limit(self.contentment - randint(5, 10))
-
+        # print(f'[Feelings] {str(self.attention)} {str(self.happiness)} {str(self.wakefulness)} {str(self.contentment)}')
         # Update head LEDs
         pub.sendMessage('led', identifiers='top1', color=self.wakefulness) # left
         pub.sendMessage('led', identifiers='top2', color=self.attention)
@@ -77,7 +77,7 @@ class Feel:
         # print('Feeling input: ' + str(input_type))
         if input_type == Feel.INPUT_TYPE_INTERESTING:
             # Should make me more attentive and wake me up a little
-            self.attention = RANGE_MAX
+            self.attention = Feel.RANGE_MAX
             self.happiness += 10
             self.wakefulness += 10
             self.contentment += 30
@@ -87,7 +87,7 @@ class Feel:
             self.contentment += 10
         elif input_type == Feel.INPUT_TYPE_SCARY:
             # Should make me more attentive, but less content and happy
-            self.attention = RANGE_MAX
+            self.attention = Feel.RANGE_MAX
             self.happiness -= 20
             self.wakefulness += 50
             self.contentment -= 30
@@ -99,21 +99,21 @@ class Feel:
             self.contentment += 50
         elif input_type == Feel.INPUT_TYPE_STARTLING:
             # Should make me more attentive and awake, but less content and happy
-            self.attention = RANGE_MAX
+            self.attention = Feel.RANGE_MAX
             self.happiness -= 40
-            self.wakefulness = RANGE_MAX
+            self.wakefulness = Feel.RANGE_MAX
             self.contentment -= 10
         # print(str(self.attention) + ' ' + str(self.happiness) + ' ' + str(self.wakefulness) + ' ' + str(self.contentment))
 
     @staticmethod
     def limit(val):
-        if val > RANGE_MAX:
-            val = RANGE_MAX
-        elif val < RANGE_MIN:
-            val = RANGE_MIN
+        if val > Feel.RANGE_MAX:
+            val = Feel.RANGE_MAX
+        elif val < Feel.RANGE_MIN:
+            val = Feel.RANGE_MIN
         return val
 
-    def speech(self):
+    def speech(self, msg):
         # It's fun to talk to someone
         self.input(Feel.INPUT_TYPE_FUN)
 

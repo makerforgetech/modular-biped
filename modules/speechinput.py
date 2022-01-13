@@ -46,6 +46,8 @@ class SpeechInput:
                     val = self.recognizer.recognize_google(audio)
                     pub.sendMessage('log', msg='[Speech] I heard: ' + str(val))
                     pub.sendMessage('speech', msg=val.lower())
+                except sr.WaitTimeoutError as e:
+                    pub.sendMessage('log:error', msg='[Speech] Timeout Error: ' + str(e))
                 except sr.UnknownValueError as e:
                     pub.sendMessage('log:error', msg='[Speech] Detection Error: ' + str(e))
                 finally:
