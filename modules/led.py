@@ -67,7 +67,7 @@ class LED:
         pub.subscribe(self.eye, 'led:eye')
         pub.subscribe(self.off, 'led:off')
         pub.subscribe(self.eye, 'led:flashlight')
-        pub.subscribe(self.animate, 'led:animate')
+        pub.subscribe(self.party, 'led:party')
         pub.subscribe(self.exit, 'exit')
         pub.subscribe(self.speech, 'speech')
 
@@ -151,6 +151,18 @@ class LED:
         if color in LED.COLOR_MAP.keys() and self.pixels[self.positions['middle']] != color:
             pub.sendMessage('log', msg='[LED] Setting eye colour: ' + color)
             self.set(self.positions['middle'], LED.COLOR_MAP[color])
+
+    def party(self, color):
+        # self.animate(self.all, 'off', 'rainbow_cycle')
+
+        for j in range(256 * 1):
+            for i in range(self.count):
+                self.set(i, LED._wheel((int(i * 256 / self.count) + j) & 255))
+            return
+        print('done')
+
+        # threading.Thread(target=self.rainbow_cycle(self.all, 'off'))
+        # self.thread.start()
 
     def animate(self, identifiers, color, animation):
         """

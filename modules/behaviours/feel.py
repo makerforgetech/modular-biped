@@ -9,6 +9,7 @@ class Feel:
     INPUT_TYPE_SCARY = 2
     INPUT_TYPE_FUN = 3
     INPUT_TYPE_STARTLING = 4
+    INPUT_TYPE_MAX = 5
 
     RANGE_MAX = 100
     RANGE_MIN = 0
@@ -24,10 +25,12 @@ class Feel:
 
         self.state = state  # the personality instance
         pub.subscribe(self.loop, 'loop:1')
+        pub.subscribe(self.feel, 'loop:10')
         pub.subscribe(self.loop_minute, 'loop:60')
         # pub.subscribe(self.face, 'vision:detect:face') # every loop if a face is detected
         # pub.subscribe(self.motion, 'motion') # every second when detected
         pub.subscribe(self.speech, 'speech') # Speech input detected
+        pub.subscribe(self.puppet, 'puppet')  # Being puppeteered
 
     def loop(self):
 
@@ -39,17 +42,19 @@ class Feel:
         if self.state.behaviours.motion.is_motion():
             self.input(Feel.INPUT_TYPE_COMPANY)
 
+        # Update head LEDs
+        pub.sendMessage('led', identifiers='top1', color=self.wakefulness)  # left
+        pub.sendMessage('led', identifiers='top2', color=self.attention)
+        pub.sendMessage('led', identifiers='top3', color=self.happiness)
+        pub.sendMessage('led', identifiers='top4', color=self.contentment)  # right
+
+    def feel(self):
         # Get gradually bored and tired
         self.attention = self.limit(self.attention - randint(5,10))
         self.happiness = self.limit(self.happiness - randint(5, 10))
         self.wakefulness = self.limit(self.wakefulness - randint(1, 2))
         self.contentment = self.limit(self.contentment - randint(5, 10))
         # print(f'[Feelings] {str(self.attention)} {str(self.happiness)} {str(self.wakefulness)} {str(self.contentment)}')
-        # Update head LEDs
-        pub.sendMessage('led', identifiers='top1', color=self.wakefulness) # left
-        pub.sendMessage('led', identifiers='top2', color=self.attention)
-        pub.sendMessage('led', identifiers='top3', color=self.happiness)
-        pub.sendMessage('led', identifiers='top4', color=self.contentment) # right
 
     def loop_minute(self):
         # print(f"[Feelings] {str(self.attention)} {str(self.happiness)} {str(self.wakefulness)} {str(self.contentment)}")
@@ -57,7 +62,7 @@ class Feel:
 
     def get_feelings(self):
         feelings = []
-        if self.attention == 100 and self.wakefulness == 100:
+        if self.attention > 90 and self.wakefulness > 90:
             feelings.append('excited')
         if self.happiness < 10:
             feelings.append('sad')
@@ -82,8 +87,9 @@ class Feel:
             self.wakefulness += 10
             self.contentment += 30
         elif input_type == Feel.INPUT_TYPE_COMPANY:
-            # Shouldn't keep me awake, but should make me feel good
+            # Has to keep me awake a little, otherwise nothing wakes me up again!
             self.happiness += 10
+            self.wakefulness += 5
             self.contentment += 10
         elif input_type == Feel.INPUT_TYPE_SCARY:
             # Should make me more attentive, but less content and happy
@@ -103,6 +109,12 @@ class Feel:
             self.happiness -= 40
             self.wakefulness = Feel.RANGE_MAX
             self.contentment -= 10
+        elif input_type == Feel.INPUT_TYPE_MAX:
+            # Should make me more attentive and awake, but less content and happy
+            self.attention = Feel.RANGE_MAX
+            self.happiness =  Feel.RANGE_MAX
+            self.wakefulness = Feel.RANGE_MAX
+            self.contentment =  Feel.RANGE_MAX
         # print(str(self.attention) + ' ' + str(self.happiness) + ' ' + str(self.wakefulness) + ' ' + str(self.contentment))
 
     @staticmethod
@@ -116,6 +128,9 @@ class Feel:
     def speech(self, msg):
         # It's fun to talk to someone
         self.input(Feel.INPUT_TYPE_FUN)
+
+    def puppet(self):
+        self.input(Feel.INPUT_TYPE_MAX)
 
     # def motion(self):
     #     self.input(Feel.INPUT_TYPE_COMPANY)
