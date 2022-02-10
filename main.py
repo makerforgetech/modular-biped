@@ -25,7 +25,7 @@ from modules.visionutils.train_model import TrainModel
 from modules.animate import Animate
 from modules.power import Power
 from modules.keyboard import Keyboard
-# from modules.gamepad import Gamepad
+from modules.gamepad import Gamepad
 from modules.sensor import Sensor
 try:
     from modules.hotword import HotWord
@@ -89,7 +89,7 @@ def main():
     elif mode() == Config.MODE_KEYBOARD:
         keyboard = Keyboard()
 
-    # gamepad = Gamepad()
+    gamepad = Gamepad()
 
     # Voice
     if Config.HOTWORD_MODEL is not None:
@@ -117,7 +117,7 @@ def main():
     ten_second_loop = time()
     minute_loop = time()
     loop = True
-    pub.sendMessage('animate', action='wake')
+    # pub.sendMessage('animate', action='wake')
     #pub.sendMessage('animate', action='sit')
     #quit()
     # pub.sendMessage('speak', message='hi')
