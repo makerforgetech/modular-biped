@@ -29,7 +29,7 @@ class Config:
 
     servos = dict()
     # Everything is percentages except the range values.
-    servos['neck'] = {'pin': 2, 'range': [36, 170], 'start': 90}
+    servos['neck'] = {'pin': 2, 'range': [36, 170], 'start': 85}
     servos['tilt'] = {'pin': 3, 'range': [36, 125], 'start': 55}
     servos['pan'] = {'pin': 4, 'range': [0, 180], 'start': 60}
     servos['leg_l_hip'] = {'pin': 8, 'range': [0, 180], 'start': 80}

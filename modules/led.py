@@ -111,7 +111,7 @@ class LED:
             if color >= 100:
                 color = 99 # max in range
             color = LED.COLOR_RED_TO_GREEN_100[color].rgb
-            color = (color[0]*5, color[1]*5, color[2]*5) # increase values to be used as LED RGB
+            color = (color[0]*10, color[1]*10, color[2]*10) # increase values to be used as LED RGB
         elif type(color) is str:
             color = LED.COLOR_MAP[color]
         for i in identifiers:

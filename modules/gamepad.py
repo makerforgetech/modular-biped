@@ -10,6 +10,9 @@ class Gamepad:
     KEY_RIGHT = 106
     LEFT_CLICK = 272
     RIGHT_CLICK = 273
+    SPACE = 57
+    BACKSPACE = 14
+    RETURN = 28
 
     def __init__(self, **kwargs):
         self.running = False
@@ -53,6 +56,12 @@ class Gamepad:
                             pub.sendMessage('speak', message='hi')
                         elif event.code == Gamepad.RIGHT_CLICK:
                             pub.sendMessage('boredom:action')
+                        elif event.code == Gamepad.SPACE:
+                            pub.sendMessage('animate', action='stand')
+                        elif event.code == Gamepad.BACKSPACE:
+                            pub.sendMessage('animate', action='sit')
+                        elif event.code == Gamepad.RETURN:
+                            pub.sendMessage('animate', action='wake')
                         else:
                             print(event)
                     else:

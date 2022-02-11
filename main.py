@@ -42,6 +42,7 @@ from modules.personality import Personality
 from modules.battery import Battery
 from modules.braillespeak import Braillespeak
 from modules.buzzer import Buzzer
+from modules.pitemperature import PiTemperature
 
 def mode():
     if len(sys.argv) > 1 and sys.argv[1] == 'manual':
@@ -90,6 +91,7 @@ def main():
         keyboard = Keyboard()
 
     gamepad = Gamepad()
+    temp = PiTemperature()
 
     # Voice
     if Config.HOTWORD_MODEL is not None:
