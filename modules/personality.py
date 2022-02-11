@@ -48,7 +48,7 @@ class Personality:
         self.behaviours = SimpleNamespace(**behaviours)
 
     def loop(self):
-        if not self.is_asleep() and not self.behaviours.faces.face_detected and self.behaviours.motion.last_motion < self.past(2):
+        if not self.is_asleep() and not self.behaviours.faces.face_detected and not self.behaviours.motion.is_motion():
             self.set_eye('red')
 
         if self.state == Config.STATE_ALERT and self.lt(self.behaviours.faces.last_face, self.past(2*60)):
@@ -81,13 +81,16 @@ class Personality:
             pub.sendMessage("power:exit")
             self.set_eye('blue')
         elif state == Config.STATE_IDLE:
-            if self.is_resting():
+            if self.state == Config.STATE_RESTING or self.state == Config.STATE_SLEEPING:
                 pub.sendMessage('wake')
                 pub.sendMessage('animate', action="wake")
             pub.sendMessage('animate', action="sit")
             self.set_eye('blue')
         elif state == Config.STATE_ALERT:
-            pub.sendMessage('animate', action="stand")
+            if self.state == Config.STATE_RESTING or self.state == Config.STATE_SLEEPING:
+                pub.sendMessage('wake')
+                pub.sendMessage('animate', action="wake")
+            # pub.sendMessage('animate', action="stand")
         self.state = state
 
     def is_asleep(self):

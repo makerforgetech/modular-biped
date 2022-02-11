@@ -67,7 +67,7 @@ class LED:
         pub.subscribe(self.eye, 'led:eye')
         pub.subscribe(self.off, 'led:off')
         pub.subscribe(self.eye, 'led:flashlight')
-        pub.subscribe(self.animate, 'led:animate')
+        pub.subscribe(self.party, 'led:party')
         pub.subscribe(self.exit, 'exit')
         pub.subscribe(self.speech, 'speech')
 
@@ -104,12 +104,14 @@ class LED:
         elif type(identifiers) is str:
             identifiers = [self.positions[identifiers]]
         # lookup color if string
+        if type(color) is float:
+            color = int(color)
         if type(color) is int:
             # Make color gradiant use possible @todo refactor
             if color >= 100:
                 color = 99 # max in range
             color = LED.COLOR_RED_TO_GREEN_100[color].rgb
-            color = (color[0]*5, color[1]*5, color[2]*5) # increase values to be used as LED RGB
+            color = (color[0]*10, color[1]*10, color[2]*10) # increase values to be used as LED RGB
         elif type(color) is str:
             color = LED.COLOR_MAP[color]
         for i in identifiers:
@@ -118,7 +120,8 @@ class LED:
             #print(str(i) + str(color))
             try:
                 self.pixels[i] = color
-            except:
+            except Exception as e:
+                print(e)
                 pub.sendMessage('log', msg='[LED] Error in set pixels')
                 pass
         sleep(0.1)
@@ -148,6 +151,18 @@ class LED:
         if color in LED.COLOR_MAP.keys() and self.pixels[self.positions['middle']] != color:
             pub.sendMessage('log', msg='[LED] Setting eye colour: ' + color)
             self.set(self.positions['middle'], LED.COLOR_MAP[color])
+
+    def party(self, color):
+        # self.animate(self.all, 'off', 'rainbow_cycle')
+
+        for j in range(256 * 1):
+            for i in range(self.count):
+                self.set(i, LED._wheel((int(i * 256 / self.count) + j) & 255))
+            return
+        print('done')
+
+        # threading.Thread(target=self.rainbow_cycle(self.all, 'off'))
+        # self.thread.start()
 
     def animate(self, identifiers, color, animation):
         """
