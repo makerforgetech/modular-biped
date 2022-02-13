@@ -79,7 +79,7 @@ def main():
     if Config.MOTION_PIN is not None:
         motion = Sensor(Config.MOTION_PIN, pi=gpio)
 
-    video_dimensions = (1024, 768)
+    video_dimensions = (640, 480) #(1024, 768) - this halves the speed of image recognition
 
     if mode() == Config.MODE_LIVE:
         # Vision / Tracking
@@ -155,6 +155,7 @@ def main():
 
     finally:
         pub.sendMessage("vision:timelapse:stop")
+        pub.sendMessage("vision:timelapse:output")
         pub.sendMessage("exit")
         pub.sendMessage("animate", action="sit")
         pub.sendMessage("animate", action="sleep")
