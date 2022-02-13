@@ -79,12 +79,14 @@ def main():
     if Config.MOTION_PIN is not None:
         motion = Sensor(Config.MOTION_PIN, pi=gpio)
 
+    video_dimensions = (1024, 768)
+
     if mode() == Config.MODE_LIVE:
         # Vision / Tracking
         preview = False
         if len(sys.argv) > 1 and sys.argv[1] == 'preview':
             preview = True
-        vision = Vision(mode=Vision.MODE_FACES, path=path, preview=preview)
+        vision = Vision(mode=Vision.MODE_FACES, path=path, preview=preview, dimensions=video_dimensions)
         tracking = Tracking(vision, thread=False)
         training = TrainModel(dataset=path + '/matches/trained', output='encodings.pickle')
         personality = Personality()
@@ -94,7 +96,7 @@ def main():
     gamepad = Gamepad()
     temp = PiTemperature()
 
-    timelapse = Timelapse(path=path)
+    timelapse = Timelapse(path=path, dimensions=video_dimensions)
 
     # Voice
     if Config.HOTWORD_MODEL is not None:
@@ -152,6 +154,7 @@ def main():
         quit()
 
     finally:
+        pub.sendMessage("vision:timelapse:stop")
         pub.sendMessage("exit")
         pub.sendMessage("animate", action="sit")
         pub.sendMessage("animate", action="sleep")

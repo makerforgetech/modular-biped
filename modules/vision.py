@@ -14,7 +14,7 @@ class Vision:
         self.mode = kwargs.get('mode', Vision.MODE_MOTION)
         self.path = kwargs.get('path', '/')
         self.index = kwargs.get('index', 0)
-        self.video = VideoStream().start()
+
         #self.video.set(cv2.CAP_PROP_FPS, 1)
         # self.video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         self.static_back = None
@@ -26,7 +26,8 @@ class Vision:
         if self.rotate:
             self.dimensions = (480, 640)
         else:
-            self.dimensions = (640, 480)
+            self.dimensions = kwargs.get('dimensions', (640, 480))
+        self.video = VideoStream(resolution=self.dimensions).start()
         self.lines = []
         self.current_match = False
         self.last_match = datetime.now()  # @todo improve

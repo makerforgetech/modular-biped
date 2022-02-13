@@ -2,7 +2,8 @@
 import cv2
 import time
 from pubsub import pub
-from utils import CFEVideoConf, image_resize
+# from utils import CFEVideoConf, image_resize
+import glob, os
 
 class Timelapse:
     SECONDS_BETWEEN_FRAMES = 1
@@ -12,6 +13,7 @@ class Timelapse:
         self.path = kwargs.get('path', '/')
         self.timelapse_folder = self.path + kwargs.get('folder', '/timelapse')
         self.output_path = self.path + kwargs.get('file', '/timelapse.mp4')
+        self.dimensions = kwargs.get('dimensions', (640, 480))
         self.last_save = None
 
         self.running = False
@@ -21,6 +23,7 @@ class Timelapse:
 
     def start(self):
         self.running = True
+        self.last_save = time.time()
 
     def stop(self):
         self.running = False
@@ -29,15 +32,15 @@ class Timelapse:
     def process(self, image):
         if not self.running or image is None or self.last_save > time.time() - Timelapse.SECONDS_BETWEEN_FRAMES:
             return
-
+        file = self.timelapse_folder + '/' + str(time.time() * 1000) + '.jpg'
         self.last_save = time.time()
-        cv2.imwrite(self.timelapse_folder + '/' + str(time.time() * 1000) + '.jpg', image)
+        cv2.imwrite(file, image)
 
     def output(self, clear_images=True):
-        config = CFEVideoConf(cap, filepath=self.output_path, res='720p')
-        out = cv2.VideoWriter(save_path, config.video_type, Timelapse.OUTPUT_FPS, config.dims)
+        fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+        out = cv2.VideoWriter(self.output_path, fourcc, Timelapse.OUTPUT_FPS, self.dimensions)
 
-        image_list = glob.glob(f"{self.timelapse_folder}/*.jpg")
+        image_list = glob.glob(self.timelapse_folder + "/*.jpg")
         sorted_images = sorted(image_list, key=os.path.getmtime)
         for file in sorted_images:
             image_frame = cv2.imread(file)
