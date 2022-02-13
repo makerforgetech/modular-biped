@@ -43,6 +43,7 @@ from modules.battery import Battery
 from modules.braillespeak import Braillespeak
 from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
+from modules.visionutils.timelapse import Timelapse
 
 def mode():
     if len(sys.argv) > 1 and sys.argv[1] == 'manual':
@@ -93,6 +94,8 @@ def main():
     gamepad = Gamepad()
     temp = PiTemperature()
 
+    timelapse = Timelapse(path=path)
+
     # Voice
     if Config.HOTWORD_MODEL is not None:
         hotword = HotWord(Config.HOTWORD_MODEL)
@@ -124,6 +127,8 @@ def main():
     #quit()
     # pub.sendMessage('speak', message='hi')
     # pub.sendMessage('animate', action='celebrate')
+    pub.sendMessage('vision:timelapse:start') # todo add this to a command or key binding
+
     try:
         pub.sendMessage('log', msg="[Main] Loop started")
         while loop:

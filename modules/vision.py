@@ -61,11 +61,11 @@ class Vision:
         # update the FPS counter
         self.fps.update()
 
-
         matches = []
 
         frame = self.video.read()
-        
+        pub.sendMessage('vision:image', image=frame)
+
         if self.flip is True:
             frame = cv2.flip(frame, 0)
 
