@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import cv2
 from imutils.video import FPS # for FSP only
 from modules.visionutils.faces import Faces
-from modules.visionutils.video_stream import VideoStream
+
 
 from pubsub import pub
 
@@ -10,24 +10,18 @@ class Vision:
     MODE_MOTION = 0
     MODE_FACES = 1
 
-    def __init__(self, **kwargs):
+    def __init__(self, video, **kwargs):
         self.mode = kwargs.get('mode', Vision.MODE_MOTION)
         self.path = kwargs.get('path', '/')
         self.index = kwargs.get('index', 0)
-
-        #self.video.set(cv2.CAP_PROP_FPS, 1)
-        # self.video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         self.static_back = None
+        self.dimensions = kwargs.get('resolution', (640, 480))
         self.preview = kwargs.get('preview', False)
         self.accuracy = kwargs.get('accuracy', 10) # Was 5
 
         self.flip = kwargs.get('flip', False)
         self.rotate = kwargs.get('rotate', False)
-        if self.rotate:
-            self.dimensions = (480, 640)
-        else:
-            self.dimensions = kwargs.get('dimensions', (640, 480))
-        self.video = VideoStream(resolution=self.dimensions).start()
+        self.video = video
         self.lines = []
         self.current_match = False
         self.last_match = datetime.now()  # @todo improve
@@ -65,7 +59,8 @@ class Vision:
         matches = []
 
         frame = self.video.read()
-        pub.sendMessage('vision:image', image=frame)
+        if frame is None:
+            return
 
         if self.flip is True:
             frame = cv2.flip(frame, 0)

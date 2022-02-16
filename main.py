@@ -43,6 +43,7 @@ from modules.battery import Battery
 from modules.braillespeak import Braillespeak
 from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
+from modules.visionutils.video_stream import VideoStream
 from modules.visionutils.timelapse import Timelapse
 
 def mode():
@@ -79,15 +80,16 @@ def main():
     if Config.MOTION_PIN is not None:
         motion = Sensor(Config.MOTION_PIN, pi=gpio)
 
-    video_dimensions = (640, 480) #(1024, 768) - this halves the speed of image recognition
+    camera_resolution = (640, 480) #(1024, 768) #- this halves the speed of image recognition
+    video_stream = VideoStream(resolution=camera_resolution).start()
 
     if mode() == Config.MODE_LIVE:
         # Vision / Tracking
         preview = False
         if len(sys.argv) > 1 and sys.argv[1] == 'preview':
             preview = True
-        vision = Vision(mode=Vision.MODE_FACES, path=path, preview=preview, dimensions=video_dimensions)
-        tracking = Tracking(vision, thread=False)
+        vision = Vision(video_stream, mode=Vision.MODE_FACES, path=path, preview=preview, resolution=camera_resolution)
+        tracking = Tracking(vision)
         training = TrainModel(dataset=path + '/matches/trained', output='encodings.pickle')
         personality = Personality()
     elif mode() == Config.MODE_KEYBOARD:
@@ -96,7 +98,7 @@ def main():
     gamepad = Gamepad()
     temp = PiTemperature()
 
-    timelapse = Timelapse(path=path, dimensions=video_dimensions)
+    timelapse = Timelapse(video_stream, path=path, original_resolution=camera_resolution)
 
     # Voice
     if Config.HOTWORD_MODEL is not None:
@@ -124,12 +126,8 @@ def main():
     ten_second_loop = time()
     minute_loop = time()
     loop = True
-    # pub.sendMessage('animate', action='wake')
-    #pub.sendMessage('animate', action='sit')
-    #quit()
     # pub.sendMessage('speak', message='hi')
     # pub.sendMessage('animate', action='celebrate')
-    pub.sendMessage('vision:timelapse:start') # todo add this to a command or key binding
 
     try:
         pub.sendMessage('log', msg="[Main] Loop started")
@@ -154,8 +152,6 @@ def main():
         quit()
 
     finally:
-        pub.sendMessage("vision:timelapse:stop")
-        pub.sendMessage("vision:timelapse:output")
         pub.sendMessage("exit")
         pub.sendMessage("animate", action="sit")
         pub.sendMessage("animate", action="sleep")

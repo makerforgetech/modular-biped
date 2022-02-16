@@ -9,11 +9,8 @@ class VideoStream:
 
     def __init__(self, index=0, resolution=(640, 480), framerate=30):
         # Initialize the PiCamera and the camera image stream
-        self.stream = cv2.VideoCapture(index)
-        ret = self.stream.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-        # ret = self.stream.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
-        ret = self.stream.set(3, resolution[0])
-        ret = self.stream.set(4, resolution[1])
+        self.stream = None
+        self.configure(resolution, index)
 
         # Read first frame from the stream
         (self.grabbed, self.frame) = self.stream.read()
@@ -38,6 +35,18 @@ class VideoStream:
 
             # Otherwise, grab the next frame from the stream
             (self.grabbed, self.frame) = self.stream.read()
+
+    def configure(self, res, index=0):
+        if self.stream is not None:
+            self.stream.release()
+        self.stream = cv2.VideoCapture(index)
+        self.stream.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        self.set_resolution(res)
+        return self.stream
+
+    def set_resolution(self, res):
+        self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, res[0])
+        self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, res[1])
 
     def read(self):
         # Return the most recent frame
