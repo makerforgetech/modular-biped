@@ -18,8 +18,8 @@ def test_reset():
     assert True  # @todo
 
 
-def test_breathe():
-    led = RGB(0, 1, 2)
-    led.breathe(0)
-
-    assert True  # @todo
+# def test_breathe():
+#     led = RGB(0, 1, 2)
+#     led.breathe(0)
+#
+#     assert True  # @todo
