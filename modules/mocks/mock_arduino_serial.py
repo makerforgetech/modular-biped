@@ -5,6 +5,6 @@ from unittest.mock import Mock
 #     def sendMessage(val):
 #         return val
 
-module = type(sys)('pubsub')
-module.pub = Mock()
-sys.modules['pubsub'] = module
+module = type(sys)('modules.arduinoserial')
+module.ArduinoSerial = Mock()
+sys.modules['modules.arduinoserial'] = module
