@@ -17,9 +17,9 @@ jobs:
           name: Run tests
           command: python -m pytest
       - persist_to_workspace:
-          root: ~/project
+          root: ~/project/modules
           paths:
-            - ./modules
+            - .
 
   # deploy: # this can be any name you choose
   #   executor: python/default
