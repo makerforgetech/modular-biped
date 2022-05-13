@@ -8,6 +8,9 @@ jobs:
     executor: python/default
     steps:
       - checkout
+      - run:
+          name: Install pytest
+          command: pip install -U pytest
 #      - python/install-packages:
 #          pkg-manager: pip
       - run:
