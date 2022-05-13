@@ -18,7 +18,7 @@ jobs:
 #          pkg-manager: pip
       - run:
           name: Run tests
-          command: python -m pytest --cov=modules
+          command: python -m pytest --cov=modules --cov-report term-missing
       - persist_to_workspace:
           root: ~/project
           paths:
