@@ -11,11 +11,14 @@ jobs:
       - run:
           name: Install pytest
           command: pip install -U pytest
+      - run:
+          name: Install coverage
+          command: pip install pytest-cov
 #      - python/install-packages:
 #          pkg-manager: pip
       - run:
           name: Run tests
-          command: python -m pytest
+          command: python -m pytest --cov=modules
       - persist_to_workspace:
           root: ~/project
           paths:
