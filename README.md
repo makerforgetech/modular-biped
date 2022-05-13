@@ -89,13 +89,66 @@ sudo python3 i2smic.py
 `arecord -l`
 `arecord -D plughw:0 -c2 -r 48000 -f S32_LE -t wav -V stereo -v file_stereo.wav`
 
-### Voice Recognition
-Trigger word for voice recognition (currently unused):
+_Note:_ See below for additional configuration to support voice recognition
+
+### Speech Recognition
+Trigger word for voice recognition (currently not used):
 https://snowboy.kitt.ai/
 
-Voice recognition is enabled whenever a face is visible. 
+Speech recognition is enabled whenever a face is visible. 
 Ensure that the `device_index` specified in `modules/speechinput.py` matches your microphone. 
-See `scripts/speech.py` to list input devices and test. 
+
+See `scripts/speech.py` to list input devices and test. See below for MEMS microphone configuration
+
+### MEMS Microphone configuration for speech recognition
+
+By default the Adafruit I2S MEMS Microphone Breakout does not work with speech recognition. 
+
+To support voice recognition on the MEMS microphone(s) the following configuration changes are needed.
+
+`sudo apt-get install ladspa-sdk`
+
+Create `/etc/asound.conf` with the following content:
+
+``` 
+pcm.pluglp {
+    type ladspa
+    slave.pcm "plughw:0"
+    path "/usr/lib/ladspa"
+    capture_plugins [
+   {   
+      label hpf
+      id 1042
+   }
+        {
+                label amp_mono
+                id 1048
+                input {
+                    controls [ 30 ]
+                }
+        }
+    ]
+}
+
+pcm.lp {
+    type plug
+    slave.pcm pluglp
+}
+```
+
+This enables the device 'lp' to be referenced in voice recognition. Shown with index `18` in the example below.
+
+Sample rate should also be set to `16000`
+
+`mic = sr.Microphone(device_index=18, sample_rate=16000)`
+
+References: 
+
+* [MEMS Microphone Installation Guide](https://learn.adafruit.com/adafruit-i2s-mems-microphone-breakout/raspberry-pi-wiring-test)
+
+* [Adafruit Support discussing issue](https://forums.adafruit.com/viewtopic.php?f=50&t=181675&p=883853&hilit=MEMS#p883853)
+
+* [Referenced documentation of fix](https://github.com/mpromonet/v4l2rtspserver/issues/94)
 
 ### Serial communication with Arduino
 
