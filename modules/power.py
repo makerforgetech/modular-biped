@@ -13,7 +13,7 @@ class Power:
         pub.subscribe(self.use, 'power:use')
         pub.subscribe(self.release, 'power:release')
         pub.subscribe(self.exit, 'power:exit')
-        pub.sendMessage('serial', type=ArduinoSerial.DEVICE_PIN, identifier=self.pin, message=Power.STATE_ON)  # high is off, low is on
+        pub.sendMessage('serial', type=ArduinoSerial.DEVICE_PIN, identifier=self.pin, message=Power.STATE_OFF)  # high is off, low is on
 
     def __del__(self):
         if self.timer is not None:
@@ -35,7 +35,7 @@ class Power:
         self.active_count = self.active_count - 1
         if self.active_count <= 0:
             self.active_count = 0  # just ensure that it hasn't gone below 0
-#            pub.sendMessage('serial', type=ArduinoSerial.DEVICE_PIN, identifier=self.pin, message=Power.STATE_OFF)
+            pub.sendMessage('serial', type=ArduinoSerial.DEVICE_PIN, identifier=self.pin, message=Power.STATE_OFF)
             if self.thread:
                 if self.timer is not None:
                     self.timer.cancel()

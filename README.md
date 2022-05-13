@@ -1,3 +1,5 @@
+[![Companion Robot](https://circleci.com/gh/danic85/companion-robot.svg?style=svg)](https://github.com/danic85/companion-robot/)
+
 # Robotics Development Environment
 This platform has been created to allow modular development and experimentation of robotics in python / C++ using the Raspberry Pi and Arduino.
 

@@ -5,7 +5,7 @@ pypubsub
 
 # Speech recognition
 SpeechRecognition
-pocketsphinx
+#pocketsphinx
 
 # Chat bot
 #Cython
