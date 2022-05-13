@@ -13,6 +13,9 @@ class Gamepad:
     SPACE = 57
     BACKSPACE = 14
     RETURN = 28
+    KEY_T = 20
+    KEY_Y = 21
+    # KEY_Q = 4
 
     def __init__(self, **kwargs):
         self.running = False
@@ -62,6 +65,12 @@ class Gamepad:
                             pub.sendMessage('animate', action='sit')
                         elif event.code == Gamepad.RETURN:
                             pub.sendMessage('animate', action='wake')
+                        elif event.code == Gamepad.KEY_T:
+                            pub.sendMessage('vision:timelapse:start')
+                        elif event.code == Gamepad.KEY_Y:
+                            pub.sendMessage('vision:timelapse:stop')
+                        # elif event.code == Gamepad.KEY_Q:
+                        #     raise pub.sendMessage('exit')
                         else:
                             print(event)
                     else:

@@ -43,6 +43,8 @@ from modules.battery import Battery
 from modules.braillespeak import Braillespeak
 from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
+from modules.visionutils.video_stream import VideoStream
+from modules.visionutils.timelapse import Timelapse
 
 def mode():
     if len(sys.argv) > 1 and sys.argv[1] == 'manual':
@@ -78,13 +80,16 @@ def main():
     if Config.MOTION_PIN is not None:
         motion = Sensor(Config.MOTION_PIN, pi=gpio)
 
+    camera_resolution = (640, 480) #(1024, 768) #- this halves the speed of image recognition
+    video_stream = VideoStream(resolution=camera_resolution).start()
+
     if mode() == Config.MODE_LIVE:
         # Vision / Tracking
         preview = False
         if len(sys.argv) > 1 and sys.argv[1] == 'preview':
             preview = True
-        vision = Vision(mode=Vision.MODE_FACES, path=path, preview=preview)
-        tracking = Tracking(vision, thread=False)
+        vision = Vision(video_stream, mode=Vision.MODE_FACES, path=path, preview=preview, resolution=camera_resolution)
+        tracking = Tracking(vision)
         training = TrainModel(dataset=path + '/matches/trained', output='encodings.pickle')
         personality = Personality()
     elif mode() == Config.MODE_KEYBOARD:
@@ -92,6 +97,8 @@ def main():
 
     gamepad = Gamepad()
     temp = PiTemperature()
+
+    timelapse = Timelapse(video_stream, path=path, original_resolution=camera_resolution)
 
     # Voice
     if Config.HOTWORD_MODEL is not None:
@@ -119,11 +126,9 @@ def main():
     ten_second_loop = time()
     minute_loop = time()
     loop = True
-    # pub.sendMessage('animate', action='wake')
-    #pub.sendMessage('animate', action='sit')
-    #quit()
     # pub.sendMessage('speak', message='hi')
     # pub.sendMessage('animate', action='celebrate')
+
     try:
         pub.sendMessage('log', msg="[Main] Loop started")
         while loop:
