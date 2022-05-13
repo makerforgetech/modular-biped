@@ -19,7 +19,7 @@ jobs:
       - persist_to_workspace:
           root: ~/project
           paths:
-            - .
+            - ./modules
 
   # deploy: # this can be any name you choose
   #   executor: python/default
