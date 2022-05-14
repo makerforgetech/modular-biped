@@ -24,6 +24,10 @@ To execute startup including a preview of the video feed (not available via SSH)
 ./preview_startup.sh
 ```
 
+###Testing
+```
+python3 -m pytest --cov=modules --cov-report term-missing
+```
 ## Features
 
 ### Facial detection and tracking
