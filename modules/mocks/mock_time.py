@@ -1,10 +1,7 @@
 import sys
-
-
-# disable the real sleep command for faster unit tests
-def sleep(val):
-    return val
+from unittest.mock import Mock
 
 module = type(sys)('time')
-module.sleep = sleep
-sys.modules['time'] = module
+module.sleep = Mock()
+module.localtime = Mock()
+# sys.modules['time'] = module
