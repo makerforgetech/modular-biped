@@ -4,6 +4,9 @@ import time
 from pubsub import pub
 
 from modules.melodies.deck_the_halls import MelodyDeckTheHalls
+from modules.melodies.happy_birthday import MelodyHappyBirthday
+from modules.melodies.notes import MelodyNotes
+
 
 class Buzzer:
     def buzz(self, frequency, length):  # create the function "buzz" and feed it the pitch and duration)
@@ -30,6 +33,8 @@ class Buzzer:
 
         pub.subscribe(self.speech, 'speech')
 
+        self.play(MelodyHappyBirthday.MELODY, MelodyHappyBirthday.TEMPO, MelodyHappyBirthday.PAUSE, MelodyHappyBirthday.PACE)
+
         # self.deck_the_halls()
 
 
@@ -39,6 +44,9 @@ class Buzzer:
     def speech(self, msg):
         if 'merry christmas' in msg:
             self.deck_the_halls()
+        if 'birthday today' in msg:
+            self.play(MelodyHappyBirthday.MELODY, MelodyHappyBirthday.TEMPO, MelodyHappyBirthday.PAUSE,
+                      MelodyHappyBirthday.PACE)
 
     def deck_the_halls(self):
         self.play(MelodyDeckTheHalls.MELODY, MelodyDeckTheHalls.TEMPO, MelodyDeckTheHalls.PAUSE, MelodyDeckTheHalls.PACE)
@@ -47,6 +55,8 @@ class Buzzer:
         for i in range(0, len(melody)):  # Play song
 
             noteDuration = pace / tempo[i]
+            if type(melody[i]) is not int:
+                melody[i] = MelodyNotes.notes[melody[i]]
             self.buzz(melody[i], noteDuration)  # Change the frequency along the song note
 
             pauseBetweenNotes = noteDuration * pause
