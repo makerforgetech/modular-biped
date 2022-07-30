@@ -72,13 +72,11 @@ class Personality:
             pub.sendMessage("sleep")
             pub.sendMessage("animate", action="sleep")
             pub.sendMessage("animate", action="sit")
-            pub.sendMessage("power:exit")
             pub.sendMessage("led:off")
         elif state == Config.STATE_RESTING:
             pub.sendMessage('rest')
             pub.sendMessage("animate", action="sit")
             pub.sendMessage("animate", action="sleep")
-            pub.sendMessage("power:exit")
             self.set_eye('blue')
         elif state == Config.STATE_IDLE:
             if self.state == Config.STATE_RESTING or self.state == Config.STATE_SLEEPING:

@@ -5,6 +5,7 @@ from pubsub import pub
 class Power:
     STATE_ON = 0
     STATE_OFF = 1
+
     def __init__(self, pin, **kwargs):
         self.pin = pin
         self.active_count = 0

@@ -52,14 +52,12 @@ def mode():
     return Config.MODE_LIVE
 
 def main():
+    print('Starting...')
     path = os.path.dirname(__file__)
     log = LogWrapper(path=os.path.dirname(__file__))
 
     # Throw exception to safely exit script when terminated
     signal.signal(signal.SIGTERM, Config.exit)
-
-    # POWER
-    power = Power(Config.POWER_ENABLE_PIN)
 
     # GPIO
     gpio = pigpio.pi()
@@ -67,13 +65,13 @@ def main():
     # Arduino connection
     serial = ArduinoSerial()
 
-    power.use()
-    sleep(2)  # @todo possible fix for PD bug
-
     servos = dict()
     for key in Config.servos:
         s = Config.servos[key]
         servos[key] = Servo(s['pin'], key, s['range'], start_pos=s['start'])
+
+    # POWER
+    power = Power(Config.POWER_ENABLE_PIN)
 
     led = LED(Config.LED_COUNT)
 
