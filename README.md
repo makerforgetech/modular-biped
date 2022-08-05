@@ -3,6 +3,13 @@
 # Robotics Development Framework
 This platform has been created to allow modular development and experimentation of robotics in python / C++ using the Raspberry Pi and Arduino.
 
+## Coral TPU Accelerator
+
+To use the Googla Coral USB Accelerator, first flash the Pi SD card with the image found in the [AIY Maker Kit](https://aiyprojects.withgoogle.com/maker/)
+([Download as of 2022-08-05](https://github.com/google-coral/aiy-maker-kit-tools/releases/download/v20220518/aiy-maker-kit-2022-05-18.img.xz))
+
+(I attempted to install the required software from the coral [getting started guide](https://coral.ai/docs/accelerator/get-started#1-install-the-edge-tpu-runtime) but I was unable to get past an error relating to grpico "GLIBC_2.29' not found")
+
 ## Installation
 ```
 chmod 777 install.sh
