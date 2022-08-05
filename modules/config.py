@@ -14,6 +14,9 @@ class Config:
     MODE_KEYBOARD = 5
     MODE_LIVE = 6
 
+
+    VISION_MODE = 'coral' # or 'opencv'
+
     # GPIO
     # gpio = pigpio.pi()
 

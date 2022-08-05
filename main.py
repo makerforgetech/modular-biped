@@ -19,13 +19,10 @@ import schedule
 # Import modules
 from modules.config import Config
 from modules.actuators.servo import Servo
-from modules.vision import Vision
-from modules.tracking import Tracking
-from modules.visionutils.train_model import TrainModel
 from modules.animate import Animate
 from modules.power import Power
 from modules.keyboard import Keyboard
-from modules.gamepad import Gamepad
+# from modules.gamepad import Gamepad
 from modules.sensor import Sensor
 try:
     from modules.hotword import HotWord
@@ -34,17 +31,27 @@ except ModuleNotFoundError as e:
 
 import sys
 
-
 from modules.speechinput import SpeechInput
 from modules.arduinoserial import ArduinoSerial
-from modules.led import LED
+# from modules.led import LED
 from modules.personality import Personality
-from modules.battery import Battery
+# from modules.battery import Battery
 from modules.braillespeak import Braillespeak
 from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
-from modules.visionutils.video_stream import VideoStream
-from modules.visionutils.timelapse import Timelapse
+
+
+if Config.VISION_MODE is 'opencv':
+    from modules.opencv.vision import Vision
+    from modules.opencv.tracking import Tracking
+    from modules.opencv.train_model import TrainModel
+    from modules.opencv.video_stream import VideoStream
+    from modules.opencv.timelapse import Timelapse
+elif Config.VISION_MODE is 'coral':
+    from modules.coral.vision import Vision
+    from modules.coral.tracking import Tracking
+
+
 
 def mode():
     if len(sys.argv) > 1 and sys.argv[1] == 'manual':
@@ -73,30 +80,36 @@ def main():
     # POWER
     power = Power(Config.POWER_ENABLE_PIN)
 
-    led = LED(Config.LED_COUNT)
+    # led = LED(Config.LED_COUNT)
 
     if Config.MOTION_PIN is not None:
         motion = Sensor(Config.MOTION_PIN, pi=gpio)
 
-    camera_resolution = (640, 480) #(1024, 768) #- this halves the speed of image recognition
-    video_stream = VideoStream(resolution=camera_resolution).start()
+    
 
     if mode() == Config.MODE_LIVE:
         # Vision / Tracking
         preview = False
         if len(sys.argv) > 1 and sys.argv[1] == 'preview':
             preview = True
-        vision = Vision(video_stream, mode=Vision.MODE_FACES, path=path, preview=preview, resolution=camera_resolution)
-        tracking = Tracking(vision)
-        training = TrainModel(dataset=path + '/matches/trained', output='encodings.pickle')
+
+        if Config.VISION_MODE is 'opencv':
+            camera_resolution = (640, 480) #(1024, 768) #- this halves the speed of image recognition
+            video_stream = VideoStream(resolution=camera_resolution).start()
+            vision = Vision(video_stream, mode=Vision.MODE_FACES, path=path, preview=preview, resolution=camera_resolution)
+            tracking = Tracking(vision)
+            training = TrainModel(dataset=path + '/matches/trained', output='encodings.pickle')
+            # timelapse = Timelapse(video_stream, path=path, original_resolution=camera_resolution)
+        elif Config.VISION_MODE is 'coral':
+            vision = Vision(preview=preview, mode='face')
+            tracking = Tracking()
+
         personality = Personality()
     elif mode() == Config.MODE_KEYBOARD:
         keyboard = Keyboard()
 
-    gamepad = Gamepad()
+    # gamepad = Gamepad()
     temp = PiTemperature()
-
-    timelapse = Timelapse(video_stream, path=path, original_resolution=camera_resolution)
 
     # Voice
     if Config.HOTWORD_MODEL is not None:
