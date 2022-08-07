@@ -6,7 +6,13 @@ class Tracking:
     TRACKING_MOVE_PERCENT = 10 # Larger number = smaller movement
 
     MATCH_PERSON_ID = 0 # The Id of the 'person object': {0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 4: 'airplane', 5: 'bus', 6: 'train', 7: 'truck', 8: 'boat', 9: 'traffic light', 10: 'fire hydrant', 11: 'n/a', 12: 'stop sign', 13: 'parking meter', 14: 'bench', 15: 'bird', 16: 'cat', 17: 'dog', 18: 'horse', 19: 'sheep', 20: 'cow', 21: 'elephant', 22: 'bear', 23: 'zebra', 24: 'giraffe', 25: 'n/a', 26: 'backpack', 27: 'umbrella', 28: 'n/a', 29: 'n/a', 30: 'handbag', 31: 'tie', 32: 'suitcase', 33: 'frisbee', 34: 'skis', 35: 'snowboard', 36: 'sports ball', 37: 'kite', 38: 'baseball bat', 39: 'baseball glove', 40: 'skateboard', 41: 'surfboard', 42: 'tennis racket', 43: 'bottle', 44: 'n/a', 45: 'wine glass', 46: 'cup', 47: 'fork', 48: 'knife', 49: 'spoon', 50: 'bowl', 51: 'banana', 52: 'apple', 53: 'sandwich', 54: 'orange', 55: 'broccoli', 56: 'carrot', 57: 'hot dog', 58: 'pizza', 59: 'donut', 60: 'cake', 61: 'chair', 62: 'couch', 63: 'potted plant', 64: 'bed', 65: 'n/a', 66: 'dining table', 67: 'n/a', 68: 'n/a', 69: 'toilet', 70: 'n/a', 71: 'tv', 72: 'laptop', 73: 'mouse', 74: 'remote', 75: 'keyboard', 76: 'cell phone', 77: 'microwave', 78: 'oven', 79: 'toaster', 80: 'sink', 81: 'refrigerator', 82: 'n/a', 83: 'book', 84: 'clock', 85: 'vase', 86: 'scissors', 87: 'teddy bear', 88: 'hair drier', 89: 'toothbrush'}
-    VIDEO_SIZE = (640, 480)
+    
+    # For calculating movements 
+    CAMERA_FOV = 160 # Field of view of camera
+    VIDEO_SIZE = (640, 480) # Pixel dimensions of image
+    SCREEN_X_C = VIDEO_SIZE[0] / 2 # Center of screen
+    DEG_PER_PIXEL = VIDEO_SIZE[0] / CAMERA_FOV # Calculate number of degrees in each pixel 
+    PAN_RANGE_DEG = 180 # Define range in degrees of pan camera
 
     def __init__(self, **kwargs):
         self.active = kwargs.get('active', False)
@@ -55,7 +61,7 @@ class Tracking:
         w = x2-x
         h = y2-y
 
-        x_move = Tracking.calc_move_amount(Tracking.VIDEO_SIZE[0], x, w)
+        x_move = Tracking.calc_move_amount_pan(x, w)
         y_move = Tracking.calc_move_amount(Tracking.VIDEO_SIZE[1], y, h)
 
         if x_move:
@@ -70,6 +76,30 @@ class Tracking:
         stop_moving.start()
 
         return True
+
+    @staticmethod
+    def calc_move_amount_pan(target_pos, target_w):
+        target_c = target_pos + (target_w / 2)
+
+        # 1. Get number of degrees visible by camera CAMERA_FOV
+        # 2. Get number of pixels in image VIDEO_SIZE
+        # 3. Calculate degrees per pixel DEG_PER_PIXEL
+        # 4. Calculate difference between screen_c and target_c in pixels
+        difference_px = (Tracking.SCREEN_X_C - target_c)
+        print('difference_px')
+        print(difference_px)
+        # 5. Translate to degrees using above values
+        difference_deg = difference_px / Tracking.DEG_PER_PIXEL
+        # 6. Identify range of servo in degrees
+        PAN_RANGE_DEG = 180
+        # 7. Set servo relative position as percentage of range.
+        if difference_deg == 0:
+            return 0
+        print('difference_deg')
+        print(difference_deg)
+        move_pc = round(difference_deg / PAN_RANGE_DEG * 100)
+
+        return move_pc
 
     @staticmethod
     def calc_move_amount(screen_w, target_pos, target_w):
