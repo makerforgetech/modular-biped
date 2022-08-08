@@ -41,13 +41,13 @@ from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
 
 
-if Config.VISION_MODE is 'opencv':
+if Config.VISION_TECH is 'opencv':
     from modules.opencv.vision import Vision
     from modules.opencv.tracking import Tracking
     from modules.opencv.train_model import TrainModel
     from modules.opencv.video_stream import VideoStream
     from modules.opencv.timelapse import Timelapse
-elif Config.VISION_MODE is 'coral':
+elif Config.VISION_TECH is 'coral':
     from modules.coral.vision import Vision
     from modules.coral.tracking import Tracking
 
@@ -93,16 +93,29 @@ def main():
         if len(sys.argv) > 1 and sys.argv[1] == 'preview':
             preview = True
 
-        if Config.VISION_MODE is 'opencv':
+        if Config.VISION_TECH is 'opencv':
             camera_resolution = (640, 480) #(1024, 768) #- this halves the speed of image recognition
             video_stream = VideoStream(resolution=camera_resolution).start()
             vision = Vision(video_stream, mode=Vision.MODE_FACES, path=path, preview=preview, resolution=camera_resolution)
             tracking = Tracking(vision)
             training = TrainModel(dataset=path + '/matches/trained', output='encodings.pickle')
             # timelapse = Timelapse(video_stream, path=path, original_resolution=camera_resolution)
-        elif Config.VISION_MODE is 'coral':
-            vision = Vision(preview=preview, mode='face')
+        elif Config.VISION_TECH is 'coral':
+            if Config.DEBUG_VISION:
+                # Testing - for fine-tuning tracking without the other stuff
+                pub.sendMessage('wake')
+                pub.sendMessage('power:use')
+                pub.sendMessage("servo:neck:mvabs", percentage=40)
+                pub.sendMessage("servo:tilt:mvabs", percentage=40)
+                pub.sendMessage("servo:pan:mvabs", percentage=60)
+                sleep(1)
+
+            vision = Vision(preview=preview, mode=Config.VISION_MODE)
             tracking = Tracking()
+
+            if Config.DEBUG_VISION:
+                while True:
+                    pass
 
         personality = Personality()
     elif mode() == Config.MODE_KEYBOARD:
