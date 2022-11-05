@@ -27,6 +27,7 @@ class Vision:
     def __init__(self, **kwargs):
         self.preview = kwargs.get('preview', False)
         self.mode = kwargs.get('mode', 'object')
+        
 
         self.new_thread = Thread(target=self.vision_thread)
         
@@ -40,8 +41,9 @@ class Vision:
             self.threshold = 0.1
         
         self.new_thread.start()
+        pub.subscribe(self.exit, 'exit')
 
-    def __del__(self):
+    def exit(self):
         self.new_thread.join()
 
     def vision_thread(self):

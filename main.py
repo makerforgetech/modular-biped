@@ -33,13 +33,13 @@ import sys
 
 from modules.speechinput import SpeechInput
 from modules.arduinoserial import ArduinoSerial
-# from modules.led import LED
+from modules.led import LED
+from modules.tts import TTS
 from modules.personality import Personality
 # from modules.battery import Battery
 from modules.braillespeak import Braillespeak
 from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
-
 
 if Config.VISION_TECH is 'opencv':
     from modules.opencv.vision import Vision
@@ -60,6 +60,7 @@ def mode():
 
 def main():
     print('Starting...')
+    
     path = os.path.dirname(__file__)
     log = LogWrapper(path=os.path.dirname(__file__))
 
@@ -70,7 +71,7 @@ def main():
     gpio = pigpio.pi()
 
     # Arduino connection
-    serial = ArduinoSerial()
+    #serial = ArduinoSerial()
 
     servos = dict()
     for key in Config.servos:
@@ -80,12 +81,13 @@ def main():
     # POWER
     power = Power(Config.POWER_ENABLE_PIN)
 
-    # led = LED(Config.LED_COUNT)
+    led = LED(Config.LED_COUNT)
+    tts = TTS()
 
     if Config.MOTION_PIN is not None:
         motion = Sensor(Config.MOTION_PIN, pi=gpio)
 
-    
+    pub.sendMessage('tts', msg='I am awake')
 
     if mode() == Config.MODE_LIVE:
         # Vision / Tracking

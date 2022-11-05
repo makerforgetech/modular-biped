@@ -17,7 +17,7 @@ class Config:
 
     VISION_TECH = 'coral' # or 'opencv'
     VISION_MODE = 'face' # or 'object'
-    DEBUG_VISION = True # Creates loop to focus on tracking without personality etc.
+    DEBUG_VISION = False # Creates loop to focus on tracking without personality etc.
 
     # GPIO
     # gpio = pigpio.pi()
