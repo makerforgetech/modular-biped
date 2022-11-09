@@ -19,9 +19,6 @@ class Config:
     VISION_MODE = 'face' # or 'object'
     DEBUG_VISION = False # Creates loop to focus on tracking without personality etc.
 
-    # GPIO
-    # gpio = pigpio.pi()
-
     # Power Management
     POWER_ENABLE_PIN = 11
     SLEEP_TIMEOUT = 1  # Minutes
@@ -31,6 +28,9 @@ class Config:
 
     # Microwave sensor pin
     MOTION_PIN = 13
+
+    # Arduino connection
+    ENABLE_SERIAL = False
 
     servos = dict()
     # Everything is percentages except the range values.
@@ -43,41 +43,6 @@ class Config:
     servos['leg_r_hip'] = {'pin': 5, 'range': [0, 180], 'start': 20}
     servos['leg_r_knee'] = {'pin': 6, 'range': [0, 180], 'start': 100}
     servos['leg_r_ankle'] = {'pin': 7, 'range': [0, 180], 'start': 65}
-
-    # Head and neck
-    # NECK_PIN = 3
-    # TILT_PIN = 4
-    # PAN_PIN = 5
-    #
-    # TILT_RANGE = [81, 117]
-    # PAN_RANGE = [0, 180]
-    # NECK_RANGE = [45, 117]
-    #
-    # TILT_START_POS = 50
-    # PAN_START_POS = 50
-    # NECK_START_POS = 75
-    #
-    # # Right Leg
-    # LEG_R_HIP_PIN = 6
-    # LEG_R_KNEE_PIN = 7
-    # LEG_R_ANKLE_PIN = 8
-    #
-    # # Left Leg
-    # LEG_L_HIP_PIN = 9
-    # LEG_L_KNEE_PIN = 10
-    # LEG_L_ANKLE_PIN = 11
-    #
-    # LEG_HIP_RANGE = [0, 180]
-    # LEG_KNEE_RANGE = [0, 180]
-    # LEG_ANKLE_RANGE = [0, 180]
-    #
-    # LEG_L_HIP_START_POS = 50
-    # LEG_L_KNEE_START_POS = 45
-    # LEG_L_ANKLE_START_POS = 50
-    #
-    # LEG_R_HIP_START_POS = 55
-    # LEG_R_KNEE_START_POS = 55
-    # LEG_R_ANKLE_START_POS = 50
 
     # RGB NeoPixels
     LED_COUNT = 12
@@ -92,6 +57,8 @@ class Config:
     STATE_ALERT = 3
 
     NIGHT_HOURS = [22, 8]  # night start and end. Will not wake during this time
+
+    ENABLE_TTS = True
 
     @staticmethod
     def exit(signum, frame):

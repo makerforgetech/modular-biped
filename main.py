@@ -71,23 +71,25 @@ def main():
     gpio = pigpio.pi()
 
     # Arduino connection
-    #serial = ArduinoSerial()
-
-    servos = dict()
-    for key in Config.servos:
-        s = Config.servos[key]
-        servos[key] = Servo(s['pin'], key, s['range'], start_pos=s['start'])
+    if Config.ENABLE_SERIAL:
+        serial = ArduinoSerial()
+        servos = dict()
+        for key in Config.servos:
+            s = Config.servos[key]
+            servos[key] = Servo(s['pin'], key, s['range'], start_pos=s['start'])
 
     # POWER
-    power = Power(Config.POWER_ENABLE_PIN)
+    if Config.POWER_ENABLE_PIN:
+        power = Power(Config.POWER_ENABLE_PIN)
 
     led = LED(Config.LED_COUNT)
-    tts = TTS()
+    
+    if Config.ENABLE_TTS:
+        tts = TTS()
+        pub.sendMessage('tts', msg='I am awake')
 
     if Config.MOTION_PIN is not None:
         motion = Sensor(Config.MOTION_PIN, pi=gpio)
-
-    pub.sendMessage('tts', msg='I am awake')
 
     if mode() == Config.MODE_LIVE:
         # Vision / Tracking
