@@ -1,9 +1,15 @@
+/**
+ * @file arduino_sketch2.ino
+ * @brief Arduino sketch to control a 9 servo robot
+ * @details This sketch animates a 9 servo bipedal robot using the ServoEasing library.
+ * See the README.md file for more information.
+ */
+
 #include <Arduino.h>
 
 #define MAX_EASING_SERVOS 9
 #include "ServoEasing.hpp"
-#include "PinDefinitionsAndMore.h"
-
+#include "config.h"
 
 // Left Leg
 ServoEasing Servo1;
@@ -31,27 +37,23 @@ ServoEasing Servo9;
 #define S9_REST 90 // Neck pan
 
 // Arrays to store servo min / max positions to avoid mechanical issues due
-// NOTE: PosStart disregards this, set the PosStart to be within range of the servo's physical boundaries
+// NOTE: attach() disregards this, set PosSleep to be within range of the servo's physical boundaries
 int PosMin[MAX_EASING_SERVOS] = { 20, 5, 15, 20, 5, 15, 40, 60 ,20 };
 int PosMax[MAX_EASING_SERVOS] = { 160, 175, 180, 160, 175, 180, 90, 120, 160 };
+int PosSleep[MAX_EASING_SERVOS] = { PosMin[0], PosMin[1], PosMin[2], PosMax[3], PosMax[4], PosMax[5], S7_REST, PosMax[7], S9_REST };
 
 // Starting positions @todo make this pose the legs just above their unpowered position
-int PosStart[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, S9_REST };
+int PosRest[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, S9_REST };
 
 // Poses
 int PosStand[MAX_EASING_SERVOS] = {110, 110, 100, 70, 70, 60, S7_REST, S8_REST, S9_REST };
-int PosSit[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, S9_REST };
-//int PosHeadForward[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 120, S9_REST };
 int PosLookLeft[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, 180 };
 int PosLookRight[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, 0 };
-// Move Servo 8 and 9 to random position
 int PosLookRandom[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, random(60, 120), random(20, 160) };
-//int PosHeadBack[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 60, S9_REST };
 int PosLookUp[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 60, S9_REST };
 int PosLookDown[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 120, S9_REST };
-int PosSleep[MAX_EASING_SERVOS] = { PosMin[0], PosMin[1], PosMin[2], PosMax[3], PosMax[4], PosMax[5], S7_REST, PosMax[7], S9_REST };
 
-// Array of poses except PosSit
+// Array of poses except PosRest and PosSleep (which are used for initialization and reset of position)
 int *Poses[] = {PosStand, PosLookLeft, PosLookRight, PosLookUp, PosLookDown, PosLookRandom};
 
 void blinkLED();
@@ -66,15 +68,15 @@ void setup() {
     // Seed random number generator
     randomSeed(analogRead(0));
 
-    Servo1.attach(SERVO1_PIN, PosStart[0]);
-    Servo2.attach(SERVO2_PIN, PosStart[1]);
-    Servo3.attach(SERVO3_PIN, PosStart[2]);
-    Servo4.attach(SERVO4_PIN, PosStart[3]);
-    Servo5.attach(SERVO5_PIN, PosStart[4]);
-    Servo6.attach(SERVO6_PIN, PosStart[5]);
-    Servo7.attach(SERVO7_PIN, PosStart[6]);
-    Servo8.attach(SERVO8_PIN, PosStart[7]);
-    Servo9.attach(SERVO9_PIN, PosStart[8]);
+    Servo1.attach(SERVO1_PIN, PosSleep[0]);
+    Servo2.attach(SERVO2_PIN, PosSleep[1]);
+    Servo3.attach(SERVO3_PIN, PosSleep[2]);
+    Servo4.attach(SERVO4_PIN, PosSleep[3]);
+    Servo5.attach(SERVO5_PIN, PosSleep[4]);
+    Servo6.attach(SERVO6_PIN, PosSleep[5]);
+    Servo7.attach(SERVO7_PIN, PosSleep[6]);
+    Servo8.attach(SERVO8_PIN, PosSleep[7]);
+    Servo9.attach(SERVO9_PIN, PosSleep[8]);
 
     // Loop over ServoEasing::ServoEasingArray and attach each servo
     for (uint8_t tIndex = 0; tIndex < MAX_EASING_SERVOS; ++tIndex) {
@@ -84,6 +86,8 @@ void setup() {
     }
     // Wait for servos to reach start position.
     delay(3000);
+
+    moveServos(PosRest);
 
     demoAll();
     Serial.println(F("Start loop"));
@@ -116,14 +120,14 @@ void demoAll() {
         moveServos(Poses[tPoseIndex]);
         delay(1000);
         Serial.println(F("Rest"));
-        moveServos(PosSit);
+        moveServos(PosRest);
         delay(2000);
     }
     Serial.println(F("Move to sleep"));
     moveServos(PosSleep);
     delay(5000); // Final delay to allow time to stop if needed
     Serial.println(F("Move to rest ahead of main loop"));
-    moveServos(PosStart);
+    moveServos(PosRest);
 }
 
 void setSpeed(uint16_t pSpeed) {
@@ -151,7 +155,7 @@ void loop() {
 
     // Move back to resting pose
     Serial.println(F("Rest"));
-    moveServos(PosSit);
+    moveServos(PosRest);
 
     // Wait between 5 and 30 seconds
     delay(random(5000, 30000));
