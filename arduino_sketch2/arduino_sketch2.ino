@@ -21,29 +21,30 @@ ServoEasing Servo9;
 #define S4_REST 20
 #define S5_REST 0
 #define S6_REST 90
-#define S7_REST 40
-#define S8_REST 140
+#define S7_REST 0
+#define S8_REST 90
 #define S9_REST 90
 
 // Arrays to store servo min / max positions to avoid mechanical issues due
 // NOTE: PosStart disregards this, set the PosStart to be within range of the servo's physical boundaries
-int PosMin[MAX_EASING_SERVOS] = { 20, 5, 15, 20, 5, 15, 20, 20 ,20 };
-int PosMax[MAX_EASING_SERVOS] = { 160, 175, 180, 160, 175, 180, 160, 160, 160 };
+int PosMin[MAX_EASING_SERVOS] = { 20, 5, 15, 20, 5, 15, 40, 60 ,20 };
+int PosMax[MAX_EASING_SERVOS] = { 160, 175, 180, 160, 175, 180, 90, 120, 160 };
 
 // Starting positions @todo make this pose the legs just above their unpowered position
 int PosStart[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, S9_REST };
 
 // Poses
-int PosStand[MAX_EASING_SERVOS] = { 90, 90, 110, 90, 90, 70, S7_REST, S8_REST, S9_REST };
+int PosStand[MAX_EASING_SERVOS] = {110, 110, 100, 70, 70, 60, S7_REST, S8_REST, S9_REST };
 int PosSit[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, S9_REST };
-int PosHeadForward[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, 180, 0, S9_REST };
+//int PosHeadForward[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 120, S9_REST };
 int PosLookLeft[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, 180 };
 int PosLookRight[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, 0 };
-int PosHeadBack[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, 0, 180, S9_REST };
-int PosLookDown[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, 180, 70, S9_REST };
+//int PosHeadBack[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 60, S9_REST };
+int PosLookUp[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 60, S9_REST };
+int PosLookDown[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 120, S9_REST };
 
 // Array of poses except PosSit
-int *Poses[] = { PosStand, PosHeadForward, PosLookLeft, PosLookRight, PosHeadBack, PosLookDown };
+int *Poses[] = {PosStand, PosLookLeft, PosLookRight, PosLookUp, PosLookDown };
 
 void blinkLED();
 
@@ -76,6 +77,8 @@ void setup() {
     }
     // Wait for servos to reach start position.
     delay(3000);
+
+    demoAll();
     Serial.println(F("Start loop"));
 }
 
@@ -86,14 +89,42 @@ void blinkLED() {
     delay(100);
 }
 
+void demoAll() {
+  // Cycle through all poses and move all servos to them
+    for (uint8_t tPoseIndex = 0; tPoseIndex < sizeof(Poses) / sizeof(Poses[0]); ++tPoseIndex) {
+        Serial.print(F("Pose: "));
+        Serial.println(tPoseIndex);
+        for (uint8_t tIndex = 0; tIndex < MAX_EASING_SERVOS; ++tIndex) {
+            ServoEasing::ServoEasingNextPositionArray[tIndex] = Poses[tPoseIndex][tIndex];
+        }
+        setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
+    
+        while (ServoEasing::areInterruptsActive()) {
+          blinkLED();
+        }
+        //setEaseToForAllServos();
+        delay(3000);
+        for (uint8_t tIndex = 0; tIndex < MAX_EASING_SERVOS; ++tIndex) {
+            ServoEasing::ServoEasingNextPositionArray[tIndex] = PosSit[tIndex];
+        }
+        setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
+    
+        while (ServoEasing::areInterruptsActive()) {
+          blinkLED();
+        }
+        delay(3000);
+    }
+}
+
 void loop() {
     // Set tSpeed to between SERVO_SPEED_MIN and SERVO_SPEED_MAX
     tSpeed = random(SERVO_SPEED_MIN, SERVO_SPEED_MAX);
     setSpeedForAllServos(tSpeed);
     Serial.println(tSpeed);
 
-    // Radomly select a pose and move to it
-    uint8_t tPoseIndex = random(0, sizeof(Poses) / sizeof(Poses[0]));
+    // Radomly select a pose and move to it (not stand)
+    uint8_t tPoseIndex = random(1, sizeof(Poses) / sizeof(Poses[0]));
+    //tPoseIndex = 4; // Look down
     Serial.print(F("Pose: "));
     Serial.println(tPoseIndex);
     for (uint8_t tIndex = 0; tIndex < MAX_EASING_SERVOS; ++tIndex) {
