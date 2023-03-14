@@ -40,16 +40,18 @@ ServoEasing Servo9;
 // NOTE: attach() disregards this, set PosSleep to be within range of the servo's physical boundaries
 int PosMin[MAX_EASING_SERVOS] = { 20, 5, 15, 20, 5, 15, 40, 60 ,20 };
 int PosMax[MAX_EASING_SERVOS] = { 160, 175, 180, 160, 175, 180, 90, 120, 160 };
-int PosSleep[MAX_EASING_SERVOS] = { PosMin[0], PosMin[1], PosMin[2], PosMax[3], PosMax[4], PosMax[5], S7_REST, PosMax[7], S9_REST };
+int PosSleep[MAX_EASING_SERVOS] = { 70, PosMin[1], PosMax[2], 110, PosMax[4], PosMin[5], S7_REST, PosMax[7], S9_REST };
+int PrepRestFromSleep[MAX_EASING_SERVOS] = { 80, PosMin[1], PosMax[2], 100, PosMax[4], PosMin[5], S7_REST, 80, S9_REST };
+int PrepSleepFromRest[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 80, S9_REST };
 
 // Starting positions @todo make this pose the legs just above their unpowered position
 int PosRest[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, S9_REST };
 
 // Poses
-int PosStand[MAX_EASING_SERVOS] = {110, 110, 100, 70, 70, 60, S7_REST, S8_REST, S9_REST };
+int PosStand[MAX_EASING_SERVOS] = {110, 110, 110, 70, 70, 70, S7_REST, S8_REST, S9_REST };
 int PosLookLeft[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, 180 };
 int PosLookRight[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, 0 };
-int PosLookRandom[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, random(60, 120), random(20, 160) };
+int PosLookRandom[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, random(60, 120), random(20, 160) }; //@todo make random each call
 int PosLookUp[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 60, S9_REST };
 int PosLookDown[MAX_EASING_SERVOS] = { S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 120, S9_REST };
 
@@ -87,9 +89,17 @@ void setup() {
     // Wait for servos to reach start position.
     delay(3000);
 
+    moveServos(PrepRestFromSleep); // Move hips and head to try and balance
     moveServos(PosRest);
 
     demoAll();
+
+    Serial.println(F("Move to sleep"));
+    moveServos(PrepSleepFromRest);
+    moveServos(PosSleep);
+    delay(5000); // Final delay to allow time to stop if needed
+    Serial.println(F("Move to rest ahead of main loop"));
+    moveServos(PosRest);
     Serial.println(F("Start loop"));
 }
 
@@ -123,11 +133,7 @@ void demoAll() {
         moveServos(PosRest);
         delay(2000);
     }
-    Serial.println(F("Move to sleep"));
-    moveServos(PosSleep);
-    delay(5000); // Final delay to allow time to stop if needed
-    Serial.println(F("Move to rest ahead of main loop"));
-    moveServos(PosRest);
+    
 }
 
 void setSpeed(uint16_t pSpeed) {
