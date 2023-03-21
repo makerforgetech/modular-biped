@@ -52,7 +52,7 @@ int PosRest[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S
 int PosStand[MAX_EASING_SERVOS] = {110, 110, 110, 70, 70, 70, S7_REST, S8_REST, S9_REST};
 int PosLookLeft[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, 180};
 int PosLookRight[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, 0};
-int PosLookRandom[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, random(60, 120), random(20, 160)}; //@todo make random each call
+int PosLookRandom[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, -1, -1}; // Made random by calling the function moveRandom() if the value is -1
 int PosLookUp[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 60, S9_REST};
 int PosLookDown[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 120, S9_REST};
 
@@ -94,11 +94,11 @@ void setup()
     // Wait for servos to reach start position.
     delay(3000);
 
-    testInverseK();
 
     moveServos(PrepRestFromSleep); // Move hips and head to try and balance
     moveServos(PosRest);
 
+    testInverseK();
     demoAll();
 
     Serial.println(F("Move to sleep"));
@@ -108,6 +108,11 @@ void setup()
     Serial.println(F("Move to rest ahead of main loop"));
     moveServos(PosRest);
     Serial.println(F("Start loop"));
+}
+
+long moveRandom(int index)
+{
+    return random(PosMin[index], PosMax[index]);
 }
 
 // Quick conversion from the Braccio angle system to radians
@@ -163,7 +168,7 @@ void testInverseK()
     // 210,97.85,84.12,53.03,76.85,118.44,67.71
     for (int i = 100; i < 300; i += 10)
     {
-        boolean solved = 0;
+        int solved = 0;
         Serial.print(i);
         Serial.print(',');
         if (InverseK.solve(0, 0, i, d, hl, kl, al))
@@ -199,7 +204,7 @@ void testInverseK()
         {
             int thisMove[MAX_EASING_SERVOS] = {a2b(hl), a2b(kl), a2b(al), a2b(hr), a2b(kr), a2b(ar), 90, 90, 90};
             moveServos(thisMove);
-            delay(10000);
+            delay(2000);
         }
     }
 }
@@ -216,7 +221,10 @@ void moveServos(int *Pos)
 {
     for (uint8_t tIndex = 0; tIndex < MAX_EASING_SERVOS; ++tIndex)
     {
-        ServoEasing::ServoEasingNextPositionArray[tIndex] = Pos[tIndex];
+        if (Pos[tIndex] != -1)
+            ServoEasing::ServoEasingNextPositionArray[tIndex] = Pos[tIndex];
+        else 
+            ServoEasing::ServoEasingNextPositionArray[tIndex] = moveRandom(tIndex); // If scripted value is -1, generate random position based on range of currently indexed servo
     }
     setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
     while (ServoEasing::areInterruptsActive())
