@@ -71,7 +71,7 @@ def main():
     gpio = pigpio.pi()
 
     # Arduino connection
-    #serial = ArduinoSerial()
+    serial = ArduinoSerial()
 
     servos = dict()
     for key in Config.servos:

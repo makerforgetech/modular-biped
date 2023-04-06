@@ -28,8 +28,10 @@ class ArduinoSerial:
             raise e
         is_connected = False
         bytes_array = False
+        attempts = 1
         # Initialize communication with Arduino
         while not is_connected and attempts > 0:
+            attempts = attempts -1
             pub.sendMessage('log', msg="[ArduinoSerial] Waiting for arduino...")
             write_order(serial_file, Order.HELLO)
             bytes_array = bytearray(serial_file.read(1))
@@ -43,6 +45,7 @@ class ArduinoSerial:
             pub.sendMessage('log', msg="[ArduinoSerial] Connected to Arduino")
         else:
             pub.sendMessage('log', msg="[ArduinoSerial] NOT CONNECTED")
+            serial_file = None
         return serial_file
 
     def send(self, type, identifier, message):
@@ -55,6 +58,13 @@ class ArduinoSerial:
         :param identifier: an identifier or list / range of identifiers, pin or LED number
         :param message: the packet to send to the arduino
         """
+        # If serial_file is None, call initialise(), if still fails then exit
+        if self.serial_file is None:
+            pub.sendMessage('log', msg="[ArduinoSerial] Attempting to recover connection...")
+            self.serial_file = ArduinoSerial.initialise()
+        if self.serial_file is None:
+            return
+
         pub.sendMessage('log', msg='[ArduinoSerial] ' + str(ArduinoSerial.type_map[type]) + ' id: ' + str(identifier) + ' val: ' + str(message))
         if type == ArduinoSerial.DEVICE_SERVO or type == 'servo':
             write_order(self.serial_file, Order.SERVO)

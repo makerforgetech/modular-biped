@@ -3,6 +3,8 @@
  * @brief Configuration file for the Arduino sketch.
  * @details This file contains the configuration for the Arduino sketch.
  */
+
+#define SERVO_PIN_OFFSET 2
 #define SERVO1_PIN 5
 #define SERVO2_PIN 6
 #define SERVO3_PIN 7
@@ -17,3 +19,6 @@
 #define ENABLE_EASE_QUADRATIC
 #define SERVO_SPEED_MIN 50
 #define SERVO_SPEED_MAX 100
+
+// If DEBUG is set to true, the arduino will send back all the received messages
+#define DEBUG false
