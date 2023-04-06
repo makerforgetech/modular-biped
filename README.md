@@ -3,6 +3,15 @@
 # Robotics Development Framework
 This platform has been created to allow modular development and experimentation of robotics in python / C++ using the Raspberry Pi and Arduino.
 
+## Coral TPU Accelerator
+
+To use the Googla Coral USB Accelerator, first flash the Pi SD card with the image found in the [AIY Maker Kit](https://aiyprojects.withgoogle.com/maker/)
+([Download as of 2022-08-05](https://github.com/google-coral/aiy-maker-kit-tools/releases/download/v20220518/aiy-maker-kit-2022-05-18.img.xz))
+
+(I attempted to install the required software from the coral [getting started guide](https://coral.ai/docs/accelerator/get-started#1-install-the-edge-tpu-runtime) but I was unable to get past an error relating to grpico "GLIBC_2.29' not found")
+
+Alternatively, set Config.VISION_TECH to `opencv` for the original (slower) facial recognition. I am not updating this anymore so you may find some integration issues.
+
 ## Installation
 ```
 chmod 777 install.sh
@@ -28,6 +37,23 @@ To execute startup including a preview of the video feed (not available via SSH)
 ```
 python3 -m pytest --cov=modules --cov-report term-missing
 ```
+
+## Run on Startup
+
+Execute `sudo vim /etc/rc/local` and add the following lines before the `exit 0` statement:
+```
+python3 /home/archie/companion-robot/shutdown_pi.py
+/home/archie/companion-robot/startup.sh
+```
+
+### Auto shutdown
+GPIO 26 is wired to allow shutdown when brought to ground via a switch. 
+
+The script `shutdown_pi.py` manages this.
+
+Guide:
+https://howchoo.com/g/mwnlytk3zmm/how-to-add-a-power-button-to-your-raspberry-pi
+
 ## Features
 
 ### Facial detection and tracking
@@ -38,31 +64,6 @@ Control of up to 9 servos via an arduino serial connection
 
 ### Battery monitor
 Both external and software integrated via the arduino serial connection
-
-### Auto shutdown
-Add the startup command to the boot file on the pi (edit `/etc/rc.local`)
-This can then be stopped by running the `./stop.sh` command in the project directory.
-
-GPIO 26 is also wired to allow shutdown when brought to ground via a switch.
-
-Guide:
-https://howchoo.com/g/mwnlytk3zmm/how-to-add-a-power-button-to-your-raspberry-pi
-
-Script:
-
-```
-#!/usr/bin/env python
-
-import RPi.GPIO as GPIO
-import subprocess
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(26, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.wait_for_edge(26, GPIO.FALLING)
-
-subprocess.call(['pkill', '-f', 'main.py'], shell=False) # kill main script safely
-subprocess.call(['shutdown', '-h', 'now'], shell=False)
-```
 
 ### Buzzer
 A buzzer is connected to GPIO 27 to allow for tones to be played in absence of audio output (see Neopixel below).

@@ -14,6 +14,11 @@ class Config:
     MODE_KEYBOARD = 5
     MODE_LIVE = 6
 
+
+    VISION_TECH = 'coral' # or 'opencv'
+    VISION_MODE = 'face' # or 'object'
+    DEBUG_VISION = False # Creates loop to focus on tracking without personality etc.
+
     # GPIO
     # gpio = pigpio.pi()
 
@@ -29,15 +34,15 @@ class Config:
 
     servos = dict()
     # Everything is percentages except the range values.
-    servos['neck'] = {'pin': 2, 'range': [36, 170], 'start': 85}
-    servos['tilt'] = {'pin': 3, 'range': [36, 125], 'start': 55}
-    servos['pan'] = {'pin': 4, 'range': [0, 180], 'start': 60}
-    servos['leg_l_hip'] = {'pin': 8, 'range': [0, 180], 'start': 80}
-    servos['leg_l_knee'] = {'pin': 9, 'range': [0, 180], 'start': 5}
-    servos['leg_l_ankle'] = {'pin': 10, 'range': [0, 180], 'start': 35}
-    servos['leg_r_hip'] = {'pin': 5, 'range': [0, 180], 'start': 20}
-    servos['leg_r_knee'] = {'pin': 6, 'range': [0, 180], 'start': 100}
-    servos['leg_r_ankle'] = {'pin': 7, 'range': [0, 180], 'start': 65}
+    servos['neck'] = {'pin': 2, 'range': [36, 170], 'start': 50}
+    servos['tilt'] = {'pin': 3, 'range': [36, 125], 'start': 50}
+    servos['pan'] = {'pin': 4, 'range': [0, 180], 'start': 50}
+    servos['leg_l_hip'] = {'pin': 8, 'range': [20, 160], 'start': 90}
+    servos['leg_l_knee'] = {'pin': 9, 'range': [5, 175], 'start': 100}
+    servos['leg_l_ankle'] = {'pin': 10, 'range': [40, 180], 'start': 50}
+    servos['leg_r_hip'] = {'pin': 5, 'range': [20, 160], 'start': 10}
+    servos['leg_r_knee'] = {'pin': 6, 'range': [5, 175], 'start': 0}
+    servos['leg_r_ankle'] = {'pin': 7, 'range': [40, 180], 'start': 50}
 
     # Head and neck
     # NECK_PIN = 3
