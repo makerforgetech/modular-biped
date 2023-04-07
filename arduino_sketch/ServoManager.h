@@ -1,8 +1,9 @@
 #ifndef ServoManager_h
 #define ServoManager_h
 
-#include "ServoEasing.hpp"
+
 #include "Config.h"
+
 #include "InverseKinematics.h"
 
 
@@ -27,7 +28,7 @@ InverseKinematics ik(PosMin[3], PosMax[3], PosMin[4], PosMax[4], PosMin[5], PosM
 class ServoManager
 {
     public:
-    ServoManager()
+    void doInit()
     {
         Servo1.attach(SERVO1_PIN, PosSleep[0]);
         Servo2.attach(SERVO2_PIN, PosSleep[1]);
@@ -47,8 +48,8 @@ class ServoManager
             ServoEasing::ServoEasingArray[tIndex]->setMinMaxConstraint(PosMin[tIndex], PosMax[tIndex]);
         }
         // Wait for servos to reach start position.
-        delay(3000);
-        
+        delay(3000); 
+        Serial.println("Servos initialised");
     }
 
     void moveServos(int *Pos)
@@ -60,20 +61,12 @@ class ServoManager
             else 
                 ServoEasing::ServoEasingNextPositionArray[tIndex] = moveRandom(tIndex); // If scripted value is -1, generate random position based on range of currently indexed servo
         }
-        setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
-        while (ServoEasing::areInterruptsActive())
-        {
-            blinkLED();
-        }
+        //setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed); 
     }
     void moveSingleServo(uint8_t pServoIndex, int pPos)
     {
         ServoEasing::ServoEasingNextPositionArray[pServoIndex] = pPos;
-        setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
-        while (ServoEasing::areInterruptsActive())
-        {
-            blinkLED();
-        }
+        //setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
     }
 
     void demoAll()
@@ -101,15 +94,14 @@ class ServoManager
         //Serial.println(tSpeed);
     }
 
+    uint16_t getSpeed()
+    {
+      return tSpeed;
+    }
+
     private:
     uint16_t tSpeed;
-    void blinkLED()
-    {
-        digitalWrite(LED_BUILTIN, HIGH);
-        delay(100);
-        digitalWrite(LED_BUILTIN, LOW);
-        delay(100);
-    }
+    
 
     long moveRandom(int index)
     {

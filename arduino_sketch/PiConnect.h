@@ -25,16 +25,20 @@ class PiConnect
         }
         void setConnected(boolean connected)
         {
+            Serial.print(F("Serial connected: "));
+            Serial.println(connected);
             this->serialConnected = connected;
         }
         static boolean checkForConnection()
         {
+            Serial.print(F("Checking for connection:"));
             write_order(HELLO);
             wait_for_bytes(1, 1000);
         }
 
         static Order read_order()
         {
+            Serial.println("Reading order");
             return (Order) Serial.read();
         }
 

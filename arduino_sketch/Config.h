@@ -39,8 +39,8 @@
 
 // Arrays to store servo min / max positions to avoid mechanical issues due
 // NOTE: attach() disregards this, set PosSleep to be within range of the servo's physical boundaries
-const int PosMin[MAX_EASING_SERVOS] = {20, 5, 40, 20, 5, 15, 40, 60, 20};
-const int PosMax[MAX_EASING_SERVOS] = {160, 175, 180, 160, 175, 180, 90, 120, 160};
+int PosMin[MAX_EASING_SERVOS] = {20, 5, 40, 20, 5, 15, 40, 60, 20};
+int PosMax[MAX_EASING_SERVOS] = {160, 175, 180, 160, 175, 180, 90, 120, 160};
 int PosSleep[MAX_EASING_SERVOS] = {70, PosMin[1], PosMax[2], 110, PosMax[4], PosMin[5], S7_REST, PosMax[7], S9_REST};
 int PrepRestFromSleep[MAX_EASING_SERVOS] = {80, PosMin[1], PosMax[2], 100, PosMax[4], PosMin[5], S7_REST, 80, S9_REST};
 int PrepSleepFromRest[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 80, S9_REST};
@@ -58,5 +58,13 @@ int PosLookDown[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_RES
 
 // Array of poses except PosRest and PosSleep (which are used for initialization and reset of position)
 int *Poses[] = {PosStand, PosLookLeft, PosLookRight, PosLookUp, PosLookDown, PosLookRandom};
+
+void blinkLED()
+{
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(100);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(100);
+}
 
 #endif
