@@ -25,26 +25,42 @@ unsigned long sleepTime;
 
 void setup()
 {
+    // Init LED pin
     pinMode(LED_BUILTIN, OUTPUT);
     pinMode(11, OUTPUT);   // sets the digital pin as output
     digitalWrite(11, LOW); // sets the digital pin on
+    // Init boot time for sleep function
     bootTime = millis();
+    // Init serial
     Serial.begin(115200);
-    //delay(2000);
+    // Init ServoManager
     servoManager.doInit();
     servoManager.setSpeed(SERVO_SPEED_MIN);
 
     // Seed random number generator
     randomSeed(analogRead(0));
 
-    servoManager.moveServos(PrepRestFromSleep); // Move hips and head to try and balance
-    doRest();
-    
-    Serial.println(F("Start loop"));
+    // Move from start position to rest position
+    // servoManager.moveServos(PrepRestFromSleep); // Move hips and head to try and balance
+    //doRest();
+
+    // Mid value between LEG_IK_MIN and LEG_IK_MAX
+    float mid = LEG_IK_MIN + ((LEG_IK_MAX - LEG_IK_MIN) / 2);
+    servoManager.moveLegsAndStore(mid, 0, PosRest); // Move legs and store as rest position
+    // iterate over PosRest and output values:
+    for (int i = 0; i < 9; i++)
+    {
+        Serial.print(PosRest[i]);
+        Serial.print(", ");
+    }
+    Serial.println();
+
+    // Custom log message (enable DEBUG in Config.h to see this)
+    cLog("Start loop");
 }
 void doRest()
 {
-  Serial.println("Resting");
+  cLog("Resting");
   isResting = true;
   // Reset to slow speed
   servoManager.setSpeed(SERVO_SPEED_MIN);
@@ -58,11 +74,8 @@ void loop()
   {
       blinkLED();
   }
-  //Serial.println("Looping");
-  // Check for serial connection and connect, or wait for orders if connected
-//  if (pi.isConnected() == false)
-  //  PiConnect::checkForConnection(); // Say hello and wait for response
-  
+
+  // Check for orders from pi
   getOrdersFromPi();
 
   // if not sleeping, animate randomly
@@ -89,33 +102,53 @@ void setSleep(unsigned long length)
 
 boolean isSleeping()
 {
-    //Serial.println(".");
     return millis() - bootTime < sleepTime;
 }
 
 void animateRandomly()
 {
-    Serial.println("Animating");
+    cLog("Animating");
     isResting = false;
-    // Set tSpeed to between SERVO_SPEED_MIN and SERVO_SPEED_MAX
     servoManager.setSpeed(random(SERVO_SPEED_MIN, SERVO_SPEED_MAX));
-    // Radomly select a pose and move to it (not stand)
-    // uint8_t tPoseIndex = random(1, sizeof(Poses) / sizeof(Poses[0]));
+    // Look around randomly or move legs randomly
+    switch (random(0, 4))
+    {
+      case 0:
+        servoManager.moveServos(PosLookRandom);
 
-    //Serial.print(F("Pose: "));
-    //Serial.println(tPoseIndex);
-    //moveServos(Poses[tPoseIndex]);
-    servoManager.moveServos(PosLookRandom);
+        // If head looks down, move legs up, and vice versa
+        float headTiltOffset = ServoEasing::ServoEasingNextPositionArray[7] - 90;
+        // Scale headTiltOffset value between 0 and 180 to scale of LEG_IK_MIN and LEG_IK_MAX 
+        float legHeight = map(headTiltOffset, -90, 90, LEG_IK_MIN, LEG_IK_MAX); 
+        // Move legs to that height
+        servoManager.moveLegs(legHeight, 0);
+        Serial.print("Moving legs ");
+        Serial.print(legHeight);
+        Serial.print(" as head tilt was ");
+        Serial.println(headTiltOffset);
+        break;
+      case 1:
+        servoManager.moveLegs(random(LEG_IK_MIN, LEG_IK_MAX), 0);
+        break;
+      case 2:
+        servoManager.moveServos(PosLookRandom);
+        break;
+      case 3:
+        // do both
+        servoManager.moveServos(PosLookRandom);
+        servoManager.moveLegs(random(LEG_IK_MIN, LEG_IK_MAX), 0);
+        break;
+    }
 }
 
 void getOrdersFromPi()
 {
   if(Serial.available() == 0) return;
-  Serial.print("Order received: ");
+  cLog("Order received: ", false);
   
   // The first byte received is the instruction
   Order order_received = PiConnect::read_order();
-  Serial.println(order_received);
+  cLog((String) order_received);
   if(order_received == HELLO)
   {
     // If the cards haven't say hello, check the connection

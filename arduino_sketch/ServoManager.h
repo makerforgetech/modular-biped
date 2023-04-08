@@ -22,7 +22,7 @@ ServoEasing Servo8;
 // Neck pan
 ServoEasing Servo9;
 
-InverseKinematics ik(PosMin[3], PosMax[3], PosMin[4], PosMax[4], PosMin[5], PosMax[5], 94.0, 94.0, 28.0);
+InverseKinematics ik;
 
 
 class ServoManager
@@ -40,6 +40,8 @@ class ServoManager
         Servo8.attach(SERVO8_PIN, PosSleep[7]);
         Servo9.attach(SERVO9_PIN, PosSleep[8]);
 
+        ik.doInit(PosMin[3], PosMax[3], PosMin[4], PosMax[4], PosMin[5], PosMax[5], 94.0, 94.0, 28.0);
+
         // Loop over ServoEasing::ServoEasingArray and attach each servo
         for (uint8_t tIndex = 0; tIndex < MAX_EASING_SERVOS; ++tIndex)
         {
@@ -49,38 +51,62 @@ class ServoManager
         }
         // Wait for servos to reach start position.
         delay(3000); 
-        Serial.println("Servos initialised");
+        cLog("Servos initialised");
     }
 
     void moveServos(int *Pos)
     {
         for (uint8_t tIndex = 0; tIndex < MAX_EASING_SERVOS; ++tIndex)
         {
+            if (Pos[tIndex] == NOVAL) {
+              //Serial.println("NOVAL FOUND");
+              continue;
+            }
             if (Pos[tIndex] != -1)
-                ServoEasing::ServoEasingNextPositionArray[tIndex] = Pos[tIndex];
+                moveSingleServo(tIndex, Pos[tIndex]);
             else 
-                ServoEasing::ServoEasingNextPositionArray[tIndex] = moveRandom(tIndex); // If scripted value is -1, generate random position based on range of currently indexed servo
+                moveSingleServo(tIndex, moveRandom(tIndex)); // If scripted value is -1, generate random position based on range of currently indexed servo
         }
         //setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed); 
     }
+    
+    // @todo just make this pass an array in to moveServos.
     void moveSingleServo(uint8_t pServoIndex, int pPos)
     {
         ServoEasing::ServoEasingNextPositionArray[pServoIndex] = pPos;
         //setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
     }
 
+    void moveLegsAndStore(int x, int y, int *store)
+    {
+        moveLegs(x, y);
+        for (uint8_t tIndex = 0; tIndex < MAX_EASING_SERVOS; ++tIndex)
+        {
+            store[tIndex] = ServoEasing::ServoEasingNextPositionArray[tIndex];
+        }
+    }
+
+    // function moveLegs that returns an int array
+    void moveLegs(int x, int y)
+    {
+        float hipAngleL, kneeAngleL, ankleAngleL, hipAngleR, kneeAngleR, ankleAngleR;
+        // solve left leg
+        ik.inverseKinematics2D(x, y, hipAngleR, kneeAngleR, ankleAngleR);
+        // solve other leg
+        ik.calculateOtherLeg(hipAngleR, kneeAngleR, ankleAngleR, hipAngleL, kneeAngleL, ankleAngleL);
+        // Assign angles and move servos
+        int thisMove[MAX_EASING_SERVOS] = {hipAngleL, kneeAngleL, ankleAngleL, hipAngleR, kneeAngleR, ankleAngleR, NOVAL, NOVAL, NOVAL};
+        moveServos(thisMove);
+    }
+
     void demoAll()
     {
-        //Serial.println(F("Demo all poses at minimum speed"));
         setSpeed(SERVO_SPEED_MIN);
         // Cycle through all poses and move all servos to them
         for (uint8_t tPoseIndex = 0; tPoseIndex < sizeof(Poses) / sizeof(Poses[0]); ++tPoseIndex)
         {
-            //Serial.print(F("Pose: "));
-            //Serial.println(tPoseIndex);
             moveServos(Poses[tPoseIndex]);
             delay(1000);
-            //Serial.println(F("Rest"));
             moveServos(PosRest);
             delay(2000);
         }
@@ -90,8 +116,8 @@ class ServoManager
     {
         tSpeed = pSpeed;
         setSpeedForAllServos(tSpeed);
-        //Serial.print(F("Speed set: "));
-        //Serial.println(tSpeed);
+//        cLog(F("Speed set: "));
+//        cLog((String) tSpeed);
     }
 
     uint16_t getSpeed()
@@ -116,7 +142,9 @@ class ServoManager
         // Solve inverse kinematics for left leg
         if (!ik.inverseKinematics2D(x, 0, hipAngleL, kneeAngleL, ankleAngleL)) 
         {
+            #ifdef IK_DEBUG
             Serial.println("No solution");
+            #endif
             return;
         }
 

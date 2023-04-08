@@ -12,7 +12,7 @@ class InverseKinematics
 {
     // constructor
     public:
-        InverseKinematics(float hipMinAngle, float hipMaxAngle, float kneeMinAngle, float kneeMaxAngle, float ankleMinAngle, float ankleMaxAngle, float thighLength, float shinLength, float footLength)
+        void doInit(float hipMinAngle, float hipMaxAngle, float kneeMinAngle, float kneeMaxAngle, float ankleMinAngle, float ankleMaxAngle, float thighLength, float shinLength, float footLength)
         {
             this->hipMinAngle = hipMinAngle;
             this->hipMaxAngle = hipMaxAngle;

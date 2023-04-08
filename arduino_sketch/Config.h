@@ -22,8 +22,7 @@
 #define SERVO_SPEED_MIN 50
 #define SERVO_SPEED_MAX 100
 
-// If DEBUG is set to true, the arduino will send back all the received messages
-#define DEBUG false
+#define DEBUG
 
 #define MAX_EASING_SERVOS 9
 
@@ -37,6 +36,12 @@
 #define S8_REST 90  // Neck tilt
 #define S9_REST 90  // Neck pan
 
+#define LEG_IK_MIN 140
+#define LEG_IK_MAX 170
+
+#define NOVAL 1000
+
+
 // Arrays to store servo min / max positions to avoid mechanical issues due
 // NOTE: attach() disregards this, set PosSleep to be within range of the servo's physical boundaries
 int PosMin[MAX_EASING_SERVOS] = {20, 5, 40, 20, 5, 15, 40, 60, 20};
@@ -49,12 +54,12 @@ int PrepSleepFromRest[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, 
 int PosRest[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, S9_REST};
 
 // Poses
-int PosStand[MAX_EASING_SERVOS] = {110, 110, 110, 70, 70, 70, S7_REST, S8_REST, S9_REST};
-int PosLookLeft[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, 180};
-int PosLookRight[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, 0};
-int PosLookRandom[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, -1, -1}; // Made random by calling the function moveRandom() if the value is -1
-int PosLookUp[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 60, S9_REST};
-int PosLookDown[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 120, S9_REST};
+int PosStand[MAX_EASING_SERVOS] = {110, 110, 110, 70, 70, 70, NOVAL, NOVAL, NOVAL};
+int PosLookLeft[MAX_EASING_SERVOS] = {NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, 180};
+int PosLookRight[MAX_EASING_SERVOS] = {NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, 0};
+int PosLookRandom[MAX_EASING_SERVOS] = {NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, -1, -1}; // Made random by calling the function moveRandom() if the value is -1
+int PosLookUp[MAX_EASING_SERVOS] = {NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, 60, S9_REST};
+int PosLookDown[MAX_EASING_SERVOS] = {NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, 120, S9_REST};
 
 // Array of poses except PosRest and PosSleep (which are used for initialization and reset of position)
 int *Poses[] = {PosStand, PosLookLeft, PosLookRight, PosLookUp, PosLookDown, PosLookRandom};
@@ -65,6 +70,23 @@ void blinkLED()
     delay(100);
     digitalWrite(LED_BUILTIN, LOW);
     delay(100);
+}
+
+/**
+ * Custom logging function to avoid having to wrap every Serial.println() in #ifdef DEBUG
+*/
+void cLog(String message, boolean newline = true)
+{
+    #ifdef DEBUG
+    if (newline)
+    {
+        Serial.println(message);
+    }
+    else
+    {
+        Serial.print(message);
+    }
+    #endif
 }
 
 #endif
