@@ -23,6 +23,8 @@ unsigned long bootTime;
 // wait start time in millis
 unsigned long sleepTime;
 
+boolean calibrateRest = true;
+
 void setup()
 {
     // Init LED pin
@@ -40,11 +42,45 @@ void setup()
     // Seed random number generator
     randomSeed(analogRead(0));
 
-    // Move from start position to rest position
-    // servoManager.moveServos(PrepRestFromSleep); // Move hips and head to try and balance
-    //doRest();
+    //allTo90();
 
-    // Mid value between LEG_IK_MIN and LEG_IK_MAX
+    // Move to rest position + calculate IK and store as rest position
+    doRest();
+
+    // Custom log message (enable DEBUG in Config.h to see this)
+    cLog("Start loop");
+}
+/**
+ * @brief Set all servos to 90 degrees for mechanical calibration. Wait for 20 seconds.
+*/
+void allTo90() 
+{
+  Serial.println("All at 90");
+  servoManager.moveServos(PosConfig);
+  setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
+  while (ServoEasing::areInterruptsActive())
+  {
+      blinkLED();
+  }
+  delay(20000);
+ 
+}
+/**
+ * @brief Move to rest position. Either using stored values or by calculating using inverse kinematics and storing result for next time.
+*/
+void doRest()
+{
+  cLog("Resting");
+  isResting = true;
+  // Reset to slow speed
+  servoManager.setSpeed(SERVO_SPEED_MIN);
+  if (calibrateRest == false)
+  {
+    servoManager.moveServos(PosRest);
+  }
+  else 
+  {
+    //Mid value between LEG_IK_MIN and LEG_IK_MAX
     float mid = LEG_IK_MIN + ((LEG_IK_MAX - LEG_IK_MIN) / 2);
     servoManager.moveLegsAndStore(mid, 0, PosRest); // Move legs and store as rest position
     // iterate over PosRest and output values:
@@ -54,21 +90,14 @@ void setup()
         Serial.print(", ");
     }
     Serial.println();
-
-    // Custom log message (enable DEBUG in Config.h to see this)
-    cLog("Start loop");
-}
-void doRest()
-{
-  cLog("Resting");
-  isResting = true;
-  // Reset to slow speed
-  servoManager.setSpeed(SERVO_SPEED_MIN);
-  servoManager.moveServos(PosRest);
+    calibrateRest = false;
+  }
+  setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
 }
 
 void loop()
 {
+  
   // This needs to be here rather than in the ServoManager, otherwise it doesn't work.
   while (ServoEasing::areInterruptsActive())
   {
@@ -91,7 +120,6 @@ void loop()
       setSleep(random(3000, 20000));
     }
     setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
-    
   }  
 }
 
@@ -139,6 +167,7 @@ void animateRandomly()
         servoManager.moveLegs(random(LEG_IK_MIN, LEG_IK_MAX), 0);
         break;
     }
+    //servoManager.moveLegs(random(LEG_IK_MIN, LEG_IK_MAX), 0);
 }
 
 void getOrdersFromPi()

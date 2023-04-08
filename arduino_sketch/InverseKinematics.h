@@ -74,7 +74,7 @@ class InverseKinematics
 
             // Convert the angles from radians to degrees
             // Adjust to compensate for servo's actual position
-            hipAngle = r2d(d2r(180) - (hip + d2r(110))); // Inverse and offset by 110 degrees
+            hipAngle = r2d(d2r(180) - (hip + d2r(115))); // Inverse and offset by 115 degrees
             kneeAngle = r2d(knee - d2r(90)); // Offset 90 to compensate
             ankleAngle = r2d(ankle + d2r(60)); // Offset 60 to compensate
 

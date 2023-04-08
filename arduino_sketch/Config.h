@@ -48,7 +48,7 @@
 // NOTE: attach() disregards this, set PosRest to be within range of the servo's physical boundaries
 int PosMin[MAX_EASING_SERVOS] = {20, 5, 40, 20, 5, 15, 40, 60, 20};
 int PosMax[MAX_EASING_SERVOS] = {160, 175, 180, 160, 175, 180, 90, 120, 160};
-//int PosSleep[MAX_EASING_SERVOS] = {70, PosMin[1], PosMax[2], 110, PosMax[4], PosMin[5], S7_REST, PosMax[7], S9_REST};
+int PosSleep[MAX_EASING_SERVOS] = {70, PosMin[1], PosMax[2], 110, PosMax[4], PosMin[5], 0, PosMax[7], 90};
 //int PrepRestFromSleep[MAX_EASING_SERVOS] = {80, PosMin[1], PosMax[2], 100, PosMax[4], PosMin[5], S7_REST, 80, S9_REST};
 //int PrepSleepFromRest[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 80, S9_REST};
 
@@ -56,7 +56,9 @@ int PosMax[MAX_EASING_SERVOS] = {160, 175, 180, 160, 175, 180, 90, 120, 160};
 int PosStart[MAX_EASING_SERVOS] = {144, 158, 85, 35, 21, 94, 0, 120, 90};
 
 //int PosRest[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, S9_REST};
-int PosRest[MAX_EASING_SERVOS] = {144, 158, 85, 35, 21, 94, 0, 90, 90};
+int PosRest[MAX_EASING_SERVOS] = {160, 130, 90, 20, 50, 90, 0, 90, 90};
+
+int PosConfig[MAX_EASING_SERVOS] = {90, 90, 90, 90, 90, 90, 90, 90, 90};
 
 // Poses
 int PosStand[MAX_EASING_SERVOS] = {110, 110, 110, 70, 70, 70, NOVAL, NOVAL, NOVAL};

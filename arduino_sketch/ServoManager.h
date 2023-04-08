@@ -30,15 +30,15 @@ class ServoManager
     public:
     void doInit()
     {
-        Servo1.attach(SERVO1_PIN, PosRest[0]);
-        Servo2.attach(SERVO2_PIN, PosRest[1]);
-        Servo3.attach(SERVO3_PIN, PosRest[2]);
-        Servo4.attach(SERVO4_PIN, PosRest[3]);
-        Servo5.attach(SERVO5_PIN, PosRest[4]);
-        Servo6.attach(SERVO6_PIN, PosRest[5]);
-        Servo7.attach(SERVO7_PIN, PosRest[6]);
-        Servo8.attach(SERVO8_PIN, PosRest[7]);
-        Servo9.attach(SERVO9_PIN, PosRest[8]);
+        Servo1.attach(SERVO1_PIN, PosStart[0]);
+        Servo2.attach(SERVO2_PIN, PosStart[1]);
+        Servo3.attach(SERVO3_PIN, PosStart[2]);
+        Servo4.attach(SERVO4_PIN, PosStart[3]);
+        Servo5.attach(SERVO5_PIN, PosStart[4]);
+        Servo6.attach(SERVO6_PIN, PosStart[5]);
+        Servo7.attach(SERVO7_PIN, PosStart[6]);
+        Servo8.attach(SERVO8_PIN, PosStart[7]);
+        Servo9.attach(SERVO9_PIN, PosStart[8]);
 
         ik.doInit(PosMin[3], PosMax[3], PosMin[4], PosMax[4], PosMin[5], PosMax[5], 94.0, 94.0, 28.0);
 
