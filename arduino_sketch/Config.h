@@ -7,15 +7,20 @@
  */
 
 #define SERVO_PIN_OFFSET 2
-#define SERVO1_PIN 5
-#define SERVO2_PIN 6
-#define SERVO3_PIN 7
-#define SERVO4_PIN 8
-#define SERVO5_PIN 9
-#define SERVO6_PIN 10
+// Left Leg
+#define SERVO1_PIN 9
+#define SERVO2_PIN 10
+#define SERVO3_PIN 11
+// Right Leg
+#define SERVO4_PIN 6
+#define SERVO5_PIN 7
+#define SERVO6_PIN 8
+// Neck
 #define SERVO7_PIN 2
 #define SERVO8_PIN 3
+// Sway
 #define SERVO9_PIN 4
+#define SERV09_PIN 5
 
 #define EASING_TYPE EASE_QUADRATIC_IN_OUT
 #define ENABLE_EASE_QUADRATIC
@@ -53,10 +58,12 @@ int PosSleep[MAX_EASING_SERVOS] = {70, PosMin[1], PosMax[2], 110, PosMax[4], Pos
 //int PrepSleepFromRest[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, 80, S9_REST};
 
 // Starting positions
-int PosStart[MAX_EASING_SERVOS] = {144, 158, 85, 35, 21, 94, 0, 120, 90};
+int PosStart[MAX_EASING_SERVOS] = {30, 21, 94, 149, 158, 85, 0, 120, 90};
+
+
 
 //int PosRest[MAX_EASING_SERVOS] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, S9_REST};
-int PosRest[MAX_EASING_SERVOS] = {160, 130, 90, 20, 50, 90, 0, 90, 90};
+int PosRest[MAX_EASING_SERVOS] = {30, 21, 94, 149, 158, 85, 0, 120, 90};
 
 int PosConfig[MAX_EASING_SERVOS] = {90, 90, 90, 90, 90, 90, 90, 90, 90};
 

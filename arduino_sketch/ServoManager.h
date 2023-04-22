@@ -91,9 +91,9 @@ class ServoManager
     {
         float hipAngleL, kneeAngleL, ankleAngleL, hipAngleR, kneeAngleR, ankleAngleR;
         // solve left leg
-        ik.inverseKinematics2D(x, y, hipAngleR, kneeAngleR, ankleAngleR);
+        ik.inverseKinematics2D(x, y, hipAngleL, kneeAngleL, ankleAngleL);
         // solve other leg
-        ik.calculateOtherLeg(hipAngleR, kneeAngleR, ankleAngleR, hipAngleL, kneeAngleL, ankleAngleL);
+        ik.calculateOtherLeg(hipAngleL, kneeAngleL, ankleAngleL, hipAngleR, kneeAngleR, ankleAngleR);
         // Assign angles and move servos
         int thisMove[MAX_EASING_SERVOS] = {hipAngleL, kneeAngleL, ankleAngleL, hipAngleR, kneeAngleR, ankleAngleR, NOVAL, NOVAL, NOVAL};
         moveServos(thisMove);
