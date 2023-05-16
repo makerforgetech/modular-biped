@@ -8,19 +8,17 @@
 
 
 // Left Leg
-ServoEasing Servo1;
-ServoEasing Servo2;
-ServoEasing Servo3;
+ServoEasing ServoLLH; // Hip
+ServoEasing ServoLLK; // Knee
+ServoEasing ServoLLA; // Ankle
 // Right Leg
-ServoEasing Servo4;
-ServoEasing Servo5;
-ServoEasing Servo6;
-// Neck elevation (unused)
-ServoEasing Servo7;
+ServoEasing ServoRLH; // Hip
+ServoEasing ServoRLK; // Knee
+ServoEasing ServoRLA; // Ankle
 // Neck tilt
-ServoEasing Servo8;
+ServoEasing ServoNT;
 // Neck pan
-ServoEasing Servo9;
+ServoEasing ServoNP;
 
 InverseKinematics ik;
 
@@ -30,17 +28,17 @@ class ServoManager
     public:
     void doInit()
     {
-        Servo1.attach(SERVO1_PIN, PosStart[0]);
-        Servo2.attach(SERVO2_PIN, PosStart[1]);
-        Servo3.attach(SERVO3_PIN, PosStart[2]);
-        Servo4.attach(SERVO4_PIN, PosStart[3]);
-        Servo5.attach(SERVO5_PIN, PosStart[4]);
-        Servo6.attach(SERVO6_PIN, PosStart[5]);
-        Servo7.attach(SERVO7_PIN, PosStart[6]);
-        Servo8.attach(SERVO8_PIN, PosStart[7]);
-        Servo9.attach(SERVO9_PIN, PosStart[8]);
-
-        ik.doInit(PosMin[3], PosMax[3], PosMin[4], PosMax[4], PosMin[5], PosMax[5], 94.0, 94.0, 28.0);
+        ServoLLH.attach(PIN_SLLH, PosStart[0]);
+        ServoLLK.attach(PIN_SLLK, PosStart[1]);
+        ServoLLA.attach(PIN_SLLA, PosStart[2]);
+        ServoRLH.attach(PIN_SRLH, PosStart[3]);
+        ServoRLK.attach(PIN_SRLK, PosStart[4]);
+        ServoRLA.attach(PIN_SRLA, PosStart[5]);
+        ServoNT.attach(PIN_SNT, PosStart[6]);
+        ServoNP.attach(PIN_SNP, PosStart[7]);
+        
+        // Initialise IK with min and max angles and leg section lengths
+        ik.doInit(PosMin[3], PosMax[3], PosMin[4], PosMax[4], PosMin[5], PosMax[5], LEG_LENGTH_THIGH, LEG_LENGTH_SHIN, LEG_LENGTH_FOOT);
 
         // Loop over ServoEasing::ServoEasingArray and attach each servo
         for (uint8_t tIndex = 0; tIndex < MAX_EASING_SERVOS; ++tIndex)
@@ -95,7 +93,7 @@ class ServoManager
         // solve other leg
         ik.calculateOtherLeg(hipAngleL, kneeAngleL, ankleAngleL, hipAngleR, kneeAngleR, ankleAngleR);
         // Assign angles and move servos
-        int thisMove[MAX_EASING_SERVOS] = {hipAngleL, kneeAngleL, ankleAngleL, hipAngleR, kneeAngleR, ankleAngleR, NOVAL, NOVAL, NOVAL};
+        int thisMove[MAX_EASING_SERVOS] = {hipAngleL, kneeAngleL, ankleAngleL, hipAngleR, kneeAngleR, ankleAngleR, NOVAL, NOVAL};
         moveServos(thisMove);
     }
 
@@ -137,7 +135,7 @@ class ServoManager
     void solve2dInverseK(int x)
     {
         float hipAngleL, kneeAngleL, ankleAngleL, hipAngleR, kneeAngleR, ankleAngleR;
-        int thisMove[MAX_EASING_SERVOS] = {90, 90, 90, 90, 90, 90, 90, 90, 90};
+        int thisMove[MAX_EASING_SERVOS] = {NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL};
 
         // Solve inverse kinematics for left leg
         if (!ik.inverseKinematics2D(x, 0, hipAngleL, kneeAngleL, ankleAngleL)) 

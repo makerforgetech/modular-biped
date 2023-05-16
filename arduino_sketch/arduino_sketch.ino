@@ -138,36 +138,19 @@ void animateRandomly()
     cLog("Animating");
     isResting = false;
     servoManager.setSpeed(random(SERVO_SPEED_MIN, SERVO_SPEED_MAX));
-    // Look around randomly or move legs randomly
-    switch (random(0, 4))
-    {
-      case 0:
-        servoManager.moveServos(PosLookRandom);
-
-        // If head looks down, move legs up, and vice versa
-        float headTiltOffset = ServoEasing::ServoEasingNextPositionArray[7] - 90;
-        // Scale headTiltOffset value between 0 and 180 to scale of LEG_IK_MIN and LEG_IK_MAX 
-        float legHeight = map(headTiltOffset, -90, 90, LEG_IK_MIN, LEG_IK_MAX); 
-        // Move legs to that height
-        servoManager.moveLegs(legHeight, 0);
-        Serial.print("Moving legs ");
-        Serial.print(legHeight);
-        Serial.print(" as head tilt was ");
-        Serial.println(headTiltOffset);
-        break;
-      case 1:
-        servoManager.moveLegs(random(LEG_IK_MIN, LEG_IK_MAX), 0);
-        break;
-      case 2:
-        servoManager.moveServos(PosLookRandom);
-        break;
-      case 3:
-        // do both
-        servoManager.moveServos(PosLookRandom);
-        servoManager.moveLegs(random(LEG_IK_MIN, LEG_IK_MAX), 0);
-        break;
-    }
-    //servoManager.moveLegs(random(LEG_IK_MIN, LEG_IK_MAX), 0);
+    
+    // Look around randomly and move legs to react
+    servoManager.moveServos(PosLookRandom);
+    // If head looks down, move legs up, and vice versa
+    float headTiltOffset = ServoEasing::ServoEasingNextPositionArray[7] - 90;
+    // Scale headTiltOffset value between 0 and 180 to scale of LEG_IK_MIN and LEG_IK_MAX 
+    float legHeight = map(headTiltOffset, -90, 90, LEG_IK_MIN, LEG_IK_MAX); 
+    // Move legs to that height
+    servoManager.moveLegs(legHeight, 0);
+    Serial.print("Moving legs ");
+    Serial.print(legHeight);
+    Serial.print(" as head tilt was ");
+    Serial.println(headTiltOffset);  
 }
 
 void getOrdersFromPi()
