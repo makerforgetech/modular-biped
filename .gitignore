@@ -11,3 +11,5 @@ matches/
 encodings.pickle
 app.log*
 battery*.csv
+timelapse/*
+.coverage

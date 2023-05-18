@@ -21,4 +21,4 @@ class Sensor:
         :param edge: pigpio.EITHER_EDGE, pigpio.FALLING_EDGE, pigpio.RISING_EDGE
         :param callback: method to call when change detected
         """
-        self.pi.callback(self.pin, edge, callback)
+        return self.pi.callback(self.pin, edge, callback)

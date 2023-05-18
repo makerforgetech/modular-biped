@@ -3,18 +3,14 @@ pygame
 # Publisher / subscriber service
 pypubsub
 
-# Chirp
-#chirpsdk
-
 # Speech recognition
 SpeechRecognition
-pocketsphinx
+#pocketsphinx
 
 # Chat bot
 #Cython
 #chatterbot==1.0.2
 #chatterbot_corpus
-
 
 # Braillespeak
 pysine

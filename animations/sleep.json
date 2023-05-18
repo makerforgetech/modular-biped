@@ -1,5 +1,5 @@
 [
-  {"servo:neck:mvabs": 90},
+  {"servo:neck:mvabs": 85},
   {"servo:tilt:mvabs": 55},
   {"servo:pan:mvabs": 60},
   {"sleep": 1}

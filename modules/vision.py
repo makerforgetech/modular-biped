@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import cv2
 from imutils.video import FPS # for FSP only
 from modules.visionutils.faces import Faces
+
 
 from pubsub import pub
 
@@ -9,22 +10,18 @@ class Vision:
     MODE_MOTION = 0
     MODE_FACES = 1
 
-    def __init__(self, **kwargs):
+    def __init__(self, video, **kwargs):
         self.mode = kwargs.get('mode', Vision.MODE_MOTION)
         self.path = kwargs.get('path', '/')
         self.index = kwargs.get('index', 0)
-        self.video = cv2.VideoCapture(self.index)
-        #self.video.set(cv2.CAP_PROP_FPS, 1)
-        self.video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         self.static_back = None
+        self.dimensions = kwargs.get('resolution', (640, 480))
         self.preview = kwargs.get('preview', False)
+        self.accuracy = kwargs.get('accuracy', 10) # Was 5
 
         self.flip = kwargs.get('flip', False)
         self.rotate = kwargs.get('rotate', False)
-        if self.rotate:
-            self.dimensions = (480, 640)
-        else:
-            self.dimensions = (640, 480)
+        self.video = video
         self.lines = []
         self.current_match = False
         self.last_match = datetime.now()  # @todo improve
@@ -42,7 +39,7 @@ class Vision:
 
     def exit(self):
         self.running = False
-        self.video.release()
+        self.video.stop()
         # Destroying all the windows
         cv2.destroyAllWindows()
         self.fps.stop()
@@ -54,16 +51,17 @@ class Vision:
     def detect(self):
         if not self.running:
             return
-        if not self.video.isOpened():
-            raise Exception('Unable to load camera')
+        # if not self.video.stream.isOpened():
+        #     raise Exception('Unable to load camera')
         # update the FPS counter
         self.fps.update()
 
-
         matches = []
 
-        check, frame = self.video.read()        
-        
+        frame = self.video.read()
+        if frame is None:
+            return
+
         if self.flip is True:
             frame = cv2.flip(frame, 0)
 
@@ -77,9 +75,8 @@ class Vision:
             matches = self.cascade.detectMultiScale(
                 gray,
                 scaleFactor=1.1,
-                minNeighbors=5,
-                minSize=(30, 30),
-                flags=cv2.CASCADE_SCALE_IMAGE
+                minNeighbors=self.accuracy,
+                minSize=(30, 30)
             )
             if len(matches) < 1:
                 if self.current_match:
@@ -163,7 +160,7 @@ class Vision:
 
         # Displaying color frame with contour of motion of object
         cv2.imshow("Preview", frame)
-        cv2.waitKey(25)
+        cv2.waitKey(1)
 
     def add_lines(self, lines):
         """
