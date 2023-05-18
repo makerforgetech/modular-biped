@@ -55,7 +55,7 @@ void setup()
 */
 void allTo90() 
 {
-  Serial.println("All at 90");
+  cLog("All at 90");
   servoManager.moveServos(PosConfig);
   setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
   while (ServoEasing::areInterruptsActive())
@@ -84,12 +84,14 @@ void doRest()
     float mid = LEG_IK_MIN + ((LEG_IK_MAX - LEG_IK_MIN) / 2);
     servoManager.moveLegsAndStore(mid, 0, PosRest); // Move legs and store as rest position
     // iterate over PosRest and output values:
+    #ifdef DEBUG
     for (int i = 0; i < 9; i++)
     {
         Serial.print(PosRest[i]);
         Serial.print(", ");
     }
     Serial.println();
+    #endif
     calibrateRest = false;
   }
   setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
@@ -147,10 +149,12 @@ void animateRandomly()
     float legHeight = map(headTiltOffset, -90, 90, LEG_IK_MIN, LEG_IK_MAX); 
     // Move legs to that height
     servoManager.moveLegs(legHeight, 0);
+    #ifdef DEBUG
     Serial.print("Moving legs ");
     Serial.print(legHeight);
     Serial.print(" as head tilt was ");
-    Serial.println(headTiltOffset);  
+    Serial.println(headTiltOffset);
+    #endif  
 }
 
 void getOrdersFromPi()
