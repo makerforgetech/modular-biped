@@ -34,15 +34,16 @@ class Config:
 
     servos = dict()
     # Everything is percentages except the range values.
-    servos['neck'] = {'pin': 2, 'range': [36, 170], 'start': 50}
-    servos['tilt'] = {'pin': 3, 'range': [36, 125], 'start': 50}
-    servos['pan'] = {'pin': 4, 'range': [0, 180], 'start': 50}
-    servos['leg_l_hip'] = {'pin': 8, 'range': [20, 160], 'start': 90}
-    servos['leg_l_knee'] = {'pin': 9, 'range': [5, 175], 'start': 100}
-    servos['leg_l_ankle'] = {'pin': 10, 'range': [40, 180], 'start': 50}
-    servos['leg_r_hip'] = {'pin': 5, 'range': [20, 160], 'start': 10}
-    servos['leg_r_knee'] = {'pin': 6, 'range': [5, 175], 'start': 0}
-    servos['leg_r_ankle'] = {'pin': 7, 'range': [40, 180], 'start': 50}
+    servos['tilt'] = {'pin': 2, 'range': [60, 120], 'start': 75}
+    servos['pan'] = {'pin': 3, 'range': [20, 160], 'start': 50}
+#    servos['leg_l_sway'] = {'pin': 4, 'range': [0, 180], 'start': 0}
+#    servos['leg_r_sway'] = {'pin': 5, 'range': [0, 180], 'start': 0}
+    servos['leg_l_hip'] = {'pin': 9, 'range': [20, 160], 'start': 19}
+    servos['leg_l_knee'] = {'pin': 10, 'range': [5, 175], 'start': 12}
+    servos['leg_l_ankle'] = {'pin': 11, 'range': [40, 180], 'start': 52}
+    servos['leg_r_hip'] = {'pin': 6, 'range': [20, 160], 'start': 93}
+    servos['leg_r_knee'] = {'pin': 7, 'range': [5, 175], 'start': 90}
+    servos['leg_r_ankle'] = {'pin': 8, 'range': [40, 180], 'start': 88}
 
     # Head and neck
     # NECK_PIN = 3
@@ -80,7 +81,7 @@ class Config:
     # LEG_R_ANKLE_START_POS = 50
 
     # RGB NeoPixels
-    LED_COUNT = 12
+    LED_COUNT = 7
 
     # HotWord (uses Snowboy.ai)
     HOTWORD_MODEL = None #'modules/snowboy/resources/models/robot.pmdl'
