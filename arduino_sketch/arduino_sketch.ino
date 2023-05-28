@@ -145,8 +145,9 @@ void animateRandomly()
     servoManager.moveServos(PosLookRandom);
     // If head looks down, move legs up, and vice versa
     float headTiltOffset = ServoEasing::ServoEasingNextPositionArray[7] - 90;
-    // Scale headTiltOffset value between 0 and 180 to scale of LEG_IK_MIN and LEG_IK_MAX 
-    float legHeight = map(headTiltOffset, -90, 90, LEG_IK_MIN, LEG_IK_MAX); 
+    // Attempt to compensate movement of head by adjusting leg height
+    // Scale headTiltOffset value between 0 and 180 (inverted) to scale of LEG_IK_MIN and LEG_IK_MAX 
+    float legHeight = map(headTiltOffset, 180, 0, LEG_IK_MIN, LEG_IK_MAX); 
     // Move legs to that height
     servoManager.moveLegs(legHeight, 0);
     #ifdef DEBUG
