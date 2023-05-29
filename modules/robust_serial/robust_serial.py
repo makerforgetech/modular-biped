@@ -12,7 +12,7 @@ class Order(Enum):
 
     HELLO = 0
     SERVO = 1
-    MOTOR = 2
+    SERVO_RELATIVE = 2
     ALREADY_CONNECTED = 3
     ERROR = 4
     RECEIVED = 5

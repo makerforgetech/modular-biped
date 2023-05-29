@@ -63,17 +63,24 @@ class ServoManager
               continue;
             }
             if (Pos[tIndex] != -1)
-                moveSingleServo(tIndex, Pos[tIndex]);
+                moveSingleServo(tIndex, Pos[tIndex], false);
             else 
-                moveSingleServo(tIndex, moveRandom(tIndex)); // If scripted value is -1, generate random position based on range of currently indexed servo
+                moveSingleServo(tIndex, moveRandom(tIndex), false); // If scripted value is -1, generate random position based on range of currently indexed servo
         }
         //setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed); 
     }
     
     // @todo just make this pass an array in to moveServos.
-    void moveSingleServo(uint8_t pServoIndex, int pPos)
+    void moveSingleServo(uint8_t pServoIndex, int pPos, boolean isRelative)
     {
-        ServoEasing::ServoEasingNextPositionArray[pServoIndex] = pPos;
+        if (isRelative)
+        {
+            ServoEasing::ServoEasingNextPositionArray[pServoIndex] += pPos;
+        }
+        else
+        {
+            ServoEasing::ServoEasingNextPositionArray[pServoIndex] = pPos;
+        }
         //setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
     }
 

@@ -34,14 +34,20 @@ class Servo:
         pass #self.reset()
 
     def move_relative(self, percentage, safe=True):
-        new = self.pos + (self.translate(percentage) - self.range[0])
+        # Only calculate relative position if not using serial
+        # Otherwise it is done by the arduino
+        if not self.serial:
+            new = self.pos + (self.translate(percentage) - self.range[0])
+        else:
+            new = self.translate(percentage)
+        
         if new > self.range[1] and safe:
             new = self.range[1]
         elif new < self.range[0] and safe:
             new = self.range[0]
         if self.range[0] <= new <= self.range[1]:
             this_move = self.calculate_move(self.pos, new)
-            self.execute_move(this_move)
+            self.execute_move(this_move, True)
             self.pos = new
         else:
             pub.sendMessage('log:error', '[Servo] Percentage %d out of range' % percentage)
@@ -60,7 +66,7 @@ class Servo:
             pub.sendMessage('log:error', '[Servo] Percentage %d out of range' % percentage)
             raise ValueError('Percentage %d out of range' % percentage)
 
-    def execute_move(self, sequence):
+    def execute_move(self, sequence, is_relative=False):
         """
         Recursive function to handle each movement in sequence.
         Move to first position then set thread.Timer for next movement after delay specified in movement 1.
@@ -81,7 +87,10 @@ class Servo:
             # just move the pan servo for now. Remove after debugging
             if self.index != 7 and self.index != 6:
                 return;
-            pub.sendMessage('serial', type=ArduinoSerial.DEVICE_SERVO, identifier=self.index, message=s[0])
+            type = ArduinoSerial.DEVICE_SERVO
+            if is_relative:
+                type = ArduinoSerial.DEVICE_SERVO_RELATIVE
+            pub.sendMessage('serial', type=type, identifier=self.index, message=s[0])
         else:
             self.pi.set_servo_pulsewidth(self.pin, s[0])
         if len(sequence) > 1:

@@ -8,12 +8,12 @@ class ArduinoSerial:
     """
     Communicate with Arduino over Serial
     """
-    type_map=['led', 'servo',' pin', 'read']
+    type_map=['led', 'servo', 'servo_relative', ' pin', 'read']
     DEVICE_LED = 0
     DEVICE_SERVO = 1
     DEVICE_PIN = 2
     DEVICE_PIN_READ = 3
-
+    DEVICE_SERVO_RELATIVE = 4
     ORDER_RECEIVED = 5
     def __init__(self, **kwargs):
         self.serial_file = ArduinoSerial.initialise()
@@ -68,6 +68,10 @@ class ArduinoSerial:
         pub.sendMessage('log', msg='[ArduinoSerial] ' + str(ArduinoSerial.type_map[type]) + ' id: ' + str(identifier) + ' val: ' + str(message))
         if type == ArduinoSerial.DEVICE_SERVO or type == 'servo':
             write_order(self.serial_file, Order.SERVO)
+            write_i8(self.serial_file, identifier)
+            write_i16(self.serial_file, int(message))
+        if type == ArduinoSerial.DEVICE_SERVO_RELATIVE or type == 'servo_relative':
+            write_order(self.serial_file, Order.SERVO_RELATIVE)
             write_i8(self.serial_file, identifier)
             write_i16(self.serial_file, int(message))
         elif type == ArduinoSerial.DEVICE_LED or type == 'led':
