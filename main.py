@@ -76,10 +76,29 @@ def main():
     servos = dict()
     for key in Config.servos:
         s = Config.servos[key]
-        servos[key] = Servo(s['pin'], key, s['range'], start_pos=s['start'])
+        servos[key] = Servo(s['pin'], key, s['range'], s['id'], start_pos=s['start'])
 
     # POWER
     power = Power(Config.POWER_ENABLE_PIN)
+
+    pub.sendMessage('log', msg="[Main] Starting pan test")
+    pub.sendMessage('servo:pan:mvabs', percentage=0)
+    sleep(2)
+    pub.sendMessage('log', msg="[Main] Finished looking left")
+    pub.sendMessage('servo:pan:mvabs', percentage=100)
+    sleep(2)
+    pub.sendMessage('log', msg="[Main] Finished looking right")
+    pub.sendMessage('servo:pan:mvabs', percentage=50)
+    sleep(2)
+    pub.sendMessage('servo:tilt:mvabs', percentage=100)
+    sleep(2)
+    pub.sendMessage('log', msg="[Main] Finished looking up")
+    pub.sendMessage('servo:tilt:mvabs', percentage=0)
+    sleep(2)
+    pub.sendMessage('log', msg="[Main] Finished looking down")
+    sleep(10)
+    pub.sendMessage('log', msg="[Main] Finished testing")
+    #return
 
     led = LED(Config.LED_COUNT)
     tts = TTS()

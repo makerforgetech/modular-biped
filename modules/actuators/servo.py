@@ -7,9 +7,10 @@ from pubsub import pub
 
 class Servo:
 
-    def __init__(self, pin, identifier, pwm_range, **kwargs):
+    def __init__(self, pin, identifier, pwm_range, index, **kwargs):
         self.pin = pin
         self.identifier = identifier
+        self.index = index
         self.range = pwm_range
         self.power = kwargs.get('power', True)
 
@@ -77,8 +78,10 @@ class Servo:
         if self.power:
             pub.sendMessage('power:use')
         if self.serial:
-            # print(int(s[0]))
-            pub.sendMessage('serial', type=ArduinoSerial.DEVICE_SERVO, identifier=self.pin, message=s[0])
+            # just move the pan servo for now. Remove after debugging
+            if self.index != 7 and self.index != 6:
+                return;
+            pub.sendMessage('serial', type=ArduinoSerial.DEVICE_SERVO, identifier=self.index, message=s[0])
         else:
             self.pi.set_servo_pulsewidth(self.pin, s[0])
         if len(sequence) > 1:

@@ -28,6 +28,8 @@ class ServoManager
     public:
     void doInit()
     {
+
+        // IMPORTANT: Communication from Pi uses index, these must be attached in the same order as they are referenced in the pi config
         ServoLLH.attach(PIN_SLLH, PosStart[0]);
         ServoLLK.attach(PIN_SLLK, PosStart[1]);
         ServoLLA.attach(PIN_SLLA, PosStart[2]);
