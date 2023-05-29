@@ -15,8 +15,7 @@ class Boredom:
 
     def do_something(self):
         # Random action to simulate behaviour, then reset. WIP.
-        actions = ['sleep', 'look_up', 'look_down', 'head_shake', 'head_nod', 'neck_forward', 'head_right',
-                   'head_left', 'speak']
+        actions = ['sleep', 'look_up', 'look_down', 'head_shake', 'head_nod', 'head_left', 'speak']
         action = actions[randrange(len(actions)-1)]
         pub.sendMessage('log', msg='[Personality] Boredom action: ' + str(action))
         if action is 'speak':
