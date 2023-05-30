@@ -201,7 +201,7 @@ void getOrdersFromPi()
         // sleep animations for 2 seconds to allow pi to control servos
         setSleep(2000);
         servoManager.moveSingleServo(servo_identifier, servo_angle, order_received == SERVO_RELATIVE);
-        delay(2000);
+        // delay(2000);
         break;
       }
       case PIN:

@@ -38,20 +38,21 @@ class Servo:
         # Otherwise it is done by the arduino
         if not self.serial:
             new = self.pos + (self.translate(percentage) - self.range[0])
-        else:
-            new = self.translate(percentage)
         
-        if new > self.range[1] and safe:
-            new = self.range[1]
-        elif new < self.range[0] and safe:
-            new = self.range[0]
-        if self.range[0] <= new <= self.range[1]:
-            this_move = self.calculate_move(self.pos, new)
-            self.execute_move(this_move, True)
-            self.pos = new
+        
+            if new > self.range[1] and safe:
+                new = self.range[1]
+            elif new < self.range[0] and safe:
+                new = self.range[0]
+            if self.range[0] <= new <= self.range[1]:
+                this_move = self.calculate_move(self.pos, new)
+                self.execute_move(this_move, True)
+                self.pos = new
+            else:
+                pub.sendMessage('log:error', '[Servo] Percentage %d out of range' % percentage)
+                raise ValueError('Percentage %d out of range' % percentage)
         else:
-            pub.sendMessage('log:error', '[Servo] Percentage %d out of range' % percentage)
-            raise ValueError('Percentage %d out of range' % percentage)
+            self.execute_move([(percentage, 0)])
 
     def move(self, percentage, safe=True):
         if 0 <= percentage <= 100 or safe:
