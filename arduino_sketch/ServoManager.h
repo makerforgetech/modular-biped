@@ -81,7 +81,7 @@ class ServoManager
         {
             ServoEasing::ServoEasingNextPositionArray[pServoIndex] = pPos;
         }
-        //setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
+        setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
     }
 
     void moveLegsAndStore(int x, int y, int *store)
