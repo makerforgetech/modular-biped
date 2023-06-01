@@ -22,7 +22,6 @@ ServoEasing ServoNP;
 
 InverseKinematics ik;
 
-
 class ServoManager
 {
     public:
@@ -75,7 +74,8 @@ class ServoManager
     {
         if (isRelative)
         {
-            ServoEasing::ServoEasingNextPositionArray[pServoIndex] += pPos;
+            // Assuming pPos is a percentage, map to PosMin and PosMax and add to current position
+            ServoEasing::ServoEasingNextPositionArray[pServoIndex] = ServoEasing::ServoEasingNextPositionArray[pServoIndex] + map(pPos, 0, 100, PosMin[pServoIndex], PosMax[pServoIndex]);
         }
         else
         {
