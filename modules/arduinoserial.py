@@ -74,6 +74,7 @@ class ArduinoSerial:
             write_order(self.serial_file, Order.SERVO_RELATIVE)
             write_i8(self.serial_file, identifier)
             write_i16(self.serial_file, int(message))
+            pub.sendMessage('log', msg="[ArduinoSerial] Servo(relative) " + str(identifier) + " " + str(message))
         elif type == ArduinoSerial.DEVICE_LED or type == 'led':
             write_order(self.serial_file, Order.LED)
             if isinstance(identifier, list) or isinstance(identifier, range):

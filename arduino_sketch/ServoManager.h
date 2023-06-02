@@ -75,7 +75,12 @@ class ServoManager
         if (isRelative)
         {
             // Assuming pPos is a percentage, map to PosMin and PosMax and add to current position
-            ServoEasing::ServoEasingNextPositionArray[pServoIndex] = ServoEasing::ServoEasingNextPositionArray[pServoIndex] + map(pPos, 0, 100, PosMin[pServoIndex], PosMax[pServoIndex]);
+            int realChange = map(abs(pPos), 0, 100, PosMin[pServoIndex], PosMax[pServoIndex]);
+            if (pPos < 0)
+            {
+                realChange = -realChange;
+            }
+            ServoEasing::ServoEasingNextPositionArray[pServoIndex] = ServoEasing::ServoEasingNextPositionArray[pServoIndex] + realChange;
         }
         else
         {

@@ -52,7 +52,7 @@ class Servo:
                 pub.sendMessage('log:error', '[Servo] Percentage %d out of range' % percentage)
                 raise ValueError('Percentage %d out of range' % percentage)
         else:
-            self.execute_move([(percentage, 0)])
+            self.execute_move([(percentage, 0)], True)
 
     def move(self, percentage, safe=True):
         if 0 <= percentage <= 100 or safe:
