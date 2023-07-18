@@ -1,0 +1,12 @@
+[
+  {"servo:pan:mvabs": 40},
+  {"sleep": 0.4},
+  {"servo:pan:mvabs": 60},
+  {"sleep": 0.4},
+  {"servo:pan:mvabs": 40},
+  {"sleep": 0.4},
+  {"servo:pan:mvabs": 60},
+  {"sleep": 0.4},
+  {"servo:pan:mvabs": 50},
+  {"sleep": 2}
+]

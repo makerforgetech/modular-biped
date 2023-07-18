@@ -76,10 +76,10 @@ def main():
     servos = dict()
     for key in Config.servos:
         s = Config.servos[key]
-        servos[key] = Servo(s['pin'], key, s['range'], start_pos=s['start'])
+        servos[key] = Servo(s['pin'], key, s['range'], s['id'], start_pos=s['start'])
 
     # POWER
-    power = Power(Config.POWER_ENABLE_PIN)
+    # power = Power(Config.POWER_ENABLE_PIN)
 
     led = LED(Config.LED_COUNT)
     tts = TTS()

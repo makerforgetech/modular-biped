@@ -189,16 +189,19 @@ void getOrdersFromPi()
     switch(order_received)
     {
       case SERVO:
+      case SERVO_RELATIVE:
       {
         int servo_identifier = PiConnect::read_i8();
         int servo_angle = PiConnect::read_i16();
         #ifdef DEBUG
           PiConnect::write_order(SERVO);
+          PiConnect::write_i8(servo_identifier);
           PiConnect::write_i16(servo_angle);
         #endif
         // sleep animations for 2 seconds to allow pi to control servos
         setSleep(2000);
-        servoManager.moveSingleServo(servo_identifier - SERVO_PIN_OFFSET, servo_angle);
+        servoManager.moveSingleServo(servo_identifier, servo_angle, order_received == SERVO_RELATIVE);
+        // delay(2000);
         break;
       }
       case PIN:

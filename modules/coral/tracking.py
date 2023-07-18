@@ -66,10 +66,10 @@ class Tracking:
             pub.sendMessage('log:info', msg="[Tracking] panning " + str(x_move) + "%")
         if y_move:
             pub.sendMessage('servo:tilt:mv', percentage=-y_move)
-            pub.sendMessage('servo:neck:mv', percentage=y_move/2)
             pub.sendMessage('log:info', msg="[Tracking] tilting " + str(-y_move) + "% and moving neck " + str(y_move) + "%")
         
-        stop_moving = Timer(abs(max(x_move,y_move))/5, self.debounce) # Wait for some time depending on amount of movement
+        #stop_moving = Timer(abs(max(x_move,y_move))/5, self.debounce) # Wait for some time depending on amount of movement
+        stop_moving = Timer(2, self.debounce) # Wait for 2 seconds until this behaviour is improved. Then time can be reduced.
         stop_moving.start()
 
         return True

@@ -22,12 +22,13 @@ ServoEasing ServoNP;
 
 InverseKinematics ik;
 
-
 class ServoManager
 {
     public:
     void doInit()
     {
+
+        // IMPORTANT: Communication from Pi uses index, these must be attached in the same order as they are referenced in the pi config
         ServoLLH.attach(PIN_SLLH, PosStart[0]);
         ServoLLK.attach(PIN_SLLK, PosStart[1]);
         ServoLLA.attach(PIN_SLLA, PosStart[2]);
@@ -61,18 +62,31 @@ class ServoManager
               continue;
             }
             if (Pos[tIndex] != -1)
-                moveSingleServo(tIndex, Pos[tIndex]);
+                moveSingleServo(tIndex, Pos[tIndex], false);
             else 
-                moveSingleServo(tIndex, moveRandom(tIndex)); // If scripted value is -1, generate random position based on range of currently indexed servo
+                moveSingleServo(tIndex, moveRandom(tIndex), false); // If scripted value is -1, generate random position based on range of currently indexed servo
         }
         //setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed); 
     }
     
     // @todo just make this pass an array in to moveServos.
-    void moveSingleServo(uint8_t pServoIndex, int pPos)
+    void moveSingleServo(uint8_t pServoIndex, int pPos, boolean isRelative)
     {
-        ServoEasing::ServoEasingNextPositionArray[pServoIndex] = pPos;
-        //setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
+        if (isRelative)
+        {
+            // Assuming pPos is a percentage, map to PosMin and PosMax and add to current position
+            int realChange = map(abs(pPos), 0, 100, PosMin[pServoIndex], PosMax[pServoIndex]);
+            if (pPos < 0)
+            {
+                realChange = -realChange;
+            }
+            ServoEasing::ServoEasingNextPositionArray[pServoIndex] = ServoEasing::ServoEasingNextPositionArray[pServoIndex] + realChange;
+        }
+        else
+        {
+            ServoEasing::ServoEasingNextPositionArray[pServoIndex] = pPos;
+        }
+        setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
     }
 
     void moveLegsAndStore(int x, int y, int *store)

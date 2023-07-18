@@ -34,16 +34,16 @@ class Config:
 
     servos = dict()
     # Everything is percentages except the range values.
-    servos['tilt'] = {'pin': 2, 'range': [60, 120], 'start': 75}
-    servos['pan'] = {'pin': 3, 'range': [20, 160], 'start': 50}
+    servos['leg_l_hip'] = {'id': 0, 'pin': 9, 'range': [20, 160], 'start': 19}
+    servos['leg_l_knee'] = {'id': 1, 'pin': 10, 'range': [5, 175], 'start': 12}
+    servos['leg_l_ankle'] = {'id': 2, 'pin': 11, 'range': [40, 180], 'start': 52}
+    servos['leg_r_hip'] = {'id': 3, 'pin': 6, 'range': [20, 160], 'start': 93}
+    servos['leg_r_knee'] = {'id': 4, 'pin': 7, 'range': [5, 175], 'start': 90}
+    servos['leg_r_ankle'] = {'id': 5, 'pin': 8, 'range': [40, 180], 'start': 88}
+    servos['tilt'] = {'id': 6, 'pin': 2, 'range': [60, 120], 'start': 75}
+    servos['pan'] = {'id': 7, 'pin': 3, 'range': [20, 160], 'start': 50}
 #    servos['leg_l_sway'] = {'pin': 4, 'range': [0, 180], 'start': 0}
 #    servos['leg_r_sway'] = {'pin': 5, 'range': [0, 180], 'start': 0}
-    servos['leg_l_hip'] = {'pin': 9, 'range': [20, 160], 'start': 19}
-    servos['leg_l_knee'] = {'pin': 10, 'range': [5, 175], 'start': 12}
-    servos['leg_l_ankle'] = {'pin': 11, 'range': [40, 180], 'start': 52}
-    servos['leg_r_hip'] = {'pin': 6, 'range': [20, 160], 'start': 93}
-    servos['leg_r_knee'] = {'pin': 7, 'range': [5, 175], 'start': 90}
-    servos['leg_r_ankle'] = {'pin': 8, 'range': [40, 180], 'start': 88}
 
     # Head and neck
     # NECK_PIN = 3
