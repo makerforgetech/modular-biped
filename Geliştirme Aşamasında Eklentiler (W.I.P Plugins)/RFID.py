@@ -1,6 +1,7 @@
 import os
 import pyttsx3
-import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO3
+import MFRC522
 import speech_recognition as sr
 import re
 import time
