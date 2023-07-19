@@ -8,8 +8,8 @@ import time
 # Initialize the TTS engine
 engine = pyttsx3.init()
 engine.setProperty("rate", 170)  # speech rate
-voices = engine.getProperty('voices')
-engine.setProperty('voice', voices[64].id)  # Turkish voice
+voices = engine.getProperty('voices') 
+engine.setProperty('voice', voices[64].id)  # Turkish voice  @todo change this voice
 
 # GPIO pin for RFID module
 RFID_PIN = 18
@@ -21,7 +21,12 @@ ROOT_PASSWORD = "rootroot"
 DEFAULT_DURATION = 0
 
 # RFID card IDs
-AUTHORIZED_CARD_ID = "1234567890"  # Replace with your authorized card ID
+AUTHORIZED_CARD_ID0 = "1234567890"  # Replace with your authorized card ID
+AUTHORIZED_CARD_ID1 = "1234567890"  # Replace with your authorized card ID
+AUTHORIZED_CARD_ID2 = "1234567890"  # Replace with your authorized card ID
+AUTHORIZED_CARD_ID3 = "1234567890"  # Replace with your authorized card ID
+AUTHORIZED_CARD_ID4 = "1234567890"  # Replace with your authorized card ID
+AUTHORIZED_CARD_ID5 = "1234567890"  # Replace with your authorized card ID
 
 # Configure RFID module
 GPIO.setmode(GPIO.BCM)
@@ -51,36 +56,27 @@ def tts(text):
 
 def authenticate_card(card_id):
     # Function to authenticate the RFID card
-    if card_id == AUTHORIZED_CARD_ID:
-        tts("Welcome, SentryCoder.Devloper")
+    if card_id == AUTHORIZED_CARD_ID0:
+        tts("Welcome, SentryCoder.Devloper")    #where SentryCoder.developer is meant define rfid card 0 for the owner of the robot change it for yourself
         return True
+    if card_id == AUTHORIZED_CARD_ID1:
+        tts("Welcome,'name' ")
+        return True
+    if card_id == AUTHORIZED_CARD_ID2:
+        tts("Welcome,'name'")
+        return True
+    if card_id == AUTHORIZED_CARD_ID3:
+        tts("Welcome,'name'")
+        return True
+    if card_id == AUTHORIZED_CARD_ID4:
+        tts("Welcome,'name'")
+        return True
+    if card_id == AUTHORIZED_CARD_ID5:
+        tts("Welcome,'name'")
+        return True    
     else:
         tts("Unauthorized person")
         return False
-
-
-def authenticate_owner():
-    # Function to perform owner's identity authentication
-    tts("Authenticate your voice.")
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        audio = r.listen(source)
-    text = r.recognize_google(audio, language="tr-TR")
-    if text.lower() == "identity verification":
-        tts("Say the login identity to verify your identity.")
-        with sr.Microphone() as source:
-            audio = r.listen(source)
-        text = r.recognize_google(audio, language="tr-TR")
-        if text.lower() == "devloper 366":
-            tts("SentryBOT unlocked.")
-            return True
-        else:
-            tts("Invalid login identity. Unauthorized person detected.")
-            return False
-    else:
-        tts("Identity verification failed. Please try again.")
-        return False
-
 
 def get_active_duration():
     # Function to get the desired active duration from the user's voice input
@@ -129,36 +125,19 @@ def main():
     unauthorized_attempts = 0
     wait_time = 0
 
+ 
+def main():
     while True:
-        if unauthorized_attempts > 5:
-            if not authenticate_owner():
-                tts("Unauthorized person identified. Robot locked.")
-                wait_time += 5
-                time.sleep(wait_time * 60)
-                continue
-
-        if unauthorized_attempts % 5 == 0 and unauthorized_attempts != 0:
-            wait_time += 5
-            tts(f"You have entered unauthorized access {unauthorized_attempts} times. Access will be granted in {wait_time} minutes.")
-            time.sleep(wait_time * 60)
-
         tts("Please authenticate your identity.")
         card_id = read_rfid()
-        if not authenticate_card(card_id):
-            unauthorized_attempts += 1
-            tts("Unauthorized person identified.")
-            continue
-
-        unauthorized_attempts = 0  # Reset unauthorized attempts counter
-        wait_time = 0  # Reset wait time counter
-
-        active_duration = get_active_duration()
-        tts("SentryBOT activated for {} hours.".format(active_duration))
-        open_jetson_session()
-        time.sleep(active_duration * 60 * 60)
-        close_jetson_session()
-        tts("SentryBOT active duration completed. Wait for 10 seconds to authenticate your identity.")
-        time.sleep(10)
+        if authenticate_card(card_id):
+            active_duration = get_active_duration()
+            tts("SentryBOT activated for {} hours.".format(active_duration))
+            open_jetson_session()
+            time.sleep(active_duration * 60 * 60)
+            close_jetson_session()
+            tts("SentryBOT active duration completed. Wait for 10 seconds to authenticate your identity.")
+            time.sleep(10)
 
 
 if __name__ == "__main__":
