@@ -1,0 +1,15 @@
+Bu sınıf, NeoPixel LED şeritini kontrol etmek için kullanılır.
+
+İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+- `NeoPixel` sınıfı, `pin` ve `count` parametrelerini alarak NeoPixel LED şeridini başlatır.
+
+- `__del__` metodu, sınıf nesnesi yok edildiğinde LED şeridindeki tüm pikselleri kapatır.
+
+- `set` metodu, belirli bir pikselin rengini ayarlar. `number` parametresi ile piksel numarasını belirtiriz (0'dan başlar) ve `color` parametresi ile (R, G, B) şeklinde renk değerini belirtiriz.
+
+- `fill` metodu, tüm LED şeridini belirli bir renkle doldurur.
+
+- `blink` metodu, belirli bir pikselin belirli bir renkte belirli sayıda yanıp sönmesini sağlar. `number` parametresi ile piksel numarasını, `color` parametresi ile yanıp sönme rengini, `count` parametresi ile yanıp sönme sayısını belirtiriz.
+
+Bu sınıf, NeoPixel LED şeridini kontrol etmek için kullanılır. LED şeridinin belirli piksellerini ayarlamak, doldurmak veya yanıp sönmesini sağlamak için uygun metotlara sahiptir.

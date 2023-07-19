@@ -1,0 +1,15 @@
+Bu sınıf, `speech_recognition` kütüphanesini kullanarak sesi algılamak ve yorumlamak için kullanılır.
+
+İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+- `SpeechInput` sınıfı, `speech_recognition` kütüphanesinden bir ses tanıma nesnesi oluşturur ve ayarları yapılandırır.
+
+- `start` metodu, ses algılama işlemini başlatır. Arka planda çalışan bir iş parçacığı oluşturur ve `detect` metodunu çağırır.
+
+- `get_device_index` metodu, belirli bir cihaz adına (`device_name`) sahip mikrofonun cihaz indeksini döndürür.
+
+- `detect` metodu, ses algılama işlemini gerçekleştirir. Mikrofonu kaynak olarak kullanır ve sürekli olarak sesi dinler. Algılanan sesi metne dönüştürür ve bu metni `speech` olayını yayınlayarak iletmek için `pubsub` kullanır.
+
+- `stop` metodu, ses algılama işlemini durdurur ve `listening` bayrağını `False` olarak ayarlar.
+
+Bu sınıf, `speech_recognition` kütüphanesini kullanarak sesi algılamak ve yorumlamak için kullanılır. Örneğin, `start` metodu çağrılarak ses algılama işlemi başlatılabilir ve algılanan metin `speech` olayıyla iletilir. `stop` metoduyla da ses algılama işlemi durdurulabilir.

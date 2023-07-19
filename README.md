@@ -1,86 +1,89 @@
-[![Companion Robot](https://circleci.com/gh/danic85/companion-robot.svg?style=shield)](https://app.circleci.com/pipelines/github/danic85/companion-robot)
+<h1>SentryBOT Genel Bakış ve Kareler </h1> &nbsp; <h1><a href="https://github.com/SentryCoderDev/SentryBOT/tree/feature/v3serial/SentryBOT fotoğraflar">Fotoğraflar</a></h1>
 
-# Robotics Development Framework
-This platform has been created to allow modular development and experimentation of robotics in python / C++ using the Raspberry Pi and Arduino.
+![V3](https://github.com/SentryCoderDev/SentryBOT/assets/134494889/ff2a8546-a461-4b45-98e1-eed6752441b2)
+# Robotik geliştirme çerçevesi
+Bu platform, Raspberry Pi/Jetson nano ve Arduino kullanarak Python / C++ ile robotik geliştirme ve deney yapmayı modüler hale getirmek için oluşturulmuştur.
 
-## Coral TPU Accelerator
+## Coral Usb Hızlandırıcısı
 
-To use the Googla Coral USB Accelerator, first flash the Pi SD card with the image found in the [AIY Maker Kit](https://aiyprojects.withgoogle.com/maker/)
-([Download as of 2022-08-05](https://github.com/google-coral/aiy-maker-kit-tools/releases/download/v20220518/aiy-maker-kit-2022-05-18.img.xz))
+Googla Coral USB Hızlandırıcısını kullanmak için öncelikle Pi SD kartını AIY Maker Kit içinde bulunan görüntüyle yeniden yazdırın.
 
-(I attempted to install the required software from the coral [getting started guide](https://coral.ai/docs/accelerator/get-started#1-install-the-edge-tpu-runtime) but I was unable to get past an error relating to grpico "GLIBC_2.29' not found")
+(Coral başlangıç kılavuzunda yer alan gerekli yazılımı yüklemeye çalıştım, ancak "GLIBC_2.29" bulunamadığına dair bir hata nedeniyle başarılı olamadım.)
 
-Alternatively, set Config.VISION_TECH to `opencv` for the original (slower) facial recognition. I am not updating this anymore so you may find some integration issues.
+Alternatif olarak, Config.VISION_TECH'i opencv olarak ayarlayarak orijinal (daha yavaş) yüz tanıma işlemi için seçim yapabilirsiniz. Bu bölümü artık güncellemiyorum, bu nedenle bazı entegrasyon sorunlarıyla karşılaşabilirsiniz.
 
-## Installation
+## Kurulum
 ```
 chmod 777 install.sh
 ./install.sh
 ```
 
-Disable audio (see Neopixels section below)
+Raspberry pi de neopixelleri kullanmak için sesi devredışı bırakmanız gerekiyor.(neopixel kısmına bakın)
 
-## Running
+## Çalıştırma
 ```
 ./startup.sh
 ```
-To execute manual control via keyboard:
+
+Klavye ile manüel kontrol için
 ```
 ./manual_startup.sh
 ```
-To execute startup including a preview of the video feed (not available via SSH):
+
+Başlangıcı gerçekleştirmek için video beslemesinin önizlemesini içeren (SSH aracılığıyla kullanılamaz) 
 ```
 ./preview_startup.sh
 ```
 
-###Testing
+###Test etme
 ```
 python3 -m pytest --cov=modules --cov-report term-missing
 ```
 
-## Run on Startup
+## Başlangıçta otomatik olarak çalıştırma
 
-Execute `sudo vim /etc/rc/local` and add the following lines before the `exit 0` statement:
+`sudo vim /etc/rc/local` komutunu çalıştırın ve `exit 0` ifadesinden önce aşağıdaki satırları ekleyin:
 ```
-python3 /home/archie/companion-robot/shutdown_pi.py
-/home/archie/companion-robot/startup.sh
+python3 /home/Desktop/companion-robot/shutdown_pi.py
+/home/Desktop/companion-robot/startup.sh
 ```
 
-### Auto shutdown
-GPIO 26 is wired to allow shutdown when brought to ground via a switch. 
+### Düşme anında Otomatik Kapanma
+GPIO 26, bir anahtar aracılığıyla toprağa getirildiğinde kapanmayı sağlamak için bağlanmıştır.
 
-The script `shutdown_pi.py` manages this.
+shutdown_pi.py betiği bunu yönetmektedir.
 
-Guide:
+Kılavuz:
 https://howchoo.com/g/mwnlytk3zmm/how-to-add-a-power-button-to-your-raspberry-pi
 
-## Features
+## Özellikler
 
-### Facial detection and tracking
-Using the Raspberry Pi camera
+### Yüz tespiti ve Takibi
+Raspberry pi kamerası veya herhangi bir webcam kullanılarak
 
-### Servo control
-Control of up to 9 servos via an arduino serial connection
+### Servo kontrol
+Arduino serial bağlantı ile 8 servo kontrolü(6 servo ayaklar 1 servo pan 1 servo tilt)
 
-### Battery monitor
-Both external and software integrated via the arduino serial connection
+### Batarya Monitörü
+Harici ve yazılım aracılığıyla Arduino seri bağlantısı üzerinden entegre edilmiştir.
 
 ### Buzzer
-A buzzer is connected to GPIO 27 to allow for tones to be played in absence of audio output (see Neopixel below).
+Bir buzzer, ses çıkışı olmadığında tonların çalınabilmesi için GPIO 27'ye bağlanmıştır (Neopixel kısmına bakın).
+
 https://github.com/gumslone/raspi_buzzer_player.git
 
-### Motion Sensor
-An RCWL-0516 microwave radar sensor is equipped on GPIO 13
+### Hareket Sensörü
+GPIO 13 üzerine bir RCWL-0516 mikrodalga radar sensörü takılmıştır.
 
-### Stereo MEMS Mics
-GPIO 18, 19 and 20 allow stereo MEMS microphones as audio input
+### Stereo MEMS Microfonlar
+GPIO 18, 19 ve 20, stereo MEMS mikrofonlarını ses girişi olarak kullanmak için kullanılır.
 ```
-Mic 3V to Pi 3.3V
-Mic GND to Pi GND
-Mic SEL to Pi GND (this is used for channel selection, connect to either 3.3V or GND)
-Mic BCLK to BCM 18 (pin 12)
-Mic DOUT to BCM 20 (pin 38)
-Mic LRCL to BCM 19 (pin 35)
+Mic 3V - Pi 3.3V'ye bağlanır.
+Mic GND - Pi GND'ye bağlanır.
+Mic SEL - Pi GND'ye bağlanır (bu kanal seçimi için kullanılır, 3.3V veya GND'ye bağlanabilir).
+Mic BCLK - BCM 18 (pin 12)'e bağlanır.
+Mic DOUT - BCM 20 (pin 38)'ye bağlanır.
+Mic LRCL - BCM 19 (pin 35)'e bağlanır.
 ```
 https://learn.adafruit.com/adafruit-i2s-mems-microphone-breakout/raspberry-pi-wiring-test
 
@@ -92,30 +95,28 @@ wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/m
 sudo python3 i2smic.py
 ```
 
-####Test
+####Test etme
 `arecord -l`
 `arecord -D plughw:0 -c2 -r 48000 -f S32_LE -t wav -V stereo -v file_stereo.wav`
 
-_Note:_ See below for additional configuration to support voice recognition
+_Note:_ Ses tanıma işlemini desteklemek için aşağıdaki ek yapılandırmaya bakın.
 
-### Speech Recognition
-Trigger word for voice recognition (currently not used):
+### Konuşma Tanıma
+Ses tanıma için tetikleyici kelime (şu anda kullanılmıyor):
 https://snowboy.kitt.ai/
 
-Speech recognition is enabled whenever a face is visible. 
-Ensure that the `device_index` specified in `modules/speechinput.py` matches your microphone. 
+Yüz görüldüğünde konuşma tanıma etkinleştirilir.
+`modules/speechinput.py` dosyasında belirtilen `device_index` değerinin mikrofonunuzla eşleştiğinden emin olun.
 
-See `scripts/speech.py` to list input devices and test. See below for MEMS microphone configuration
+Giriş cihazlarını listelemek ve test etmek için `scripts/speech.py` dosyasına bakın. MEMS mikrofon yapılandırması için aşağıya bakın.
+### Konuşma Tanıma için MEMS Mikrofon konfigrasyonu
 
-### MEMS Microphone configuration for speech recognition
+Varsayılan olarak, Adafruit I2S MEMS Mikrofon Breakout, ses tanıma ile çalışmaz.
 
-By default the Adafruit I2S MEMS Microphone Breakout does not work with speech recognition. 
-
-To support voice recognition on the MEMS microphone(s) the following configuration changes are needed.
+MEMS mikrofon(lar) üzerinde ses tanımayı desteklemek için aşağıdaki yapılandırma değişiklikleri yapılmalıdır.
 
 `sudo apt-get install ladspa-sdk`
-
-Create `/etc/asound.conf` with the following content:
+Aşağıdaki içeriğe `/etc/asound.conf`dosyası oluşturun:
 
 ``` 
 pcm.pluglp {
@@ -143,13 +144,13 @@ pcm.lp {
 }
 ```
 
-This enables the device 'lp' to be referenced in voice recognition. Shown with index `18` in the example below.
+Bu, ses tanımada 'lp' cihazının başvurulabilmesini sağlar. Aşağıdaki örnekte `18` dizininde gösterilir.
 
-Sample rate should also be set to `16000`
+Örneğin, örnekleme hızı `16000` olarak ayarlanmalıdır.
 
 `mic = sr.Microphone(device_index=18, sample_rate=16000)`
 
-References: 
+Referanslar:
 
 * [MEMS Microphone Installation Guide](https://learn.adafruit.com/adafruit-i2s-mems-microphone-breakout/raspberry-pi-wiring-test)
 
@@ -157,34 +158,36 @@ References:
 
 * [Referenced documentation of fix](https://github.com/mpromonet/v4l2rtspserver/issues/94)
 
-### Serial communication with Arduino
+### Arduino ile seri haberleşme
 
-In order to use the Raspberry Pi’s serial port, we need to disable getty (the program that displays login screen)
+Raspberry Pi'nin seri portunu kullanabilmek için, getty (giriş ekranını görüntüleyen program) devre dışı bırakılmalıdır.
 
 `sudo raspi-config ->  Interfacing Options -> Serial -> "Would you like a login shell to be accessible over serial" = 'No'. Restart`
 
-#### Connection via serial pins
-Connect the Pi GPIO 14 & 15 (tx & rx) to the arduino tx & rx (tx -> rx in both directions!) via a logic level shifter, as the Pi is 3v3 and the arduino is (most likely) 5v.
+#### Serial pinleri ile bağlantı
+Raspberry Pi'nin GPIO 14 ve 15 (tx ve rx) pinlerini, Arduino tx ve rx pinlerine (hem yönü hem de yönü tersine olarak tx -> rx!) bir mantıksal seviye kaydırıcı aracılığıyla bağlayın, çünkü Raspberry Pi 3v3 ve Arduino (muhtemelen) 5v'dur.
 
-####Upload to Arduino over serial pins
-To upload over serial pins, press the reset button on the Arduino at the point that the IDE starts 'uploading' (after compile), otherwise a sync error will display.
+####Arduino'ya seri pinler aracılığıyla yükleme yapmak için aşağıdaki adımı izleyebilirsiniz:
+
+Seri pinler aracılığıyla yükleme yapmak için, IDE 'uploading' (derlemeden sonra) işlemine başladığı noktada Arduino üzerindeki reset düğmesine basın; aksi takdirde senkronizasyon hatası görüntülenecektir.
 
 ### Neopixel
 
-WS1820B support is included via the Pi GPIO pin 12. Unfortunately to support this you must disable audio on the Pi.
+Pi GPIO pin 12 üzerinden WS1820B desteği sağlanmıştır. Ne yazık ki, bunu desteklemek için Pi üzerindeki ses devre dışı bırakılmalıdır.
 
 ```
 sudo vim /boot/config.txt
 #dtparam=audio=on
 ```
 
-This is also why the application must be executed with `sudo`
+Bu nedenle uygulamanın `sudo` ile çalıştırılması gerekmektedir.
 
 https://learn.adafruit.com/neopixels-on-raspberry-pi/python-usage
 
-## PCBs
-Prefabricated PCBs are available for this project in the `circuits` folder. This allows the connection between the core components as described above.
+## PCBler
+Bu projenin prefabrike PCB'leri `circuits` klasöründe mevcuttur. Bu, yukarıda açıklandığı şekilde çekirdek bileşenler arasında bağlantı sağlar.
 
-![Top](circuits/v2/Upper/Top%20Feb%202021_pcb.png)
+![Top](Devreler/v2/Upper/Top%20Feb%202021_pcb.png)
 
-![Bottom](circuits/v2/Lower/Lower%20Feb%202021_pcb.png)
+![body_pcb](https://github.com/SentryCoderDev/SentryBOT/assets/134494889/857f3284-5361-4b6f-b097-b052fe510902)
+

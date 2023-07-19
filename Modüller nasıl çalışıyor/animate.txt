@@ -1,0 +1,23 @@
+Bu modül, animasyonları yönetmek için kullanılan Animate sınıfını içerir. İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+Animate sınıfının __init__ metodu, modülün başlatılmasında çağrılır. path argümanıyla birlikte verilirse, animasyon dosyalarının bulunduğu dizin belirlenir. Ayrıca, "animate" isimli bir yayın (publish) aboneliği oluşturulur. Bu sayede, animate fonksiyonu bir mesaj alındığında tetiklenecektir.
+
+animate metodu, bir animasyonu yürüten ana metottur. action parametresiyle belirtilen animasyonu yürütür.
+
+İlk olarak, belirtilen animasyon dosyasının varlığını kontrol eder. Dosya mevcut değilse, ValueError hatası fırlatır.
+
+Ardından, belirtilen dosyayı açar ve içeriğini json.load fonksiyonu ile yükler.
+
+Yüklenen içerikteki her bir adım için döngü oluşturur. Her adım, bir komutu ve argümanlarını içerir.
+
+Komutun başında "servo:" varsa, pub.sendMessage fonksiyonunu kullanarak ilgili yayını gönderir. Bu şekilde, pan ve tilt servo motorlarına hareket komutu gönderilir.
+
+Komut "sleep" ise, belirtilen süre kadar bekler.
+
+Komut "animate" ise, yine pub.sendMessage fonksiyonunu kullanarak ilgili yayını gönderir. Bu sayede, başka bir animasyonu başlatır.
+
+Komutun başında "led:" varsa, pub.sendMessage fonksiyonunu kullanarak ilgili yayını gönderir. Bu şekilde, LED kontrolü için ilgili renk bilgisi gönderilir.
+
+Komut "speak" ise, pub.sendMessage fonksiyonunu kullanarak ilgili yayını gönderir. Bu şekilde, belirtilen mesajın seslendirilmesi sağlanır.
+
+Bu modül, animasyonları yönetmek ve ilgili komutları yayınlayarak diğer modüllerle iletişim kurmak için kullanılabilir. Animasyon dosyaları, JSON formatında olmalı ve belirtilen adımları ve komutları içermelidir.

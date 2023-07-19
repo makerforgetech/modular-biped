@@ -1,0 +1,15 @@
+Bu modül, bir oyun kumandasından gelen girişleri takip etmek ve ilgili olayları yayınlamak için kullanılır. İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+- `Gamepad` sınıfı, oyun kumandasından gelen girişleri takip etmek ve ilgili olayları yayınlamak için kullanılır.
+
+- `__init__` metodu, oyun kumandası cihazlarını tanımlar ve girişlerini takip etmek için gerekli ayarları yapar.
+
+- `start` metodu, oyun kumandası girişlerini takip etmeye başlar. Bu metot, bir alt iş parçacığında çalışır ve oyun kumandasının girişlerini sürekli olarak dinler.
+
+- `handle_input` metodu, oyun kumandasının girişlerini alır ve ilgili olayları yayınlar. Örneğin, bir düğme basıldığında, ilgili olaya abone olan diğer modüllere mesaj gönderir.
+
+- Oyun kumandasından gelen farklı tuşlara basılması durumunda, ilgili olaya bağlı olarak farklı mesajlar yayınlanabilir. Örneğin, yön tuşlarına basıldığında, servo motorların hareket etmesi için ilgili olaylar yayınlanabilir. Ayrıca, diğer tuşlara basıldığında, sesli komutlar, animasyonlar veya diğer eylemler için ilgili olaylar yayınlanabilir.
+
+- `__del__` metodu, oyun kumandası takibi durdurulduğunda çağrılır ve gerekli temizlik işlemlerini gerçekleştirir.
+
+Bu modül, oyun kumandası girişlerini takip etmek ve uygulama içindeki diğer bileşenlerle etkileşimde bulunmak için kullanılır. Örneğin, oyun kumandasının düğmelerine basıldığında robotun hareket etmesi, animasyonların oynatılması veya diğer işlevlerin gerçekleştirilmesi gibi etkileşimler sağlanabilir.

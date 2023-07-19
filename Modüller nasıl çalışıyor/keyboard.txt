@@ -1,0 +1,17 @@
+Bu modül, terminal üzerinden klavye girişini yakalamak ve belirli tuşlara atanmış işlevleri gerçekleştirmek için kullanılır. İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+- `Keyboard` sınıfı, klavye girişini yakalamak ve belirli tuşlara atanmış işlevleri gerçekleştirmek için kullanılır. Bu sınıf, curses kütüphanesini kullanarak klavye girişini alır.
+
+- `__init__` metodu, curses kütüphanesini başlatır ve klavye girişini almak için gerekli ayarları yapar. Ayrıca, belirli tuşlara atanmış işlevleri gerçekleştirmek için abonelikleri başlatır.
+
+- `loop` metodu, klavye girişini sürekli olarak dinler ve belirli tuşlara atanmış işlevleri gerçekleştirir. Bu metod, `pubsub` kütüphanesini kullanarak ilgili olayları yayınlar.
+
+- `__del__` metodu, curses kütüphanesini sonlandırır ve klavye girişini kapatır.
+
+- `input` metodu, klavye girişini alır.
+
+- `handle_input` metodu, klavye girişini işler ve atanmış işlevleri gerçekleştirir. Atanmış işlevler, `mappings` parametresi aracılığıyla sağlanır.
+
+- `mappings` parametresi, tuşlara atanmış işlevleri içeren bir sözlüktür. Tuşlar, önceden tanımlanmış sabitlerle ilişkilendirilir ve ilgili işlevler çağrılır.
+
+Örneğin, klavyeden belirli tuşlara basıldığında, animasyonların veya diğer işlevlerin çalıştırılması gibi işlevler sağlanabilir.

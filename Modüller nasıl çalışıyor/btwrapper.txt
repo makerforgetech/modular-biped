@@ -1,0 +1,9 @@
+Bu modül, Bluetooth iletişimini yönetmek için BTWrapper sınıfını içerir. İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+BTWrapper sınıfının __init__ metodu, modülün başlatılmasında çağrılır. Bluetooth soketi oluşturur, belirtilen bir port üzerinde bağlantıları dinler ve gelen bağlantıları kabul eder.
+
+read metodu, veri okumak için kullanılır. Client soketinden 1024 baytlık bir veri alır ve bu veriyi döndürür.
+
+__delete__ metodu, sınıf örneği silindiğinde çağrılır. Client soketini ve server soketini kapatır.
+
+Bu modül, Bluetooth üzerinden veri iletişimi sağlamak için kullanılabilir. Diğer cihazlarla Bluetooth bağlantısı kurabilir ve veri alışverişi yapabilirsiniz.

@@ -1,0 +1,17 @@
+Bu modül, braille alfabesindeki harfleri ses tonlarına dönüştürerek iletişim sağlayan Braillespeak sınıfını içerir. İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+Braillespeak sınıfının __init__ metodu, modülün başlatılmasında çağrılır. pin parametresiyle birlikte verilir. Ayrıca, "speak" adıyla bir yayın aboneliği oluşturulur. Bu sayede, send yöntemi bir mesaj alındığında tetiklenecektir.
+
+self.speaker özelliği, hoparlör kullanımını belirler. Eğer False ise, Raspberry Pi'nin GPIO pininden çıkış yaparak ses üretir. True ise, harici bir hoparlör kullanılır.
+
+self.notes listesi, ton frekanslarını içerir. Bu frekanslar, notaların frekanslarına karşılık gelir.
+
+self.brailleLetters listesi, braille alfabesindeki harfleri ton çiftlerine dönüştüren bilgileri içerir.
+
+buzz yöntemi, belirli bir frekansta belirli bir süre boyunca bir buzzer aracılığıyla ses üretir.
+
+handle_char yöntemi, bir karakterin ses tonuna dönüştürülmesini gerçekleştirir. Karakter boşluk ise, belirli bir süre bekler. Diğer harfler için, braille harf listesinden ilgili ton çiftini alır ve ses üretir.
+
+send yöntemi, bir mesaj alır ve mesajdaki her bir karakteri ses tonlarına dönüştürmek için handle_char yöntemini çağırır.
+
+Bu modül, braille alfabesiyle sesli iletişim sağlamak için kullanılabilir. Belirli bir mesajı alır, harfleri ses tonlarına dönüştürerek çıktı olarak verir. Ses tonlarının hoparlörden veya Raspberry Pi'nin GPIO pini üzerinden çıkarılmasını seçebilirsiniz.

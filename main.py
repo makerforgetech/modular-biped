@@ -40,6 +40,7 @@ from modules.personality import Personality
 from modules.braillespeak import Braillespeak
 from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
+from modules.rfid import Rfid
 
 if Config.VISION_TECH is 'opencv':
     from modules.opencv.vision import Vision
