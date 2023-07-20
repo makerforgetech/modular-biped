@@ -16,7 +16,7 @@ class Config:
 
 
     VISION_TECH = 'coral' # or 'opencv'
-    VISION_MODE = 'face' # or 'object'
+    VISION_MODE = 'object' # 'face' or 'object'
     DEBUG_VISION = False # Creates loop to focus on tracking without personality etc.
 
     # GPIO

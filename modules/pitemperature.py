@@ -20,8 +20,8 @@ class PiTemperature:
         val = float(val)
         if val >= PiTemperature.THROTTLED_TEMP:
             pub.sendMessage('led:full', color='red') # WARNING
-        else:
-            pub.sendMessage('led', identifiers='top5', color=self.map_range(round(val)))  # right
+        # else:
+            # pub.sendMessage('led', identifiers='top5', color=self.map_range(round(val)))  # right
 
 
     def map_range(self, value):

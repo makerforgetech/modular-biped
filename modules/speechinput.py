@@ -49,7 +49,7 @@ class SpeechInput:
             while self.listening:
                 try:
                     audio = self.recognizer.listen(source)#, timeout=10, phrase_time_limit=5)
-                    pub.sendMessage('led', identifiers='top5', color='white')
+                    # pub.sendMessage('led', identifiers='top5', color='white')
                     # pub.sendMessage('log', msg='[Speech] End Detection')
 
                     val = self.recognizer.recognize_google(audio)
@@ -60,8 +60,8 @@ class SpeechInput:
                 except sr.UnknownValueError as e:
                     pass
                     # pub.sendMessage('log:error', msg='[Speech] Detection Error: ' + str(e))
-                finally:
-                    pub.sendMessage('led', identifiers='top5', color='off')
+                # finally:
+                    # pub.sendMessage('led', identifiers='top5', color='off')
 
     def stop(self):
         self.listening = False

@@ -25,7 +25,7 @@ class Faces:
         self.face_detected = True
         self.last_face = datetime.now()
         # self.state.set_state(Config.STATE_IDLE)
-        if name == 'Unknown':
+        if name == 'unknown':
             self.state.set_eye('purple')
         else:
             # self.set_state(Config.STATE_ALERT)  # This overrides the tracking so we can't trigger this here
@@ -34,5 +34,5 @@ class Faces:
                 self.current_faces.append(name)
                 pub.sendMessage('speak', message=name)
 
-        if name != 'Unknown':
+        if name != 'unknown':
             self.last_face_name = name
