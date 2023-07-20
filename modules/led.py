@@ -1,6 +1,6 @@
 from pubsub import pub
 from time import sleep
-from colour import Color
+#from colour import Color
 
 try:
     import board
@@ -18,7 +18,7 @@ class LED:
     COLOR_PURPLE = (5, 0, 5)
     COLOR_WHITE = (5, 5, 5)
     COLOR_WHITE_FULL = (255, 255, 255)
-    COLOR_RED_TO_GREEN_100 = list(Color("red").range_to(Color("green"),100))
+    #COLOR_RED_TO_GREEN_100 = list(Color("red").range_to(Color("green"),100))
 
     COLOR_MAP = {
         'red': COLOR_RED,
@@ -110,8 +110,8 @@ class LED:
             # Make color gradiant use possible @todo refactor
             if color >= 100:
                 color = 99 # max in range
-            color = LED.COLOR_RED_TO_GREEN_100[color].rgb
-            color = (color[0]*10, color[1]*10, color[2]*10) # increase values to be used as LED RGB
+            color = (255,0,0)#LED.COLOR_RED_TO_GREEN_100[color].rgb
+            #color = (color[0]*10, color[1]*10, color[2]*10) # increase values to be used as LED RGB
         elif type(color) is str:
             color = LED.COLOR_MAP[color]
         for i in identifiers:
@@ -120,11 +120,14 @@ class LED:
             #print(str(i) + str(color))
             try:
                 self.pixels[i] = color
+                
+                #pub.sendMessage('log', msg='[LED] Setting LED')
             except Exception as e:
                 print(e)
                 pub.sendMessage('log', msg='[LED] Error in set pixels')
                 pass
-        sleep(0.1)
+        self.pixels.show()
+        sleep(.1)
 
     def flashlight(self, on):
         if on:

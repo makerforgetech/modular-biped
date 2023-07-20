@@ -1,0 +1,12 @@
+[
+  {"servo:tilt:mvabs": 70},
+  {"sleep": 0.4},
+  {"servo:tilt:mvabs": 30},
+  {"sleep": 0.4},
+  {"servo:tilt:mvabs": 70},
+  {"sleep": 0.4},
+  {"servo:tilt:mvabs": 30},
+  {"sleep": 0.4},
+  {"servo:tilt:mvabs": 50},
+  {"sleep": 0.5}
+]

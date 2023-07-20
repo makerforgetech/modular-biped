@@ -1,0 +1,31 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=Top Feb 2021
+*Date=19:18:09
+*CreatedBy=Fritzing 0.9.3b.04.19.5c895d327c44a3114e5fcc9d8260daf0cbb52806
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;;;21.6408;-11.0468;0;Bottom;Via5
+2;;;15.5448;-17.1428;0;Bottom;Via3
+3;;;10.3576;-14.8229;0;Bottom;Part1
+4;;THT;44.6476;-12.2829;90;Bottom;Serial
+5;;THT;21.7876;-14.8229;90;Bottom;Sw
+6;;THT;27.6299;-4.66909;180;Bottom;J1
+7;;;4.00756;-19.9029;180;Bottom;Bzz
+8;;THT;44.6476;-21.1729;0;Bottom;LED
+9;;Breakout board;34.4555;-17.3486;0;Bottom;LLC1
+10;;THT;26.8676;-17.3629;180;Bottom;LLC Ext
+11;;;33.2232;-1.2932;0;Bottom;Via1
+12;;THT;19.2476;-21.1729;0;Bottom;Motion
+13;;;22.86;-22.6292;0;Bottom;Via4
+14;;;6.4008;-17.1428;0;Bottom;Via2
+15;;THT;52.2676;-12.2829;90;Bottom;PWR
+16;;;10.3576;-17.3629;0;Bottom;Mics

@@ -1,213 +1,232 @@
-
-#include <Servo.h> 
-#include "order.h"
-#include "parameters.h"
-
-/** IMPORTANT
- * To upload over serial pins, reset the Arduino at the point that the IDE starts 'uploading' (after compile), otherwise a sync error will display.
+/**
+ * @file arduino_sketch2.ino
+ * @brief Arduino sketch to control a 9 servo robot
+ * @details This sketch animates a 9 servo bipedal robot using the ServoEasing library.
+ * See the README.md file for more information.
  */
 
-bool is_connected = false; ///< True if the connection with the master is available
+#include <Arduino.h>
+#include "ServoEasing.hpp" // Must be here otherwise method fails: setEaseToForAllServosSynchronizeAndStartInterrupt
+#include "Config.h"
+#include "Order.h"
+#include "PiConnect.h"
+#include "ServoManager.h"
 
-int servo_increment = 5;
+//#define DEBUG
 
-Servo servos[SERVO_COUNT];
-int servo_angles[SERVO_COUNT];
+PiConnect pi;
+ServoManager servoManager;
 
-void setup() 
+bool isResting = false;
+// boot time in millis
+unsigned long bootTime;
+// wait start time in millis
+unsigned long sleepTime;
+
+boolean calibrateRest = true;
+
+void setup()
 {
-  Serial.begin(SERIAL_BAUD);
+    // Init LED pin
+    pinMode(LED_BUILTIN, OUTPUT);
+    pinMode(11, OUTPUT);   // sets the digital pin as output
+    digitalWrite(11, LOW); // sets the digital pin on
+    // Init boot time for sleep function
+    bootTime = millis();
+    // Init serial
+    Serial.begin(115200);
+    // Init ServoManager
+    servoManager.doInit();
+    servoManager.setSpeed(SERVO_SPEED_MIN);
 
-  // Wait until the arduino is connected to master
-  while(!is_connected)
+    // Seed random number generator
+    randomSeed(analogRead(0));
+
+    //allTo90();
+
+    // Move to rest position + calculate IK and store as rest position
+    doRest();
+
+    // Custom log message (enable DEBUG in Config.h to see this)
+    cLog("Start loop");
+}
+/**
+ * @brief Set all servos to 90 degrees for mechanical calibration. Wait for 20 seconds.
+*/
+void allTo90() 
+{
+  cLog("All at 90");
+  servoManager.moveServos(PosConfig);
+  setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
+  while (ServoEasing::areInterruptsActive())
   {
-    write_order(HELLO);
-    wait_for_bytes(1, 1000);
-    get_messages_from_serial();
+      blinkLED();
   }
-}
+  delay(20000);
  
-void loop() 
-{
-    get_messages_from_serial();
-    increment_servos();
 }
-
-void increment_servos()
+/**
+ * @brief Move to rest position. Either using stored values or by calculating using inverse kinematics and storing result for next time.
+*/
+void doRest()
 {
-    for (int index = 0; index < SERVO_COUNT; index++ )
-    {
-       int curr = servos[index].read();
-       int end = servo_angles[index];
-       if (curr < end)
-       {
-            if (end - curr < servo_increment)
-            {
-                servos[index].write(end);
-            }
-            else servos[index].write(servos[index].read() + servo_increment);
-       }
-       else if (curr > end)
-       {
-            if (curr - end < servo_increment)
-            {
-                servos[index].write(end);
-            }
-            else servos[index].write(servos[index].read() - servo_increment);
-       }
-    }
-    delay(50);
-}
-
-void get_messages_from_serial()
-{
-  if(Serial.available() > 0)
+  cLog("Resting");
+  isResting = true;
+  // Reset to slow speed
+  servoManager.setSpeed(SERVO_SPEED_MIN);
+  if (calibrateRest == false)
   {
-    // The first byte received is the instruction
-    Order order_received = read_order();
-
-    if(order_received == HELLO)
+    servoManager.moveServos(PosRest);
+  }
+  else 
+  {
+    //Mid value between LEG_IK_MIN and LEG_IK_MAX
+    float mid = LEG_IK_MIN + ((LEG_IK_MAX - LEG_IK_MIN) / 2);
+    servoManager.moveLegsAndStore(mid, 0, PosRest); // Move legs and store as rest position
+    // iterate over PosRest and output values:
+    #ifdef DEBUG
+    for (int i = 0; i < 9; i++)
     {
-      // If the cards haven't say hello, check the connection
-      if(!is_connected)
-      {
-        is_connected = true;
-        write_order(HELLO);
-      }
-      else
-      {
-        // If we are already connected do not send "hello" to avoid infinite loop
-        write_order(ALREADY_CONNECTED);
-      }
+        Serial.print(PosRest[i]);
+        Serial.print(", ");
     }
-    else if(order_received == ALREADY_CONNECTED)
+    Serial.println();
+    #endif
+    calibrateRest = false;
+  }
+  setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
+}
+
+void loop()
+{
+  
+  // This needs to be here rather than in the ServoManager, otherwise it doesn't work.
+  while (ServoEasing::areInterruptsActive())
+  {
+      blinkLED();
+  }
+
+  // Check for orders from pi
+  getOrdersFromPi();
+
+  // if not sleeping, animate randomly
+  // Orders from pi will set sleep time so that the animation does not take precedence
+  if (!isSleeping()){
+    if (isResting)
     {
-      is_connected = true;
+      animateRandomly();
+      setSleep(random(3000, 5000));
+    }
+    else {
+      doRest();
+      setSleep(random(3000, 20000));
+    }
+    setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
+  }  
+}
+
+void setSleep(unsigned long length)
+{
+    sleepTime = millis() - bootTime + length;
+}
+
+boolean isSleeping()
+{
+    return millis() - bootTime < sleepTime;
+}
+
+void animateRandomly()
+{
+    cLog("Animating");
+    isResting = false;
+    servoManager.setSpeed(random(SERVO_SPEED_MIN, SERVO_SPEED_MAX));
+    
+    // Look around randomly and move legs to react
+    servoManager.moveServos(PosLookRandom);
+    // If head looks down, move legs up, and vice versa
+    float headTiltOffset = ServoEasing::ServoEasingNextPositionArray[7] - 90;
+    // Attempt to compensate movement of head by adjusting leg height
+    // Scale headTiltOffset value between 0 and 180 (inverted) to scale of LEG_IK_MIN and LEG_IK_MAX 
+    float legHeight = map(headTiltOffset, 180, 0, LEG_IK_MIN, LEG_IK_MAX); 
+    // Move legs to that height
+    servoManager.moveLegs(legHeight, 0);
+    #ifdef DEBUG
+    Serial.print("Moving legs ");
+    Serial.print(legHeight);
+    Serial.print(" as head tilt was ");
+    Serial.println(headTiltOffset);
+    #endif  
+}
+
+void getOrdersFromPi()
+{
+  if(Serial.available() == 0) return;
+  cLog("Order received: ", false);
+  
+  // The first byte received is the instruction
+  Order order_received = PiConnect::read_order();
+  cLog((String) order_received);
+  if(order_received == HELLO)
+  {
+    // If the cards haven't say hello, check the connection
+    if(!pi.isConnected())
+    {
+      pi.setConnected(true);
+      PiConnect::write_order(HELLO);
     }
     else
     {
-      switch(order_received)
-      {
-        case SERVO:
-        {
-          int servo_identifier = read_i8();
-          int servo_angle = read_i16();
-          if(DEBUG)
-          {
-            write_order(SERVO);
-            write_i16(servo_angle);
-          }
-          move_servo(servo_identifier, servo_angle);
-          break;
-        }
-        case PIN:
-        {
-            int pin = read_i8();
-            int value = read_i8();
-            pinMode(pin, OUTPUT);
-            digitalWrite(pin, value);
-            break;
-        }
-        case READ:
-        {
-            int pin = read_i8();
-            pinMode(pin, INPUT);
-            long value = analogRead(pin);
-            write_i16(value);
-            break;
-        }
-        // Unknown order
-        default:
-        {
-          write_order(ERROR);
-          write_i16(404);
-        }
-        return;
-      }
+      // If we are already connected do not send "hello" to avoid infinite loop
+      PiConnect::write_order(ALREADY_CONNECTED);
     }
-    //write_order(RECEIVED); // Confirm the receipt
   }
-}
-
-void move_servo(int identifier, int angle) {
-    int index = identifier - SERVO_PIN_OFFSET;
-
-    // attach after write to hopefully stop initial position 'spasm' https://forum.arduino.cc/index.php?topic=346406.0
-    if (servos[index].attached() == false) {
-        servos[index].write(angle);
-        servos[index].attach(identifier);
+  else if(order_received == ALREADY_CONNECTED)
+  {
+    pi.setConnected(true);
+  }
+  else
+  {
+    switch(order_received)
+    {
+      case SERVO:
+      case SERVO_RELATIVE:
+      {
+        int servo_identifier = PiConnect::read_i8();
+        int servo_angle = PiConnect::read_i16();
+        #ifdef DEBUG
+          PiConnect::write_order(SERVO);
+          PiConnect::write_i8(servo_identifier);
+          PiConnect::write_i16(servo_angle);
+        #endif
+        // sleep animations for 2 seconds to allow pi to control servos
+        setSleep(2000);
+        servoManager.moveSingleServo(servo_identifier, servo_angle, order_received == SERVO_RELATIVE);
+        // delay(2000);
+        break;
+      }
+      case PIN:
+      {
+          int pin = PiConnect::read_i8();
+          int value = PiConnect::read_i8();
+          pinMode(pin, OUTPUT);
+          digitalWrite(pin, value);
+          break;
+      }
+      case READ:
+      {
+          int pin = PiConnect::read_i8();
+          pinMode(pin, INPUT);
+          long value = analogRead(pin);
+          PiConnect::write_i16(value);
+          break;
+      }
+      // Unknown order
+      default:
+      {
+        PiConnect::write_order(order_received);
+        //PiConnect::write_i16(404);
+      }
+      return;
     }
-    servo_angles[index] = angle; // Don't move it but queue the move
-}
-
-Order read_order()
-{
-	return (Order) Serial.read();
-}
-
-void wait_for_bytes(int num_bytes, unsigned long timeout)
-{
-	unsigned long startTime = millis();
-	//Wait for incoming bytes or exit if timeout
-	while ((Serial.available() < num_bytes) && (millis() - startTime < timeout)){}
-}
-
-// NOTE : Serial.readBytes is SLOW
-// this one is much faster, but has no timeout
-void read_signed_bytes(int8_t* buffer, size_t n)
-{
-	size_t i = 0;
-	int c;
-	while (i < n)
-	{
-		c = Serial.read();
-		if (c < 0) break;
-		*buffer++ = (int8_t) c; // buffer[i] = (int8_t)c;
-		i++;
-	}
-}
-
-int8_t read_i8()
-{
-	wait_for_bytes(1, 100); // Wait for 1 byte with a timeout of 100 ms
-  return (int8_t) Serial.read();
-}
-
-int16_t read_i16()
-{
-  int8_t buffer[2];
-	wait_for_bytes(2, 100); // Wait for 2 bytes with a timeout of 100 ms
-	read_signed_bytes(buffer, 2);
-  return (((int16_t) buffer[0]) & 0xff) | (((int16_t) buffer[1]) << 8 & 0xff00);
-}
-
-int32_t read_i32()
-{
-  int8_t buffer[4];
-	wait_for_bytes(4, 200); // Wait for 4 bytes with a timeout of 200 ms
-	read_signed_bytes(buffer, 4);
-  return (((int32_t) buffer[0]) & 0xff) | (((int32_t) buffer[1]) << 8 & 0xff00) | (((int32_t) buffer[2]) << 16 & 0xff0000) | (((int32_t) buffer[3]) << 24 & 0xff000000);
-}
-
-void write_order(enum Order myOrder)
-{
-	uint8_t* Order = (uint8_t*) &myOrder;
-  Serial.write(Order, sizeof(uint8_t));
-}
-
-void write_i8(int8_t num)
-{
-  Serial.write(num);
-}
-
-void write_i16(int16_t num)
-{
-	int8_t buffer[2] = {(int8_t) (num & 0xff), (int8_t) (num >> 8)};
-  Serial.write((uint8_t*)&buffer, 2*sizeof(int8_t));
-}
-
-void write_i32(int32_t num)
-{
-	int8_t buffer[4] = {(int8_t) (num & 0xff), (int8_t) (num >> 8 & 0xff), (int8_t) (num >> 16 & 0xff), (int8_t) (num >> 24 & 0xff)};
-  Serial.write((uint8_t*)&buffer, 4*sizeof(int8_t));
+  }
 }

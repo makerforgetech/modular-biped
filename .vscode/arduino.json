@@ -1,0 +1,7 @@
+{
+    "port": "/dev/ttyS0",
+    "configuration": "cpu=16MHzatmega328",
+    "board": "arduino:avr:pro",
+    "programmer": "avrisp",
+    "sketch": "arduino_sketch/arduino_sketch.ino"
+}

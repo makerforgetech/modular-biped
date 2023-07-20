@@ -1,9 +1,3 @@
 [
-  {"servo:leg_l_hip:mvabs": 65},
-  {"servo:leg_r_hip:mvabs": 35},
-  {"servo:leg_l_knee:mvabs": 55},
-  {"servo:leg_r_knee:mvabs": 55},
-  {"servo:leg_l_ankle:mvabs": 65},
-  {"servo:leg_r_ankle:mvabs": 35},
   {"sleep": 1}
 ]
