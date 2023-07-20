@@ -40,7 +40,6 @@ from modules.personality import Personality
 from modules.braillespeak import Braillespeak
 from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
-from modules.rfid import Rfid
 
 if Config.VISION_TECH is 'opencv':
     from modules.opencv.vision import Vision
@@ -79,7 +78,24 @@ def main():
         s = Config.servos[key]
         servos[key] = Servo(s['pin'], key, s['range'], s['id'], start_pos=s['start'])
 
-    # POWER
+    # pub.sendMessage('log', msg="[Main] Starting pan test")
+    # pub.sendMessage('servo:pan:mvabs', percentage=0)
+    # sleep(2)
+    # pub.sendMessage('log', msg="[Main] Finished looking left")
+    # pub.sendMessage('servo:pan:mvabs', percentage=100)
+    # sleep(2)
+    # pub.sendMessage('log', msg="[Main] Finished looking right")
+    # pub.sendMessage('servo:pan:mvabs', percentage=50)
+    # sleep(2)
+    # pub.sendMessage('servo:tilt:mvabs', percentage=100)
+    # sleep(2)
+    # pub.sendMessage('log', msg="[Main] Finished looking up")
+    # pub.sendMessage('servo:tilt:mvabs', percentage=0)
+    # sleep(2)
+    # pub.sendMessage('log', msg="[Main] Finished looking down")
+    # sleep(10)
+    # pub.sendMessage('log', msg="[Main] Finished testing")
+    #return
     # power = Power(Config.POWER_ENABLE_PIN)
 
     led = LED(Config.LED_COUNT)
