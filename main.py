@@ -78,9 +78,6 @@ def main():
         s = Config.servos[key]
         servos[key] = Servo(s['pin'], key, s['range'], s['id'], start_pos=s['start'])
 
-    # POWER
-    power = Power(Config.POWER_ENABLE_PIN)
-
     # pub.sendMessage('log', msg="[Main] Starting pan test")
     # pub.sendMessage('servo:pan:mvabs', percentage=0)
     # sleep(2)
@@ -99,6 +96,7 @@ def main():
     # sleep(10)
     # pub.sendMessage('log', msg="[Main] Finished testing")
     #return
+    # power = Power(Config.POWER_ENABLE_PIN)
 
     led = LED(Config.LED_COUNT)
     tts = TTS()
