@@ -1,0 +1,43 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=body
+*Date=14:45:07
+*CreatedBy=Fritzing 0.9.6b..
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;;;33.8048;-45.6282;0;Bottom;Hole3
+2;;;37.8465;-40.9656;0;Bottom;Via5
+3;;THT;5.86486;-40.5482;-90;Bottom;D11
+4;;THT;5.86486;-10.0682;-90;Bottom;D8
+5;;THT;34.7418;-39.1751;0;Bottom;vout
+6;;THT;5.86486;-30.3882;-90;Bottom;D2
+7;;;3.32476;-2.44827;0;Bottom;Hole2
+8;;THT;5.86486;-20.2282;-90;Bottom;D5
+9;;;19.1972;-2.16205;0;Bottom;TXT1
+10;;;32.714;-33.8832;0;Bottom;Via4
+11;;THT;5.86486;-35.4682;-90;Bottom;D9
+12;;;21.1049;-27.8482;0;Bottom;ProMini
+13;;;11.3816;-45.8826;0;Bottom;Via3
+14;;THT;5.86486;-38.0082;-90;Bottom;D10
+15;;THT;5.86486;-22.7682;-90;Bottom;D4
+16;;THT;5.86486;-15.1482;-90;Bottom;D6
+17;;THT;5.86486;-12.6082;-90;Bottom;D7
+18;;;5.53767;-3.17048;0;Bottom;Via1
+19;;;33.8048;-2.44827;0;Bottom;Hole4
+20;;;31.7505;-4.38968;0;Bottom;Via2
+21;;THT;34.8307;-25.3811;180;Bottom;Pi
+22;330;THT;19.225;-6.16814;180;Bottom;R1
+23;;THT;5.86486;-27.8482;-90;Bottom;D3
+24;;THT;13.3957;-8.08556;0;Bottom;Bridge
+25;330;THT;19.225;-9.16817;180;Bottom;A0
+26;;;3.32476;-45.6282;0;Bottom;Hole1
+27;;THT;32.7824;-9.39846;0;Bottom;5v+
+28;;;25.0749;-26.5482;0;Bottom;Part1

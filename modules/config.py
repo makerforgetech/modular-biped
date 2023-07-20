@@ -14,6 +14,11 @@ class Config:
     MODE_KEYBOARD = 5
     MODE_LIVE = 6
 
+
+    VISION_TECH = 'coral' # or 'opencv'
+    VISION_MODE = 'face' # or 'object'
+    DEBUG_VISION = False # Creates loop to focus on tracking without personality etc.
+
     # GPIO
     # gpio = pigpio.pi()
 
@@ -29,15 +34,16 @@ class Config:
 
     servos = dict()
     # Everything is percentages except the range values.
-    servos['neck'] = {'pin': 2, 'range': [36, 170], 'start': 85}
-    servos['tilt'] = {'pin': 3, 'range': [36, 125], 'start': 55}
-    servos['pan'] = {'pin': 4, 'range': [0, 180], 'start': 60}
-    servos['leg_l_hip'] = {'pin': 8, 'range': [0, 180], 'start': 80}
-    servos['leg_l_knee'] = {'pin': 9, 'range': [0, 180], 'start': 5}
-    servos['leg_l_ankle'] = {'pin': 10, 'range': [0, 180], 'start': 35}
-    servos['leg_r_hip'] = {'pin': 5, 'range': [0, 180], 'start': 20}
-    servos['leg_r_knee'] = {'pin': 6, 'range': [0, 180], 'start': 100}
-    servos['leg_r_ankle'] = {'pin': 7, 'range': [0, 180], 'start': 65}
+    servos['leg_l_hip'] = {'id': 0, 'pin': 9, 'range': [20, 160], 'start': 19}
+    servos['leg_l_knee'] = {'id': 1, 'pin': 10, 'range': [5, 175], 'start': 12}
+    servos['leg_l_ankle'] = {'id': 2, 'pin': 11, 'range': [40, 180], 'start': 52}
+    servos['leg_r_hip'] = {'id': 3, 'pin': 6, 'range': [20, 160], 'start': 93}
+    servos['leg_r_knee'] = {'id': 4, 'pin': 7, 'range': [5, 175], 'start': 90}
+    servos['leg_r_ankle'] = {'id': 5, 'pin': 8, 'range': [40, 180], 'start': 88}
+    servos['tilt'] = {'id': 6, 'pin': 2, 'range': [60, 120], 'start': 75}
+    servos['pan'] = {'id': 7, 'pin': 3, 'range': [20, 160], 'start': 50}
+#    servos['leg_l_sway'] = {'pin': 4, 'range': [0, 180], 'start': 0}
+#    servos['leg_r_sway'] = {'pin': 5, 'range': [0, 180], 'start': 0}
 
     # Head and neck
     # NECK_PIN = 3
@@ -75,7 +81,7 @@ class Config:
     # LEG_R_ANKLE_START_POS = 50
 
     # RGB NeoPixels
-    LED_COUNT = 12
+    LED_COUNT = 7
 
     # HotWord (uses Snowboy.ai)
     HOTWORD_MODEL = None #'modules/snowboy/resources/models/robot.pmdl'

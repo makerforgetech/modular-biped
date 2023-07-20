@@ -8,12 +8,12 @@ class ArduinoSerial:
     """
     Communicate with Arduino over Serial
     """
-    type_map=['led', 'servo',' pin', 'read']
+    type_map=['led', 'servo', 'servo_relative', ' pin', 'read']
     DEVICE_LED = 0
     DEVICE_SERVO = 1
     DEVICE_PIN = 2
     DEVICE_PIN_READ = 3
-
+    DEVICE_SERVO_RELATIVE = 4
     ORDER_RECEIVED = 5
     def __init__(self, **kwargs):
         self.serial_file = ArduinoSerial.initialise()
@@ -26,21 +26,26 @@ class ArduinoSerial:
             serial_file = open_serial_port(baudrate=115200, timeout=None)
         except Exception as e:
             raise e
-
-        is_connected = False
-        # Initialize communication with Arduino
-        while not is_connected:
-            pub.sendMessage('log', msg="[ArduinoSerial] Waiting for arduino...")
-            write_order(serial_file, Order.HELLO)
-            bytes_array = bytearray(serial_file.read(1))
-            if not bytes_array:
-                time.sleep(2)
-                continue
-            byte = bytes_array[0]
-            if byte in [Order.HELLO.value, Order.ALREADY_CONNECTED.value]:
-                is_connected = True
-
-        pub.sendMessage('log', msg="[ArduinoSerial] Connected to Arduino")
+        is_connected = True # assume connection
+        # bytes_array = False
+        # attempts = 1
+        # # Initialize communication with Arduino
+        # while not is_connected and attempts > 0:
+        #     attempts = attempts -1
+        #     pub.sendMessage('log', msg="[ArduinoSerial] Waiting for arduino...")
+        #     write_order(serial_file, Order.HELLO)
+        #     bytes_array = bytearray(serial_file.read(1))
+        #     if not bytes_array:
+        #         time.sleep(2)
+        #         continue
+        #     byte = bytes_array[0]
+        #     if byte in [Order.HELLO.value, Order.ALREADY_CONNECTED.value]:
+        #         is_connected = True
+        # if is_connected:
+        #     pub.sendMessage('log', msg="[ArduinoSerial] Connected to Arduino")
+        # else:
+        #     pub.sendMessage('log', msg="[ArduinoSerial] NOT CONNECTED")
+        #     serial_file = None
         return serial_file
 
     def send(self, type, identifier, message):
@@ -53,11 +58,23 @@ class ArduinoSerial:
         :param identifier: an identifier or list / range of identifiers, pin or LED number
         :param message: the packet to send to the arduino
         """
+        # If serial_file is None, call initialise(), if still fails then exit
+        if self.serial_file is None:
+            pub.sendMessage('log', msg="[ArduinoSerial] Attempting to recover connection...")
+            self.serial_file = ArduinoSerial.initialise()
+        if self.serial_file is None:
+            return
+
         pub.sendMessage('log', msg='[ArduinoSerial] ' + str(ArduinoSerial.type_map[type]) + ' id: ' + str(identifier) + ' val: ' + str(message))
         if type == ArduinoSerial.DEVICE_SERVO or type == 'servo':
             write_order(self.serial_file, Order.SERVO)
             write_i8(self.serial_file, identifier)
             write_i16(self.serial_file, int(message))
+        if type == ArduinoSerial.DEVICE_SERVO_RELATIVE or type == 'servo_relative':
+            write_order(self.serial_file, Order.SERVO_RELATIVE)
+            write_i8(self.serial_file, identifier)
+            write_i16(self.serial_file, int(message))
+            pub.sendMessage('log', msg="[ArduinoSerial] Servo(relative) " + str(identifier) + " " + str(message))
         elif type == ArduinoSerial.DEVICE_LED or type == 'led':
             write_order(self.serial_file, Order.LED)
             if isinstance(identifier, list) or isinstance(identifier, range):
