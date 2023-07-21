@@ -28,7 +28,7 @@ class Faces:
         self.state.set_eye('green')
         if name not in self.current_faces:
             self.current_faces.append(name)
-            pub.sendMessage('speak', message=name)
+            pub.sendMessage('speak', message='hi')
 
         if name != 'unknown':
             self.last_face_name = name
