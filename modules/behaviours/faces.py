@@ -25,7 +25,7 @@ class Faces:
         self.face_detected = True
         self.last_face = datetime.now()
         # self.state.set_state(Config.STATE_IDLE)
-       self.state.set_eye('green')
+        self.state.set_eye('green')
         if name not in self.current_faces:
             self.current_faces.append(name)
             pub.sendMessage('speak', message=name)
