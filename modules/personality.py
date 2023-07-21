@@ -12,6 +12,7 @@ from modules.behaviours.boredom import Boredom
 from modules.behaviours.feel import Feel
 from modules.behaviours.sleep import Sleep
 from modules.behaviours.respond import Respond
+from modules.behaviours.objects import Objects
 
 from types import SimpleNamespace
 
@@ -43,15 +44,16 @@ class Personality:
                        'motion': Motion(self),
                        'sleep': Sleep(self),
                        'feel': Feel(self),
+                       'objects': Objects(self),
                        'respond': Respond(self)}
 
         self.behaviours = SimpleNamespace(**behaviours)
 
     def loop(self):
-        if not self.is_asleep() and not self.behaviours.faces.face_detected and not self.behaviours.motion.is_motion():
+        if not self.is_asleep() and not self.behaviours.faces.face_detected and not self.behaviours.motion.is_motion() and not self.behaviours.objects.is_detected:
             self.set_eye('red')
 
-        if self.state == Config.STATE_ALERT and self.lt(self.behaviours.faces.last_face, self.past(2*60)):
+        if self.state == Config.STATE_ALERT and self.lt(self.behaviours.faces.last_face, self.past(2*60)) and self.lt(self.behaviours.objects.last_detection, self.past(2*60)):
             # reset to idle position after 2 minutes inactivity
             pub.sendMessage('animate', action="wake")
             self.set_state(Config.STATE_IDLE)
