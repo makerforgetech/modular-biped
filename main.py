@@ -40,6 +40,7 @@ from modules.personality import Personality
 from modules.braillespeak import Braillespeak
 from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
+from modules.chatbot import MyChatBot
 
 if Config.VISION_TECH is 'opencv':
     from modules.opencv.vision import Vision
@@ -141,6 +142,16 @@ def main():
 
     buzzer = Buzzer(Config.BUZZER_PIN)
     animate = Animate()
+
+    chatbot = MyChatBot(tts, speech_input)
+    
+    while True:
+        trigger_word = "chatrobot"
+        user_input = speech_input.get_audio_input()
+
+        if trigger_word in user_input.lower():
+            chatbot.chat()
+            break
 
     # @todo 2k resistor needs switching to > 3k for 20v+ support.
     #battery = Battery(0, serial, path=path) # note: needs ref for pubsub to work
