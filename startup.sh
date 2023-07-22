@@ -11,9 +11,8 @@ username="archie"
 # Check if the user is logged in
 if who | grep -wq "$username"; then
   # If the user is logged in, start the desired file here
-  sudo python3 /home/archie/companion-robot/main.py
   echo "User is logged in, running the file..."
-  /path/to/yourfile.sh
+  sudo python3 /home/archie/companion-robot/main.py
 else
   # If the user is not logged in, print a message
   echo "User is not logged in, the file won't be executed."
