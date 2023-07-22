@@ -129,6 +129,8 @@ def main():
 
 def main():
     while True:
+        close_jetson_session()
+        time.sleep(10)
         tts("Please authenticate your identity.")
         card_id = read_rfid()
         if authenticate_card(card_id):
