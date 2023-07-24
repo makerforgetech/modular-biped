@@ -33,7 +33,7 @@ import sys
 
 from modules.speechinput import SpeechInput
 from modules.arduinoserial import ArduinoSerial
-from modules.led import LED
+# from modules.led import LED
 from modules.tts import TTS
 from modules.personality import Personality
 # from modules.battery import Battery
@@ -98,7 +98,7 @@ def main():
     #return
     # power = Power(Config.POWER_ENABLE_PIN)
 
-    led = LED(Config.LED_COUNT)
+    # led = LED(Config.LED_COUNT)
     tts = TTS()
 
     if Config.MOTION_PIN is not None:
