@@ -40,12 +40,7 @@ class LED:
             'left' : 3,
             'bottom_left' : 4,
             'bottom_right' : 5,
-            'middle': 6,
-            'top1': 7,
-            'top2': 8,
-            'top3': 9,
-            'top4': 10,
-            'top5': 11
+            'middle': 6
         }
         self.all = range(self.count)
         self.all_eye = range(6)
@@ -123,8 +118,8 @@ class LED:
                 
                 #pub.sendMessage('log', msg='[LED] Setting LED')
             except Exception as e:
-                print(e)
-                pub.sendMessage('log', msg='[LED] Error in set pixels')
+                #print(e)
+                pub.sendMessage('log', msg='[LED] Error in set pixels: '+ str(e))
                 pass
         self.pixels.show()
         sleep(.1)
