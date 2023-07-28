@@ -93,6 +93,13 @@ class Config:
     STATE_ALERT = 3
 
     NIGHT_HOURS = [22, 8]  # night start and end. Will not wake during this time
+    
+    # GPIO pin for RFID module
+    RFID_PIN = None# 18
+    RFID_CARDS = {
+        '0000000000': 'Unknown',
+        '0000000001': 'Unknown'
+    }
 
     @staticmethod
     def exit(signum, frame):

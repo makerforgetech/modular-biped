@@ -41,6 +41,7 @@ from modules.braillespeak import Braillespeak
 from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
 from modules.chatbot import MyChatBot
+from modules.RFID import RFID
 
 if Config.VISION_TECH is 'opencv':
     from modules.opencv.vision import Vision
@@ -89,6 +90,10 @@ def main():
         motion = Sensor(Config.MOTION_PIN, pi=gpio)
 
     pub.sendMessage('tts', msg='I am awake')
+    
+    if (Config.RFID_PIN is not None):
+        rfid = RFID()
+        rfid.wait_for_access()
 
     if mode() == Config.MODE_LIVE:
         # Vision / Tracking
@@ -143,15 +148,7 @@ def main():
     buzzer = Buzzer(Config.BUZZER_PIN)
     animate = Animate()
 
-    chatbot = MyChatBot(tts, speech_input)
-    
-    while True:
-        trigger_word = "chatrobot"
-        user_input = speech_input.get_audio_input()
-
-        if trigger_word in user_input.lower():
-            chatbot.chat()
-            break
+    chatbot = MyChatBot()
 
     # @todo 2k resistor needs switching to > 3k for 20v+ support.
     #battery = Battery(0, serial, path=path) # note: needs ref for pubsub to work
