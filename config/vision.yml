@@ -2,3 +2,4 @@ vision:
   tech: "coral"
   initial_mode: "object"
   modes: ["object", "face"]
+  debug: false

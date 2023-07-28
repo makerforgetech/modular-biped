@@ -41,40 +41,40 @@ class Config:
     MODE_LIVE = 6
 
 
-    VISION_TECH = 'coral' # or 'opencv'
-    VISION_MODE = 'object' # 'face' or 'object'
-    DEBUG_VISION = False # Creates loop to focus on tracking without personality etc.
+    # VISION_TECH = 'coral' # or 'opencv'
+    # VISION_MODE = 'object' # 'face' or 'object'
+    # DEBUG_VISION = False # Creates loop to focus on tracking without personality etc.
 
     # GPIO
     # gpio = pigpio.pi()
 
     # Power Management
-    POWER_ENABLE_PIN = 11
-    SLEEP_TIMEOUT = 1  # Minutes
+    # POWER_ENABLE_PIN = 11
+    # SLEEP_TIMEOUT = 1  # Minutes
 
-    # Audio
-    BUZZER_PIN = 27
+    # # Audio
+    # BUZZER_PIN = 27
 
-    # Microwave sensor pin
-    MOTION_PIN = 13
+    # # Microwave sensor pin
+    # MOTION_PIN = 13
 
-    servos = dict()
-    # Everything is percentages except the range values.
-    servos['leg_l_hip'] = {'id': 0, 'pin': 9, 'range': [20, 160], 'start': 19}
-    servos['leg_l_knee'] = {'id': 1, 'pin': 10, 'range': [5, 175], 'start': 12}
-    servos['leg_l_ankle'] = {'id': 2, 'pin': 11, 'range': [40, 180], 'start': 52}
-    servos['leg_r_hip'] = {'id': 3, 'pin': 6, 'range': [20, 160], 'start': 93}
-    servos['leg_r_knee'] = {'id': 4, 'pin': 7, 'range': [5, 175], 'start': 90}
-    servos['leg_r_ankle'] = {'id': 5, 'pin': 8, 'range': [40, 180], 'start': 88}
-    servos['tilt'] = {'id': 6, 'pin': 2, 'range': [60, 120], 'start': 75}
-    servos['pan'] = {'id': 7, 'pin': 3, 'range': [20, 160], 'start': 50}
+    # servos = dict()
+    # # Everything is percentages except the range values.
+    # servos['leg_l_hip'] = {'id': 0, 'pin': 9, 'range': [20, 160], 'start': 19}
+    # servos['leg_l_knee'] = {'id': 1, 'pin': 10, 'range': [5, 175], 'start': 12}
+    # servos['leg_l_ankle'] = {'id': 2, 'pin': 11, 'range': [40, 180], 'start': 52}
+    # servos['leg_r_hip'] = {'id': 3, 'pin': 6, 'range': [20, 160], 'start': 93}
+    # servos['leg_r_knee'] = {'id': 4, 'pin': 7, 'range': [5, 175], 'start': 90}
+    # servos['leg_r_ankle'] = {'id': 5, 'pin': 8, 'range': [40, 180], 'start': 88}
+    # servos['tilt'] = {'id': 6, 'pin': 2, 'range': [60, 120], 'start': 75}
+    # servos['pan'] = {'id': 7, 'pin': 3, 'range': [20, 160], 'start': 50}
 
-    # RGB NeoPixels
-    LED_COUNT = 7
+    # # RGB NeoPixels
+    # LED_COUNT = 7
 
-    # HotWord (uses Snowboy.ai)
-    HOTWORD_MODEL = None #'modules/snowboy/resources/models/robot.pmdl'
-    HOTWORD_SLEEP_TIME = 0.03
+    # # HotWord (uses Snowboy.ai)
+    # HOTWORD_MODEL = None #'modules/snowboy/resources/models/robot.pmdl'
+    # HOTWORD_SLEEP_TIME = 0.03
 
     STATE_SLEEPING = 0
     STATE_RESTING = 1
