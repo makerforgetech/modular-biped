@@ -150,7 +150,7 @@ class LED:
             pub.sendMessage('log', msg='[LED] Setting eye colour: ' + color)
             self.set(self.positions['middle'], LED.COLOR_MAP[color])
 
-    def party(self, color):
+    def party(self):
         # self.animate(self.all, 'off', 'rainbow_cycle')
 
         for j in range(256 * 1):
