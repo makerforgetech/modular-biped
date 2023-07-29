@@ -1,0 +1,6 @@
+rfid:
+  pin: None
+  cards:
+    "1234567890": "John Doe"
+    "0987654321": "Jane Doe"
+    "1234567891": "John Doe"

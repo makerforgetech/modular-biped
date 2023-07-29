@@ -1,0 +1,37 @@
+neopixel:
+  pin: None
+  count: 7
+  docs:
+    description: "The neopixel module is used to drive neopixel LEDs."
+    events:
+      sub:
+        - led:
+            description: "Set specific LEDs"
+            args:
+              - identifiers: "array[integer] | integer"
+              - color: string
+        - led:full:
+            description: "Set all LEDs"
+            args:
+              - color: string
+        - led:eye:
+            description: "Set eye LEDs"
+            args:
+              - color: string
+        - led:off:
+            description: "Turn off all LEDs"
+        - led:flashlight:
+            description: "Turn on all eye LEDs full white"
+            args:
+              - on: boolean
+        - led:party:
+            description: "Turn on all LEDs in random colors"
+        - exit:
+            description: "Exit module."
+        - speech:
+            description: "Attempt to process commands from speech (light on | off)"
+            args:
+              - msg: string
+      pub:
+        - log:
+            description: "Send messages to logger."
