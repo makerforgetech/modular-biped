@@ -161,7 +161,7 @@ def main():
     if Config.get('buzzer', 'pin') != '':
         speak = Braillespeak(Config.get('buzzer', 'pin'), duration=80/1000)
 
-    buzzer = Buzzer(Config.get('buzzer', 'pin'))
+    #buzzer = Buzzer(Config.get('buzzer', 'pin'))
     animate = Animate()
 
     # @todo 2k resistor needs switching to > 3k for 20v+ support.
