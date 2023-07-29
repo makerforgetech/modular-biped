@@ -64,7 +64,7 @@ def main():
     print('Starting...')
     
     path = os.path.dirname(__file__)
-    translator = Translator(src=Config.get('translator', 'default')['src'], dest=Config.get('translator', 'default')['src'])
+    translator = Translator(src=Config.get('translator', 'default')['src'], dest=Config.get('translator', 'default')['dest'])
     log = LogWrapper(path=os.path.dirname(__file__), translator=translator)
     
 
@@ -104,9 +104,9 @@ def main():
     # power = Power(Config.POWER_ENABLE_PIN)
 
     led = LED(Config.get('neopixel','count'))
-    tts = TTS()
+    tts = TTS(translator=translator)
 
-    if Config.get('motion','pin') is not None:
+    if Config.get('motion','pin') != '':
         motion = Sensor(Config.get('motion','pin'), pi=gpio)
 
     pub.sendMessage('tts', msg='I am awake')
@@ -149,7 +149,7 @@ def main():
     temp = PiTemperature()
 
     # Voice
-    if Config.get('hotword', 'model') is not None:
+    if Config.get('hotword', 'model') is not '':
         hotword = HotWord(Config.get('hotword', 'model'))
         hotword.start()  # @todo this starts the thread. can it be moved into hotword?
         hotword.start_recog(sleep_time=Config.get('hotword', 'sleep_time'))
@@ -158,7 +158,7 @@ def main():
 
     speech = SpeechInput()
     # Output
-    if Config.get('buzzer', 'pin') is not None:
+    if Config.get('buzzer', 'pin') != '':
         speak = Braillespeak(Config.get('buzzer', 'pin'), duration=80/1000)
 
     buzzer = Buzzer(Config.get('buzzer', 'pin'))

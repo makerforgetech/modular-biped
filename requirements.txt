@@ -24,3 +24,9 @@ imutils
 schedule
 
 colour
+
+#Config yaml
+pyyaml
+
+# Translator
+googletrans==3.1.0a0

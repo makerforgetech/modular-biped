@@ -21,9 +21,12 @@ class Translator:
             dest = self.dest
         if src == dest:
             return text
-        translation = self.translator.translate(text, src=src, dest=dest)
-        print(f"{translation.origin} ({translation.src}) --> {translation.text} ({translation.dest})")    
-        return translation
+        try:
+            translation = self.translator.translate(text, src=src, dest=dest)
+        except Exception as e:
+            return 'FAILED TRANSLATION: ' + text
+        # print(f"{translation.origin} ({translation.src}) --> {translation.text} ({translation.dest})")    
+        return translation.text
         
 
 if __name__ == '__main__':

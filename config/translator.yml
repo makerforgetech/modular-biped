@@ -1,7 +1,7 @@
 translator:
   default:
     src: "en"
-    dest: "en"
+    dest: "es"
   docs:
     description: "The translator module is used to translate any text from one language to another"
     methods:
