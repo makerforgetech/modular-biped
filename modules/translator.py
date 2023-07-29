@@ -9,11 +9,10 @@ from googletrans import Translator as GoogleTranslator
 
 class Translator:
     def __init__(self, **kwargs):
-        # init the Google API translator
-        self.translator = GoogleTranslator()
         self.src = kwargs.get('src', 'en')
         self.dest = kwargs.get('dest', 'en')
-        
+        self.translator = None
+
     def request(self, text, src = None, dest = None):
         if src is None:
             src = self.src
@@ -22,8 +21,11 @@ class Translator:
         if src == dest:
             return text
         try:
+            if self.translator is None:
+                self.translator = GoogleTranslator()
             translation = self.translator.translate(text, src=src, dest=dest)
         except Exception as e:
+            print(e)
             return 'FAILED TRANSLATION: ' + text
         # print(f"{translation.origin} ({translation.src}) --> {translation.text} ({translation.dest})")    
         return translation.text

@@ -109,7 +109,7 @@ def main():
     if Config.get('motion','pin') != '':
         motion = Sensor(Config.get('motion','pin'), pi=gpio)
 
-    pub.sendMessage('tts', msg='I am awake')
+    pub.sendMessage('tts', msg='I am awake.')
 
     if mode() == Config.MODE_LIVE:
         # Vision / Tracking
@@ -128,10 +128,9 @@ def main():
             if Config.get('vision', 'debug'):
                 # Testing - for fine-tuning tracking without the other stuff
                 pub.sendMessage('wake')
-                pub.sendMessage('power:use')
-                pub.sendMessage("servo:neck:mvabs", percentage=40)
-                pub.sendMessage("servo:tilt:mvabs", percentage=40)
-                pub.sendMessage("servo:pan:mvabs", percentage=60)
+                # pub.sendMessage('power:use')
+                pub.sendMessage("servo:tilt:mvabs", percentage=50)
+                pub.sendMessage("servo:pan:mvabs", percentage=50)
                 sleep(1)
 
             vision = Vision(preview=preview, mode=Config.get('vision','initial_mode'))

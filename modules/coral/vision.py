@@ -20,7 +20,7 @@ Performs continuous object detection with the camera.
 from modules.coral.aiymakerkit import vision as coralvision
 from modules.coral.aiymakerkit import utils
 import modules.coral.models as models
-from threading import Thread
+from threading import Thread, Timer
 from pubsub import pub
 import time
 
@@ -38,6 +38,7 @@ class Vision:
         self.set_mode(kwargs.get('mode', 'object')) # intial mode, will switch dynamically during use
         self.new_thread = Thread(target=self.vision_thread)        
         self.new_thread.start()
+        self.mode_change_delay = None
         
         pub.subscribe(self.exit, 'exit')
         
@@ -62,6 +63,12 @@ class Vision:
 
     def exit(self):
         self.new_thread.join()
+        
+    def debounce(self, mode, delay=10):
+        if self.mode_change_delay is not None and self.mode_change_delay.is_alive():
+            return
+        self.mode_change_delay = Timer(delay, self.set_mode, [mode])
+        self.mode_change_delay.start()
 
     def vision_thread(self):
         for frame in coralvision.get_frames(display=self.preview):
@@ -76,19 +83,22 @@ class Vision:
                 if self.mode == 'object':
                     pub.sendMessage('vision:detect:object', name='unknown') #, name=self.labels[objects[0].id])
                 else:
+                    if self.mode_change_delay is not None:
+                        self.mode_change_delay.cancel()
+                        self.mode_change_delay = None
                     pub.sendMessage('vision:detect:face', name="unknown") # @todo face recognition (from opencv module)
                 pub.sendMessage('vision:matches', matches=objects, labels=self.labels)
                 # if any detected objects contains 'person' then set_mode to 'face'
                 if self.mode == 'object':
                     for object in objects:
-                        if self.labels[object.id] == 'person':
+                        if self.labels is not None and object.id in self.labels and self.labels[object.id] == 'person':
                             self.set_mode('face')
                             break
             else:
                 pub.sendMessage('vision:nomatch')
                 # if no faces detected, go back to object detection
                 if self.mode == 'face':
-                    self.set_mode('object')
+                    self.debounce('object')
             
 
 
