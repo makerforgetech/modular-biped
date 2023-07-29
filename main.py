@@ -74,8 +74,9 @@ def main():
     serial = ArduinoSerial()
 
     servos = dict()
-    for key in Config.get('servos'):
-        s = Config.get('servos', 'key')
+    servo_conf = Config.get('servos','conf')
+    for key in servo_conf:
+        s = servo_conf[key]
         servos[key] = Servo(s['pin'], key, s['range'], s['id'], start_pos=s['start'])
 
     # pub.sendMessage('log', msg="[Main] Starting pan test")
