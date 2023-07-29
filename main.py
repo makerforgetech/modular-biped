@@ -156,7 +156,7 @@ def main():
         sleep(1)  # @todo is this needed?
         # @todo this is throwing errors: ALSA lib confmisc.c:1281:(snd_func_refer) Unable to find definition 'defaults.bluealsa.device'
 
-    speech = SpeechInput()
+    #speech = SpeechInput()
     # Output
     if Config.get('buzzer', 'pin') != '':
         speak = Braillespeak(Config.get('buzzer', 'pin'), duration=80/1000)
