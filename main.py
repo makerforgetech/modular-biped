@@ -41,6 +41,8 @@ from modules.braillespeak import Braillespeak
 from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
 
+from modules.translator import Translator
+
 if Config.get('vision', 'tech') is 'opencv':
     from modules.opencv.vision import Vision
     from modules.opencv.tracking import Tracking
@@ -62,7 +64,9 @@ def main():
     print('Starting...')
     
     path = os.path.dirname(__file__)
-    log = LogWrapper(path=os.path.dirname(__file__))
+    translator = Translator(src=Config.get('translator', 'default')['src'], dest=Config.get('translator', 'default')['src'])
+    log = LogWrapper(path=os.path.dirname(__file__), translator=translator)
+    
 
     # Throw exception to safely exit script when terminated
     signal.signal(signal.SIGTERM, Config.exit)

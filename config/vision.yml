@@ -5,11 +5,11 @@ vision:
   debug: false
   docs:
     description: "The vision module is used to detect objects and faces."
-    events: 
-      sub: 
+    events:
+      sub:
         - exit:
             description: "Exit module."
-      pub: 
+      pub:
         - log:
             description: "Send messages to logger."
         - vision:detect:object:
@@ -18,9 +18,11 @@ vision:
               - name: string
         - vision:detect:face:
             description: "The vision module has detected a face."
+            args:
               - name: string
         - vision:matches:
             description: "List of vision matches."
+            args:
               - matches: array
               - labels: array
         - vision:nomatch:

@@ -10,6 +10,8 @@ class LogWrapper:
         self.path = kwargs.get('path', '/')
         self.filename = kwargs.get('filename', 'app.log')
         self.file = self.path + '/' + self.filename
+        
+        self.translator = kwargs.get('translator', None)
 
         pub.subscribe(self.log, 'log', type='info')
         pub.subscribe(self.log, 'log:debug', type='debug')
@@ -26,4 +28,6 @@ class LogWrapper:
         # Translate type string to log level (0 - 50)
         logging.log(LogWrapper.levels.index(type)*10, msg)
         # if type == 'error' or type == 'warning':
+        if self.translator is not None:
+            msg = self.translator.translate(msg)
         print('LogWrapper: ' + type + ' - ' + str(msg))
