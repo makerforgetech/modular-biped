@@ -1,0 +1,7 @@
+buzzer:
+  pin: 27
+  docs:
+    description: "The buzzer is a piezo speaker that can be used to play tones and melodies."
+    events: 
+      sub: 
+        - speech

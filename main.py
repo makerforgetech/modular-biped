@@ -41,13 +41,15 @@ from modules.braillespeak import Braillespeak
 from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
 
-if Config.VISION_TECH is 'opencv':
+from modules.translator import Translator
+
+if Config.get('vision', 'tech') is 'opencv':
     from modules.opencv.vision import Vision
     from modules.opencv.tracking import Tracking
     from modules.opencv.train_model import TrainModel
     from modules.opencv.video_stream import VideoStream
     from modules.opencv.timelapse import Timelapse
-elif Config.VISION_TECH is 'coral':
+elif Config.get('vision', 'tech') is 'coral':
     from modules.coral.vision import Vision
     from modules.coral.tracking import Tracking
 
@@ -62,7 +64,9 @@ def main():
     print('Starting...')
     
     path = os.path.dirname(__file__)
-    log = LogWrapper(path=os.path.dirname(__file__))
+    translator = Translator(src=Config.get('translator', 'default')['src'], dest=Config.get('translator', 'default')['dest'])
+    log = LogWrapper(path=os.path.dirname(__file__), translator=translator)
+    
 
     # Throw exception to safely exit script when terminated
     signal.signal(signal.SIGTERM, Config.exit)
@@ -74,8 +78,9 @@ def main():
     serial = ArduinoSerial()
 
     servos = dict()
-    for key in Config.servos:
-        s = Config.servos[key]
+    servo_conf = Config.get('servos','conf')
+    for key in servo_conf:
+        s = servo_conf[key]
         servos[key] = Servo(s['pin'], key, s['range'], s['id'], start_pos=s['start'])
 
     # pub.sendMessage('log', msg="[Main] Starting pan test")
@@ -98,11 +103,11 @@ def main():
     #return
     # power = Power(Config.POWER_ENABLE_PIN)
 
-    # led = LED(Config.LED_COUNT)
-    tts = TTS()
+    #led = LED(Config.get('neopixel','count'))
+    tts = TTS(translator=translator)
 
-    if Config.MOTION_PIN is not None:
-        motion = Sensor(Config.MOTION_PIN, pi=gpio)
+    if Config.get('motion','pin') != '':
+        motion = Sensor(Config.get('motion','pin'), pi=gpio)
 
     pub.sendMessage('tts', msg='I am awake')
 
@@ -112,15 +117,15 @@ def main():
         if len(sys.argv) > 1 and sys.argv[1] == 'preview':
             preview = True
 
-        if Config.VISION_TECH is 'opencv':
+        if Config.get('vision','tech') is 'opencv':
             camera_resolution = (640, 480) #(1024, 768) #- this halves the speed of image recognition
             video_stream = VideoStream(resolution=camera_resolution).start()
             vision = Vision(video_stream, mode=Vision.MODE_FACES, path=path, preview=preview, resolution=camera_resolution)
             tracking = Tracking(vision)
             training = TrainModel(dataset=path + '/matches/trained', output='encodings.pickle')
             # timelapse = Timelapse(video_stream, path=path, original_resolution=camera_resolution)
-        elif Config.VISION_TECH is 'coral':
-            if Config.DEBUG_VISION:
+        elif Config.get('vision','tech') is 'coral':
+            if Config.get('vision', 'debug'):
                 # Testing - for fine-tuning tracking without the other stuff
                 pub.sendMessage('wake')
                 pub.sendMessage('power:use')
@@ -129,10 +134,10 @@ def main():
                 pub.sendMessage("servo:pan:mvabs", percentage=60)
                 sleep(1)
 
-            vision = Vision(preview=preview, mode=Config.VISION_MODE)
+            vision = Vision(preview=preview, mode=Config.get('vision','initial_mode'))
             tracking = Tracking()
 
-            if Config.DEBUG_VISION:
+            if Config.get('vision', 'debug'):
                 while True:
                     pass
 
@@ -144,19 +149,19 @@ def main():
     temp = PiTemperature()
 
     # Voice
-    if Config.HOTWORD_MODEL is not None:
-        hotword = HotWord(Config.HOTWORD_MODEL)
+    if Config.get('hotword', 'model') is not '':
+        hotword = HotWord(Config.get('hotword', 'model'))
         hotword.start()  # @todo this starts the thread. can it be moved into hotword?
-        hotword.start_recog(sleep_time=Config.HOTWORD_SLEEP_TIME)
+        hotword.start_recog(sleep_time=Config.get('hotword', 'sleep_time'))
         sleep(1)  # @todo is this needed?
         # @todo this is throwing errors: ALSA lib confmisc.c:1281:(snd_func_refer) Unable to find definition 'defaults.bluealsa.device'
 
     speech = SpeechInput()
     # Output
-    if Config.BUZZER_PIN is not None:
-        speak = Braillespeak(Config.BUZZER_PIN, duration=80/1000)
+    if Config.get('buzzer', 'pin') != '':
+        speak = Braillespeak(Config.get('buzzer', 'pin'), duration=80/1000)
 
-    buzzer = Buzzer(Config.BUZZER_PIN)
+    buzzer = Buzzer(Config.get('buzzer', 'pin'))
     animate = Animate()
 
     # @todo 2k resistor needs switching to > 3k for 20v+ support.

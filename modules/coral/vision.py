@@ -76,7 +76,7 @@ class Vision:
                 if self.mode == 'object':
                     pub.sendMessage('vision:detect:object', name='unknown') #, name=self.labels[objects[0].id])
                 else:
-                    pub.sendMessage('vision:detect:face', name="unknown")
+                    pub.sendMessage('vision:detect:face', name="unknown") # @todo face recognition (from opencv module)
                 pub.sendMessage('vision:matches', matches=objects, labels=self.labels)
                 # if any detected objects contains 'person' then set_mode to 'face'
                 if self.mode == 'object':

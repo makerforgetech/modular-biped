@@ -10,7 +10,7 @@ To use the Googla Coral USB Accelerator, first flash the Pi SD card with the ima
 
 (I attempted to install the required software from the coral [getting started guide](https://coral.ai/docs/accelerator/get-started#1-install-the-edge-tpu-runtime) but I was unable to get past an error relating to grpico "GLIBC_2.29' not found")
 
-Alternatively, set Config.VISION_TECH to `opencv` for the original (slower) facial recognition. I am not updating this anymore so you may find some integration issues.
+Alternatively, set Config.vision.tech to `opencv` for the original (slower) facial recognition. I am not updating this anymore so you may find some integration issues.
 
 ## Installation
 ```
