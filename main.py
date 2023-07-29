@@ -43,13 +43,13 @@ from modules.pitemperature import PiTemperature
 
 from modules.translator import Translator
 
-if Config.get('vision', 'tech') is 'opencv':
+if Config.get('vision', 'tech') == 'opencv':
     from modules.opencv.vision import Vision
     from modules.opencv.tracking import Tracking
     from modules.opencv.train_model import TrainModel
     from modules.opencv.video_stream import VideoStream
     from modules.opencv.timelapse import Timelapse
-elif Config.get('vision', 'tech') is 'coral':
+elif Config.get('vision', 'tech') == 'coral':
     from modules.coral.vision import Vision
     from modules.coral.tracking import Tracking
 
@@ -116,15 +116,15 @@ def main():
         preview = False
         if len(sys.argv) > 1 and sys.argv[1] == 'preview':
             preview = True
-
-        if Config.get('vision','tech') is 'opencv':
+            
+        if Config.get('vision','tech') == 'opencv':
             camera_resolution = (640, 480) #(1024, 768) #- this halves the speed of image recognition
             video_stream = VideoStream(resolution=camera_resolution).start()
             vision = Vision(video_stream, mode=Vision.MODE_FACES, path=path, preview=preview, resolution=camera_resolution)
             tracking = Tracking(vision)
             training = TrainModel(dataset=path + '/matches/trained', output='encodings.pickle')
             # timelapse = Timelapse(video_stream, path=path, original_resolution=camera_resolution)
-        elif Config.get('vision','tech') is 'coral':
+        elif Config.get('vision','tech') == 'coral':
             if Config.get('vision', 'debug'):
                 # Testing - for fine-tuning tracking without the other stuff
                 pub.sendMessage('wake')
@@ -149,7 +149,7 @@ def main():
     temp = PiTemperature()
 
     # Voice
-    if Config.get('hotword', 'model') is not '':
+    if Config.get('hotword', 'model') != '':
         hotword = HotWord(Config.get('hotword', 'model'))
         hotword.start()  # @todo this starts the thread. can it be moved into hotword?
         hotword.start_recog(sleep_time=Config.get('hotword', 'sleep_time'))
@@ -159,9 +159,9 @@ def main():
     #speech = SpeechInput()
     # Output
     if Config.get('buzzer', 'pin') != '':
-        speak = Braillespeak(Config.get('buzzer', 'pin'), duration=80/1000)
-
-    #buzzer = Buzzer(Config.get('buzzer', 'pin'))
+        #speak = Braillespeak(Config.get('buzzer', 'pin'), duration=80/1000)
+        buzzer = Buzzer(Config.get('buzzer', 'pin'))
+    
     animate = Animate()
 
     # @todo 2k resistor needs switching to > 3k for 20v+ support.
