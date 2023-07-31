@@ -2,7 +2,7 @@ vision:
   tech: "coral"
   initial_mode: "face"
   modes: ["object", "face"]
-  debug: True
+  debug: False
   docs:
     description: "The vision module is used to detect objects and faces."
     events:
