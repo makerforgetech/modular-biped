@@ -30,3 +30,6 @@ pyyaml
 
 # Translator
 googletrans==3.1.0a0
+
+#i2c neopixels
+adafruit-extended-bus
