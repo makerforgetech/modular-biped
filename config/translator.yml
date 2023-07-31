@@ -1,0 +1,18 @@
+translator:
+  default:
+    src: "en"
+    dest: "en"
+  docs:
+    description: "The translator module is used to translate any text from one language to another"
+    methods:
+      - init:
+          description: "Initialize the translator module"
+          args:
+            - src: string
+            - dest: string
+      - request:
+          description: "Translate text from one language to another. Languages can be specified or use defaults"
+          args:
+            - text: string
+            - src: string
+            - dest: string
