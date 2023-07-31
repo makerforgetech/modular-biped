@@ -1,10 +1,15 @@
 from pubsub import pub
 from time import sleep
 #from colour import Color
-
+from modules.config import Config
 try:
     import board
-    import neopixel
+    if Config.get('neopixel', 'i2c'):
+        import busio
+        from rainbowio import colorwheel
+        from adafruit_seesaw import seesaw, neopixel
+    else:
+        import neopixel
 except:
     pass
 
@@ -12,11 +17,11 @@ import threading
 
 class LED:
     COLOR_OFF = (0, 0, 0)
-    COLOR_RED = (5, 0, 0)
-    COLOR_GREEN = (0, 5, 0)
-    COLOR_BLUE = (0, 0, 5)
-    COLOR_PURPLE = (5, 0, 5)
-    COLOR_WHITE = (5, 5, 5)
+    COLOR_RED = (100, 0, 0)
+    COLOR_GREEN = (0, 100, 0)
+    COLOR_BLUE = (0, 0, 100)
+    COLOR_PURPLE = (100, 0, 100)
+    COLOR_WHITE = (100, 100, 100)
     COLOR_WHITE_FULL = (255, 255, 255)
     #COLOR_RED_TO_GREEN_100 = list(Color("red").range_to(Color("green"),100))
 
@@ -47,10 +52,19 @@ class LED:
         self.animation = False
         self.thread = None
         self.overridden = False  # prevent any further changes until released (for flashlight)
-        try:
+        if Config.get('neopixel', 'i2c'):
+            self.i2c = busio.I2C(board.SCL, board.SDA)
+            try:
+                ss = seesaw.Seesaw(self.i2c, addr=0x60)
+            except:
+                # If i2c fails, try again
+                self.i2c.deinit()
+                self.i2c = busio.I2C(board.SCL, board.SDA)
+                ss = seesaw.Seesaw(self.i2c, addr=0x60)
+            neo_pin = 15 # Unclear how this is used
+            self.pixels = neopixel.NeoPixel(ss, neo_pin, count, brightness = 0.1)
+        else:
             self.pixels = neopixel.NeoPixel(board.D12, count)
-        except:
-            pass
         # Default states
         self.set(self.all, LED.COLOR_OFF)
         sleep(0.1)
@@ -74,6 +88,7 @@ class LED:
             self.animation = False
             self.thread.join()
         self.set(self.all, LED.COLOR_OFF)
+        self.i2c.deinit()
         sleep(1)
 
     def speech(self, msg):
@@ -112,11 +127,10 @@ class LED:
         for i in identifiers:
             if type(i) is str:
                 i = self.positions[i]
-            #print(str(i) + str(color))
+            # print(str(i) + str(color))
             try:
                 self.pixels[i] = color
-                
-                #pub.sendMessage('log', msg='[LED] Setting LED')
+                # pub.sendMessage('log', msg='[LED] Setting LED')
             except Exception as e:
                 #print(e)
                 pub.sendMessage('log', msg='[LED] Error in set pixels: '+ str(e))
@@ -266,3 +280,11 @@ class LED:
             if not getattr(t, "animation", True):
                 return
             sleep(wait_ms / 1000)
+
+
+if __name__ == '__main__':
+    inst = LED(7)
+    inst.flashlight(True)
+    sleep(2)
+    inst.flashlight(False)
+    

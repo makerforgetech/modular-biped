@@ -1,6 +1,7 @@
 neopixel:
   pin: None
   count: 7
+  i2c: True
   docs:
     description: "The neopixel module is used to drive neopixel LEDs."
     events:
