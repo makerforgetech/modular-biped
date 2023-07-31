@@ -114,7 +114,7 @@ void loop()
   if (!isSleeping()){
     if (isResting)
     {
-      ///animateRandomly();
+      animateRandomly();
       setSleep(random(3000, 5000));
     }
     else {

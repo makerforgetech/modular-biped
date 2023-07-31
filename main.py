@@ -33,7 +33,7 @@ import sys
 
 from modules.speechinput import SpeechInput
 from modules.arduinoserial import ArduinoSerial
-from modules.led import LED
+from modules.neopx import NeoPx
 from modules.tts import TTS
 from modules.personality import Personality
 # from modules.battery import Battery
@@ -103,7 +103,7 @@ def main():
     #return
     # power = Power(Config.POWER_ENABLE_PIN)
 
-    led = LED(Config.get('neopixel','count'))
+    neopx = NeoPx(Config.get('neopixel','count'))
     tts = TTS(translator=translator)
 
     if Config.get('motion','pin') != '':

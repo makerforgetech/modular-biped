@@ -15,7 +15,7 @@ except:
 
 import threading
 
-class LED:
+class NeoPx:
     COLOR_OFF = (0, 0, 0)
     COLOR_RED = (100, 0, 0)
     COLOR_GREEN = (0, 100, 0)
@@ -283,7 +283,7 @@ class LED:
 
 
 if __name__ == '__main__':
-    inst = LED(7)
+    inst = NeoPx(7)
     inst.flashlight(True)
     sleep(2)
     inst.flashlight(False)
