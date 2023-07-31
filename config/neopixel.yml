@@ -1,5 +1,5 @@
 neopixel:
-  pin: None
+  pin: None # GPIO2 and 3 are use for i2c
   count: 7
   i2c: True
   docs:
