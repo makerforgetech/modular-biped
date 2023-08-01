@@ -35,7 +35,7 @@ Başlangıcı gerçekleştirmek için video beslemesinin önizlemesini içeren (
 ./preview_startup.sh
 ```
 
-###Test etme
+### Test etme
 ```
 python3 -m pytest --cov=modules --cov-report term-missing
 ```
@@ -95,7 +95,7 @@ wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/m
 sudo python3 i2smic.py
 ```
 
-####Test etme
+#### Test etme
 `arecord -l`
 `arecord -D plughw:0 -c2 -r 48000 -f S32_LE -t wav -V stereo -v file_stereo.wav`
 
@@ -167,7 +167,7 @@ Raspberry Pi'nin seri portunu kullanabilmek için, getty (giriş ekranını gör
 #### Serial pinleri ile bağlantı
 Raspberry Pi'nin GPIO 14 ve 15 (tx ve rx) pinlerini, Arduino tx ve rx pinlerine (hem yönü hem de yönü tersine olarak tx -> rx!) bir mantıksal seviye kaydırıcı aracılığıyla bağlayın, çünkü Raspberry Pi 3v3 ve Arduino (muhtemelen) 5v'dur.
 
-####Arduino'ya seri pinler aracılığıyla yükleme yapmak için aşağıdaki adımı izleyebilirsiniz:
+#### Arduino'ya seri pinler aracılığıyla yükleme yapmak için aşağıdaki adımı izleyebilirsiniz:
 
 Seri pinler aracılığıyla yükleme yapmak için, IDE 'uploading' (derlemeden sonra) işlemine başladığı noktada Arduino üzerindeki reset düğmesine basın; aksi takdirde senkronizasyon hatası görüntülenecektir.
 
