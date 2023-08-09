@@ -6,7 +6,7 @@ PShape botModel; // PShape to hold the loaded 3D model
 
 void setup() {
     size(800, 600, P3D);
-    arduino = new Serial(this, "COMx", 9600); // COMx yerine Arduino'nun bağlı olduğu portu yazın
+    arduino = new Serial(this, "COMx", 9600); // Replace COMx with the port the Arduino is connected to.
 
     // Load the .obj model
     botModel = loadShape("bot.obj");
