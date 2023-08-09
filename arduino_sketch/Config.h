@@ -41,7 +41,7 @@
 #define NOVAL 1000
 
 #define MPU6050_ENABLED // Enable MPU6050
-#define MPU6050_DEBUG // Debug in serial plotter
+//#define MPU6050_DEBUG // Debug in serial plotter
 
 
 // Arrays to store servo min / max positions to avoid mechanical issues due
