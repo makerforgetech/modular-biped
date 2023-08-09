@@ -28,7 +28,7 @@
 
 #define EASING_TYPE EASE_QUADRATIC_IN_OUT
 #define ENABLE_EASE_QUADRATIC
-#define SERVO_SPEED_MIN 50
+#define SERVO_SPEED_MIN 20
 #define SERVO_SPEED_MAX 80
 
 //#define DEBUG
@@ -39,6 +39,9 @@
 #define LEG_IK_MAX 170 // Max solvable height of leg between hip and ankle
 
 #define NOVAL 1000
+
+#define MPU6050_ENABLED // Enable MPU6050
+#define MPU6050_DEBUG // Debug in serial plotter
 
 
 // Arrays to store servo min / max positions to avoid mechanical issues due

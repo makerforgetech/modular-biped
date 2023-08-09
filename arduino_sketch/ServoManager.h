@@ -54,16 +54,26 @@ public:
     // Read pitch (input from MPU6050) and adjust hips accordingly
     void hipAdjust(double pitch)
     {
-//        Serial.print(pitch);
+        double startingOffset = 3.5;
+        
         double threshold = 5.0; // Do not move if less than this
-        if (pitch < threshold && pitch > -threshold)
+        #ifdef MPU6050_DEBUG
+        Serial.print("Pitch:");
+        Serial.print(pitch);
+        Serial.print(" TH:");
+        Serial.print(threshold+startingOffset);
+        Serial.print(" TL:");
+        Serial.println(-threshold+startingOffset);
+        #endif
+        if (pitch < threshold+startingOffset && pitch > -threshold+startingOffset)
         {
-//            Serial.println("No move");
             return;
         }
-        
-//        Serial.println("Moving");
-        ik.hipAdjust(ik.hipAdjustment + pitch);
+
+        if (abs(pitch) > threshold) { 
+          pitch = pitch*0.5;
+        }
+        ik.hipAdjust(ik.hipAdjustment - pitch);
         moveSingleServo(0, pitch, true);
         moveSingleServo(3, -pitch, true);
     }
@@ -85,18 +95,32 @@ public:
         // setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
     }
 
-    // @todo just make this pass an array in to moveServos.
+    void moveSingleServoByPercentage(uint8_t pServoIndex, int pPercent, boolean isRelative) {
+        // Serial.print("PosMin: ");
+        // Serial.print(PosMin[pServoIndex]);
+        // Serial.print(" PosMax: ");
+        // Serial.print(PosMax[pServoIndex]);
+        // Serial.print(" Relative pos change in %: ");
+        // Serial.print(pPercent);
+        int realChange = map(abs(pPercent), 0, 100, PosMin[pServoIndex], PosMax[pServoIndex]) - PosMin[pServoIndex];
+        // Serial.print(" in degrees: ");
+        // Serial.print(realChange);
+        if (pPercent < 0)
+        {
+            realChange = -realChange;
+        }
+        moveSingleServo(pServoIndex, realChange, isRelative);
+    }
+
     void moveSingleServo(uint8_t pServoIndex, int pPos, boolean isRelative)
     {
         if (isRelative)
         {
-            // Assuming pPos is a percentage, map to PosMin and PosMax and add to current position
-            int realChange = map(abs(pPos), 0, 100, PosMin[pServoIndex], PosMax[pServoIndex]);
-            if (pPos < 0)
-            {
-                realChange = -realChange;
-            }
-            ServoEasing::ServoEasingNextPositionArray[pServoIndex] = ServoEasing::ServoEasingNextPositionArray[pServoIndex] + realChange;
+            // Serial.print(" Moving from: ");
+            // Serial.print(ServoEasing::ServoEasingNextPositionArray[pServoIndex]);
+            // Serial.print(" to: ");
+            // Serial.println(ServoEasing::ServoEasingNextPositionArray[pServoIndex] + pPos);
+            ServoEasing::ServoEasingNextPositionArray[pServoIndex] = ServoEasing::ServoEasingNextPositionArray[pServoIndex] + pPos;
         }
         else
         {

@@ -11,13 +11,17 @@
 #include "Order.h"
 #include "PiConnect.h"
 #include "ServoManager.h"
+#ifdef MPU6050_ENABLED
 #include "Mpu6050.h"
+#endif
 
 // #define DEBUG
 
 PiConnect pi;
 ServoManager servoManager;
+#ifdef MPU6050_ENABLED
 Mpu6050 tilt;
+#endif
 
 bool isResting = false;
 // boot time in millis
@@ -41,7 +45,9 @@ void setup()
   servoManager.doInit();
   servoManager.setSpeed(SERVO_SPEED_MIN);
 
+  #ifdef MPU6050_ENABLED
   tilt.doInit();
+  #endif
 
   // Seed random number generator
   randomSeed(analogRead(0));
@@ -100,15 +106,20 @@ void doRest()
   setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
 }
 
+#ifdef MPU6050_ENABLED
 void hipAdjust()
 {
   tilt.read();
+  //Serial.println(tilt.getPitch());
   servoManager.hipAdjust(tilt.getPitch());
 }
+#endif
 
 void loop()
 {
+  #ifdef MPU6050_ENABLED
   hipAdjust();
+  #endif
   //  This needs to be here rather than in the ServoManager, otherwise it doesn't work.
   while (ServoEasing::areInterruptsActive())
   {
@@ -124,7 +135,7 @@ void loop()
   {
     if (isResting)
     {
-      //animateRandomly();
+      animateRandomly();
       setSleep(random(3000, 5000));
     }
     else
@@ -150,7 +161,7 @@ void animateRandomly()
 {
   cLog("Animating");
   isResting = false;
-  servoManager.setSpeed(random(SERVO_SPEED_MIN, SERVO_SPEED_MAX));
+  servoManager.setSpeed(SERVO_SPEED_MIN);
 
   // Look around randomly and move legs to react
   servoManager.moveServos(PosLookRandom);
@@ -204,15 +215,15 @@ void getOrdersFromPi()
     case SERVO_RELATIVE:
     {
       int servo_identifier = PiConnect::read_i8();
-      int servo_angle = PiConnect::read_i16();
+      int servo_angle_percent = PiConnect::read_i16();
 #ifdef DEBUG
       PiConnect::write_order(SERVO);
       PiConnect::write_i8(servo_identifier);
-      PiConnect::write_i16(servo_angle);
+      PiConnect::write_i16(servo_angle_percent);
 #endif
       // sleep animations for 2 seconds to allow pi to control servos
       setSleep(2000);
-      servoManager.moveSingleServo(servo_identifier, servo_angle, order_received == SERVO_RELATIVE);
+      servoManager.moveSingleServoByPercentage(servo_identifier, servo_angle_percent, order_received == SERVO_RELATIVE);
       // delay(2000);
       break;
     }
