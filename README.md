@@ -101,6 +101,17 @@ sudo python3 i2smic.py
 
 _Note:_ Ses tanıma işlemini desteklemek için aşağıdaki ek yapılandırmaya bakın.
 
+### Hotword
+Orijinal sıcak kelime algılama, artık kullanımdan kaldırılan Snowboy'u kullanmaktaydı. Dosyalar hala bu depoda mevcuttur:
+
+https://github.com/dmt-labs/modular-biped/blob/feature/PR29_review/modules/hotword.py, bu çerçeveden gelen modülü içerir.
+
+https://github.com/dmt-labs/modular-biped/tree/feature/PR29_review/modules/snowboy, orijinal snowboy işlevselliğini içerir.
+
+https://github.com/dmt-labs/modular-biped/tree/feature/PR29_review/modules/snowboy/resources/models, anahtar kelimeler olarak kullanılabilecek eğitilmiş modelleri içerir. İnternet üzerinde daha fazlasını bulmak mümkün olabilir.
+
+Yeni modellerin eğitimi konusunda bir rehber burada bulunmaktadır ama linux bir cihazda yeni modeller eğitmek için kaynaklar bulunmaktadır.
+
 ### Konuşma Tanıma
 Ses tanıma için tetikleyici kelime (şu anda kullanılmıyor):
 https://snowboy.kitt.ai/
@@ -182,7 +193,18 @@ sudo vim /boot/config.txt
 
 Bu nedenle uygulamanın `sudo` ile çalıştırılması gerekmektedir.
 
+Eğer sürücüyü kullanmadan neopixelleri kullanmak isterseniz (ve ses çıkışı olmadan), yapılandırmada pini 12 olarak ayarlayın ve i2c'yi False olarak ayarlayın. Uygulama ayrıca sudo ile çalıştırılmalıdır.
+
 https://learn.adafruit.com/neopixels-on-raspberry-pi/python-usage
+
+### Anlık Çeviri
+
+Canlı çeviri modülü <code>translation.py</code> günlüklerin ve TTS çıkısının Google Çeviri aracılığıyla canlı çevirisine olanak tanır.
+
+<code>translate.request(msg)</code> işlevini çağırın ve isteğe bağlı olarak kaynak ve hedef dilleri belirtin.
+
+<code>config/translation.yml</code> varsayılan dilleri belirtir.
+
 
 ## PCBler
 Bu projenin prefabrike PCB'leri `circuits` klasöründe mevcuttur. Bu, yukarıda açıklandığı şekilde çekirdek bileşenler arasında bağlantı sağlar.
