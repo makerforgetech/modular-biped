@@ -40,7 +40,7 @@ from modules.personality import Personality
 from modules.braillespeak import Braillespeak
 from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
-
+from modules.chataigpt import ChataiGPT
 from modules.translator import Translator
 
 if Config.get('vision', 'tech') == 'opencv':
@@ -207,3 +207,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+    chataigpt = ChataiGPT()
+    chataigpt.main()
