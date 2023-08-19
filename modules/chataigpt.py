@@ -9,7 +9,7 @@ import yaml
 
 
 class ChataiGPT:
-    def __init__(self, config_path="config.yml"):
+    def __init__(self, config_path="chatgpt.yml"):
         self.load_config(config_path)
         self.recognizer = sr.Recognizer()
 
