@@ -7,6 +7,7 @@ import os
 from bs4 import BeautifulSoup
 import yaml
 
+
 class ChataiGPT:
     def __init__(self, config_path="config.yml"):
         self.load_config(config_path)
