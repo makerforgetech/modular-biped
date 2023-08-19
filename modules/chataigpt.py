@@ -52,7 +52,7 @@ class ChataiGPT:
                 audio = self.recognizer.listen(source)
 
             try:
-                search_query = self.recognizer.recognize_google(audio, language="en-UK")
+                search_query = self.recognizer.recognize_google(audio, language="en-UK")   #default language
                 print(f"Research topic: {search_query}")
             except sr.UnknownValueError:
                 self.speak(self.config["responses"]["misunderstood"])
