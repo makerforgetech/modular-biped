@@ -66,9 +66,9 @@ class NeoPx:
         else:
             self.pixels = neopixel.NeoPixel(board.D12, count)
         # Default states
-        self.set(self.all, LED.COLOR_OFF)
+        self.set(self.all, NeoPx.COLOR_OFF)
         sleep(0.1)
-        self.set(self.positions['middle'], LED.COLOR_BLUE)
+        self.set(self.positions['middle'], NeoPx.COLOR_BLUE)
 
         # Set subscribers
         pub.subscribe(self.set, 'led')
@@ -87,7 +87,7 @@ class NeoPx:
         if self.animation:
             self.animation = False
             self.thread.join()
-        self.set(self.all, LED.COLOR_OFF)
+        self.set(self.all, NeoPx.COLOR_OFF)
         self.i2c.deinit()
         sleep(1)
 
@@ -120,10 +120,10 @@ class NeoPx:
             # Make color gradiant use possible @todo refactor
             if color >= 100:
                 color = 99 # max in range
-            color = (255,0,0)#LED.COLOR_RED_TO_GREEN_100[color].rgb
+            color = (255,0,0)#NeoPx.COLOR_RED_TO_GREEN_100[color].rgb
             #color = (color[0]*10, color[1]*10, color[2]*10) # increase values to be used as LED RGB
         elif type(color) is str:
-            color = LED.COLOR_MAP[color]
+            color = NeoPx.COLOR_MAP[color]
         for i in identifiers:
             if type(i) is str:
                 i = self.positions[i]
@@ -140,11 +140,11 @@ class NeoPx:
 
     def flashlight(self, on):
         if on:
-            self.set(self.all, LED.COLOR_WHITE_FULL)
+            self.set(self.all, NeoPx.COLOR_WHITE_FULL)
             self.overridden = True
         else:
             self.overridden = False
-            self.set(self.all, LED.COLOR_OFF)
+            self.set(self.all, NeoPx.COLOR_OFF)
 
     def off(self):
         if self.thread:
@@ -152,24 +152,24 @@ class NeoPx:
             self.animation = False
             self.thread.animation = False
             self.thread.join()
-        self.set(self.all, LED.COLOR_OFF)
+        self.set(self.all, NeoPx.COLOR_OFF)
         sleep(.5)
 
     def full(self, color):
-        if color in LED.COLOR_MAP.keys():
-            self.set(self.all, LED.COLOR_MAP[color])
+        if color in NeoPx.COLOR_MAP.keys():
+            self.set(self.all, NeoPx.COLOR_MAP[color])
 
     def eye(self, color):
-        if color in LED.COLOR_MAP.keys() and self.pixels[self.positions['middle']] != color:
+        if color in NeoPx.COLOR_MAP.keys() and self.pixels[self.positions['middle']] != color:
             pub.sendMessage('log', msg='[LED] Setting eye colour: ' + color)
-            self.set(self.positions['middle'], LED.COLOR_MAP[color])
+            self.set(self.positions['middle'], NeoPx.COLOR_MAP[color])
 
     def party(self):
         # self.animate(self.all, 'off', 'rainbow_cycle')
 
         for j in range(256 * 1):
             for i in range(self.count):
-                self.set(i, LED._wheel((int(i * 256 / self.count) + j) & 255))
+                self.set(i, NeoPx._wheel((int(i * 256 / self.count) + j) & 255))
             return
         print('done')
 
@@ -212,7 +212,7 @@ class NeoPx:
         """
         sleep(.3)
 
-        self.set(range(1, 7), LED.COLOR_OFF)
+        self.set(range(1, 7), NeoPx.COLOR_OFF)
         self.set(index, color)
 
         index = (index + 1) % self.count
@@ -236,7 +236,7 @@ class NeoPx:
         :param color: string map of COLOR_MAP or tuple (R, G, B)
         """
         if type(color) is str:
-            color = LED.COLOR_MAP[color]
+            color = NeoPx.COLOR_MAP[color]
         t = threading.currentThread()
         if getattr(t, "animation", True):
             for dc in range(0, max(color), 1):  # Increase brightness to max of color
@@ -265,7 +265,7 @@ class NeoPx:
         """Draw rainbow that fades across all pixels at once."""
         for j in range(256 * iterations):
             for i in range(self.count):
-                self.set(i, LED._wheel((i + j) & 255))
+                self.set(i, NeoPx._wheel((i + j) & 255))
             t = threading.currentThread()
             if not getattr(t, "animation", True):
                 return
@@ -275,7 +275,7 @@ class NeoPx:
         """Draw rainbow that uniformly distributes itself across all pixels."""
         for j in range(256 * iterations):
             for i in range(self.count):
-                self.set(i, LED._wheel((int(i * 256 / self.count) + j) & 255))
+                self.set(i, NeoPx._wheel((int(i * 256 / self.count) + j) & 255))
             t = threading.currentThread()
             if not getattr(t, "animation", True):
                 return
