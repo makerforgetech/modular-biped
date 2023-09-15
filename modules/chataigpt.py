@@ -20,7 +20,7 @@ class ChataiGPT:
     def check_internet_connection(self):
         try:
             driver = webdriver.Chrome()
-            driver.get("https://www.google.com")
+            driver.get("http://www.gstatic.com/generate_204")
             driver.quit()
             return True
         except:
