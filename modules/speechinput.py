@@ -78,3 +78,4 @@ if __name__ == '__main__':
     log = LogWrapper(path=os.path.dirname(__file__))
     speech = SpeechInput()
     speech.start()
+ 

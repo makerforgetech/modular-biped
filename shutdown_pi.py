@@ -9,3 +9,4 @@ GPIO.wait_for_edge(26, GPIO.FALLING)
 
 subprocess.call(['pkill', '-f', 'main.py'], shell=False) # ana scripti güvenle sonlandır
 subprocess.call(['shutdown', '-h', 'now'], shell=False)  # cihazın falling anında hemen kapanmasını sağlar 
+
