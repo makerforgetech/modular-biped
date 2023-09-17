@@ -3,6 +3,7 @@
 
 //#define IK_DEBUG
 
+
 /**
  * @file inverse_kinematics.h
  * @brief Inverse kinematics library for biped robots
@@ -12,6 +13,7 @@ class InverseKinematics
 {
     // constructor
     public:
+        double hipAdjustment = 105; // Angle to adjust hip, will be modified for balance
         void doInit(float hipMinAngle, float hipMaxAngle, float kneeMinAngle, float kneeMaxAngle, float ankleMinAngle, float ankleMaxAngle, float thighLength, float shinLength, float footLength)
         {
             this->hipMinAngle = hipMinAngle;
@@ -23,6 +25,11 @@ class InverseKinematics
             this->thighLength = thighLength;
             this->shinLength = shinLength;
             this->footLength = footLength; // Not currently used
+        }
+
+        void hipAdjust(float angle)
+        {
+            this->hipAdjustment = angle;
         }
 
         /**
@@ -74,7 +81,7 @@ class InverseKinematics
 
             // Convert the angles from radians to degrees
             // Adjust to compensate for servo's actual position
-            hipAngle = r2d(d2r(180) - (hip + d2r(105))); // Inverse and offset by 105 degrees
+            hipAngle = r2d(d2r(180) - (hip + d2r(hipAdjustment))); // Inverse and offset by 105 degrees
             kneeAngle = r2d(knee - d2r(90)); // Offset 90 to compensate
             ankleAngle = r2d(ankle + d2r(70)); // Offset 70 to compensate
 
