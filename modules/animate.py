@@ -6,7 +6,7 @@ from time import sleep
 
 class Animate:
     def __init__(self, **kwargs):
-        self.path = kwargs.get('path', os.path.dirname(os.path.realpath(__file__)) + '/../animations') + '/'
+        self.path = kwargs.get('path', os.path.dirname(os.path.realpath(__file__)) + '/../SentryBOTanimasyonlar') + '/'
         pub.subscribe(self.animate, "animate")
 
     def animate(self, action):

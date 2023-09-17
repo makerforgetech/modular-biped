@@ -11,7 +11,7 @@ sudo apt install bluealsa
 apt-get install flac
 
 # CHIRP
-#sudo apt-get install python3-dev python3-setuptools portaudio19-dev libffi-dev libsndfile1
+sudo apt-get install python3-dev python3-setuptools portaudio19-dev libffi-dev libsndfile1
 
 # NeoPixels
 sudo pip3 install rpi_ws281x adafruit-circuitpython-neopixel

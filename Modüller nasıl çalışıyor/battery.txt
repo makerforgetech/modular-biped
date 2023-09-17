@@ -1,0 +1,15 @@
+Bu modül, pil seviyesini kontrol eden ve düşük voltaj durumunda belirli işlemleri gerçekleştiren Battery sınıfını içerir. İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+Battery sınıfının __init__ metodu, modülün başlatılmasında çağrılır. pin ve serial parametreleriyle birlikte verilir. Ayrıca, "loop:60" adıyla bir yayın aboneliği oluşturulur. Bu sayede, her 60 saniyede bir loop yöntemi çağrılacaktır.
+
+loop yöntemi, pil seviyesini kontrol eder ve belirli durumları değerlendirir.
+
+check yöntemi, Arduino üzerindeki belirli bir pini okur ve pil seviyesini döndürür. Okunan değeri log mesajı olarak yayınlar ve ayrıca "battery.csv" adlı bir dosyaya tarih ve değeri ekler.
+
+low_voltage yöntemi, belirtilen değerin düşük voltaj eşiğini aşılıp aşmadığını kontrol eder. Eğer eşiği aşıyorsa True, aşmıyorsa False döndürür.
+
+safe_voltage yöntemi, belirtilen değerin güvenli voltaj eşiğini aşılıp aşmadığını kontrol eder. Eğer aşıyorsa True, aşmıyorsa False döndürür.
+
+loop yöntemi, check yöntemini çağırarak pil seviyesini kontrol eder. Eğer okuma değeri 0 ise, hata durumunu log mesajıyla yayınlar ve işlemi sonlandırır. Daha sonra, düşük voltaj durumunu kontrol eder. Eğer düşük voltaj ise, "led:full" yayınıyla kırmızı LED'i etkinleştirir. Güvenli voltaj eşiğini aşmıyorsa, "log:critical" yayınıyla acil kapanma mesajını yayınlar, ardından sistemi kapatır.
+
+Bu modül, pil seviyesini kontrol etmek ve belirli eşik değerlerini değerlendirerek işlem yapmak için kullanılabilir. Pil seviyesinin Arduino tarafından okunması ve belirli komutların Arduino'ya gönderilmesi gerekmektedir. Ayrıca, pil seviyesi kayıtlarını bir CSV dosyasına yazmak için dosya yolunu belirtmeniz gerekmektedir.

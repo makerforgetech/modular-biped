@@ -117,6 +117,7 @@ def main():
         rfid = RFID(Config.get('rfid','pin'), Config.get('rfid', 'cards'))
         rfid.wait_for_access()
 
+
     if mode() == Config.MODE_LIVE:
         # Vision / Tracking
         preview = False

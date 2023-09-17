@@ -1,4 +1,4 @@
-sudo pkill -f /home/archie/companion-robot/main.py
-sudo modprobe bcm2835-v4l2 # Enable camera
-sudo pigpiod # GPIO @todo may not be used
-python3 /home/archie/companion-robot/main.py manual
+sudo pkill -f /home/SentryRoot/SentryBOT/main.py
+sudo modprobe bcm2835-v4l2 # kamera aktifleştirme
+sudo pigpiod # GPIO @todo kullanılamaz
+python3 /home/SentryRoot/SentryBOT/main.py manual

@@ -1,0 +1,11 @@
+Bu modülde `Config` sınıfı, uygulamanın genel ayarlarını içerir. İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+- `Config` sınıfı, uygulamanın genel ayarlarını saklamak için kullanılır. Bu ayarlar, uygulama döngüsü sıklığı, görüntü işleme teknolojisi (OpenCV veya Coral), GPIO pinleri, servo motorlar, LED sayısı, sesli komut modeli ve diğer birçok ayarı içerir.
+
+- Bu sınıfta, ayarlar sınıf değişkenleri olarak tanımlanır ve üzerlerinde değişiklik yapılabilir. Örneğin, `VISION_TECH` değişkeni, kullanılacak görüntü işleme teknolojisini belirtmek için kullanılır. `DEBUG_VISION` değişkeni, görüntü işleme modunda hata ayıklama yapılıp yapılmayacağını belirler.
+
+- `exit` metodu, çıkış komutu alındığında çağrılır. Bu, uygulamayı güvenli bir şekilde sonlandırmak için kullanılır.
+
+- `is_night` metodu, mevcut saat diliminde gece saatlerinde olup olunmadığını kontrol eder. Bu, gece saatlerinde uygulamanın bazı işlemleri durdurmasını sağlamak için kullanılabilir.
+
+Bu modül, uygulamanın genel ayarlarını saklamak için kullanılır ve uygulama genelinde erişilebilir olmasını sağlar. Ayarlar, uygulama gereksinimlerine göre özelleştirilebilir.

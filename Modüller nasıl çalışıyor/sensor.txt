@@ -1,0 +1,13 @@
+Bu sınıf, bir sensörün okunması ve değişikliklerin takip edilmesi için kullanılır.
+
+İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+- `Sensor` sınıfı, sensörün bağlı olduğu pin numarasını (`pin`) ve isteğe bağlı olarak kullanılan `pigpio` nesnesini (`pi`) alır.
+
+- `loop` metodu, sensörün durumunu sürekli olarak okur ve değişiklikleri takip eder. Eğer bir değişiklik tespit edilirse, `motion` olayını yayınlar.
+
+- `read` metodu, sensörün mevcut durumunu okur ve `value` değişkenine kaydeder. Okunan değeri döndürür.
+
+- `watch` metodu, sensördeki değişiklikleri takip etmek için kullanılır. `edge` parametresi olarak `pigpio.EITHER_EDGE`, `pigpio.FALLING_EDGE` veya `pigpio.RISING_EDGE` değerlerinden birini alır. `callback` parametresi, bir değişiklik tespit edildiğinde çağrılacak yöntemi belirtir. Bu metodun geri dönüş değeri, sensördeki değişiklikleri durdurmak için kullanılabilecek bir geri çağırma nesnesidir.
+
+Bu sınıf, bir sensörün okunması ve değişikliklerin takip edilmesi için kullanılır. Örneğin, `loop` metodu sürekli olarak sensörün durumunu okuyabilir ve `motion` olayını yayınlayabilir. `watch` metoduyla da sensördeki değişiklikler takip edilebilir ve belirtilen bir yöntem çağrılabilir.

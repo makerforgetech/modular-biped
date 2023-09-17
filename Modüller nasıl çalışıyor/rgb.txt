@@ -1,0 +1,13 @@
+Bu sınıf, RGB LED'in renklerini kontrol etmek için kullanılır.
+
+İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+- `RGB` sınıfı, kırmızı (`r`), yeşil (`g`) ve mavi (`b`) renklerin kontrol edileceği pin numaralarını alır.
+
+- `breathe` metodu, belirtilen renkteki LED'in soluklama efektini gerçekleştirir. `color` parametresi olarak bir renk seçilir (örneğin, 'r' kırmızı, 'g' yeşil, 'b' mavi) ve `start` ile başlangıç değeri belirlenir. `increment` parametresi soluklama hızını belirler. `lighter` parametresi, renk soluklatılırken artırılacak mı (True) yoksa azaltılacak mı (False) olduğunu belirtir. Soluklama efekti, belirli bir parlaklık seviyesine ulaşıldığında ters yöne döner ve bu işlem belirli bir süre duraklar.
+
+- `reset` metodu, RGB LED'i sıfırlar ve tüm renkleri kapatır.
+
+- `led` metodu, belirli bir renkteki LED'in parlaklığını belirli bir yüzde değerine ayarlar.
+
+Bu sınıf, RGB LED'in renklerini kontrol etmek ve soluklama efekti oluşturmak için kullanılır. Örneğin, `breathe` metodu kullanılarak LED'in belirli bir renkte soluklama efekti oluşturulabilir ve `reset` metodu ile LED'in tüm renkleri kapatılabilir. `led` metoduyla da belirli bir renkteki LED'in parlaklığı ayarlanabilir.

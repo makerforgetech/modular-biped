@@ -1,0 +1,23 @@
+Bu modül, Snowboy hotword algılama kütüphanesini kullanarak bir anahtar kelimeyi tanıyan bir ses algılama işlevselliği sağlar. İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+- `HotWord` sınıfı, hotword algılama modülünü başlatmak, duraklatmak, sonlandırmak ve ayarlarını değiştirmek için kullanılır. Bu sınıf, ayrı bir iş parçacığında çalışır.
+
+- `__init__` metodu, algılamak için kullanılacak hotword modellerini ve ilgili ayarları alır. Bu modele ait hotword algılama ayarları, `**kwargs` aracılığıyla iletilir.
+
+- `initialize_detectors` metodu, hotword algılama nesnelerini başlatır.
+
+- `run` metodu, ayrı bir iş parçacığında çalışır ve komutları bekler. Algılamayı başlatmak veya iş parçacığını sonlandırmak için gelen komutları alır.
+
+- `detected_callback` metodu, hotword algılandığında çağrılır ve ilgili olayı yayınlar. Bu olaya abone olan diğer modüllere mesaj gönderilir.
+
+- `start_recog` metodu, algılamayı başlatır ve belirtilen ayarları kullanarak hotword algılama işlemini gerçekleştirir.
+
+- `pause_recog` metodu, algılamayı duraklatır.
+
+- `terminate` metodu, hotword algılama işlemi sonlandırır ve iş parçacığını sonlandırır.
+
+- `change_models` metodu, algılanacak hotword modellerini değiştirir. Modeller değiştirildikten sonra algılamayı yeniden başlatmak gerekir.
+
+- `change_sensitivity` metodu, algılama hassasiyetini değiştirir. Hassasiyet değiştirildikten sonra algılamayı yeniden başlatmak gerekir.
+
+Bu modül, belirli bir hotword algılandığında ilgili olayları yayınlamak için kullanılır. Örneğin, hotword algılandığında bir uygulamanın çalıştırılması, sesli komutların dinlenmesi veya diğer etkileşimlerin gerçekleştirilmesi gibi işlevler sağlanabilir.

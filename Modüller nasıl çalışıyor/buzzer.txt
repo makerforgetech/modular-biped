@@ -1,0 +1,15 @@
+Bu modül, bir aktarıcı (buzzer) kullanarak melodi çalmayı sağlayan Buzzer sınıfını içerir. İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+Buzzer sınıfının __init__ metodu, modülün başlatılmasında çağrılır. pin parametresiyle birlikte verilir. Raspberry Pi'nin GPIO pinlerini yapılandırır ve speech adıyla bir yayın aboneliği oluşturur.
+
+buzz metodu, belirli bir frekansta belirli bir süre boyunca aktarıcıyı (buzzer) çalıştırır. Ses üretmek için GPIO pinlerini kontrol eder.
+
+speech metodu, yayınlanan konuşma mesajını alır ve mesajın içeriğine göre uygun bir melodi çalmayı başlatır. Eğer mesaj "merry christmas" içeriyorsa, "deck_the_halls" melodisini çalar. Eğer mesaj "birthday today" içeriyorsa, "happy_birthday" melodisini çalar.
+
+deck_the_halls metodu, "deck_the_halls" melodisini çalmayı başlatır.
+
+play metodu, verilen bir melodi, tempoları ve ara not bekleme sürelerine göre melodi çalmayı sağlar.
+
+__del__ metodu, sınıf örneği silindiğinde çağrılır ve GPIO pinlerini temizler.
+
+Bu modül, bir aktarıcı (buzzer) kullanarak belirli melodileri çalmak ve yayınlanan konuşma mesajlarına göre otomatik olarak melodi çalmak için kullanılabilir. Örneğin, "merry christmas" mesajı yayınlandığında "deck_the_halls" melodisi çalınabilir.

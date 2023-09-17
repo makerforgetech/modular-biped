@@ -32,3 +32,4 @@ class Faces:
             pub.sendMessage('tts', msg='hello there')
         if name != 'unknown':
             self.last_face_name = name
+
