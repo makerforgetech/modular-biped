@@ -1,0 +1,13 @@
+Bu sınıf, Raspberry Pi'nin sıcaklığını izler ve sıcaklık değerine bağlı olarak uygun eylemleri gerçekleştirir.
+
+İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+- `PiTemperature` sınıfı, Raspberry Pi sıcaklığını izlemek ve uygun eylemleri gerçekleştirmek için gereken abonelikleri oluşturur.
+
+- `read` metodu, Raspberry Pi'nin sıcaklık değerini okur ve döndürür.
+
+- `monitor` metodu, belirli bir periyodik süre içinde Raspberry Pi sıcaklığını izler. Sıcaklık değeri `read` metoduyla okunur ve kontrol edilir. Eğer sıcaklık belirli bir eşik değeri olan `THROTTLED_TEMP` değerini aşarsa, bir uyarı göstermek için 'led:full' mesajı yayınlanır. Aksi takdirde, sıcaklık değeri 'led' mesajıyla LED'lerin renk aralığına dönüştürülerek yayınlanır.
+
+- `map_range` metodu, sıcaklık değerini LED'lerin renk aralığına dönüştürür. Sıcaklık değeri `STARTUP_TEMP` ve `WARNING_TEMP` aralığındaysa, bu aralık 0 ila 100 arasındaki bir değere dönüştürülür. Bu değer, LED'lerin renk aralığına uygun şekilde dönüştürülerek döndürülür.
+
+Bu sınıf, Raspberry Pi'nin sıcaklık değerini izler ve belirli bir eşik değeri aşıldığında uygun bir uyarı gösterir. Ayrıca, sıcaklık değeri LED'lerin renk aralığına dönüştürülerek yayınlanır.

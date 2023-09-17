@@ -1,0 +1,33 @@
+Bu modül, LED'leri kontrol etmek için kullanılır. İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+- `LED` sınıfı, LED'leri kontrol etmek ve çeşitli animasyonlar gerçekleştirmek için kullanılır. Bu sınıf, `neopixel` kütüphanesini kullanarak LED'leri kontrol eder.
+
+- `__init__` metodu, LED'lerin sayısını ve özel konumlarını (örneğin, sağ, sol, üst, alt) ayarlar. Ayrıca, belirli olaylara abone olur ve ilgili yöntemleri çağırır.
+
+- `exit` metodu, uygulama kapatıldığında temizlik yapar. LED'leri kapatır ve bekler.
+
+- `speech` metodu, ses komutlarına yanıt olarak LED'leri kontrol etmek için kullanılır. Örneğin, "light on" komutuyla LED'leri açabilir ve "light off" komutuyla LED'leri kapatabilir.
+
+- `set` metodu, belirli LED'leri belirli bir renge ayarlar. `identifiers` parametresi, LED'lerin dizinlerini veya özel konumlarını içeren bir liste veya tek bir sayı olabilir. `color` parametresi, LED rengini belirleyen bir dize veya (R, G, B) demeti olabilir.
+
+- `flashlight` metodu, LED'leri bir el feneri gibi açıp kapatır. `on` parametresi `True` ise LED'leri beyaz renkte açar, `False` ise LED'leri kapatır.
+
+- `off` metodu, tüm LED'leri kapatır.
+
+- `full` metodu, tüm LED'leri belirli bir renkte ayarlar.
+
+- `eye` metodu, ortadaki LED'i belirli bir renkte ayarlar. Bu metot genellikle göz animasyonlarında kullanılır.
+
+- `party` metodu, LED'leri parti modunda renkli bir döngüye sokar.
+
+- `animate` metodu, belirli LED'lerde belirli bir renkte belirli bir animasyonu başlatır. `identifiers` parametresi, LED'lerin dizinlerini içeren bir liste olabilir. `color` parametresi, animasyon sırasında kullanılacak renk demetini belirtir. `animation` parametresi, gerçekleştirilecek animasyonun adını belirtir.
+
+- `spinner` metodu, dış LED halkasında bir dönme efekti oluşturur. Belirli bir LED'i belirli bir renge ayarlar ve bir sonraki LED'e geçiş yapar.
+
+- `breathe` metodu, belirli LED'lerde nefes alma animasyonu gerçekleştirir. Belirli bir renk demeti verilir ve LED'lerin parlaklığı yavaşça artar ve azalır.
+
+- `rainbow` metodu, LED'ler üzerinde yavaşça kayan bir gökkuşağı efekti oluşturur.
+
+- `rainbow_cycle` metodu, LED'ler üzerinde dönen bir gökkuşağı efekti oluşturur.
+
+Bu modül, LED'leri kontrol etmek ve çeşitli renkli animasyonlar gerçekleştirmek için kullanılabilir.

@@ -1,0 +1,9 @@
+Bu sınıf, metni konuşmaya dönüştürmek için `pyttsx3` kütüphanesini kullanır.
+
+İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+- `TTS` sınıfı, `pyttsx3` kütüphanesinden bir metin okuma motoru nesnesi oluşturur ve ayarları yapılandırır. Örneğin, sesli okuma hızını ayarlamak veya farklı bir ses seçmek için kullanılabilir.
+
+- `speak` metodu, gelen bir metni sesli olarak okur. Metin, `tts` olayıyla iletilir ve bu metni sesli olarak okumak için `pyttsx3` motorunu kullanır.
+
+Bu sınıf, metni konuşmaya dönüştürmek için `pyttsx3` kütüphanesini kullanır. Örneğin, `speak` metodu çağrılarak bir metin sesli olarak okunabilir.

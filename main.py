@@ -40,6 +40,9 @@ from modules.personality import Personality
 from modules.braillespeak import Braillespeak
 from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
+
+from modules.rfid import RFID
+from modules.chatbot import MyChatBot
 from modules.chataigpt import ChataiGPT
 from modules.translator import Translator
 
@@ -109,7 +112,12 @@ def main():
     if Config.get('motion','pin') != '':
         motion = Sensor(Config.get('motion','pin'), pi=gpio)
 
-    pub.sendMessage('tts', msg='I am awake.')
+    pub.sendMessage('tts', msg='I am awake')
+    
+    if (Config.get('rfid','pin') != ''):
+        rfid = RFID(Config.get('rfid','pin'), Config.get('rfid', 'cards'))
+        rfid.wait_for_access()
+
 
     if mode() == Config.MODE_LIVE:
         # Vision / Tracking
@@ -162,6 +170,8 @@ def main():
         buzzer = Buzzer(Config.get('buzzer', 'pin'))
     
     animate = Animate()
+
+    chatbot = MyChatBot()
 
     # @todo 2k resistor needs switching to > 3k for 20v+ support.
     #battery = Battery(0, serial, path=path) # note: needs ref for pubsub to work

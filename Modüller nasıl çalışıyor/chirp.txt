@@ -1,0 +1,9 @@
+Bu modül, Chirp SDK'yı kullanarak ses üzerinden iletişim sağlamak için `Chirp` sınıfını içerir. İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+- `Chirp` sınıfının `__init__` metodu, modülün başlatılmasında çağrılır. ChirpSDK'nın başlatılması ve gönderme ve alma işlemlerinin başlatılması için `start` yöntemi çağrılır.
+
+- `exit` metodu, sınıf örneği silindiğinde çağrılır ve ChirpSDK'nın durdurulması için `stop` yöntemi çağrılır.
+
+- `send` metodu, bir mesaj göndermek için kullanılır. Önce Arduino üzerindeki ilgili pine bir sinyal gönderilir (örneğin, sesli iletişimi etkinleştirmek için). Ardından, mesajın UTF-8 olarak kodlanmış bir örneği alınır ve ChirpSDK üzerinden gönderilir.
+
+Bu modül, Chirp SDK'yı kullanarak ses üzerinden iletişim sağlamak için kullanılabilir. Mesajlar gönderilebilir ve alınabilir. Örneğin, başka bir cihaza bir mesaj göndermek için `send` yöntemi kullanılabilir. Ses üzerinden iletişim sağlamak için Chirp SDK'nın kurulması ve yapılandırılması gerekmektedir. Ayrıca, ArduinoSerial modülü kullanılarak Arduino üzerinde sesli iletişimi etkinleştirmek için ilgili pine sinyal gönderilir.

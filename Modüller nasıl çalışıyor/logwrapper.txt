@@ -1,0 +1,13 @@
+Bu modül, loglama işlevselliği sağlar. İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+- `LogWrapper` sınıfı, loglama yapmak için kullanılır. Loglar, belirli bir dosyaya kaydedilir.
+
+- `__init__` metodu, loglama ayarlarını alır. `path` ve `filename` parametreleri, log dosyasının kaydedileceği dizin ve dosya adını belirler.
+
+- `__del__` metodu, LogWrapper nesnesi sonlandırıldığında çalışır. Eğer log dosyası mevcutsa, onu `.previous` uzantısıyla değiştirir.
+
+- `log` metodu, log mesajlarını belirli log seviyelerine göre kaydeder. `type` parametresi, log seviyesini belirler. `msg` parametresi, kaydedilecek log mesajını içerir. Bu metot ayrıca log mesajını konsola da yazdırır.
+
+- `levels` listesi, log seviyelerini içerir. Bu seviyeler, log mesajının ciddiyetine göre sıralanır.
+
+Bu modül, loglama işlevselliği sağlar ve log mesajlarını belirli bir dosyaya kaydeder.

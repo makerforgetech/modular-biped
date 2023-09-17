@@ -1,0 +1,25 @@
+Bu sınıf, robotun davranışını belirler. Farklı giriş olaylarına (yüz eşleşmeleri veya hareket) abone olarak, bu davranışlara bağlı olarak animasyonları tetikler.
+
+Ayrıca, robotun mevcut "ruh hali"ni depolar, bu sayede sıkıntı gibi duygusal tepkileri yukarıdaki uyaranlara dayalı olarak simüle edebiliriz.
+
+İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+- `Personality` sınıfı, robotun davranışını belirler. `mode` parametresi, robotun çalışma modunu belirler. Varsayılan olarak `Config.MODE_LIVE` kullanılır.
+
+- `__init__` metodu, gerekli abonelikleri oluşturur ve davranışları tanımlar.
+
+- `loop` metodu, ana döngü içinde çalışır ve robotun durumuna ve çevresel uyaranlara bağlı olarak gerekli eylemleri gerçekleştirir. Örneğin, eğer robot uyandıysa ve yüz algılaması veya hareket algılaması yoksa, göz rengini kırmızıya ayarlar.
+
+- `set_eye` metodu, robotun göz rengini ayarlar. `color` parametresi, belirtilen renge gözleri ayarlar.
+
+- `set_state` metodu, robotun durumunu ayarlar. `state` parametresi, belirtilen duruma robotu geçirir. Durum değişikliği durumunda ilgili eylemler gerçekleştirilir.
+
+- `is_asleep` metodu, robotun uyku durumunda olup olmadığını kontrol eder.
+
+- `is_resting` metodu, robotun uyku veya dinlenme durumunda olup olmadığını kontrol eder.
+
+- `lt` metodu, belirtilen tarihin belirli bir zamandan daha küçük olup olmadığını kontrol eder.
+
+- `past` metodu, belirli bir süreden daha eski olan bir tarih döndürür.
+
+Bu sınıf, robotun davranışını kontrol eder ve uygun animasyonları tetikler.

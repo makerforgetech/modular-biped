@@ -31,3 +31,5 @@ class LogWrapper:
         if self.translator is not None:
             msg = self.translator.request(msg)
         print('LogWrapper: ' + type + ' - ' + str(msg))
+
+

@@ -1,0 +1,23 @@
+Bu modül, Arduino ile seri iletişim kurmayı sağlayan ArduinoSerial sınıfını içerir. İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+ArduinoSerial sınıfının __init__ metodu, modülün başlatılmasında çağrılır. serial_file adında bir özellik oluşturulur ve initialise yöntemi çağrılır. Ayrıca, "serial" adıyla bir yayın aboneliği oluşturulur. Bu sayede, send yöntemi bir mesaj alındığında tetiklenecektir.
+
+initialise yöntemi, Arduino ile seri bağlantının kurulması için çağrılır. open_serial_port fonksiyonu kullanılarak seri bağlantı noktası açılır ve bir serial_file nesnesi elde edilir. Ardından, serial_file nesnesi döndürülür.
+
+send yöntemi, Arduino'ya veri göndermek için kullanılır. type parametresiyle belirtilen cihaz türüne ve identifier ile belirtilen kimliklere göre ilgili veri paketi gönderilir.
+
+Eğer serial_file özelliği None ise, bağlantıyı kurtarmak için initialise yöntemi çağrılır. Eğer hala serial_file None ise, işlem sonlandırılır.
+
+Gönderilen komut ve veri hakkında bir log mesajı yayınlanır.
+
+type parametresi DEVICE_SERVO veya "servo" ise, ilgili komut ve veriler Arduino'ya gönderilir.
+
+type parametresi DEVICE_SERVO_RELATIVE veya "servo_relative" ise, ilgili komut ve veriler Arduino'ya gönderilir.
+
+type parametresi DEVICE_LED veya "led" ise, ilgili komut ve veriler Arduino'ya gönderilir.
+
+type parametresi DEVICE_PIN veya "pin" ise, ilgili komut ve veriler Arduino'ya gönderilir.
+
+type parametresi DEVICE_PIN_READ veya "pin_read" ise, ilgili komut ve veriler Arduino'ya gönderilir ve bir değer okunur.
+
+Bu modül, Arduino ile seri iletişim kurmak ve belirli komutları ve verileri Arduino'ya göndermek için kullanılabilir. Arduino tarafında bu komutları ve verileri işlemek üzere uygun bir yazılımın çalıştırıldığından emin olmanız gerekmektedir.

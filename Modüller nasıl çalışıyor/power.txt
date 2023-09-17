@@ -1,0 +1,17 @@
+Bu sınıf, güç kontrolünü gerçekleştirmek için kullanılır.
+
+İşlevselliği aşağıdaki gibi açıklayabilirim:
+
+- `Power` sınıfı, `pin` parametresi ile kontrol edilecek cihazın pin numarasını alır.
+
+- `STATE_ON` ve `STATE_OFF` sabitleri, güç durumlarını temsil eder.
+
+- `use` metodu, gücün kullanıldığını bildirir. Her çağrıldığında `active_count` değerini artırır ve eğer `active_count` 1 ise gücü açar.
+
+- `release` metodu, gücün serbest bırakıldığını bildirir. Her çağrıldığında `active_count` değerini azaltır ve eğer `active_count` 0 veya daha küçükse gücü kapatır. Eğer `thread` parametresi `True` ise, gücü kapatma işlemini 10 saniye geciktirir.
+
+- `_off` metodu, gücü kapatır.
+
+- `exit` metodu, program sonlandığında gücü kapatır.
+
+Bu sınıf, güç kontrolü için kullanılır. Gücün kullanılması ve serbest bırakılması durumlarında belirtilen pin üzerindeki cihazın açılıp kapatılmasını sağlar. Ayrıca, gücün belirli bir süre sonra otomatik olarak kapanması için zamanlayıcı işlevi de sağlar.
