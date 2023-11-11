@@ -143,7 +143,7 @@ void hipAdjust()
 void loop()
 {
 
-  stationarySteps();
+  //stationarySteps();
 
   #ifdef MPU6050_ENABLED
   hipAdjust();
