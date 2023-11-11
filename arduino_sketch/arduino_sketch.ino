@@ -106,6 +106,31 @@ void doRest()
   setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
 }
 
+void stationarySteps() {
+  int left[SERVO_COUNT] = {PosMin[0], PosMin[1], PosMin[2], PosMax[3], PosMax[4], PosMax[5]};
+  int right[SERVO_COUNT] = {PosMax[0], PosMax[1], PosMax[2], PosMin[3], PosMin[4], PosMin[5]};
+  uint16_t speed = SERVO_SPEED_MIN; // 20 - 60 recommended
+  unsigned long delayTime = 200;
+  servoManager.setSpeed(speed);
+  boolean moveLeft = true;
+  while (true)
+  {
+    if (moveLeft)
+      servoManager.moveServos(left);
+    else
+      servoManager.moveServos(right);
+
+    setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
+
+    while (ServoEasing::areInterruptsActive())
+    {
+      blinkLED();
+    }
+
+    delay(delayTime);
+  }
+}
+
 #ifdef MPU6050_ENABLED
 void hipAdjust()
 {
@@ -117,6 +142,9 @@ void hipAdjust()
 
 void loop()
 {
+
+  stationarySteps();
+
   #ifdef MPU6050_ENABLED
   hipAdjust();
   #endif

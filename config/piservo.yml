@@ -1,0 +1,21 @@
+piservo:
+  conf:
+    leg_l_hip: { id: 0, pin: 9, range: [20, 160], start: 19 }
+  docs:
+    description: "The piservos module is used to control servos via the raspberry pi."
+    events:
+      sub:
+        - servo:[identifier]:mvabs:
+            description: "Move servo to absolute position."
+            args:
+              - percentage: integer
+        - servo:[identifier]:mv:
+            description: "Move servo to relative position."
+            args:
+              - percentage: integer
+              - safe: boolean
+      pub:
+        - log:
+            description: "Send messages to logger."
+        - log:error:
+            description: "Send error messages to logger."
