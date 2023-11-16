@@ -1766,7 +1766,7 @@
   (symbol (lib_id "ComponentLibrary:RCWL-0516") (at 64.77 146.05 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 0c2e62ce-a1ec-4267-9400-82a4cad81538)
-    (property "Reference" "RCWL-1" (at 60.96 151.13 0)
+    (property "Reference" "RCWL-516" (at 60.96 151.13 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "~" (at 64.77 146.05 0)
@@ -1786,7 +1786,7 @@
     (instances
       (project "v4head"
         (path "/6f9ecdea-83ce-4770-aa87-96e479963d0e"
-          (reference "RCWL-1") (unit 1)
+          (reference "RCWL-516") (unit 1)
         )
       )
     )
@@ -1978,7 +1978,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x03") (at 119.38 33.02 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 27313017-4e7c-4765-b510-c0332e14fb0f)
-    (property "Reference" "5VMODULE1" (at 121.92 31.75 0)
+    (property "Reference" "5V_EXT1" (at 121.92 31.75 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x03" (at 121.92 34.29 0)
@@ -1996,7 +1996,7 @@
     (instances
       (project "v4head"
         (path "/6f9ecdea-83ce-4770-aa87-96e479963d0e"
-          (reference "5VMODULE1") (unit 1)
+          (reference "5V_EXT1") (unit 1)
         )
       )
     )
@@ -2086,7 +2086,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x02") (at 63.5 86.36 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 3ef9c796-bdec-42a4-a664-79a6057943f9)
-    (property "Reference" "Power1" (at 60.96 86.36 0)
+    (property "Reference" "PWR1" (at 60.96 86.36 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x02" (at 60.96 88.9 0)
@@ -2103,7 +2103,7 @@
     (instances
       (project "v4head"
         (path "/6f9ecdea-83ce-4770-aa87-96e479963d0e"
-          (reference "Power1") (unit 1)
+          (reference "PWR1") (unit 1)
         )
       )
     )
@@ -2163,7 +2163,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x03") (at 275.59 101.6 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 481674bd-3dea-4050-831b-13f3d3bf985e)
-    (property "Reference" "NEO2" (at 271.78 106.68 0)
+    (property "Reference" "NEO1" (at 271.78 106.68 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x03" (at 271.78 109.22 0)
@@ -2181,7 +2181,7 @@
     (instances
       (project "v4head"
         (path "/6f9ecdea-83ce-4770-aa87-96e479963d0e"
-          (reference "NEO2") (unit 1)
+          (reference "NEO1") (unit 1)
         )
       )
     )
@@ -2448,7 +2448,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x03") (at 57.15 125.73 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 8b1e0193-fd3b-485d-b855-4f962d49c718)
-    (property "Reference" "3VMODULE1" (at 66.04 116.84 0)
+    (property "Reference" "3V_EXT1" (at 66.04 116.84 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x03" (at 66.04 119.38 0)
@@ -2466,7 +2466,7 @@
     (instances
       (project "v4head"
         (path "/6f9ecdea-83ce-4770-aa87-96e479963d0e"
-          (reference "3VMODULE1") (unit 1)
+          (reference "3V_EXT1") (unit 1)
         )
       )
     )
@@ -2475,7 +2475,7 @@
   (symbol (lib_id "Connector:Raspberry_Pi_2_3") (at 101.6 110.49 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 93ebf8b5-38bb-4fb3-a200-5b956f554f64)
-    (property "Reference" "J1" (at 108.8741 74.93 0)
+    (property "Reference" "PI1" (at 108.8741 74.93 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Raspberry_Pi_2_3" (at 108.8741 77.47 0)
@@ -2530,7 +2530,7 @@
     (instances
       (project "v4head"
         (path "/6f9ecdea-83ce-4770-aa87-96e479963d0e"
-          (reference "J1") (unit 1)
+          (reference "PI1") (unit 1)
         )
       )
     )
@@ -2539,7 +2539,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x02") (at 93.98 41.91 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid a2b70c7c-e0e4-4243-9452-2181d470a7df)
-    (property "Reference" "Serial2" (at 91.44 41.91 0)
+    (property "Reference" "SERIAL1" (at 91.44 41.91 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x02" (at 91.44 44.45 0)
@@ -2556,7 +2556,7 @@
     (instances
       (project "v4head"
         (path "/6f9ecdea-83ce-4770-aa87-96e479963d0e"
-          (reference "Serial2") (unit 1)
+          (reference "SERIAL1") (unit 1)
         )
       )
     )
@@ -2643,7 +2643,7 @@
   (symbol (lib_id "Connector_Generic:Conn_01x04") (at 158.75 130.81 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b5500b30-ed1d-4985-afc5-25ad38ce4802)
-    (property "Reference" "I2CMODULE1" (at 161.29 130.81 0)
+    (property "Reference" "I2C_EXT1" (at 161.29 130.81 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Conn_01x04" (at 161.29 133.35 0)
@@ -2662,7 +2662,7 @@
     (instances
       (project "v4head"
         (path "/6f9ecdea-83ce-4770-aa87-96e479963d0e"
-          (reference "I2CMODULE1") (unit 1)
+          (reference "I2C_EXT1") (unit 1)
         )
       )
     )
@@ -2774,7 +2774,7 @@
   (symbol (lib_id "ComponentLibrary:I2C_NEOPIXEL") (at 160.02 93.98 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid e1edd95e-1599-41d8-8031-95f8aebf8c7b)
-    (property "Reference" "NEO1" (at 170.18 91.44 90)
+    (property "Reference" "I2C_NEO1" (at 170.18 96.52 90)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "I2C_NEOPIXEL" (at 172.72 99.06 90)
@@ -2794,7 +2794,7 @@
     (instances
       (project "v4head"
         (path "/6f9ecdea-83ce-4770-aa87-96e479963d0e"
-          (reference "NEO1") (unit 1)
+          (reference "I2C_NEO1") (unit 1)
         )
       )
     )
