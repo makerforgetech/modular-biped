@@ -1,17 +1,22 @@
 from pubsub import pub
 from time import sleep
 #from colour import Color
-from modules.config import Config
 try:
-    import board
-    if Config.get('neopixel', 'i2c'):
-        import busio
-        from rainbowio import colorwheel
-        from adafruit_seesaw import seesaw, neopixel
-    else:
-        import neopixel
-except:
-    pass
+    from modules.config import Config
+except Exception as e:
+    print("Importing config directly")
+    from config import Config
+import board
+    
+if Config.get('neopixel', 'i2c'):
+    print("Importing i2c config")
+    import busio
+    from rainbowio import colorwheel
+    from adafruit_seesaw import seesaw, neopixel
+else:
+    print("Importing GPIO config")
+    import neopixel
+    
 
 import threading
 
@@ -38,15 +43,7 @@ class NeoPx:
     def __init__(self, count, **kwargs):
         # Initialise
         self.count = count
-        self.positions = {
-            'right' : 0,
-            'top_right': 1,
-            'top_left' : 2,
-            'left' : 3,
-            'bottom_left' : 4,
-            'bottom_right' : 5,
-            'middle': 6
-        }
+        self.positions = Config.get('neopixel', 'positions')
         self.all = range(self.count)
         self.all_eye = range(6)
         self.animation = False
@@ -129,12 +126,16 @@ class NeoPx:
                 i = self.positions[i]
             # print(str(i) + str(color))
             try:
+                if i >= self.count:
+                    pub.sendMessage('log', msg='[LED] Error in set pixels: index out of range')
+                    print('Error in set pixels: index out of range')
+                    i = self.count-1                
                 self.pixels[i] = color
-                # pub.sendMessage('log', msg='[LED] Setting LED')
             except Exception as e:
-                #print(e)
-                pub.sendMessage('log', msg='[LED] Error in set pixels: '+ str(e))
+                print(e)
+                pub.sendMessage('log', msg='[LED] Error in set pixels: ' + str(e))
                 pass
+        
         self.pixels.show()
         sleep(.1)
 
@@ -160,9 +161,17 @@ class NeoPx:
             self.set(self.all, NeoPx.COLOR_MAP[color])
 
     def eye(self, color):
-        if color in NeoPx.COLOR_MAP.keys() and self.pixels[self.positions['middle']] != color:
+        if 'middle' not in self.positions:
+            raise ValueError('Middle position not found')
+        if color not in NeoPx.COLOR_MAP.keys():
+            raise ValueError('Color not found')
+        index = self.positions['middle']
+        if (self.count < index):
+            index = self.count - 1
+            pub.sendMessage('log', msg='[LED] Error in set pixels: index out of range, changing to last pixel')
+        if self.pixels[index] != color:
             pub.sendMessage('log', msg='[LED] Setting eye colour: ' + color)
-            self.set(self.positions['middle'], NeoPx.COLOR_MAP[color])
+            self.set(index, NeoPx.COLOR_MAP[color])
 
     def party(self):
         # self.animate(self.all, 'off', 'rainbow_cycle')
