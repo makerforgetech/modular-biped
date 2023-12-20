@@ -15,6 +15,7 @@ class Motion:
         # print(self.last_motion)
         if not self.state.behaviours.faces.face_detected and self.state.lt(self.state.behaviours.faces.last_face, self.state.past(2)):
             self.state.set_eye('blue')
+            pub.sendMessage('vision:start')
 
     def is_motion(self):
         return not self.state.lt(self.state.behaviours.motion.last_motion, self.state.past(2))

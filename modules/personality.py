@@ -53,7 +53,7 @@ class Personality:
         self.behaviours = SimpleNamespace(**behaviours)
 
     def loop(self):
-        pub.sendMessage('speech', msg="Hello, I am happy") # for testing sentiment responses
+        # pub.sendMessage('speech', msg="Hello, I am happy") # for testing sentiment responses
         if not self.is_asleep() and not self.behaviours.faces.face_detected and not self.behaviours.motion.is_motion() and not self.behaviours.objects.is_detected:
             self.set_eye('red')
 
@@ -86,18 +86,22 @@ class Personality:
             pub.sendMessage("animate", action="sleep")
             pub.sendMessage("animate", action="sit")
             pub.sendMessage("led:off")
+            pub.sendMessage("led", identifiers=['status1'], color="off")
             pub.sendMessage('piservo:move', angle=0)
         elif state == Config.STATE_RESTING:
             pub.sendMessage('rest')
             pub.sendMessage("animate", action="sit")
             pub.sendMessage("animate", action="sleep")
             self.set_eye('blue')
-            pub.sendMessage('piservo:move', angle=20)
+            pub.sendMessage("led", identifiers=['status1'], color="red")
+            pub.sendMessage('piservo:move', angle=-40)
         elif state == Config.STATE_IDLE:
             if self.state == Config.STATE_RESTING or self.state == Config.STATE_SLEEPING:
                 pub.sendMessage('wake')
                 pub.sendMessage('animate', action="wake")
             pub.sendMessage('animate', action="sit")
+            pub.sendMessage("led", identifiers=['status1'], color="green")
+            pub.sendMessage('piservo:move', angle=-20)
             self.set_eye('blue')
         elif state == Config.STATE_ALERT:
             if self.state == Config.STATE_RESTING or self.state == Config.STATE_SLEEPING:
@@ -105,6 +109,7 @@ class Personality:
                 pub.sendMessage('animate', action="wake")
             # pub.sendMessage('animate', action="stand")
             pub.sendMessage('piservo:move', angle=0)
+            pub.sendMessage("led", identifiers=['status1'], color="blue")
         self.state = state
 
     def is_asleep(self):

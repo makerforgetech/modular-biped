@@ -60,11 +60,13 @@ class ArduinoSerial:
         """
         # If serial_file is None, call initialise(), if still fails then exit
         if self.serial_file is None:
+            pub.sendMessage('led', identifiers='status5', color='red')
             pub.sendMessage('log', msg="[ArduinoSerial] Attempting to recover connection...")
             self.serial_file = ArduinoSerial.initialise()
         if self.serial_file is None:
             return
 
+        pub.sendMessage('led', identifiers='status5', color='blue')
         pub.sendMessage('log', msg='[ArduinoSerial] ' + str(ArduinoSerial.type_map[type]) + ' id: ' + str(identifier) + ' val: ' + str(message))
         if type == ArduinoSerial.DEVICE_SERVO or type == 'servo':
             write_order(self.serial_file, Order.SERVO)
@@ -98,6 +100,9 @@ class ArduinoSerial:
             write_i8(self.serial_file, message)
 
         elif type == ArduinoSerial.DEVICE_PIN_READ or type == 'pin_read':
+            pub.sendMessage('led', identifiers='status5', color='green')
             write_order(self.serial_file, Order.READ)
             write_i8(self.serial_file, identifier)
+            pub.sendMessage('led', identifiers='status5', color='off')
             return read_i16(self.serial_file)
+        pub.sendMessage('led', identifiers='status5', color='off')

@@ -117,6 +117,7 @@ def main():
         motion = Sensor(Config.get('motion','pin'))
 
     pub.sendMessage('tts', msg='I am awake.')
+    pub.sendMessage('speak', msg='hi')
 
     if mode() == Config.MODE_LIVE:
         # Vision / Tracking
@@ -165,8 +166,8 @@ def main():
     #speech = SpeechInput()
     # Output
     # if Config.get('buzzer', 'pin') != '':
-    #     #speak = Braillespeak(Config.get('buzzer', 'pin'), duration=80/1000)
-    #     buzzer = Buzzer(Config.get('buzzer', 'pin'))
+        # speak = Braillespeak(Config.get('buzzer', 'pin'), duration=80/1000)
+        # buzzer = Buzzer(Config.get('buzzer', 'pin'))
     
     animate = Animate()
 
@@ -201,6 +202,8 @@ def main():
     except (Exception) as ex:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(ex).__name__, ex.args)
+        # output stack trace
+        print(ex.with_traceback())
         print(message)
         pub.sendMessage('log:error', msg=ex)
         loop = False

@@ -53,6 +53,8 @@ class Feel:
     def loop_minute(self):
         # print(f"[Feelings] {str(self.attention)} {str(self.happiness)} {str(self.wakefulness)} {str(self.contentment)}")
         pub.sendMessage('log', msg='[Feeling]' + str(self.get_feelings()))
+        pub.sendMessage('led', identifiers='status3', color=self.attention, gradient='bg')
+        pub.sendMessage('led', identifiers='status4', color=self.happiness, gradient='bg')
 
     def get_feelings(self):
         feelings = []
