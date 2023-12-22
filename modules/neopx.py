@@ -28,6 +28,7 @@ class NeoPx:
     COLOR_PURPLE = (100, 0, 100)
     COLOR_WHITE = (100, 100, 100)
     COLOR_WHITE_FULL = (255, 255, 255)
+    COLOR_WHITE_DIM = (50, 50, 50)
     COLOR_RED_TO_GREEN_100 = list(Color("red").range_to(Color("green"),100))
     COLOR_BLUE_TO_RED_100 = list(Color("blue").range_to(Color("red"),100)) # also passes through green
     COLOR_BLUE_TO_GREEN_100 = list(Color("blue").range_to(Color("green"),100))
@@ -39,7 +40,8 @@ class NeoPx:
         'purple': COLOR_PURPLE,
         'white': COLOR_WHITE,
         'white_full': COLOR_WHITE_FULL,
-        'off': COLOR_OFF
+        'off': COLOR_OFF,
+        'white_dim': COLOR_WHITE_DIM
     }
 
     def __init__(self, count, **kwargs):
@@ -50,6 +52,7 @@ class NeoPx:
         self.brightness = Config.get('neopixel', 'brightness')
         self.all = range(self.count)
         self.all_eye = ['right', 'top_right', 'top_left', 'left', 'bottom_left', 'bottom_right', 'middle']
+        self.ring_eye = ['right', 'top_right', 'top_left', 'left', 'bottom_left', 'bottom_right']
         self.animation = False
         self.thread = None
         self.overridden = False  # prevent any further changes until released (for flashlight)
@@ -75,6 +78,7 @@ class NeoPx:
         pub.subscribe(self.set, 'led')
         pub.subscribe(self.full, 'led:full')
         pub.subscribe(self.eye, 'led:eye')
+        pub.subscribe(self.ring, 'led:ring')
         pub.subscribe(self.off, 'led:off')
         pub.subscribe(self.eye, 'led:flashlight')
         pub.subscribe(self.party, 'led:party')
@@ -151,6 +155,9 @@ class NeoPx:
     def apply_brightness_modifier(self, identifier, color):
         # Some neopixels do not need to be full brightness. Reduce intensity with the BRIGHTNESS_MODIFIER for each neopixel
         return (round(color[0]*self.brightness[identifier]), round(color[1]*self.brightness[identifier]), round(color[2]*self.brightness[identifier]))
+
+    def ring(self, color):
+        self.set(self.ring_eye, color)
 
     def flashlight(self, on):
         if on:

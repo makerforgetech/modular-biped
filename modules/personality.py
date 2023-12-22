@@ -72,7 +72,7 @@ class Personality:
     def set_eye(self, color):
         if self.eye == color:
             return
-        pub.sendMessage('led', identifiers=['left', 'right'], color='off')
+        # pub.sendMessage('led', identifiers=['left', 'right'], color='off')
         pub.sendMessage('led:eye', color=color)
         self.eye = color
 
