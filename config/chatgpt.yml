@@ -1,0 +1,9 @@
+chatgpt:
+  language: en
+  wait_times:
+    internet_check: 10
+    search_wait: 30
+  responses:
+    no_internet: "You don't have an internet connection. Please connect to the internet."
+    misunderstood: "Sorry, I couldn't understand your voice."
+    farewell: "Alright. Research mode is closed. Have a great day!"
