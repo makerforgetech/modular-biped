@@ -12,11 +12,14 @@ class PiServo:
         self.servo = None
         # print(range)
         pub.subscribe(self.move, 'piservo:move')
-        # self.move(0)
-        # sleep(2)
-        # self.move(-40)
-        # sleep(2)
-        # self.move(40)
+        self.move(0)
+        sleep(2)
+        self.move(range[0])
+        sleep(2)
+        self.move(range[1])
+        sleep(2)
+        self.move(self.start)
+        
 
     def move(self, angle):
         if self.servo is None:

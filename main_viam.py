@@ -91,7 +91,10 @@ async def main():
         piservos[key] = PiServo(s['pin'], s['range'], start_pos=s['start'])
         
         
-    neopx = NeoPx(Config.get('neopixel','count'))
+    try:
+        neopx = NeoPx(Config.get('neopixel','count'))
+    except ValueError as e:
+        print('Error initializing NeoPixel: ' + str(e))
     # tts = TTS(translator=translator)
 
     if Config.get('motion','pin') != '':
