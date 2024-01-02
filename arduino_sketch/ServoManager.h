@@ -184,7 +184,9 @@ private:
 
     long moveRandom(int index)
     {
-        return random(PosMin[index], PosMax[index]);
+        int middle = (PosMin[index] + PosMax[index]) / 2;
+        int range = 15; // Reduce range of motion to avoid extreme movement
+        return random(middle - range, middle + range);
     }
 
     // void solve2dInverseK(int x)
