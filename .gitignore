@@ -141,3 +141,4 @@ venv/
 viam/
 viam_sdk-0.12.0.dist-info/
 yaml/
+!modules/viam/
