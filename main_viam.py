@@ -10,6 +10,10 @@ from datetime import datetime
 
 from pubsub import pub
 
+from viam.logging import getLogger
+LOGGER = getLogger(__name__)
+LOGGER.debug('INIT MAKERFORGE MAIN_VIAM')
+
 #### MAIN ####
 
 import logging
