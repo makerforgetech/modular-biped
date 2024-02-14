@@ -74,6 +74,7 @@ void allTo90()
   }
   delay(20000);
 }
+
 /**
  * @brief Move to rest position. Either using stored values or by calculating using inverse kinematics and storing result for next time.
  */
@@ -142,8 +143,9 @@ void hipAdjust()
 
 void loop()
 {
-
-  //stationarySteps();
+  #ifdef SERVO_CALIBRATION_ENABLED
+    servoManager.calibrate();
+  #endif
 
   #ifdef MPU6050_ENABLED
   hipAdjust();
@@ -163,7 +165,9 @@ void loop()
   {
     if (isResting)
     {
+      #ifdef ANIMATE_ENABLED
       animateRandomly();
+      #endif
       setSleep(random(3000, 5000));
     }
     else

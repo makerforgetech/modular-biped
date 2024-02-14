@@ -6,8 +6,8 @@ servos:
     leg_r_hip: { id: 3, pin: 6, range: [20, 160], start: 93 }
     leg_r_knee: { id: 4, pin: 7, range: [5, 175], start: 190 }
     leg_r_ankle: { id: 5, pin: 8, range: [40, 180], start: 88 }
-    tilt: { id: 6, pin: 2, range: [60, 120], start: 75 }
-    pan: { id: 7, pin: 3, range: [20, 160], start: 50 }
+    tilt: { id: 6, pin: 2, range: [60, 110], start: 50 }
+    pan: { id: 7, pin: 3, range: [30, 150], start: 50 }
   docs:
     description: "The servos module is used to control servos. These are handled by the arduino but positions can be requested by this framework via serial"
     events:

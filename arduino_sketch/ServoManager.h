@@ -179,6 +179,79 @@ public:
         return tSpeed;
     }
 
+    /**
+     * Manual servo calibration
+     * 
+     * Iterate over each servo and allow the position to be entered manually.
+     * Store in an array. If user enters '', move to the next servo.
+     * 
+     * Following calibration of all servos, output the arrays to the serial monitor.
+     * 
+     * Output instructions in the serial monitor to guide the user through the process.
+     */
+    void calibrate() {
+        Serial.println("Calibration");
+        while(true) {
+            // Array for storing positions
+            int positions[SERVO_COUNT] = {PosStart[0], PosStart[1], PosStart[2], PosStart[3], PosStart[4], PosStart[5], PosStart[6], PosStart[7]};
+
+            for (int i = 0; i < SERVO_COUNT; i++)
+            {
+                Serial.print("Calibrating servo ");
+                ServoEasing::ServoEasingArray[i]->setMinMaxConstraint(0, 180);
+
+                // Output i as String
+                Serial.println(i);
+                Serial.print("Starting position: ");
+                Serial.println(positions[i]);
+                Serial.println("Enter position (0-180) or 'n' to move to next servo");
+                while (Serial.available() == 0)
+                {
+                    delay(100);
+                }
+                String input = Serial.readString();
+//                Serial.println(isDigit(input);
+                while (isDigit(input.charAt(0)))
+                {
+//                    Serial.println(input);
+                    int pos = input.toInt();
+                    Serial.print("Moving to ");
+                    Serial.println(pos);
+                    // Store position in array
+                    positions[i] = pos;
+                    moveSingleServo(i, pos, false);
+                    #ifdef SERVO_CALIBRATION_SYMETRICAL
+                    int otherPos = i+3;
+                    if (otherPos > 5) otherPos = i-3;
+                    moveSingleServo(otherPos, 180-pos, false);
+                    #endif
+                    setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
+                    while (ServoEasing::areInterruptsActive())
+                    {
+                        blinkLED();
+                    }
+                    while (Serial.available() == 0)
+                    {
+                        delay(100);
+                    }
+                    input = Serial.readString();
+//                    Serial.println(input);
+
+                }
+                Serial.println("Moving to next servo");
+//                break;
+            }
+            Serial.println("New positions:");
+            // output all servo positions
+            for (int i = 0; i < SERVO_COUNT; i++)
+            {
+                Serial.print(positions[i]);
+                Serial.print(", ");
+            }
+            Serial.println();
+        }
+    }
+
 private:
     uint16_t tSpeed;
 
