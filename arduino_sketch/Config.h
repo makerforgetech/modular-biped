@@ -6,7 +6,7 @@
  * @details This file contains the configuration for the Arduino sketch.
  */
 //#define SERVO_CALIBRATION_ENABLED // Enable servo calibration (see ServoManager::calibrate())
-//#define SERVO_CALIBRATION_SYMETRICAL // Calculate and apply equivelant changes on other leg.
+//#define SERVO_CALIBRATION_SYMMETRICAL // Calculate and apply equivelant changes on other leg.
 
 #define SERVO_PIN_OFFSET 2 // Legacy, used to identify pin from pi communication
 // Left Leg
@@ -41,7 +41,7 @@
 
 #define SERVO_COUNT 8 // Number of servos to be controlled by ServoEasing
 
-#define LEG_IK_MIN 140 // Min solvable height of leg between hip and ankle
+#define LEG_IK_MIN 75 // Min solvable height of leg between hip and ankle
 #define LEG_IK_MAX 170 // Max solvable height of leg between hip and ankle
 
 #define NOVAL 1000

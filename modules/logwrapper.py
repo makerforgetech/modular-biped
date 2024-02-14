@@ -27,13 +27,13 @@ class LogWrapper:
             os.rename(self.file, self.file + '.previous')
 
     def log(self, type, msg):
-        msg = '[LOGGING] ' + msg
+        #msg = '[LOGGING] ' + msg
         # Translate type string to log level (0 - 50)
         logging.log(LogWrapper.levels.index(type)*10, msg)
         # if type == 'error' or type == 'warning':
         if self.translator is not None:
             msg = self.translator.request(msg)
-        print('LogWrapper: ' + type + ' - ' + str(msg))
+        #print('LogWrapper: ' + type + ' - ' + str(msg))
         self.log_viam(type, msg)
         
     def log_viam(self, type, msg):

@@ -182,45 +182,48 @@ public:
     /**
      * Manual servo calibration
      * 
+     * Move servos to 90 degree position (mid range).
+     * 
      * Iterate over each servo and allow the position to be entered manually.
      * Store in an array. If user enters '', move to the next servo.
      * 
-     * Following calibration of all servos, output the arrays to the serial monitor.
+     * Following calibration of all servos, output the arrays to the serial monitor 
+     * and loop through the process again.
      * 
      * Output instructions in the serial monitor to guide the user through the process.
      */
     void calibrate() {
-        Serial.println("Calibration");
+        Serial.println("Calibration Mode Activated.");
+        Serial.println("WARNING: All min/max constraints removed, be careful!");
+        // Array for storing positions
+        int positions[SERVO_COUNT] = {PosConfig[0], PosConfig[1], PosConfig[2], PosConfig[3], PosConfig[4], PosConfig[5], PosConfig[6], PosConfig[7]};
+        moveServos(positions);
         while(true) {
-            // Array for storing positions
-            int positions[SERVO_COUNT] = {PosStart[0], PosStart[1], PosStart[2], PosStart[3], PosStart[4], PosStart[5], PosStart[6], PosStart[7]};
-
             for (int i = 0; i < SERVO_COUNT; i++)
             {
-                Serial.print("Calibrating servo ");
-                ServoEasing::ServoEasingArray[i]->setMinMaxConstraint(0, 180);
+                ServoEasing::ServoEasingArray[i]->setMinMaxConstraint(0, 180); // Remove min/max constraints
 
-                // Output i as String
+                Serial.print("Calibrating servo ");
                 Serial.println(i);
                 Serial.print("Starting position: ");
                 Serial.println(positions[i]);
                 Serial.println("Enter position (0-180) or 'n' to move to next servo");
                 while (Serial.available() == 0)
                 {
-                    delay(100);
+                    delay(100); // Wait for input
                 }
                 String input = Serial.readString();
-//                Serial.println(isDigit(input);
+                // If input is a digit, move to that position
                 while (isDigit(input.charAt(0)))
                 {
-//                    Serial.println(input);
                     int pos = input.toInt();
                     Serial.print("Moving to ");
                     Serial.println(pos);
                     // Store position in array
                     positions[i] = pos;
                     moveSingleServo(i, pos, false);
-                    #ifdef SERVO_CALIBRATION_SYMETRICAL
+                    #ifdef SERVO_CALIBRATION_SYMMETRICAL
+                    // Calculate and move equivelent servo in other leg
                     int otherPos = i+3;
                     if (otherPos > 5) otherPos = i-3;
                     moveSingleServo(otherPos, 180-pos, false);
@@ -235,11 +238,9 @@ public:
                         delay(100);
                     }
                     input = Serial.readString();
-//                    Serial.println(input);
 
                 }
                 Serial.println("Moving to next servo");
-//                break;
             }
             Serial.println("New positions:");
             // output all servo positions
