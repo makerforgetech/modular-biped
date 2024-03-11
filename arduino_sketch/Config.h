@@ -41,7 +41,7 @@
 
 #define SERVO_COUNT 8 // Number of servos to be controlled by ServoEasing
 
-#define LEG_IK_MIN 140 // Min solvable height of leg between hip and ankle
+#define LEG_IK_MIN 75 // Min solvable height of leg between hip and ankle
 #define LEG_IK_MAX 170 // Max solvable height of leg between hip and ankle
 
 #define NOVAL 1000

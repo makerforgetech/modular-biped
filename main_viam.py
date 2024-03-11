@@ -12,7 +12,9 @@ from pubsub import pub
 
 from viam.logging import getLogger
 LOGGER = getLogger(__name__)
-LOGGER.debug('INIT MAKERFORGE MAIN_VIAM')
+LOGGER.info('INIT MAKERFORGE MAIN_VIAM')
+# LOGGER.warning('LOOP MAKERFORGE MAIN_VIAM')
+# LOGGER.error('LOOP MAKERFORGE MAIN_VIAM')
 
 #### MAIN ####
 
@@ -47,8 +49,7 @@ from modules.translator import Translator
 
 ### MAIN END ###
 
-
-from modules.viam.viamobjects import ViamObjects
+# from modules.viam.viamobjects import ViamObjects
 
 # These must be set. You can get them from your robot's 'Code sample' tab
 robot_api_key = os.getenv('ROBOT_API_KEY') or ''
@@ -67,6 +68,8 @@ async def main():
     robot = await connect()
     
     print('Starting...')
+    
+    
     
     path = os.path.dirname(__file__)
     translator = Translator(src=Config.get('translator', 'default')['src'], dest=Config.get('translator', 'default')['dest'])
@@ -116,21 +119,23 @@ async def main():
     minute_loop = time()
     loop = True
     
-    viamobjects = ViamObjects(robot)
+    # # viamobjects = ViamObjects(robot)
     
-    pub.sendMessage('vision:start')
+    # pub.sendMessage('vision:start')
         
     try:
         pub.sendMessage('log', msg="[Main] Loop started")
         while loop:
-            await viamobjects.detect()
+            # await viamobjects.detect()
             pub.sendMessage('loop')
             if time() - second_loop > 1:
+                #LOGGER.info('LOOP MAKERFORGE MAIN_VIAM')
                 second_loop = time()
                 pub.sendMessage('loop:1')
             if time() - ten_second_loop > 10:
                 ten_second_loop = time()
                 pub.sendMessage('loop:10')
+                # loop = False # remove after testing
             if time() - minute_loop > 60:
                 minute_loop = time()
                 pub.sendMessage('loop:60')

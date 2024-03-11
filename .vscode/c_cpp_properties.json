@@ -20,11 +20,6 @@
                 "/home/dan/.arduino15/packages/arduino/hardware/avr/1.8.6/variants/eightanaloginputs",
                 "/home/dan/Arduino/libraries/ServoEasing/src",
                 "/home/dan/Arduino/libraries/Servo/src",
-                "/home/dan/Arduino/libraries/Adafruit_MPU6050",
-                "/home/dan/Arduino/libraries/Adafruit_BusIO",
-                "/home/dan/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
-                "/home/dan/.arduino15/packages/arduino/hardware/avr/1.8.6/libraries/SPI/src",
-                "/home/dan/Arduino/libraries/Adafruit_Unified_Sensor",
                 "/home/dan/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/lib/gcc/avr/7.3.0/include",
                 "/home/dan/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/lib/gcc/avr/7.3.0/include-fixed",
                 "/home/dan/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/avr/include"
