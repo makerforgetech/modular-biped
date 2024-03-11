@@ -6,7 +6,7 @@
  * @details This file contains the configuration for the Arduino sketch.
  */
 //#define SERVO_CALIBRATION_ENABLED // Enable servo calibration (see ServoManager::calibrate())
-//#define SERVO_CALIBRATION_SYMETRICAL // Calculate and apply equivelant changes on other leg.
+//#define SERVO_CALIBRATION_SYMMETRICAL // Calculate and apply equivelant changes on other leg.
 
 #define SERVO_PIN_OFFSET 2 // Legacy, used to identify pin from pi communication
 // Left Leg

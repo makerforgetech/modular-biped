@@ -29,7 +29,7 @@ unsigned long bootTime;
 // wait start time in millis
 unsigned long sleepTime;
 
-boolean calibrateRest = true;
+boolean calibrateRest = false;
 
 void setup()
 {
@@ -55,7 +55,7 @@ void setup()
   // allTo90();
 
   // Move to rest position + calculate IK and store as rest position
-  doRest();
+  //doRest();
 
   // Custom log message (enable DEBUG in Config.h to see this)
   cLog("Start loop");
