@@ -21,7 +21,7 @@
 #define PIN_SNT 2 // Servo neck tilt
 #define PIN_SNP 3 // Servo neck pan
 // Sway
-#define PIN_SLLHP 4 // Servo left leg hip piovot (unused)
+#define PIN_SLLHP 4 // Servo left leg hip pivot (unused)
 #define PIN_SRLHP 5 // Servo right leg hip pivot (unused)
 
 #define LEG_LENGTH_SHIN 94.0 // Length of shin

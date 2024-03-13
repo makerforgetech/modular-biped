@@ -107,7 +107,7 @@ async def main():
     if Config.get('motion','pin') != '':
         motion = Sensor(Config.get('motion','pin'))
     
-    personality = Personality()
+    # personality = Personality()
     temp = PiTemperature()
     animate = Animate()
 
@@ -124,7 +124,6 @@ async def main():
     # pub.sendMessage('vision:start')
         
     try:
-        pub.sendMessage('log', msg="[Main] Loop started")
         while loop:
             # await viamobjects.detect()
             pub.sendMessage('loop')

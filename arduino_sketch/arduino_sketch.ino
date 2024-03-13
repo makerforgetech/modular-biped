@@ -31,6 +31,8 @@ unsigned long sleepTime;
 
 boolean calibrateRest = false;
 
+bool shouldMove = false;
+
 void setup()
 {
   // Init LED pin
@@ -104,7 +106,8 @@ void doRest()
 #endif
     calibrateRest = false;
   }
-  setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
+  shouldMove = true;
+  // setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
 }
 
 void stationarySteps() {
@@ -157,7 +160,20 @@ void loop()
   }
 
   // Check for orders from pi
-  getOrdersFromPi();
+  bool receiving = getOrdersFromPi();
+  while(receiving) 
+  {
+    delay(50); // Wait a short time for any other orders
+    receiving = getOrdersFromPi();
+    shouldMove = !receiving; // Only move when there are no other orders
+  }
+  
+  // Once all orders received (or animating without orders)
+  if (shouldMove)
+  {
+    setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
+    shouldMove = false;
+  }
 
   // if not sleeping, animate randomly
   // Orders from pi will set sleep time so that the animation does not take precedence
@@ -172,11 +188,11 @@ void loop()
     }
     else
     {
-      doRest();
+      // doRest();
       setSleep(random(3000, 20000));
     }
-    setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
   }
+  
 }
 
 void setSleep(unsigned long length)
@@ -204,6 +220,7 @@ void animateRandomly()
   float legHeight = map(headTiltOffset, 180, 0, LEG_IK_MIN, LEG_IK_MAX);
   // Move legs to that height
   servoManager.moveLegs(legHeight, 0);
+  shouldMove = true;
 #ifdef DEBUG
   Serial.print("Moving legs ");
   Serial.print(legHeight);
@@ -212,10 +229,11 @@ void animateRandomly()
 #endif
 }
 
-void getOrdersFromPi()
+boolean getOrdersFromPi()
 {
   if (Serial.available() == 0)
-    return;
+    //PiConnect::write_order(ERROR);
+    return false;
   cLog("Order received: ", false);
 
   // The first byte received is the instruction
@@ -243,45 +261,44 @@ void getOrdersFromPi()
   {
     switch (order_received)
     {
-    case SERVO:
-    case SERVO_RELATIVE:
-    {
-      int servo_identifier = PiConnect::read_i8();
-      int servo_angle_percent = PiConnect::read_i16();
-#ifdef DEBUG
-      PiConnect::write_order(SERVO);
-      PiConnect::write_i8(servo_identifier);
-      PiConnect::write_i16(servo_angle_percent);
-#endif
-      // sleep animations for 2 seconds to allow pi to control servos
-      setSleep(2000);
-      servoManager.moveSingleServoByPercentage(servo_identifier, servo_angle_percent, order_received == SERVO_RELATIVE);
-      // delay(2000);
-      break;
-    }
-    case PIN:
-    {
-      int pin = PiConnect::read_i8();
-      int value = PiConnect::read_i8();
-      pinMode(pin, OUTPUT);
-      digitalWrite(pin, value);
-      break;
-    }
-    case READ:
-    {
-      int pin = PiConnect::read_i8();
-      pinMode(pin, INPUT);
-      long value = analogRead(pin);
-      PiConnect::write_i16(value);
-      break;
-    }
-    // Unknown order
-    default:
-    {
-      PiConnect::write_order(order_received);
-      // PiConnect::write_i16(404);
-    }
-      return;
+      case SERVO:
+      case SERVO_RELATIVE:
+      {
+        int servo_identifier = PiConnect::read_i8();
+        int servo_angle_percent = PiConnect::read_i16();
+  #ifdef DEBUG
+        PiConnect::write_order(SERVO);
+        PiConnect::write_i8(servo_identifier);
+        PiConnect::write_i16(servo_angle_percent);
+  #endif
+        // sleep animations for 2 seconds to allow pi to control servos
+        setSleep(2000);
+        servoManager.moveSingleServoByPercentage(servo_identifier, servo_angle_percent, order_received == SERVO_RELATIVE);
+        return true;
+      }
+      case PIN:
+      {
+        int pin = PiConnect::read_i8();
+        int value = PiConnect::read_i8();
+        pinMode(pin, OUTPUT);
+        digitalWrite(pin, value);
+        break;
+      }
+      case READ:
+      {
+        int pin = PiConnect::read_i8();
+        pinMode(pin, INPUT);
+        long value = analogRead(pin);
+        PiConnect::write_i16(value);
+        break;
+      }
+      // Unknown order
+      default:
+      {
+        PiConnect::write_order(order_received);
+        // PiConnect::write_i16(404);
+      }
     }
   }
+  return false;
 }

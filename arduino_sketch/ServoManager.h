@@ -102,13 +102,17 @@ public:
         // Serial.print(PosMax[pServoIndex]);
         // Serial.print(" Relative pos change in %: ");
         // Serial.print(pPercent);
-        int realChange = map(abs(pPercent), 0, 100, PosMin[pServoIndex], PosMax[pServoIndex]) - PosMin[pServoIndex];
+        int realChange = map(abs(pPercent), 0, 100, PosMin[pServoIndex], PosMax[pServoIndex]);
         // Serial.print(" in degrees: ");
         // Serial.print(realChange);
+        if (isRelative) {
+            realChange = realChange - PosMin[pServoIndex]; // Account for min value ONLY if relative
+        }
         if (pPercent < 0)
         {
             realChange = -realChange;
         }
+        // PiConnect::write_i16(realChange);
         moveSingleServo(pServoIndex, realChange, isRelative);
     }
 
@@ -126,7 +130,10 @@ public:
         {
             ServoEasing::ServoEasingNextPositionArray[pServoIndex] = pPos;
         }
-        setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
+        // setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
+        
+        // Return actual value to Pi
+        PiConnect::write_i16(ServoEasing::ServoEasingNextPositionArray[pServoIndex]);
     }
 
     void moveLegsAndStore(int x, int y, int *store)
