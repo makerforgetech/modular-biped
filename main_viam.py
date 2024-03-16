@@ -4,6 +4,7 @@ import os
 from viam.robot.client import RobotClient
 from viam.rpc.dial import Credentials, DialOptions
 from viam.services.vision import VisionClient
+from viam.services.generic import Generic
 from viam.components.camera import Camera
 import setenv # I added this
 from datetime import datetime
@@ -122,6 +123,25 @@ async def main():
     # # viamobjects = ViamObjects(robot)
     
     # pub.sendMessage('vision:start')
+    
+    print('Resources:')
+    print(robot.resource_names)
+    
+    animation = Generic.from_robot(robot, "animation-service")
+
+    # Uncomment to show failure    
+    # response = await animation.do_command({"animate": ["not_an_animation"]})
+    
+    response = await animation.do_command({"animate": ["head_shake"]})
+    
+    # Until we have a working MQTT broker
+    # Parse response and use pubsub to send message to animate
+    # Example response: {'animate': [['servo:pan:mv', [20.0]], ['servo:pan:mv', [-40.0]], ['servo:pan:mv', [40.0]], ['servo:pan:mv', [-40.0]], ['servo:pan:mv', [20.0]]]}
+    for command in response['animate']:
+        pub.sendMessage(command[0], percentage=command[1][0])
+    
+    # print(f"The response is {response}")
+    print(response)
         
     try:
         while loop:
@@ -134,6 +154,7 @@ async def main():
             if time() - ten_second_loop > 10:
                 ten_second_loop = time()
                 pub.sendMessage('loop:10')
+                # pub.sendMessage('animate', action='head_shake')
                 # loop = False # remove after testing
             if time() - minute_loop > 60:
                 minute_loop = time()
