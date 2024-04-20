@@ -1,22 +1,8 @@
 from pubsub import pub
+from modules.config import Config
+from modules.arduinoserial import ArduinoSerial
 from time import sleep
-#from colour import Color
-try:
-    from modules.config import Config
-except Exception as e:
-    print("Importing config directly")
-    from config import Config
-import board
-    
-if Config.get('neopixel', 'i2c'):
-    print("Importing i2c config")
-    import busio
-    from rainbowio import colorwheel
-    from adafruit_seesaw import seesaw, neopixel
-else:
-    print("Importing GPIO config")
-    import neopixel
-    
+# from colour import Color
 
 import threading
 
@@ -49,20 +35,6 @@ class NeoPx:
         self.animation = False
         self.thread = None
         self.overridden = False  # prevent any further changes until released (for flashlight)
-        if Config.get('neopixel', 'i2c'):
-            self.i2c = busio.I2C(board.SCL, board.SDA)
-            try:
-                ss = seesaw.Seesaw(self.i2c, addr=0x60)
-            except:
-                # If i2c fails, try again
-                self.i2c.deinit()
-                self.i2c = busio.I2C(board.SCL, board.SDA)
-                ss = seesaw.Seesaw(self.i2c, addr=0x60)
-            neo_pin = 15 # Unclear how this is used
-            self.pixels = neopixel.NeoPixel(ss, neo_pin, count, brightness = 0.1)
-        else:
-            self.pixels = neopixel.NeoPixel(board.D12, count)
-        # Default states
         self.set(self.all, NeoPx.COLOR_OFF)
         sleep(0.1)
         self.set(self.positions['middle'], NeoPx.COLOR_BLUE)
@@ -93,6 +65,9 @@ class NeoPx:
             self.flashlight(True)
         if 'light off' in msg:
             self.flashlight(False)
+
+    def __del__(self):
+        self.set(self.all, NeoPx.COLOR_OFF)
 
     def set(self, identifiers, color):
         """
@@ -129,16 +104,14 @@ class NeoPx:
                 if i >= self.count:
                     pub.sendMessage('log', msg='[LED] Error in set pixels: index out of range')
                     print('Error in set pixels: index out of range')
-                    i = self.count-1                
+                    i = self.count-1
                 self.pixels[i] = color
             except Exception as e:
                 print(e)
                 pub.sendMessage('log', msg='[LED] Error in set pixels: ' + str(e))
                 pass
+        pub.sendMessage('serial', ArduinoSerial.DEVICE_LED, identifiers, color)
         
-        self.pixels.show()
-        sleep(.1)
-
     def flashlight(self, on):
         if on:
             self.set(self.all, NeoPx.COLOR_WHITE_FULL)
@@ -154,7 +127,7 @@ class NeoPx:
             self.thread.animation = False
             self.thread.join()
         self.set(self.all, NeoPx.COLOR_OFF)
-        sleep(.5)
+        sleep(0.5)
 
     def full(self, color):
         if color in NeoPx.COLOR_MAP.keys():
@@ -211,7 +184,6 @@ class NeoPx:
             self.thread = threading.Thread(target=animations[animation], args=(identifiers, color,))
         self.thread.start()
 
-
     def spinner(self, identifiers, color, index=1):
         """
         Create a spinner effect around outer LEDs of 7 LED ring.
@@ -219,7 +191,7 @@ class NeoPx:
         :param index: current LED to change
         :return:
         """
-        sleep(.3)
+        sleep(0.3)
 
         self.set(range(1, 7), NeoPx.COLOR_OFF)
         self.set(index, color)
@@ -296,4 +268,3 @@ if __name__ == '__main__':
     inst.flashlight(True)
     sleep(2)
     inst.flashlight(False)
-    
