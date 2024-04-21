@@ -43,4 +43,4 @@ pygame
 
 nltk
 
-viam-sdk[mlmodel]
+# viam-sdk[mlmodel]
