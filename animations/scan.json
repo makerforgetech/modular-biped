@@ -1,0 +1,14 @@
+[
+    {"servo:tilt:mv": 20},
+    {"sleep": 0.5},
+    {"pin:high": 22},
+    {"servo:tilt:mv": -40},
+    {"sleep": 0.5},
+    {"servo:tilt:mv": 40},
+    {"sleep": 0.5},
+    {"servo:tilt:mv": -40},
+    {"sleep": 0.5},
+    {"servo:tilt:mv": 20},
+    {"pin:low": 22},
+    {"sleep": 2}
+  ]

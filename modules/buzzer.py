@@ -33,8 +33,8 @@ class Buzzer:
 
         pub.subscribe(self.speech, 'speech')
 
+        # print("MERRY CHRISTMAS")
         # self.play(MelodyHappyBirthday.MELODY, MelodyHappyBirthday.TEMPO, MelodyHappyBirthday.PAUSE, MelodyHappyBirthday.PACE)
-
         # self.deck_the_halls()
 
 
