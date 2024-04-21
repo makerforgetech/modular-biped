@@ -9,12 +9,12 @@ except Exception as e:
     from config import Config
 import board
 
-if Config.get("neopixel", "i2c"):
+if Config.get('neopixel', 'i2c'):
     print("Importing i2c config")
     import busio
     from rainbowio import colorwheel
     from adafruit_seesaw import seesaw, neopixel
-elif Config.get("neopixel", "gpio"):
+elif Config.get('neopixel', 'gpio'):
     print("Importing GPIO config")
     import neopixel
 else:
@@ -32,7 +32,7 @@ class NeoPx:
     COLOR_PURPLE = (100, 0, 100)
     COLOR_WHITE = (100, 100, 100)
     COLOR_WHITE_FULL = (255, 255, 255)
-    #COLOR_RED_TO_GREEN_100 = list(Color("red").range_to(Color("green"),100))
+    #COLOR_RED_TO_GREEN_100 = list(Color('red').range_to(Color('green'),100))
 
     COLOR_MAP = {
         'red': COLOR_RED,
@@ -55,7 +55,7 @@ class NeoPx:
         self.overridden = (
             False  # prevent any further changes until released (for flashlight)
         )
-        if Config.get("neopixel", "i2c"):
+        if Config.get('neopixel', 'i2c'):
             self.i2c = busio.I2C(board.SCL, board.SDA)
             try:
                 ss = seesaw.Seesaw(self.i2c, addr=0x60)
@@ -67,14 +67,12 @@ class NeoPx:
             neo_pin = 15  # Unclear how this is used
             self.pixels = neopixel.NeoPixel(ss, neo_pin, count, brightness=0.1)
 
-        elif Config.get("neopixel", "gpio"):
+        elif Config.get('neopixel', 'gpio'):
             self.pixels = neopixel.NeoPixel(board.D12, count)
 
         else:
-            pub.subscribe("led", self.set)
-            self.pixels = pub.sendMessage(
-                "serial", ArduinoSerial.DEVICE_LED, identifiers, color
-            )
+            pub.subscribe('led', self.set)
+            self.pixels = pub.sendMessage('serial', ArduinoSerial.DEVICE_LED, identifiers, color)
 
         # Default states
         self.set(self.all, NeoPx.COLOR_OFF)
@@ -221,6 +219,8 @@ class NeoPx:
             self.thread = threading.Thread(target=animations[animation], args=(identifiers, color,))
         self.thread.start()
 
+
+    
     def spinner(self, identifiers, color, index=1):
         """
         Create a spinner effect around outer LEDs of 7 LED ring.
