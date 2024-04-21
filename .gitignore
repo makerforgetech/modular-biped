@@ -13,3 +13,4 @@ app.log*
 battery*.csv
 timelapse/*
 .coverage
+modular-biped-venv

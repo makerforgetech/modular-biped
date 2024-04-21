@@ -1,5 +1,6 @@
-sudo pkill -f /home/archie/companion-robot/main.py
-sudo modprobe bcm2835-v4l2 # Enable camera
-sudo pigpiod # GPIO @todo may not be used
-sudo python3 /home/archie/companion-robot/main.py
+# source modular-biped-venv/bin/activate
+sudo pkill -f /home/archie/modular-biped/main.py
+# sudo modprobe bcm2835-v4l2 # Enable camera
+sudo pigpiod # GPIO - is used
+python3 /home/archie/modular-biped/main.py
 

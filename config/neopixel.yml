@@ -1,0 +1,52 @@
+neopixel:
+  pin: None # GPIO2 and 3 are use for i2c
+  count: 2 # @todo change to 12 when fully assembled
+  positions: {
+    'status1': 0,
+    'status2': 1,
+    'status3': 2,
+    'status4': 3,
+    'status5': 4,
+    'right' : 5,
+    'top_right': 6,
+    'top_left' : 7,
+    'left' : 8,
+    'bottom_left' : 9,
+    'bottom_right' : 10,
+    'middle': 11,
+  }
+  i2c: True
+  docs:
+    description: "The neopixel module is used to drive neopixel LEDs."
+    events:
+      sub:
+        - led:
+            description: "Set specific LEDs"
+            args:
+              - identifiers: "array[integer] | integer"
+              - color: string
+        - led:full:
+            description: "Set all LEDs"
+            args:
+              - color: string
+        - led:eye:
+            description: "Set eye LEDs"
+            args:
+              - color: string
+        - led:off:
+            description: "Turn off all LEDs"
+        - led:flashlight:
+            description: "Turn on all eye LEDs full white"
+            args:
+              - on: boolean
+        - led:party:
+            description: "Turn on all LEDs in random colors"
+        - exit:
+            description: "Exit module."
+        - speech:
+            description: "Attempt to process commands from speech (light on | off)"
+            args:
+              - msg: string
+      pub:
+        - log:
+            description: "Send messages to logger."

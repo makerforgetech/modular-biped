@@ -42,12 +42,6 @@ class Feel:
         if self.state.behaviours.motion.is_motion():
             self.input(Feel.INPUT_TYPE_COMPANY)
 
-        # Update head LEDs
-        pub.sendMessage('led', identifiers='top1', color=self.wakefulness)  # left
-        pub.sendMessage('led', identifiers='top2', color=self.attention)
-        pub.sendMessage('led', identifiers='top3', color=self.happiness)
-        pub.sendMessage('led', identifiers='top4', color=self.contentment)  # right
-
     def feel(self):
         # Get gradually bored and tired
         self.attention = self.limit(self.attention - randint(5,10))

@@ -1,8 +1,34 @@
 #! /usr/bin/python
 from time import localtime
-from pubsub import pub
+import yaml
+import glob
+import json
 
 class Config:
+    # Load all yaml files in config folder
+    config = dict()
+    for file in glob.glob("config/*.yml"):
+        config.update(yaml.safe_load(open(file)))
+        
+    @staticmethod
+    def get(key):
+        return Config.get(key, None)
+    
+    @staticmethod
+    def get(key, key2):
+        if key2 == None:
+            return Config.config[key]
+        return Config.config[key][key2]
+    
+    @staticmethod
+    def get_all_pins():
+        '''Returns list of tuple for all pins used in any config file'''
+        pins = []
+        for key in Config.config:
+            if 'pin' in Config.config[key] and Config.config[key]['pin'] != 'None':
+                pins.append([key, Config.config[key]['pin']])
+        return pins
+    
     # Application settings
     LOOP_FREQUENCY = 2
 
@@ -15,77 +41,40 @@ class Config:
     MODE_LIVE = 6
 
 
-    VISION_TECH = 'coral' # or 'opencv'
-    VISION_MODE = 'face' # or 'object'
-    DEBUG_VISION = False # Creates loop to focus on tracking without personality etc.
+    # VISION_TECH = 'coral' # or 'opencv'
+    # VISION_MODE = 'object' # 'face' or 'object'
+    # DEBUG_VISION = False # Creates loop to focus on tracking without personality etc.
 
     # GPIO
     # gpio = pigpio.pi()
 
     # Power Management
-    POWER_ENABLE_PIN = 11
-    SLEEP_TIMEOUT = 1  # Minutes
+    # POWER_ENABLE_PIN = 11
+    # SLEEP_TIMEOUT = 1  # Minutes
 
-    # Audio
-    BUZZER_PIN = 27
+    # # Audio
+    # BUZZER_PIN = 27
 
-    # Microwave sensor pin
-    MOTION_PIN = 13
+    # # Microwave sensor pin
+    # MOTION_PIN = 13
 
-    servos = dict()
-    # Everything is percentages except the range values.
-    servos['leg_l_hip'] = {'id': 0, 'pin': 9, 'range': [20, 160], 'start': 19}
-    servos['leg_l_knee'] = {'id': 1, 'pin': 10, 'range': [5, 175], 'start': 12}
-    servos['leg_l_ankle'] = {'id': 2, 'pin': 11, 'range': [40, 180], 'start': 52}
-    servos['leg_r_hip'] = {'id': 3, 'pin': 6, 'range': [20, 160], 'start': 93}
-    servos['leg_r_knee'] = {'id': 4, 'pin': 7, 'range': [5, 175], 'start': 90}
-    servos['leg_r_ankle'] = {'id': 5, 'pin': 8, 'range': [40, 180], 'start': 88}
-    servos['tilt'] = {'id': 6, 'pin': 2, 'range': [60, 120], 'start': 75}
-    servos['pan'] = {'id': 7, 'pin': 3, 'range': [20, 160], 'start': 50}
-#    servos['leg_l_sway'] = {'pin': 4, 'range': [0, 180], 'start': 0}
-#    servos['leg_r_sway'] = {'pin': 5, 'range': [0, 180], 'start': 0}
+    # servos = dict()
+    # # Everything is percentages except the range values.
+    # servos['leg_l_hip'] = {'id': 0, 'pin': 9, 'range': [20, 160], 'start': 19}
+    # servos['leg_l_knee'] = {'id': 1, 'pin': 10, 'range': [5, 175], 'start': 12}
+    # servos['leg_l_ankle'] = {'id': 2, 'pin': 11, 'range': [40, 180], 'start': 52}
+    # servos['leg_r_hip'] = {'id': 3, 'pin': 6, 'range': [20, 160], 'start': 93}
+    # servos['leg_r_knee'] = {'id': 4, 'pin': 7, 'range': [5, 175], 'start': 90}
+    # servos['leg_r_ankle'] = {'id': 5, 'pin': 8, 'range': [40, 180], 'start': 88}
+    # servos['tilt'] = {'id': 6, 'pin': 2, 'range': [60, 120], 'start': 75}
+    # servos['pan'] = {'id': 7, 'pin': 3, 'range': [20, 160], 'start': 50}
 
-    # Head and neck
-    # NECK_PIN = 3
-    # TILT_PIN = 4
-    # PAN_PIN = 5
-    #
-    # TILT_RANGE = [81, 117]
-    # PAN_RANGE = [0, 180]
-    # NECK_RANGE = [45, 117]
-    #
-    # TILT_START_POS = 50
-    # PAN_START_POS = 50
-    # NECK_START_POS = 75
-    #
-    # # Right Leg
-    # LEG_R_HIP_PIN = 6
-    # LEG_R_KNEE_PIN = 7
-    # LEG_R_ANKLE_PIN = 8
-    #
-    # # Left Leg
-    # LEG_L_HIP_PIN = 9
-    # LEG_L_KNEE_PIN = 10
-    # LEG_L_ANKLE_PIN = 11
-    #
-    # LEG_HIP_RANGE = [0, 180]
-    # LEG_KNEE_RANGE = [0, 180]
-    # LEG_ANKLE_RANGE = [0, 180]
-    #
-    # LEG_L_HIP_START_POS = 50
-    # LEG_L_KNEE_START_POS = 45
-    # LEG_L_ANKLE_START_POS = 50
-    #
-    # LEG_R_HIP_START_POS = 55
-    # LEG_R_KNEE_START_POS = 55
-    # LEG_R_ANKLE_START_POS = 50
+    # # RGB NeoPixels
+    # LED_COUNT = 7
 
-    # RGB NeoPixels
-    LED_COUNT = 7
-
-    # HotWord (uses Snowboy.ai)
-    HOTWORD_MODEL = None #'modules/snowboy/resources/models/robot.pmdl'
-    HOTWORD_SLEEP_TIME = 0.03
+    # # HotWord (uses Snowboy.ai)
+    # HOTWORD_MODEL = None #'modules/snowboy/resources/models/robot.pmdl'
+    # HOTWORD_SLEEP_TIME = 0.03
 
     STATE_SLEEPING = 0
     STATE_RESTING = 1
@@ -104,3 +93,9 @@ class Config:
         if Config.NIGHT_HOURS[1] < t.tm_hour < Config.NIGHT_HOURS[0]:
             return False
         return True
+
+# if main
+if __name__ == "__main__":
+    c = Config()
+    print(json.dumps(Config.config, indent=2))
+    print('Pins: ' + str(Config.get_all_pins()))

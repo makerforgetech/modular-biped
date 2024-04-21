@@ -5,6 +5,8 @@ import pyttsx3
 class TTS:
     
     def __init__(self, **kwargs):
+        self.translator = kwargs.get('translator', None)
+        
         engine = pyttsx3.init()
         voices = engine.getProperty('voices')
         #rate = engine.getProperty('rate')
@@ -20,5 +22,12 @@ class TTS:
         pub.subscribe(self.speak, 'tts')
 
     def speak(self, msg):
+        pub.sendMessage('log', msg="[TTS] {}".format(msg))
+        if self.translator is not None:
+            msg = self.translator.request(msg)
         self.engine.say(msg)
         self.engine.runAndWait()
+        
+if __name__ == '__main__':
+    tts = TTS()
+    tts.speak('Test')

@@ -1,0 +1,29 @@
+vision:
+  tech: "coral"
+  initial_mode: "face"
+  modes: ["object", "face"]
+  debug: False
+  docs:
+    description: "The vision module is used to detect objects and faces."
+    events:
+      sub:
+        - exit:
+            description: "Exit module."
+      pub:
+        - log:
+            description: "Send messages to logger."
+        - vision:detect:object:
+            description: "The vision module has detected an object."
+            args:
+              - name: string
+        - vision:detect:face:
+            description: "The vision module has detected a face."
+            args:
+              - name: string
+        - vision:matches:
+            description: "List of vision matches."
+            args:
+              - matches: array
+              - labels: array
+        - vision:nomatch:
+            description: "No matches."

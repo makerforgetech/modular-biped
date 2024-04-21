@@ -1,22 +1,32 @@
 from pubsub import pub
 from time import sleep
 #from colour import Color
-
 try:
-    import board
+    from modules.config import Config
+except Exception as e:
+    print("Importing config directly")
+    from config import Config
+import board
+    
+if Config.get('neopixel', 'i2c'):
+    print("Importing i2c config")
+    import busio
+    from rainbowio import colorwheel
+    from adafruit_seesaw import seesaw, neopixel
+else:
+    print("Importing GPIO config")
     import neopixel
-except:
-    pass
+    
 
 import threading
 
-class LED:
+class NeoPx:
     COLOR_OFF = (0, 0, 0)
-    COLOR_RED = (5, 0, 0)
-    COLOR_GREEN = (0, 5, 0)
-    COLOR_BLUE = (0, 0, 5)
-    COLOR_PURPLE = (5, 0, 5)
-    COLOR_WHITE = (5, 5, 5)
+    COLOR_RED = (100, 0, 0)
+    COLOR_GREEN = (0, 100, 0)
+    COLOR_BLUE = (0, 0, 100)
+    COLOR_PURPLE = (100, 0, 100)
+    COLOR_WHITE = (100, 100, 100)
     COLOR_WHITE_FULL = (255, 255, 255)
     #COLOR_RED_TO_GREEN_100 = list(Color("red").range_to(Color("green"),100))
 
@@ -33,33 +43,29 @@ class LED:
     def __init__(self, count, **kwargs):
         # Initialise
         self.count = count
-        self.positions = {
-            'right' : 0,
-            'top_right': 1,
-            'top_left' : 2,
-            'left' : 3,
-            'bottom_left' : 4,
-            'bottom_right' : 5,
-            'middle': 6,
-            'top1': 7,
-            'top2': 8,
-            'top3': 9,
-            'top4': 10,
-            'top5': 11
-        }
+        self.positions = Config.get('neopixel', 'positions')
         self.all = range(self.count)
         self.all_eye = range(6)
         self.animation = False
         self.thread = None
         self.overridden = False  # prevent any further changes until released (for flashlight)
-        try:
+        if Config.get('neopixel', 'i2c'):
+            self.i2c = busio.I2C(board.SCL, board.SDA)
+            try:
+                ss = seesaw.Seesaw(self.i2c, addr=0x60)
+            except:
+                # If i2c fails, try again
+                self.i2c.deinit()
+                self.i2c = busio.I2C(board.SCL, board.SDA)
+                ss = seesaw.Seesaw(self.i2c, addr=0x60)
+            neo_pin = 15 # Unclear how this is used
+            self.pixels = neopixel.NeoPixel(ss, neo_pin, count, brightness = 0.1)
+        else:
             self.pixels = neopixel.NeoPixel(board.D12, count)
-        except:
-            pass
         # Default states
-        self.set(self.all, LED.COLOR_OFF)
+        self.set(self.all, NeoPx.COLOR_OFF)
         sleep(0.1)
-        self.set(self.positions['middle'], LED.COLOR_BLUE)
+        self.set(self.positions['middle'], NeoPx.COLOR_BLUE)
 
         # Set subscribers
         pub.subscribe(self.set, 'led')
@@ -78,7 +84,8 @@ class LED:
         if self.animation:
             self.animation = False
             self.thread.join()
-        self.set(self.all, LED.COLOR_OFF)
+        self.set(self.all, NeoPx.COLOR_OFF)
+        self.i2c.deinit()
         sleep(1)
 
     def speech(self, msg):
@@ -110,32 +117,35 @@ class LED:
             # Make color gradiant use possible @todo refactor
             if color >= 100:
                 color = 99 # max in range
-            color = (255,0,0)#LED.COLOR_RED_TO_GREEN_100[color].rgb
+            color = (255,0,0)#NeoPx.COLOR_RED_TO_GREEN_100[color].rgb
             #color = (color[0]*10, color[1]*10, color[2]*10) # increase values to be used as LED RGB
         elif type(color) is str:
-            color = LED.COLOR_MAP[color]
+            color = NeoPx.COLOR_MAP[color]
         for i in identifiers:
             if type(i) is str:
                 i = self.positions[i]
-            #print(str(i) + str(color))
+            # print(str(i) + str(color))
             try:
+                if i >= self.count:
+                    pub.sendMessage('log', msg='[LED] Error in set pixels: index out of range')
+                    print('Error in set pixels: index out of range')
+                    i = self.count-1                
                 self.pixels[i] = color
-                
-                #pub.sendMessage('log', msg='[LED] Setting LED')
             except Exception as e:
                 print(e)
-                pub.sendMessage('log', msg='[LED] Error in set pixels')
+                pub.sendMessage('log', msg='[LED] Error in set pixels: ' + str(e))
                 pass
+        
         self.pixels.show()
         sleep(.1)
 
     def flashlight(self, on):
         if on:
-            self.set(self.all, LED.COLOR_WHITE_FULL)
+            self.set(self.all, NeoPx.COLOR_WHITE_FULL)
             self.overridden = True
         else:
             self.overridden = False
-            self.set(self.all, LED.COLOR_OFF)
+            self.set(self.all, NeoPx.COLOR_OFF)
 
     def off(self):
         if self.thread:
@@ -143,24 +153,32 @@ class LED:
             self.animation = False
             self.thread.animation = False
             self.thread.join()
-        self.set(self.all, LED.COLOR_OFF)
+        self.set(self.all, NeoPx.COLOR_OFF)
         sleep(.5)
 
     def full(self, color):
-        if color in LED.COLOR_MAP.keys():
-            self.set(self.all, LED.COLOR_MAP[color])
+        if color in NeoPx.COLOR_MAP.keys():
+            self.set(self.all, NeoPx.COLOR_MAP[color])
 
     def eye(self, color):
-        if color in LED.COLOR_MAP.keys() and self.pixels[self.positions['middle']] != color:
+        if 'middle' not in self.positions:
+            raise ValueError('Middle position not found')
+        if color not in NeoPx.COLOR_MAP.keys():
+            raise ValueError('Color not found')
+        index = self.positions['middle']
+        if (self.count < index):
+            index = self.count - 1
+            pub.sendMessage('log', msg='[LED] Error in set pixels: index out of range, changing to last pixel')
+        if self.pixels[index] != color:
             pub.sendMessage('log', msg='[LED] Setting eye colour: ' + color)
-            self.set(self.positions['middle'], LED.COLOR_MAP[color])
+            self.set(index, NeoPx.COLOR_MAP[color])
 
-    def party(self, color):
+    def party(self):
         # self.animate(self.all, 'off', 'rainbow_cycle')
 
         for j in range(256 * 1):
             for i in range(self.count):
-                self.set(i, LED._wheel((int(i * 256 / self.count) + j) & 255))
+                self.set(i, NeoPx._wheel((int(i * 256 / self.count) + j) & 255))
             return
         print('done')
 
@@ -203,7 +221,7 @@ class LED:
         """
         sleep(.3)
 
-        self.set(range(1, 7), LED.COLOR_OFF)
+        self.set(range(1, 7), NeoPx.COLOR_OFF)
         self.set(index, color)
 
         index = (index + 1) % self.count
@@ -227,7 +245,7 @@ class LED:
         :param color: string map of COLOR_MAP or tuple (R, G, B)
         """
         if type(color) is str:
-            color = LED.COLOR_MAP[color]
+            color = NeoPx.COLOR_MAP[color]
         t = threading.currentThread()
         if getattr(t, "animation", True):
             for dc in range(0, max(color), 1):  # Increase brightness to max of color
@@ -256,7 +274,7 @@ class LED:
         """Draw rainbow that fades across all pixels at once."""
         for j in range(256 * iterations):
             for i in range(self.count):
-                self.set(i, LED._wheel((i + j) & 255))
+                self.set(i, NeoPx._wheel((i + j) & 255))
             t = threading.currentThread()
             if not getattr(t, "animation", True):
                 return
@@ -266,8 +284,16 @@ class LED:
         """Draw rainbow that uniformly distributes itself across all pixels."""
         for j in range(256 * iterations):
             for i in range(self.count):
-                self.set(i, LED._wheel((int(i * 256 / self.count) + j) & 255))
+                self.set(i, NeoPx._wheel((int(i * 256 / self.count) + j) & 255))
             t = threading.currentThread()
             if not getattr(t, "animation", True):
                 return
             sleep(wait_ms / 1000)
+
+
+if __name__ == '__main__':
+    inst = NeoPx(7)
+    inst.flashlight(True)
+    sleep(2)
+    inst.flashlight(False)
+    

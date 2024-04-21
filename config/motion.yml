@@ -1,0 +1,11 @@
+motion:
+  pin: 26
+  docs:
+    description: "The motion module is used to detect motion using a microwave sensor."
+    event:
+      sub:
+        - loop:1:
+            description: "Trigger read evey second."
+      pub:
+        - motion:
+            description: "Sent when motion is detected."
