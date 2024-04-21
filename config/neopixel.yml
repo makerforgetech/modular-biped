@@ -15,7 +15,8 @@ neopixel:
     'bottom_right' : 10,
     'middle': 11,
   }
-  i2c: True
+  i2c: False
+  gpio: False
   docs:
     description: "The neopixel module is used to drive neopixel LEDs."
     events:
