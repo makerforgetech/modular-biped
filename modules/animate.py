@@ -2,7 +2,7 @@ import json
 import os.path
 from pubsub import pub
 from time import sleep
-
+from gpiozero import LED
 
 class Animate:
     def __init__(self, **kwargs):
@@ -34,3 +34,9 @@ class Animate:
                 pub.sendMessage(cmd, color=args[0])
             elif 'speak' == cmd:
                 pub.sendMessage(cmd, message=args[0])
+            elif 'pin' in cmd:
+                led = LED(args[0])
+                if 'pin:high' == cmd:
+                    led.on()
+                else:
+                    led.off()

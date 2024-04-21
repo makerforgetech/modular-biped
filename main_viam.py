@@ -11,6 +11,11 @@ from datetime import datetime
 
 from pubsub import pub
 
+'''
+    Viam main script - currently replacing this with viam modules.
+    Viam Logger is viam disabled in logwrapper.py. Uncomment to re-enable.
+'''
+
 from viam.logging import getLogger
 LOGGER = getLogger(__name__)
 LOGGER.info('INIT MAKERFORGE MAIN_VIAM')
@@ -47,10 +52,12 @@ from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
 
 from modules.translator import Translator
+# from modules.opencv.timelapse import Timelapse
 
 ### MAIN END ###
 
 # from modules.viam.viamobjects import ViamObjects
+from modules.viam.viamclassifier import ViamClassifier
 
 # These must be set. You can get them from your robot's 'Code sample' tab
 robot_api_key = os.getenv('ROBOT_API_KEY') or ''
@@ -111,7 +118,7 @@ async def main():
     # personality = Personality()
     temp = PiTemperature()
     animate = Animate()
-
+    
     # Nightly loop (for facial recognition model training)
     schedule.every().day.at("10:30").do(pub.sendMessage, 'loop:nightly')
     # Other more frequent loops
@@ -120,9 +127,11 @@ async def main():
     minute_loop = time()
     loop = True
     
-    # # viamobjects = ViamObjects(robot)
-    
-    # pub.sendMessage('vision:start')
+    # viamobjects = ViamObjects(robot)
+    # viamobjects.enable()
+    #viamGestures = ViamClassifier(robot)
+    #pub.sendMessage('vision:start')
+    # 
     
     print('Resources:')
     print(robot.resource_names)
@@ -132,7 +141,7 @@ async def main():
     # Uncomment to show failure    
     # response = await animation.do_command({"animate": ["not_an_animation"]})
     
-    response = await animation.do_command({"animate": ["head_shake"]})
+    response = await animation.do_command({"animate": ["scan"]})
     
     # Until we have a working MQTT broker
     # Parse response and use pubsub to send message to animate
@@ -140,20 +149,34 @@ async def main():
     for command in response['animate']:
         pub.sendMessage(command[0], percentage=command[1][0])
     
-    # print(f"The response is {response}")
-    print(response)
+    # # print(f"The response is {response}")
+    # print(response)
+    
+    # GESTURE TEST
+    # camera_name = "camera"
+    # my_webcam = Camera.from_robot(robot, camera_name)
+    # my_webcam_return_value = await my_webcam.get_image()
+    # print(f"my-webcam get_image return value: {my_webcam_return_value}")
+    # roboflow_test = VisionClient.from_robot(robot, "roboflow-test")
+    
+                
         
     try:
         while loop:
-            # await viamobjects.detect()
+            
             pub.sendMessage('loop')
             if time() - second_loop > 1:
-                #LOGGER.info('LOOP MAKERFORGE MAIN_VIAM')
+                LOGGER.info('LOOP MAKERFORGE MAIN_VIAM')
+                # await viamobjects.detect()
+                #await viamGestures.detect()
                 second_loop = time()
                 pub.sendMessage('loop:1')
+                # roboflow_test_return_value = await roboflow_test.get_detections_from_camera(camera_name)
+                # print(f"roboflow-test get_detections_from_camera return value: {roboflow_test_return_value}")
             if time() - ten_second_loop > 10:
                 ten_second_loop = time()
                 pub.sendMessage('loop:10')
+                pub.sendMessage('vision:start')
                 # pub.sendMessage('animate', action='head_shake')
                 # loop = False # remove after testing
             if time() - minute_loop > 60:
