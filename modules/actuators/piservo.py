@@ -9,10 +9,21 @@ class PiServo:
         self.pin = pin
         self.range = range
         self.start = kwargs.get('start_pos', 0)
-        print(range)
-        self.servo = AngularServo(pin, min_angle=range[0], max_angle=range[1], initial_angle=self.start)
+        self.servo = None
+        # print(range)
         pub.subscribe(self.move, 'piservo:move')
+        self.move(0)
+        sleep(2)
+        self.move(range[0])
+        sleep(2)
+        self.move(range[1])
+        sleep(2)
+        self.move(self.start)
+        
 
     def move(self, angle):
+        if self.servo is None:
+            self.servo = AngularServo(self.pin, min_angle=self.range[0], max_angle=self.range[1], initial_angle=self.start)
         self.servo.angle = angle                # Changes the angle (to move the servo)
         sleep(1)                                # @TODO: Remove this sleep
+        self.servo.detach()                     # Detaches the servo (to stop jitter)

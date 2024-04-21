@@ -466,7 +466,7 @@
       "idf": "",
       "netlist": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "v4head.step",
       "vrml": ""
     },
     "page_layout_descr_file": ""

@@ -13,7 +13,7 @@ class InverseKinematics
 {
     // constructor
     public:
-        double hipAdjustment = 105; // Angle to adjust hip, will be modified for balance
+        double hipAdjustment = HIP_ADJUSTMENT; // Angle to adjust hip, will be modified for balance
         void doInit(float hipMinAngle, float hipMaxAngle, float kneeMinAngle, float kneeMaxAngle, float ankleMinAngle, float ankleMaxAngle, float thighLength, float shinLength, float footLength)
         {
             this->hipMinAngle = hipMinAngle;
@@ -81,9 +81,9 @@ class InverseKinematics
 
             // Convert the angles from radians to degrees
             // Adjust to compensate for servo's actual position
-            hipAngle = r2d(d2r(180) - (hip + d2r(hipAdjustment))); // Inverse and offset by 105 degrees
-            kneeAngle = r2d(knee - d2r(90)); // Offset 90 to compensate
-            ankleAngle = r2d(ankle + d2r(70)); // Offset 70 to compensate
+            hipAngle = r2d(d2r(180) - (hip + d2r(hipAdjustment))); // Inverse and offset by 90 degrees
+            kneeAngle = r2d(knee - d2r(KNEE_ADJUSTMENT)); // Offset 90 to compensate
+            ankleAngle = r2d(ankle + d2r(ANKLE_ADJUSTMENT)); // Offset 70 to compensate
 
             // if IK_DEBUG is defined, print debug info
             #ifdef IK_DEBUG

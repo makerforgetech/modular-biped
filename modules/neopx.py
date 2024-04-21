@@ -1,6 +1,6 @@
 from pubsub import pub
 from time import sleep
-#from colour import Color
+from colour import Color
 try:
     from modules.config import Config
 except Exception as e:
@@ -28,7 +28,10 @@ class NeoPx:
     COLOR_PURPLE = (100, 0, 100)
     COLOR_WHITE = (100, 100, 100)
     COLOR_WHITE_FULL = (255, 255, 255)
-    #COLOR_RED_TO_GREEN_100 = list(Color("red").range_to(Color("green"),100))
+    COLOR_WHITE_DIM = (50, 50, 50)
+    COLOR_RED_TO_GREEN_100 = list(Color("red").range_to(Color("green"),100))
+    COLOR_BLUE_TO_RED_100 = list(Color("blue").range_to(Color("red"),100)) # also passes through green
+    COLOR_BLUE_TO_GREEN_100 = list(Color("blue").range_to(Color("green"),100))
 
     COLOR_MAP = {
         'red': COLOR_RED,
@@ -37,15 +40,19 @@ class NeoPx:
         'purple': COLOR_PURPLE,
         'white': COLOR_WHITE,
         'white_full': COLOR_WHITE_FULL,
-        'off': COLOR_OFF
+        'off': COLOR_OFF,
+        'white_dim': COLOR_WHITE_DIM
     }
 
     def __init__(self, count, **kwargs):
         # Initialise
         self.count = count
         self.positions = Config.get('neopixel', 'positions')
+        # Manually adjust brightness of individual neopixels
+        self.brightness = Config.get('neopixel', 'brightness')
         self.all = range(self.count)
-        self.all_eye = range(6)
+        self.all_eye = ['right', 'top_right', 'top_left', 'left', 'bottom_left', 'bottom_right', 'middle']
+        self.ring_eye = ['right', 'top_right', 'top_left', 'left', 'bottom_left', 'bottom_right']
         self.animation = False
         self.thread = None
         self.overridden = False  # prevent any further changes until released (for flashlight)
@@ -71,6 +78,7 @@ class NeoPx:
         pub.subscribe(self.set, 'led')
         pub.subscribe(self.full, 'led:full')
         pub.subscribe(self.eye, 'led:eye')
+        pub.subscribe(self.ring, 'led:ring')
         pub.subscribe(self.off, 'led:off')
         pub.subscribe(self.eye, 'led:flashlight')
         pub.subscribe(self.party, 'led:party')
@@ -94,7 +102,7 @@ class NeoPx:
         if 'light off' in msg:
             self.flashlight(False)
 
-    def set(self, identifiers, color):
+    def set(self, identifiers, color, gradient=False):
         """
         Set color of pixel
         (255, 0, 0) # set to red, full brightness
@@ -117,8 +125,13 @@ class NeoPx:
             # Make color gradiant use possible @todo refactor
             if color >= 100:
                 color = 99 # max in range
-            color = (255,0,0)#NeoPx.COLOR_RED_TO_GREEN_100[color].rgb
-            #color = (color[0]*10, color[1]*10, color[2]*10) # increase values to be used as LED RGB
+            if gradient == 'br':
+                color = NeoPx.COLOR_BLUE_TO_RED_100[color].rgb
+            elif gradient == 'bg':
+                color = NeoPx.COLOR_BLUE_TO_GREEN_100[color].rgb
+            else:
+                color = NeoPx.COLOR_RED_TO_GREEN_100[color].rgb
+            color = (round(color[0]*100), round(color[1]*100), round(color[2]*100)) # increase values to be used as LED RGB
         elif type(color) is str:
             color = NeoPx.COLOR_MAP[color]
         for i in identifiers:
@@ -130,7 +143,7 @@ class NeoPx:
                     pub.sendMessage('log', msg='[LED] Error in set pixels: index out of range')
                     print('Error in set pixels: index out of range')
                     i = self.count-1                
-                self.pixels[i] = color
+                self.pixels[i] = self.apply_brightness_modifier(i, color)
             except Exception as e:
                 print(e)
                 pub.sendMessage('log', msg='[LED] Error in set pixels: ' + str(e))
@@ -139,13 +152,20 @@ class NeoPx:
         self.pixels.show()
         sleep(.1)
 
+    def apply_brightness_modifier(self, identifier, color):
+        # Some neopixels do not need to be full brightness. Reduce intensity with the BRIGHTNESS_MODIFIER for each neopixel
+        return (round(color[0]*self.brightness[identifier]), round(color[1]*self.brightness[identifier]), round(color[2]*self.brightness[identifier]))
+
+    def ring(self, color):
+        self.set(self.ring_eye, color)
+
     def flashlight(self, on):
         if on:
-            self.set(self.all, NeoPx.COLOR_WHITE_FULL)
+            self.set(self.all_eye, NeoPx.COLOR_WHITE_FULL)
             self.overridden = True
         else:
             self.overridden = False
-            self.set(self.all, NeoPx.COLOR_OFF)
+            self.set(self.all_eye, NeoPx.COLOR_OFF)
 
     def off(self):
         if self.thread:
@@ -292,8 +312,21 @@ class NeoPx:
 
 
 if __name__ == '__main__':
-    inst = NeoPx(7)
+    inst = NeoPx(12)
+    inst.set(inst.all, 1)
+    sleep(2)
+    inst.set(inst.all, 50)
+    sleep(2)
+    inst.set(inst.all, 100)
+    sleep(2)
+    inst.set(inst.all, NeoPx.COLOR_RED)
+    sleep(2)
+    inst.set(inst.all, NeoPx.COLOR_GREEN)
+    sleep(2)
+    inst.set(inst.all, NeoPx.COLOR_BLUE)
+    sleep(2)
+    inst.set(inst.all, NeoPx.COLOR_OFF)
+    sleep(2)
     inst.flashlight(True)
     sleep(2)
     inst.flashlight(False)
-    

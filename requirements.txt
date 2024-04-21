@@ -42,3 +42,5 @@ adafruit-circuitpython-seesaw
 pygame
 
 nltk
+
+# viam-sdk[mlmodel]

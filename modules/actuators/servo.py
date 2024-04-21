@@ -61,7 +61,7 @@ class Servo:
                 new = self.range[1]
             elif new < self.range[0] and safe:
                 new = self.range[0]
-            self.execute_move(self.calculate_move(self.pos, new))
+            self.execute_move([(percentage, 0)])
             self.pos = new
         else:
             pub.sendMessage('log:error', '[Servo] Percentage %d out of range' % percentage)
@@ -86,8 +86,8 @@ class Servo:
             pub.sendMessage('power:use')
         if self.serial:
             # just move the pan servo for now. Remove after debugging
-            if self.index != 7 and self.index != 6:
-                return;
+            # if self.index != 7 and self.index != 6 and self.index != 5 and self.index != 4  and self.index != 3  and self.index != 2:
+                # return
             type = ArduinoSerial.DEVICE_SERVO
             if is_relative:
                 type = ArduinoSerial.DEVICE_SERVO_RELATIVE
