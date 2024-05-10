@@ -33,6 +33,8 @@ boolean calibrateRest = false;
 
 bool shouldMove = false;
 
+bool piControl = false;
+
 void setup()
 {
   // Init LED pin
@@ -47,6 +49,21 @@ void setup()
   servoManager.doInit();
   servoManager.setSpeed(SERVO_SPEED_MIN);
 
+
+  pinMode(backpackPin, INPUT_PULLUP); // sets the digital pin as input
+  if (digitalRead(backpackPin) == LOW) // Check once on startup
+  {
+    Serial.println("Backpack detected");
+    backpack = true;
+  }
+
+  pinMode(restrainPin, INPUT_PULLUP); // sets the digital pin as input
+  if (digitalRead(restrainPin) == LOW) // Check once on startup
+  {
+    Serial.println("Restraint detected");
+    restrainingBolt = true;
+  }
+
   #ifdef MPU6050_ENABLED
   tilt.doInit();
   #endif
@@ -57,7 +74,7 @@ void setup()
   // allTo90();
 
   // Move to rest position + calculate IK and store as rest position
-  //doRest();
+  // doRest();
 
   // Custom log message (enable DEBUG in Config.h to see this)
   cLog("Start loop");
@@ -83,7 +100,7 @@ void allTo90()
 void doRest()
 {
   cLog("Resting");
-  isResting = true;
+
   // Reset to slow speed
   servoManager.setSpeed(SERVO_SPEED_MIN);
   if (calibrateRest == false)
@@ -163,6 +180,7 @@ void loop()
   bool receiving = getOrdersFromPi();
   while(receiving) 
   {
+    piControl = true;
     delay(50); // Wait a short time for any other orders
     receiving = getOrdersFromPi();
     shouldMove = !receiving; // Only move when there are no other orders
@@ -179,17 +197,17 @@ void loop()
   // Orders from pi will set sleep time so that the animation does not take precedence
   if (!isSleeping())
   {
-    if (isResting)
+    if (isResting && piControl == false) // Only do this if the Pi is not in control (i.e. switched off)
     {
       #ifdef ANIMATE_ENABLED
       animateRandomly();
       #endif
-      setSleep(random(3000, 5000));
     }
     else
     {
       // doRest();
-      setSleep(random(3000, 20000));
+      isResting = true;
+      setSleep(random(1000, 5000));
     }
   }
   
@@ -219,7 +237,8 @@ void animateRandomly()
   // Scale headTiltOffset value between 0 and 180 (inverted) to scale of LEG_IK_MIN and LEG_IK_MAX
   float legHeight = map(headTiltOffset, 180, 0, LEG_IK_MIN, LEG_IK_MAX);
   // Move legs to that height
-  servoManager.moveLegs(legHeight, 0);
+  // servoManager.moveLegs(LEG_IK_MAX, 0);
+  servoManager.moveServos(PosStand);
   shouldMove = true;
 #ifdef DEBUG
   Serial.print("Moving legs ");

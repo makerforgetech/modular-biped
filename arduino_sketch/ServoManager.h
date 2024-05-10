@@ -26,12 +26,23 @@ public:
     void doInit()
     {
         // IMPORTANT: Communication from Pi uses index, these must be attached in the same order as they are referenced in the pi config
-        ServoLLH.attach(PIN_SLLH, PosStart[0]);
-        ServoLLK.attach(PIN_SLLK, PosStart[1]);
-        ServoLLA.attach(PIN_SLLA, PosStart[2]);
-        ServoRLH.attach(PIN_SRLH, PosStart[3]);
-        ServoRLK.attach(PIN_SRLK, PosStart[4]);
-        ServoRLA.attach(PIN_SRLA, PosStart[5]);
+        if (backpack == true)
+        {
+            ServoLLH.attach(PIN_SLLH, PosBackpack[0]);
+            ServoLLK.attach(PIN_SLLK, PosBackpack[1]);
+            ServoLLA.attach(PIN_SLLA, PosBackpack[2]);
+            ServoRLH.attach(PIN_SRLH, PosBackpack[3]);
+            ServoRLK.attach(PIN_SRLK, PosBackpack[4]);
+            ServoRLA.attach(PIN_SRLA, PosBackpack[5]);
+        }
+        else {
+            ServoLLH.attach(PIN_SLLH, PosStart[0]);
+            ServoLLK.attach(PIN_SLLK, PosStart[1]);
+            ServoLLA.attach(PIN_SLLA, PosStart[2]);
+            ServoRLH.attach(PIN_SRLH, PosStart[3]);
+            ServoRLK.attach(PIN_SRLK, PosStart[4]);
+            ServoRLA.attach(PIN_SRLA, PosStart[5]);
+        }
         ServoNT.attach(PIN_SNT, PosStart[6]);
         ServoNP.attach(PIN_SNP, PosStart[7]);
 
@@ -118,20 +129,18 @@ public:
 
     void moveSingleServo(uint8_t pServoIndex, int pPos, boolean isRelative)
     {
-        if (isRelative)
+        if ((backpack == true || restrainingBolt == true) && pServoIndex < 6)
         {
-            // Serial.print(" Moving from: ");
-            // Serial.print(ServoEasing::ServoEasingNextPositionArray[pServoIndex]);
-            // Serial.print(" to: ");
-            // Serial.println(ServoEasing::ServoEasingNextPositionArray[pServoIndex] + pPos);
+            // Serial.println("Backpack or restrained mode, skipping leg servos");
+        }
+        else if (isRelative)
+        {
             ServoEasing::ServoEasingNextPositionArray[pServoIndex] = ServoEasing::ServoEasingNextPositionArray[pServoIndex] + pPos;
         }
         else
         {
             ServoEasing::ServoEasingNextPositionArray[pServoIndex] = pPos;
         }
-        // setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
-        
         // Return actual value to Pi
         PiConnect::write_i16(ServoEasing::ServoEasingNextPositionArray[pServoIndex]);
     }
