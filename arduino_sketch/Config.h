@@ -46,7 +46,7 @@
 
 #define NOVAL 1000
 
-// #define MPU6050_ENABLED // Enable MPU6050
+#define MPU6050_ENABLED // Enable MPU6050
 //#define MPU6050_DEBUG // Debug in serial plotter
 #define ANIMATE_ENABLED // Enable random animations
 
@@ -70,7 +70,7 @@ int PosRest[SERVO_COUNT] = {60, 0, 165, 120, 180, 10, 90, 90};
 int PosConfig[SERVO_COUNT] = {90, 90, 90, 90, 90, 90, 90, 90};
 
 // Poses
-int PosStand[SERVO_COUNT] = {45, 75, 95, 135, 105, 85, NOVAL, NOVAL};
+int PosStand[SERVO_COUNT] = {45, 75, 90, 135, 105, 90, NOVAL, NOVAL};
 int PosLookLeft[SERVO_COUNT] = {NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, 180};
 int PosLookRight[SERVO_COUNT] = {NOVAL, NOVAL, NOVAL, NOVAL, NOVAL,  NOVAL, NOVAL, 0};
 int PosLookRandom[SERVO_COUNT] = {NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, -1, -1}; // Made random by calling the function moveRandom() if the value is -1

@@ -45,9 +45,6 @@ void setup()
   bootTime = millis();
   // Init serial
   Serial.begin(115200);
-  // Init ServoManager
-  servoManager.doInit();
-  servoManager.setSpeed(SERVO_SPEED_MIN);
 
 
   pinMode(backpackPin, INPUT_PULLUP); // sets the digital pin as input
@@ -63,6 +60,10 @@ void setup()
     Serial.println("Restraint detected");
     restrainingBolt = true;
   }
+
+  // Init ServoManager
+  servoManager.doInit();
+  servoManager.setSpeed(SERVO_SPEED_MIN);
 
   #ifdef MPU6050_ENABLED
   tilt.doInit();
@@ -158,6 +159,7 @@ void hipAdjust()
   tilt.read();
   //Serial.println(tilt.getPitch());
   servoManager.hipAdjust(tilt.getPitch());
+  setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
 }
 #endif
 
