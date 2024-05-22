@@ -5,7 +5,7 @@ servos:
     leg_l_ankle: { id: 2, pin: 11, range: [5, 165], start: 100 }
     leg_r_hip: { id: 3, pin: 6, range: [0, 180], start: 60 }
     leg_r_knee: { id: 4, pin: 7, range: [0, 180], start: 90 }
-    leg_r_ankle: { id: 5, pin: 8, range: [10, 180], start: 0 }
+    leg_r_ankle: { id: 5, pin: 8, range: [10, 180], start: 20 }
     tilt: { id: 6, pin: 2, range: [60, 120], start: 50 }
     pan: { id: 7, pin: 3, range: [30, 150], start: 50 }
   docs:

@@ -11,6 +11,9 @@ from datetime import datetime
 
 from pubsub import pub
 
+from random import randint, randrange
+
+
 '''
     Viam main script - currently replacing this with viam modules.
     Viam Logger is viam disabled in logwrapper.py. Uncomment to re-enable.
@@ -42,22 +45,23 @@ from modules.sensor import Sensor
 import sys
 
 # from modules.speechinput import SpeechInput
-from modules.arduinoserial import ArduinoSerial
+# from modules.arduinoserial import ArduinoSerial
 from modules.neopx import NeoPx
 # from modules.tts import TTS
 from modules.personality import Personality
 # from modules.battery import Battery
 from modules.braillespeak import Braillespeak
-from modules.buzzer import Buzzer
+# from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
 
 from modules.translator import Translator
-# from modules.opencv.timelapse import Timelapse
+
+import cv2 
 
 ### MAIN END ###
 
 # from modules.viam.viamobjects import ViamObjects
-from modules.viam.viamclassifier import ViamClassifier
+# from modules.viam.viamclassifier import ViamClassifier
 
 # These must be set. You can get them from your robot's 'Code sample' tab
 robot_api_key = os.getenv('ROBOT_API_KEY') or ''
@@ -77,8 +81,6 @@ async def main():
     
     print('Starting...')
     
-    
-    
     path = os.path.dirname(__file__)
     translator = Translator(src=Config.get('translator', 'default')['src'], dest=Config.get('translator', 'default')['dest'])
     log = LogWrapper(path=os.path.dirname(__file__), translator=translator)
@@ -91,7 +93,7 @@ async def main():
     # gpio = pigpio.pi()
 
     # Arduino connection
-    serial = ArduinoSerial()
+    # serial = ArduinoSerial()
 
     servos = dict()
     servo_conf = Config.get('servos','conf')
@@ -115,9 +117,10 @@ async def main():
     if Config.get('motion','pin') != '':
         motion = Sensor(Config.get('motion','pin'))
     
-    # personality = Personality()
+    personality = Personality()
     temp = PiTemperature()
     animate = Animate()
+    # braillespeak = Braillespeak(Config.get('buzzer','pin'))
     
     # Nightly loop (for facial recognition model training)
     schedule.every().day.at("10:30").do(pub.sendMessage, 'loop:nightly')
@@ -136,18 +139,18 @@ async def main():
     print('Resources:')
     print(robot.resource_names)
     
-    animation = Generic.from_robot(robot, "animation-service")
+    # animation = Generic.from_robot(robot, "animation-service")
 
     # Uncomment to show failure    
     # response = await animation.do_command({"animate": ["not_an_animation"]})
     
-    response = await animation.do_command({"animate": ["scan"]})
+    # response = await animation.do_command({"animate": ["wake"]})
     
     # Until we have a working MQTT broker
     # Parse response and use pubsub to send message to animate
     # Example response: {'animate': [['servo:pan:mv', [20.0]], ['servo:pan:mv', [-40.0]], ['servo:pan:mv', [40.0]], ['servo:pan:mv', [-40.0]], ['servo:pan:mv', [20.0]]]}
-    for command in response['animate']:
-        pub.sendMessage(command[0], percentage=command[1][0])
+    # for command in response['animate']:
+        # pub.sendMessage(command[0], percentage=command[1][0])
     
     # # print(f"The response is {response}")
     # print(response)
@@ -159,15 +162,17 @@ async def main():
     # print(f"my-webcam get_image return value: {my_webcam_return_value}")
     # roboflow_test = VisionClient.from_robot(robot, "roboflow-test")
     
-                
-        
+    # Create a VideoCapture object 
+    cap = cv2.VideoCapture(0) 
+    # Capture a frame ret, img = cap.read() 
+    # Release the capture cap.release()
+
     try:
+        LOGGER.info('LOOP MAKERFORGE MAIN_VIAM')
         while loop:
             
             pub.sendMessage('loop')
             if time() - second_loop > 1:
-                LOGGER.info('LOOP MAKERFORGE MAIN_VIAM')
-                # await viamobjects.detect()
                 #await viamGestures.detect()
                 second_loop = time()
                 pub.sendMessage('loop:1')
@@ -176,12 +181,37 @@ async def main():
             if time() - ten_second_loop > 10:
                 ten_second_loop = time()
                 pub.sendMessage('loop:10')
-                pub.sendMessage('vision:start')
+                
+                camera_name = "camera"
+                my_webcam = Camera.from_robot(robot, camera_name)
+                image = await my_webcam.get_image()
+                # capture
+                if (image):
+                    # save file
+                    image.save('./timelapse/img_'+str(time()).zfill(4)+'.png')
+                else:
+                    LOGGER.info('Failed to capture image')
+                
+                # pub.sendMessage('vision:start')
                 # pub.sendMessage('animate', action='head_shake')
                 # loop = False # remove after testing
+                # await viamobjects.detect()
+                
+                # Random action to simulate behaviour, then reset. WIP.
+                # actions = ['sleep', 'look_up', 'look_down', 'head_shake', 'head_nod', 'head_left']
+                # action = actions[randrange(len(actions)-1)]
+                # pub.sendMessage('log', msg='[Main] Random action: ' + str(action))
+                # pub.sendMessage('animate', action=action)
+                # sleep(randrange(3))
+                # pub.sendMessage('animate', action="wake")
             if time() - minute_loop > 60:
                 minute_loop = time()
                 pub.sendMessage('loop:60')
+                
+                pub.sendMessage('piservo:move', angle=40)
+                sleep(2)
+                pub.sendMessage('piservo:move', angle=0)
+                pub.sendMessage('speak', msg='hi')
                 schedule.run_pending()
 
     except (Exception) as ex:
@@ -197,8 +227,8 @@ async def main():
 
     finally:
         pub.sendMessage("exit")
-        pub.sendMessage("animate", action="sit")
-        pub.sendMessage("animate", action="sleep")
+        # pub.sendMessage("animate", action="sit")
+        # pub.sendMessage("animate", action="sleep")
         pub.sendMessage("power:exit")
         pub.sendMessage("log", msg="[Main] loop ended")
     
