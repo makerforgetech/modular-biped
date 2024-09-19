@@ -43,6 +43,7 @@ from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
 
 from modules.translator import Translator
+from modules.emotion_analysis import EmotionAnalysis
 
 # if Config.get('vision', 'tech') == 'opencv':
 #     from modules.opencv.vision import Vision
@@ -112,6 +113,7 @@ def main():
 
     neopx = NeoPx(Config.get('neopixel','count'))
     # tts = TTS(translator=translator)
+    emotion_analysis = EmotionAnalysis()
 
     if Config.get('motion','pin') != '':
         motion = Sensor(Config.get('motion','pin'))
