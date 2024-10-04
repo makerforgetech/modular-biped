@@ -45,7 +45,7 @@ class EmotionAnalysis:
             'amusement': 'amusement',
         }
 
-        pub.subscribe(self.analyze_text, 'speech_recognized')
+        pub.subscribe(self.analyze_text, 'speech')
 
     def get_different_colors(self, color_dict, num_colors):
         colors = list(color_dict.values())
