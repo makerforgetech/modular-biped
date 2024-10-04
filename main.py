@@ -113,7 +113,7 @@ def main():
 
     neopx = NeoPx(Config.get('neopixel','count'))
     # tts = TTS(translator=translator)
-    emotion_analysis = EmotionAnalysis()
+    emotion_analysis_module = EmotionAnalysisModule()
 
     if Config.get('motion','pin') != '':
         motion = Sensor(Config.get('motion','pin'))
