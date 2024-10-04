@@ -43,7 +43,7 @@ from modules.buzzer import Buzzer
 from modules.pitemperature import PiTemperature
 
 from modules.translator import Translator
-from modules.emotion_analysis import EmotionAnalysis
+from modules.emotion_analysis_module import EmotionAnalysisModule
 
 # if Config.get('vision', 'tech') == 'opencv':
 #     from modules.opencv.vision import Vision
