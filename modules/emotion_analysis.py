@@ -4,7 +4,7 @@ from transformers import pipeline
 from itertools import combinations
 from pubsub import pub
 
-class EmotionAnalysis:
+class EmotionAnalysisModule:
     def __init__(self):
         # Load color sets from JSON file
         with open('emotions.json') as f:
