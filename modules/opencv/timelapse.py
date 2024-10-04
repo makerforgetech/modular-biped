@@ -11,7 +11,7 @@ import glob, os
 # from natsort import natsorted
 
 class Timelapse:
-    SECONDS_BETWEEN_FRAMES = 1
+    SECONDS_BETWEEN_FRAMES = 10
     SECONDS_BETWEEN_OUTPUTS = 60 # Used for mode where frames are stored in memory.
     OUTPUT_FPS = 20
 
@@ -33,6 +33,7 @@ class Timelapse:
         pub.subscribe(self.stop, 'vision:timelapse:stop')
         pub.subscribe(self.stop, 'exit')
         pub.subscribe(self.output, 'vision:timelapse:output')
+        self.start()
 
     def start(self):
         if self.running:

@@ -142,3 +142,16 @@ viam/
 viam_sdk-0.12.0.dist-info/
 yaml/
 !modules/viam/
+.venv/
+googleapis_common_protos-1.63.0.dist-info/
+h2-4.1.0.dist-info/
+hpack-4.0.0.dist-info/
+hyperframe-6.0.1.dist-info/
+multidict-6.0.5.dist-info/
+pillow-10.2.0.dist-info/
+pillow.libs/
+protobuf-4.25.3.dist-info/
+typing_extensions-4.10.0.dist-info/
+viam-config-example.json
+viam_sdk-0.15.0.dist-info/
+.vscode/c_cpp_properties.json

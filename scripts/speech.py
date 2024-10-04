@@ -23,7 +23,7 @@ for index, name in enumerate(sr.Microphone.list_microphone_names()):
     print("Microphone with name \"{1}\" found for `Microphone(device_index={0})`".format(index, name))
 
 
-mic = sr.Microphone(device_index=18, sample_rate=16000)
+mic = sr.Microphone(device_index=2, sample_rate=16000)
 # mic.format=sr.Microphone.get_pyaudio().paInt8
 # mic.format = mic.pyaudio_module.paInt32
 # mic.SAMPLE_WIDTH = mic.pyaudio_module.get_sample_size(mic.format)  # size of each sample

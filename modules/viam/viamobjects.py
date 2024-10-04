@@ -67,10 +67,10 @@ class ViamObjects:
                     os.makedirs(directory)
                 img.save(directory + '/' + date_time + pos + '.png')
                 found = True
-        pub.sendMessage("led:eye", color='blue')
-        if found:
-            return
-        else:
-            if self.disable_timeout < datetime.now():
-                pub.sendMessage('vision:nomatch')
-                self.disable()
+        pub.sendMessage("led:eye", color='green')
+        # if found:
+        #     return
+        # else:
+        #     if self.disable_timeout < datetime.now():
+        #         pub.sendMessage('vision:nomatch')
+        #         self.disable()
