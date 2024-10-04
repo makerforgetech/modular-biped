@@ -1,8 +1,15 @@
 from datetime import datetime, timedelta
 import cv2
 from imutils.video import FPS # for FSP only
-from modules.opencv.faces import Faces
 
+try:
+    from modules.opencv.faces import Faces
+except ModuleNotFoundError as e:
+    # Local execution
+    from faces import Faces
+    import os
+    from video_stream import VideoStream
+    
 
 from pubsub import pub
 
@@ -180,3 +187,10 @@ class Vision:
             x, y, w, h = match
             return float(w) * float(h)
         return 0
+
+
+if __name__ == '__main__':
+    path = os.path.dirname(__file__)
+    camera_resolution = (640, 480) #(1024, 768) #- this halves the speed of image recognition
+    video_stream = VideoStream(resolution=camera_resolution).start()
+    vision = Vision(video_stream, mode=Vision.MODE_FACES, path=path, preview=True, resolution=camera_resolution)

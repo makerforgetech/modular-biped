@@ -19,7 +19,7 @@ class Objects:
 
     def object(self, name):
         if not self.is_detected:
-            pub.sendMessage('log:info', msg='[Personality] Object detected')
+            pub.sendMessage('log:info', msg='[Personality] Object detected: ' + name)
         self.is_detected = True
         self.last_detection = datetime.now()
         # self.state.set_state(Config.STATE_IDLE)

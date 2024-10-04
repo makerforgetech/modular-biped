@@ -29,7 +29,11 @@ unsigned long bootTime;
 // wait start time in millis
 unsigned long sleepTime;
 
-boolean calibrateRest = true;
+boolean calibrateRest = false;
+
+bool shouldMove = false;
+
+bool piControl = false;
 
 void setup()
 {
@@ -41,6 +45,22 @@ void setup()
   bootTime = millis();
   // Init serial
   Serial.begin(115200);
+
+
+  pinMode(backpackPin, INPUT_PULLUP); // sets the digital pin as input
+  if (digitalRead(backpackPin) == LOW) // Check once on startup
+  {
+    Serial.println("Backpack detected");
+    backpack = true;
+  }
+
+  pinMode(restrainPin, INPUT_PULLUP); // sets the digital pin as input
+  if (digitalRead(restrainPin) == LOW) // Check once on startup
+  {
+    Serial.println("Restraint detected");
+    restrainingBolt = true;
+  }
+
   // Init ServoManager
   servoManager.doInit();
   servoManager.setSpeed(SERVO_SPEED_MIN);
@@ -55,7 +75,7 @@ void setup()
   // allTo90();
 
   // Move to rest position + calculate IK and store as rest position
-  doRest();
+  // doRest();
 
   // Custom log message (enable DEBUG in Config.h to see this)
   cLog("Start loop");
@@ -74,13 +94,14 @@ void allTo90()
   }
   delay(20000);
 }
+
 /**
  * @brief Move to rest position. Either using stored values or by calculating using inverse kinematics and storing result for next time.
  */
 void doRest()
 {
   cLog("Resting");
-  isResting = true;
+
   // Reset to slow speed
   servoManager.setSpeed(SERVO_SPEED_MIN);
   if (calibrateRest == false)
@@ -103,7 +124,33 @@ void doRest()
 #endif
     calibrateRest = false;
   }
-  setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
+  shouldMove = true;
+  // setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
+}
+
+void stationarySteps() {
+  int left[SERVO_COUNT] = {PosMin[0], PosMin[1], PosMin[2], PosMax[3], PosMax[4], PosMax[5]};
+  int right[SERVO_COUNT] = {PosMax[0], PosMax[1], PosMax[2], PosMin[3], PosMin[4], PosMin[5]};
+  uint16_t speed = SERVO_SPEED_MIN; // 20 - 60 recommended
+  unsigned long delayTime = 200;
+  servoManager.setSpeed(speed);
+  boolean moveLeft = true;
+  while (true)
+  {
+    if (moveLeft)
+      servoManager.moveServos(left);
+    else
+      servoManager.moveServos(right);
+
+    setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
+
+    while (ServoEasing::areInterruptsActive())
+    {
+      blinkLED();
+    }
+
+    delay(delayTime);
+  }
 }
 
 #ifdef MPU6050_ENABLED
@@ -112,11 +159,16 @@ void hipAdjust()
   tilt.read();
   //Serial.println(tilt.getPitch());
   servoManager.hipAdjust(tilt.getPitch());
+  setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
 }
 #endif
 
 void loop()
 {
+  #ifdef SERVO_CALIBRATION_ENABLED
+    servoManager.calibrate();
+  #endif
+
   #ifdef MPU6050_ENABLED
   hipAdjust();
   #endif
@@ -127,24 +179,40 @@ void loop()
   }
 
   // Check for orders from pi
-  getOrdersFromPi();
+  bool receiving = getOrdersFromPi();
+  while(receiving) 
+  {
+    piControl = true;
+    delay(50); // Wait a short time for any other orders
+    receiving = getOrdersFromPi();
+    shouldMove = !receiving; // Only move when there are no other orders
+  }
+  
+  // Once all orders received (or animating without orders)
+  if (shouldMove)
+  {
+    setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
+    shouldMove = false;
+  }
 
   // if not sleeping, animate randomly
   // Orders from pi will set sleep time so that the animation does not take precedence
   if (!isSleeping())
   {
-    if (isResting)
+    if (isResting && piControl == false) // Only do this if the Pi is not in control (i.e. switched off)
     {
+      #ifdef ANIMATE_ENABLED
       animateRandomly();
-      setSleep(random(3000, 5000));
+      #endif
     }
     else
     {
-      doRest();
-      setSleep(random(3000, 20000));
+      // doRest();
+      isResting = true;
+      setSleep(random(1000, 5000));
     }
-    setEaseToForAllServosSynchronizeAndStartInterrupt(servoManager.getSpeed());
   }
+  
 }
 
 void setSleep(unsigned long length)
@@ -171,7 +239,9 @@ void animateRandomly()
   // Scale headTiltOffset value between 0 and 180 (inverted) to scale of LEG_IK_MIN and LEG_IK_MAX
   float legHeight = map(headTiltOffset, 180, 0, LEG_IK_MIN, LEG_IK_MAX);
   // Move legs to that height
-  servoManager.moveLegs(legHeight, 0);
+  // servoManager.moveLegs(LEG_IK_MAX, 0);
+  servoManager.moveServos(PosStand);
+  shouldMove = true;
 #ifdef DEBUG
   Serial.print("Moving legs ");
   Serial.print(legHeight);
@@ -180,10 +250,11 @@ void animateRandomly()
 #endif
 }
 
-void getOrdersFromPi()
+boolean getOrdersFromPi()
 {
   if (Serial.available() == 0)
-    return;
+    //PiConnect::write_order(ERROR);
+    return false;
   cLog("Order received: ", false);
 
   // The first byte received is the instruction
@@ -211,45 +282,44 @@ void getOrdersFromPi()
   {
     switch (order_received)
     {
-    case SERVO:
-    case SERVO_RELATIVE:
-    {
-      int servo_identifier = PiConnect::read_i8();
-      int servo_angle_percent = PiConnect::read_i16();
-#ifdef DEBUG
-      PiConnect::write_order(SERVO);
-      PiConnect::write_i8(servo_identifier);
-      PiConnect::write_i16(servo_angle_percent);
-#endif
-      // sleep animations for 2 seconds to allow pi to control servos
-      setSleep(2000);
-      servoManager.moveSingleServoByPercentage(servo_identifier, servo_angle_percent, order_received == SERVO_RELATIVE);
-      // delay(2000);
-      break;
-    }
-    case PIN:
-    {
-      int pin = PiConnect::read_i8();
-      int value = PiConnect::read_i8();
-      pinMode(pin, OUTPUT);
-      digitalWrite(pin, value);
-      break;
-    }
-    case READ:
-    {
-      int pin = PiConnect::read_i8();
-      pinMode(pin, INPUT);
-      long value = analogRead(pin);
-      PiConnect::write_i16(value);
-      break;
-    }
-    // Unknown order
-    default:
-    {
-      PiConnect::write_order(order_received);
-      // PiConnect::write_i16(404);
-    }
-      return;
+      case SERVO:
+      case SERVO_RELATIVE:
+      {
+        int servo_identifier = PiConnect::read_i8();
+        int servo_angle_percent = PiConnect::read_i16();
+  #ifdef DEBUG
+        PiConnect::write_order(SERVO);
+        PiConnect::write_i8(servo_identifier);
+        PiConnect::write_i16(servo_angle_percent);
+  #endif
+        // sleep animations for 2 seconds to allow pi to control servos
+        setSleep(2000);
+        servoManager.moveSingleServoByPercentage(servo_identifier, servo_angle_percent, order_received == SERVO_RELATIVE);
+        return true;
+      }
+      case PIN:
+      {
+        int pin = PiConnect::read_i8();
+        int value = PiConnect::read_i8();
+        pinMode(pin, OUTPUT);
+        digitalWrite(pin, value);
+        break;
+      }
+      case READ:
+      {
+        int pin = PiConnect::read_i8();
+        pinMode(pin, INPUT);
+        long value = analogRead(pin);
+        PiConnect::write_i16(value);
+        break;
+      }
+      // Unknown order
+      default:
+      {
+        PiConnect::write_order(order_received);
+        // PiConnect::write_i16(404);
+      }
     }
   }
+  return false;
 }

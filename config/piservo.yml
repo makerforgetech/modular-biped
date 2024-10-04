@@ -1,0 +1,11 @@
+piservo:
+  conf:
+    ear: { id: 0, pin: 12, range: [-40, 40], start: 0 }
+  docs:
+    description: "The piservos module is used to control servos via the raspberry pi."
+    events:
+      sub:
+        - piservo:move:
+            description: "Move servo to absolute position."
+            args:
+              - angle: integer

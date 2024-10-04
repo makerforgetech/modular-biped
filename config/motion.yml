@@ -1,5 +1,5 @@
 motion:
-  pin: 13
+  pin: 26
   docs:
     description: "The motion module is used to detect motion using a microwave sensor."
     event:

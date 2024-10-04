@@ -17,9 +17,15 @@ Performs continuous object detection with the camera.
 
 """
 
-from modules.coral.aiymakerkit import vision as coralvision
-from modules.coral.aiymakerkit import utils
-import modules.coral.models as models
+try:
+    from modules.coral.aiymakerkit import vision as coralvision
+    from modules.coral.aiymakerkit import utils
+    import modules.coral.models as models
+except ModuleNotFoundError as e:
+    from aiymakerkit import vision as coralvision
+    from aiymakerkit import utils
+    import models as models
+
 from threading import Thread, Timer
 from pubsub import pub
 import time
@@ -99,9 +105,7 @@ class Vision:
                 # if no faces detected, go back to object detection
                 if self.mode == 'face':
                     self.debounce('object')
-            
 
-
-
-
-
+if __name__ == '__main__':
+    path = os.path.dirname(__file__)
+    vision = Vision(preview=True, mode=Config.get('vision','initial_mode'))

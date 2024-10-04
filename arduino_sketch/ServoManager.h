@@ -26,12 +26,23 @@ public:
     void doInit()
     {
         // IMPORTANT: Communication from Pi uses index, these must be attached in the same order as they are referenced in the pi config
-        ServoLLH.attach(PIN_SLLH, PosStart[0]);
-        ServoLLK.attach(PIN_SLLK, PosStart[1]);
-        ServoLLA.attach(PIN_SLLA, PosStart[2]);
-        ServoRLH.attach(PIN_SRLH, PosStart[3]);
-        ServoRLK.attach(PIN_SRLK, PosStart[4]);
-        ServoRLA.attach(PIN_SRLA, PosStart[5]);
+        if (backpack == true)
+        {
+            ServoLLH.attach(PIN_SLLH, PosBackpack[0]);
+            ServoLLK.attach(PIN_SLLK, PosBackpack[1]);
+            ServoLLA.attach(PIN_SLLA, PosBackpack[2]);
+            ServoRLH.attach(PIN_SRLH, PosBackpack[3]);
+            ServoRLK.attach(PIN_SRLK, PosBackpack[4]);
+            ServoRLA.attach(PIN_SRLA, PosBackpack[5]);
+        }
+        else {
+            ServoLLH.attach(PIN_SLLH, PosStart[0]);
+            ServoLLK.attach(PIN_SLLK, PosStart[1]);
+            ServoLLA.attach(PIN_SLLA, PosStart[2]);
+            ServoRLH.attach(PIN_SRLH, PosStart[3]);
+            ServoRLK.attach(PIN_SRLK, PosStart[4]);
+            ServoRLA.attach(PIN_SRLA, PosStart[5]);
+        }
         ServoNT.attach(PIN_SNT, PosStart[6]);
         ServoNP.attach(PIN_SNP, PosStart[7]);
 
@@ -102,31 +113,36 @@ public:
         // Serial.print(PosMax[pServoIndex]);
         // Serial.print(" Relative pos change in %: ");
         // Serial.print(pPercent);
-        int realChange = map(abs(pPercent), 0, 100, PosMin[pServoIndex], PosMax[pServoIndex]) - PosMin[pServoIndex];
+        int realChange = map(abs(pPercent), 0, 100, PosMin[pServoIndex], PosMax[pServoIndex]);
         // Serial.print(" in degrees: ");
         // Serial.print(realChange);
+        if (isRelative) {
+            realChange = realChange - PosMin[pServoIndex]; // Account for min value ONLY if relative
+        }
         if (pPercent < 0)
         {
             realChange = -realChange;
         }
+        // PiConnect::write_i16(realChange);
         moveSingleServo(pServoIndex, realChange, isRelative);
     }
 
     void moveSingleServo(uint8_t pServoIndex, int pPos, boolean isRelative)
     {
-        if (isRelative)
+        if ((backpack == true || restrainingBolt == true) && pServoIndex < 6)
         {
-            // Serial.print(" Moving from: ");
-            // Serial.print(ServoEasing::ServoEasingNextPositionArray[pServoIndex]);
-            // Serial.print(" to: ");
-            // Serial.println(ServoEasing::ServoEasingNextPositionArray[pServoIndex] + pPos);
+            // Serial.println("Backpack or restrained mode, skipping leg servos");
+        }
+        else if (isRelative)
+        {
             ServoEasing::ServoEasingNextPositionArray[pServoIndex] = ServoEasing::ServoEasingNextPositionArray[pServoIndex] + pPos;
         }
         else
         {
             ServoEasing::ServoEasingNextPositionArray[pServoIndex] = pPos;
         }
-        setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
+        // Return actual value to Pi
+        PiConnect::write_i16(ServoEasing::ServoEasingNextPositionArray[pServoIndex]);
     }
 
     void moveLegsAndStore(int x, int y, int *store)
@@ -179,12 +195,88 @@ public:
         return tSpeed;
     }
 
+    /**
+     * Manual servo calibration
+     * 
+     * Move servos to 90 degree position (mid range).
+     * 
+     * Iterate over each servo and allow the position to be entered manually.
+     * Store in an array. If user enters '', move to the next servo.
+     * 
+     * Following calibration of all servos, output the arrays to the serial monitor 
+     * and loop through the process again.
+     * 
+     * Output instructions in the serial monitor to guide the user through the process.
+     */
+    void calibrate() {
+        Serial.println("Calibration Mode Activated.");
+        Serial.println("WARNING: All min/max constraints removed, be careful!");
+        // Array for storing positions
+        int positions[SERVO_COUNT] = {PosConfig[0], PosConfig[1], PosConfig[2], PosConfig[3], PosConfig[4], PosConfig[5], PosConfig[6], PosConfig[7]};
+        moveServos(positions);
+        while(true) {
+            for (int i = 0; i < SERVO_COUNT; i++)
+            {
+                ServoEasing::ServoEasingArray[i]->setMinMaxConstraint(0, 180); // Remove min/max constraints
+
+                Serial.print("Calibrating servo ");
+                Serial.println(i);
+                Serial.print("Starting position: ");
+                Serial.println(positions[i]);
+                Serial.println("Enter position (0-180) or 'n' to move to next servo");
+                while (Serial.available() == 0)
+                {
+                    delay(100); // Wait for input
+                }
+                String input = Serial.readString();
+                // If input is a digit, move to that position
+                while (isDigit(input.charAt(0)))
+                {
+                    int pos = input.toInt();
+                    Serial.print("Moving to ");
+                    Serial.println(pos);
+                    // Store position in array
+                    positions[i] = pos;
+                    moveSingleServo(i, pos, false);
+                    #ifdef SERVO_CALIBRATION_SYMMETRICAL
+                    // Calculate and move equivelent servo in other leg
+                    int otherPos = i+3;
+                    if (otherPos > 5) otherPos = i-3;
+                    moveSingleServo(otherPos, 180-pos, false);
+                    #endif
+                    setEaseToForAllServosSynchronizeAndStartInterrupt(tSpeed);
+                    while (ServoEasing::areInterruptsActive())
+                    {
+                        blinkLED();
+                    }
+                    while (Serial.available() == 0)
+                    {
+                        delay(100);
+                    }
+                    input = Serial.readString();
+
+                }
+                Serial.println("Moving to next servo");
+            }
+            Serial.println("New positions:");
+            // output all servo positions
+            for (int i = 0; i < SERVO_COUNT; i++)
+            {
+                Serial.print(positions[i]);
+                Serial.print(", ");
+            }
+            Serial.println();
+        }
+    }
+
 private:
     uint16_t tSpeed;
 
     long moveRandom(int index)
     {
-        return random(PosMin[index], PosMax[index]);
+        int middle = (PosMin[index] + PosMax[index]) / 2;
+        int range = 15; // Reduce range of motion to avoid extreme movement
+        return random(middle - range, middle + range);
     }
 
     // void solve2dInverseK(int x)
