@@ -1,14 +1,13 @@
-import json
 import random
 from transformers import pipeline
 from itertools import combinations
 from pubsub import pub
+from config import Config 
 
 class EmotionAnalysisModule:
     def __init__(self):
-        # Load color sets from JSON file
-        with open('emotions.json') as f:
-            self.color_sets = json.load(f)
+        # Load color sets from YAML file via Config class
+        self.color_sets = Config.get('emotions') 
 
         # Emotion analyzer
         self.emotion_analyzer = pipeline('text-classification', model='joeddav/distilbert-base-uncased-go-emotions-student')
