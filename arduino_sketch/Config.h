@@ -84,7 +84,7 @@ int backpackPin = 12;
 bool backpack = false;
 
 int restrainPin = PIN_A1;
-bool restrainingBolt = false;
+bool restrainingBolt = true;
 
 void blinkLED()
 {
