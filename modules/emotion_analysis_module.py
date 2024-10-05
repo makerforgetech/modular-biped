@@ -4,7 +4,7 @@ from itertools import combinations
 from pubsub import pub
 from config import Config 
 
-class EmotionAnalysisModule:
+class EmotionAnalysis:
     def __init__(self):
         # Load color sets from YAML file via Config class
         self.color_sets = Config.get('emotions') 
