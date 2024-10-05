@@ -111,11 +111,10 @@ def main():
     # power = Power(Config.POWER_ENABLE_PIN)
 
     neopx = NeoPx(Config.get('neopixel','count')) 
-    if Config.get('emotion_analysis', 'enable'):
-        from modules.emotion_analysis_module import EmotionAnalysisModule
+    if Config.get('neopixel', 'emotion_analysis', 'enabled'):
         emotion_analysis_module = EmotionAnalysisModule()
+
     # tts = TTS(translator=translator)
-    emotion_analysis_module = EmotionAnalysisModule()
 
     if Config.get('motion','pin') != '':
         motion = Sensor(Config.get('motion','pin'))
