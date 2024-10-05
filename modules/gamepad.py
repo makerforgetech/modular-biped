@@ -56,7 +56,7 @@ class Gamepad:
                             pub.sendMessage('servo:tilt:mv', percentage=5)
                             print('down')
                         elif event.code == Gamepad.LEFT_CLICK:
-                            pub.sendMessage('speak', message='hi')
+                            pub.sendMessage('speak', msg='hi')
                         elif event.code == Gamepad.RIGHT_CLICK:
                             pub.sendMessage('boredom:action')
                         elif event.code == Gamepad.SPACE:

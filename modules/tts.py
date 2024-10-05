@@ -11,9 +11,9 @@ class TTS:
         self.translator = kwargs.get('translator', None)
         self.service = kwargs.get('service', 'pyttsx3')
         if self.service == 'elevenlabs':
-            self.init_elevenlabs(kwargs)
+            self.init_elevenlabs(kwargs.get('voice_id', ''))
         else:
-            self.init_pyttsx3(kwargs)
+            self.init_pyttsx3()
         # Set subscribers
         pub.subscribe(self.speak, 'tts')
 
@@ -23,7 +23,7 @@ class TTS:
         else:
             self.speak_pyttsx3(msg)
         
-    def init_pyttsx3(self, **kwargs):
+    def init_pyttsx3(self):
         engine = pyttsx3.init()
         voices = engine.getProperty('voices')
         #rate = engine.getProperty('rate')
@@ -42,11 +42,11 @@ class TTS:
         self.engine.say(msg)
         self.engine.runAndWait()
     
-    def init_elevenlabs(self, **kwargs):
+    def init_elevenlabs(self, voice_id):
         self.client = ElevenLabs(
             api_key=os.getenv('ELEVENLABS_KEY') or ''
         )
-        self.voice_id = kwargs.get('voice_id', None)
+        self.voice_id = voice_id
         
     def speak_elevenlabs(self, msg):
         # This uses ElevenLabs, create an API key and export in your .bashrc file using `export ELEVENLABS_KEY=<KEY>` before use
@@ -67,3 +67,7 @@ class TTS:
 if __name__ == '__main__':
     tts = TTS()
     tts.speak('Test')
+    
+    tts2 = TTS(service='elevenlabs', voice_id='pMsXgVXv3BLzUgSXRplE')
+    tts2.speak('Test')
+        

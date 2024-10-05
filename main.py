@@ -183,7 +183,7 @@ def main():
     ten_second_loop = time()
     minute_loop = time()
     loop = True
-    # pub.sendMessage('speak', message='hi')
+    # pub.sendMessage('speak', msg='hi')
     # pub.sendMessage('animate', action='celebrate')
 
     try:

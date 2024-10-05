@@ -19,7 +19,7 @@ class Boredom:
         action = actions[randrange(len(actions)-1)]
         pub.sendMessage('log', msg='[Personality] Boredom action: ' + str(action))
         if action is 'speak':
-            pub.sendMessage('speak', message='hi')
+            pub.sendMessage('speak', msg='hi')
         else:
             pub.sendMessage('animate', action=action)
         sleep(randrange(3))

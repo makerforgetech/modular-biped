@@ -25,7 +25,7 @@ class Respond:
         if action:
             pub.sendMessage('log', msg='[Personality] Respond action: ' + str(action))
             if action is 'speak':
-                pub.sendMessage('speak', message=msg)
+                pub.sendMessage('speak', msg=msg)
             else:
                 pub.sendMessage('animate', action=action)
 
