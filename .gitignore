@@ -156,3 +156,4 @@ yaml/
 myvenv/
 .circleci/
 .vscode
+myenv

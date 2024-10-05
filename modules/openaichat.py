@@ -30,9 +30,9 @@ class OpenAiChat:
         )
 
         pub.sendMessage('log', msg='[OpenAIChat] ' + completion.choices[0].message.content)
-        # print(completion.choices[0].message.content)
+        print(completion.choices[0].message.content)
         output = re.sub(r'[^\w\s]','',completion.choices[0].message.content).lower()
-        # print(output)
+        print(output)
         if output == 'yes':
             # Nod head if answer is just 'yes'
             pub.sendMessage('animate', action='head_nod')

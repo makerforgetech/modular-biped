@@ -2,5 +2,7 @@
 sudo pkill -f /home/archie/modular-biped/main.py
 # sudo modprobe bcm2835-v4l2 # Enable camera
 sudo pigpiod # GPIO - is used
+
+source myenv/bin/activate
 python3 /home/archie/modular-biped/main.py
 

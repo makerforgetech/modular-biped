@@ -7,10 +7,12 @@ pypubsub
 gpiozero
 
 # Speech recognition
-# SpeechRecognition
+SpeechRecognition
 #pocketsphinx
 
 # Chat bot
+openai
+elevenlabs
 #Cython
 #chatterbot==1.0.2
 #chatterbot_corpus
@@ -44,3 +46,5 @@ pygame
 nltk
 
 # viam-sdk[mlmodel]
+
+pigpio
