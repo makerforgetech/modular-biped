@@ -112,6 +112,7 @@ def main():
 
     neopx = NeoPx(Config.get('neopixel','count')) 
     if Config.get('neopixel', 'emotion_analysis', 'enabled'):
+        from modules.emotion_analysis_module import EmotionAnalysisModule
         emotion_analysis_module = EmotionAnalysisModule()
 
     # tts = TTS(translator=translator)
