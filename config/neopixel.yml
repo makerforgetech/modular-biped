@@ -64,3 +64,5 @@ neopixel:
       pub:
         - log:
             description: "Send messages to logger."
+emotion_analysis:
+  enable: true
