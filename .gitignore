@@ -154,3 +154,5 @@ viam_sdk-0.12.0.dist-info/
 viam_sdk-0.15.0.dist-info/
 yaml/
 myvenv/
+.circleci/
+.vscode
