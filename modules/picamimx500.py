@@ -15,18 +15,19 @@ from pubsub import pub
 
 
 class Detection:
-    def __init__(self, coords, category, conf, metadata):
+    def __init__(self, imx500, picam2, selfref, coords, category, conf, metadata):
         """Create a Detection object, recording the bounding box, category and confidence."""
         self.category = category
         self.conf = conf
         self.box = imx500.convert_inference_coords(coords, metadata, picam2)
+        self.piCamImx500 = selfref
     def display(self):
-        label = f"{PiCamImx500.get_labels()[int(self.category)]} ({self.conf:.2f}%): {self.box}"
+        label = f"{self.piCamImx500.get_labels()[int(self.category)]} ({self.conf:.2f}%): {self.box}"
         print(label)
         print("")
     def json_out(self):
         return {
-            'category': PiCamImx500.get_labels()[int(self.category)],
+            'category': self.piCamImx500.get_labels()[int(self.category)],
             'confidence': self.conf,
             'box': self.box
         }
@@ -36,84 +37,77 @@ class Detection:
 class PiCamImx500:
     def __init__(self, **kwargs):
         self.last_detections = []
-        # self.translator = kwargs.get('translator', None)
-        # self.service = kwargs.get('service', 'pyttsx3')
-        # if self.service == 'elevenlabs':
-        #     self.init_elevenlabs(kwargs.get('voice_id', ''))
-        # else:
-        #     self.init_pyttsx3()
-        # # Set subscribers
-        # pub.subscribe(self.speak, 'tts')
+        self.last_results = []
+        
+        self.args = PiCamImx500.get_args()
 
-    # def speak(self, msg):
-        # if self.service == 'elevenlabs':
-        #     self.speak_elevenlabs(msg)
-        # else:
-        #     self.speak_pyttsx3(msg)#
-        # 
-    
-    def detect(self, captures):
         # This must be called before instantiation of Picamera2
-        imx500 = IMX500(args.model)
-        intrinsics = imx500.network_intrinsics
-        if not intrinsics:
-            intrinsics = NetworkIntrinsics()
-            intrinsics.task = "object detection"
-        elif intrinsics.task != "object detection":
+        self.imx500 = IMX500(self.args.model)
+        self.intrinsics = self.imx500.network_intrinsics
+        if not self.intrinsics:
+            self.intrinsics = NetworkIntrinsics()
+            self.intrinsics.task = "object detection"
+        elif self.intrinsics.task != "object detection":
             print("Network is not an object detection task", file=sys.stderr)
             exit()
 
-        # Override intrinsics from args
-        for key, value in vars(args).items():
+        # Override self.intrinsics from self.args
+        for key, value in vars(self.args).items():
             if key == 'labels' and value is not None:
                 with open(value, 'r') as f:
-                    intrinsics.labels = f.read().splitlines()
-            elif hasattr(intrinsics, key) and value is not None:
-                setattr(intrinsics, key, value)
+                    self.intrinsics.labels = f.read().splitlines()
+            elif hasattr(self.intrinsics, key) and value is not None:
+                setattr(self.intrinsics, key, value)
 
         # Defaults
-        if intrinsics.labels is None:
+        if self.intrinsics.labels is None:
             with open("assets/coco_labels.txt", "r") as f:
-                intrinsics.labels = f.read().splitlines()
-        intrinsics.update_with_defaults()
+                self.intrinsics.labels = f.read().splitlines()
+        self.intrinsics.update_with_defaults()
 
-        if args.print_intrinsics:
-            print(intrinsics)
-            exit()
+        # if self.args.print_self.intrinsics:
+        #     print(self.intrinsics)
+        #     exit()
 
-        picam2 = Picamera2(imx500.camera_num)
-        config = picam2.create_preview_configuration(controls={"FrameRate": intrinsics.inference_rate}, buffer_count=12, transform=Transform(vflip=True, hflip=True))
+        self.picam2 = Picamera2(self.imx500.camera_num)
+        config = self.picam2.create_preview_configuration(controls={"FrameRate": self.intrinsics.inference_rate}, buffer_count=12, transform=Transform(vflip=False, hflip=False))
 
-        imx500.show_network_fw_progress_bar()
-        picam2.start(config, show_preview=False)
+        self.imx500.show_network_fw_progress_bar()
+        self.picam2.start(config, show_preview=False)
 
-        if intrinsics.preserve_aspect_ratio:
-            imx500.set_auto_aspect_ratio()
+        if self.intrinsics.preserve_aspect_ratio:
+            self.imx500.set_auto_aspect_ratio()
 
-        last_results = None
-        mycam = PiCamImx500()
-        picam2.pre_callback = PiCamImx500.draw_detections
+        self.picam2.pre_callback = self.draw_detections
         
+        pub.subscribe(self.scan, 'vision:detect')
+
+    def scan(self, captures=1):
         json_array = []
         for i in range(captures):
-            last_results = mycam.parse_detections(picam2.capture_metadata())
-            for i in last_results:
-                this_capture = [obj.json_out() for obj in last_results]
-                json_array.push(this_capture)
+            self.last_results = self.parse_detections(self.picam2.capture_metadata())
+            for i in self.last_results:
+                this_capture = [obj.json_out() for obj in self.last_results]
+                if captures > 1:
+                    json_array = json_array + [this_capture]
+                else:
+                    json_array = this_capture
+
+        pub.sendMessage('vision:detections', data=json_array)                
         return json_array
 
     def parse_detections(self, metadata: dict):
         """Parse the output tensor into a number of detected objects, scaled to the ISP out."""
-        bbox_normalization = intrinsics.bbox_normalization
-        threshold = args.threshold
-        iou = args.iou
-        max_detections = args.max_detections
+        bbox_normalization = self.intrinsics.bbox_normalization
+        threshold = self.args.threshold
+        iou = self.args.iou
+        max_detections = self.args.max_detections
 
-        np_outputs = imx500.get_outputs(metadata, add_batch=True)
-        input_w, input_h = imx500.get_input_size()
+        np_outputs = self.imx500.get_outputs(metadata, add_batch=True)
+        input_w, input_h = self.imx500.get_input_size()
         if np_outputs is None:
             return self.last_detections
-        if intrinsics.postprocess == "nanodet":
+        if self.intrinsics.postprocess == "nanodet":
             boxes, scores, classes = \
                 postprocess_nanodet_detection(outputs=np_outputs[0], conf=threshold, iou_thres=iou,
                                             max_out_dets=max_detections)[0]
@@ -128,29 +122,26 @@ class PiCamImx500:
             boxes = zip(*boxes)
 
         self.last_detections = [
-            Detection(box, category, score, metadata)
+            Detection(self.imx500, self.picam2, self, box, category, score, metadata)
             for box, score, category in zip(boxes, scores, classes)
             if score > threshold
         ]
         return self.last_detections
 
-    @staticmethod
     @lru_cache
-    def get_labels():
-        labels = intrinsics.labels
+    def get_labels(self):
+        labels = self.intrinsics.labels
 
-        if intrinsics.ignore_dash_labels:
+        if self.intrinsics.ignore_dash_labels:
             labels = [label for label in labels if label and label != "-"]
         return labels
 
-
-    @staticmethod
-    def draw_detections(request, stream="main"):
+    def draw_detections(self, request, stream="main"):
         """Draw the detections for this request onto the ISP output."""
-        detections = last_results
+        detections = self.last_results
         if detections is None:
             return
-        labels = PiCamImx500.get_labels()
+        labels = self.get_labels()
         with MappedArray(request, stream) as m:
             for detection in detections:
                 x, y, w, h = detection.box
@@ -181,8 +172,8 @@ class PiCamImx500:
                 # Draw detection box
                 cv2.rectangle(m.array, (x, y), (x + w, y + h), (0, 255, 0, 0), thickness=2)
 
-            if intrinsics.preserve_aspect_ratio:
-                b_x, b_y, b_w, b_h = imx500.get_roi_scaled(request)
+            if self.intrinsics.preserve_aspect_ratio:
+                b_x, b_y, b_w, b_h = self.imx500.get_roi_scaled(request)
                 color = (255, 0, 0)  # red
                 cv2.putText(m.array, "ROI", (b_x + 5, b_y + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
                 cv2.rectangle(m.array, (b_x, b_y), (b_x + b_w, b_y + b_h), (255, 0, 0, 0))
@@ -204,58 +195,13 @@ class PiCamImx500:
                             help="preserve the pixel aspect ratio of the input tensor")
         parser.add_argument("--labels", type=str,
                             help="Path to the labels file")
-        parser.add_argument("--print-intrinsics", action="store_true",
+        parser.add_argument("--print-self.intrinsics", action="store_true",
                             help="Print JSON network_intrinsics then exit")
         return parser.parse_args()
 
 
 if __name__ == "__main__":
     mycam = PiCamImx500()
-    args = PiCamImx500.get_args()
-
-    # This must be called before instantiation of Picamera2
-    imx500 = IMX500(args.model)
-    intrinsics = imx500.network_intrinsics
-    if not intrinsics:
-        intrinsics = NetworkIntrinsics()
-        intrinsics.task = "object detection"
-    elif intrinsics.task != "object detection":
-        print("Network is not an object detection task", file=sys.stderr)
-        exit()
-
-    # Override intrinsics from args
-    for key, value in vars(args).items():
-        if key == 'labels' and value is not None:
-            with open(value, 'r') as f:
-                intrinsics.labels = f.read().splitlines()
-        elif hasattr(intrinsics, key) and value is not None:
-            setattr(intrinsics, key, value)
-
-    # Defaults
-    if intrinsics.labels is None:
-        with open("assets/coco_labels.txt", "r") as f:
-            intrinsics.labels = f.read().splitlines()
-    intrinsics.update_with_defaults()
-
-    if args.print_intrinsics:
-        print(intrinsics)
-        exit()
-
-    picam2 = Picamera2(imx500.camera_num)
-    config = picam2.create_preview_configuration(controls={"FrameRate": intrinsics.inference_rate}, buffer_count=12, transform=Transform(vflip=False, hflip=False))
-
-    imx500.show_network_fw_progress_bar()
-    picam2.start(config, show_preview=False)
-
-    if intrinsics.preserve_aspect_ratio:
-        imx500.set_auto_aspect_ratio()
-
-    last_results = None
     
-    picam2.pre_callback = PiCamImx500.draw_detections
-    while True:
-        
-        last_results = mycam.parse_detections(picam2.capture_metadata())
-        for i in last_results:
-            json_array = [obj.json_out() for obj in last_results]
-            print(json_array)
+    # while True:
+    print(mycam.scan(1))
