@@ -1,4 +1,5 @@
 servos:
+  port: /dev/ttyAMA0
   conf:
     leg_l_hip: { id: 0, pin: 9, range: [0, 180], start: 40 }
     leg_l_knee: { id: 1, pin: 10, range: [0, 180], start: 10 }

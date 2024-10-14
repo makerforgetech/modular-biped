@@ -16,14 +16,17 @@ class ArduinoSerial:
     DEVICE_SERVO_RELATIVE = 4
     ORDER_RECEIVED = 5
     def __init__(self, **kwargs):
-        self.serial_file = ArduinoSerial.initialise()
+        self.port = kwargs.get('port', '/dev/ttyAMA0')
+        self.baudrate = kwargs.get('baudrate', 115200)
+        self.serial_file = ArduinoSerial.initialise(self.port, self.baudrate)
         self.file = None
         pub.subscribe(self.send, 'serial')
 
     @staticmethod
-    def initialise():
+    def initialise(port, baudrate):
         try:
-            serial_file = open_serial_port(baudrate=115200, timeout=None)
+            print('Trying to select port ' + port)
+            serial_file = open_serial_port(serial_port=port, baudrate=baudrate, timeout=None)
         except Exception as e:
             raise e
         is_connected = True # assume connection

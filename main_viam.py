@@ -159,7 +159,9 @@ async def main():
     # print(f"my-webcam get_image return value: {my_webcam_return_value}")
     # roboflow_test = VisionClient.from_robot(robot, "roboflow-test")
     
-                
+    # print('taking over servos')
+    # pub.sendMessage('servo:pan:mvabs', percentage=50)
+    # print('done')
         
     try:
         while loop:
