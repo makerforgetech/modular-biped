@@ -36,6 +36,7 @@ import sys
 from modules.arduinoserial import ArduinoSerial
 from modules.neopx import NeoPx
 # from modules.tts import TTS
+# from modules.openaichat import OpenAiChat
 from modules.personality import Personality
 # from modules.battery import Battery
 from modules.braillespeak import Braillespeak
@@ -111,8 +112,9 @@ def main():
     # power = Power(Config.POWER_ENABLE_PIN)
 
     neopx = NeoPx(Config.get('neopixel','count'))
-    # tts = TTS(translator=translator)
-
+    # tts = TTS(service=Config.get('tts','service'), voice_id=Config.get('tts','voice_id'))
+    #openaichat = OpenAiChat()
+    
     if Config.get('motion','pin') != '':
         motion = Sensor(Config.get('motion','pin'))
 
@@ -163,7 +165,7 @@ def main():
     #     sleep(1)  # @todo is this needed?
         # @todo this is throwing errors: ALSA lib confmisc.c:1281:(snd_func_refer) Unable to find definition 'defaults.bluealsa.device'
 
-    #speech = SpeechInput()
+    # speech = SpeechInput()
     # Output
     # if Config.get('buzzer', 'pin') != '':
         # speak = Braillespeak(Config.get('buzzer', 'pin'), duration=80/1000)
@@ -181,7 +183,7 @@ def main():
     ten_second_loop = time()
     minute_loop = time()
     loop = True
-    # pub.sendMessage('speak', message='hi')
+    # pub.sendMessage('speak', msg='hi')
     # pub.sendMessage('animate', action='celebrate')
 
     try:
