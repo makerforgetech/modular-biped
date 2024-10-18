@@ -112,7 +112,7 @@ def main():
 
 
     neopx = NeoPx(Config.get('neopixel','count')) 
-    if Config.get('neopixel', 'emotion_analysis', 'enabled'):
+    if Config.get('neopixel', 'emotion_analysis')['enable'] is True:
         from modules.emotion_analysis import EmotionAnalysis
         emotion_analysis = EmotionAnalysis()
 
