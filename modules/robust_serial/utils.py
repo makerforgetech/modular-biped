@@ -56,6 +56,7 @@ def get_serial_ports():
         try:
             s = serial.Serial(port)
             s.close()
+            print('[Serial] Found ' + port)
             results.append(port)
         except (OSError, serial.SerialException):
             pass
@@ -73,9 +74,11 @@ def open_serial_port(serial_port=None, baudrate=115200, timeout=0, write_timeout
     :param write_timeout: (int)
     :return: (Serial Object)
     """
+    ports = get_serial_ports()
+    print('Serial port sent: ' + serial_port)
     # Open serial port (for communication with Arduino)
     if serial_port is None:
-        serial_port = get_serial_ports()[0]
+        serial_port = ports[0]
     # timeout=0 non-blocking mode, return immediately in any case, returning zero or more,
     # up to the requested number of bytes
     return serial.Serial(port=serial_port, baudrate=baudrate, timeout=timeout, writeTimeout=write_timeout)

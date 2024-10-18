@@ -25,7 +25,7 @@
 # sudo apt-get install libatlas-base-dev
 
 # CREATE VIRTUAL ENVIRONMENT
-python3 -m venv myenv
+python3 -m venv --system-site-package myenv
 source myenv/bin/activate
 
 # INSTALL ALL PYTHON DEPENDENCIES

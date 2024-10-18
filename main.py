@@ -72,12 +72,11 @@ def main():
 
     # Throw exception to safely exit script when terminated
     signal.signal(signal.SIGTERM, Config.exit)
-
     # GPIO
     # gpio = pigpio.pi()
 
     # Arduino connection
-    serial = ArduinoSerial()
+    serial = ArduinoSerial(port=Config.get('servos','port'))
 
     servos = dict()
     servo_conf = Config.get('servos','conf')
@@ -184,7 +183,12 @@ def main():
     minute_loop = time()
     loop = True
     # pub.sendMessage('speak', msg='hi')
-    # pub.sendMessage('animate', action='celebrate')
+    # print('taking over servos')
+    # pub.sendMessage('servo:pan:mvabs', percentage=50)
+    # print('done')
+    # print('nodding')
+    # pub.sendMessage('animate', action='head_nod')
+    # print('done')
 
     try:
         pub.sendMessage('log', msg="[Main] Loop started")
