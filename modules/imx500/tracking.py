@@ -1,8 +1,9 @@
 from pubsub import pub
 from threading import Thread, Timer
 from time import sleep
+import cv2, json
 class Tracking:
-    TRACKING_THRESHOLD = (30, 30)
+    TRACKING_THRESHOLD = (10, 10)
 
     # MATCH_IDS = [0, 17, 18] # The Id of objects to pay attention to: {0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 4: 'airplane', 5: 'bus', 6: 'train', 7: 'truck', 8: 'boat', 9: 'traffic light', 10: 'fire hydrant', 11: 'n/a', 12: 'stop sign', 13: 'parking meter', 14: 'bench', 15: 'bird', 16: 'cat', 17: 'dog', 18: 'horse', 19: 'sheep', 20: 'cow', 21: 'elephant', 22: 'bear', 23: 'zebra', 24: 'giraffe', 25: 'n/a', 26: 'backpack', 27: 'umbrella', 28: 'n/a', 29: 'n/a', 30: 'handbag', 31: 'tie', 32: 'suitcase', 33: 'frisbee', 34: 'skis', 35: 'snowboard', 36: 'sports ball', 37: 'kite', 38: 'baseball bat', 39: 'baseball glove', 40: 'skateboard', 41: 'surfboard', 42: 'tennis racket', 43: 'bottle', 44: 'n/a', 45: 'wine glass', 46: 'cup', 47: 'fork', 48: 'knife', 49: 'spoon', 50: 'bowl', 51: 'banana', 52: 'apple', 53: 'sandwich', 54: 'orange', 55: 'broccoli', 56: 'carrot', 57: 'hot dog', 58: 'pizza', 59: 'donut', 60: 'cake', 61: 'chair', 62: 'couch', 63: 'potted plant', 64: 'bed', 65: 'n/a', 66: 'dining table', 67: 'n/a', 68: 'n/a', 69: 'toilet', 70: 'n/a', 71: 'tv', 72: 'laptop', 73: 'mouse', 74: 'remote', 75: 'keyboard', 76: 'cell phone', 77: 'microwave', 78: 'oven', 79: 'toaster', 80: 'sink', 81: 'refrigerator', 82: 'n/a', 83: 'book', 84: 'clock', 85: 'vase', 86: 'scissors', 87: 'teddy bear', 88: 'hair drier', 89: 'toothbrush'}
     
@@ -12,7 +13,7 @@ class Tracking:
     VIDEO_CENTER = (VIDEO_SIZE[0]/2, VIDEO_SIZE[1]/2)
     DEG_PER_PIXEL = (CAMERA_FOV[0] / VIDEO_SIZE[0], CAMERA_FOV[1] / VIDEO_SIZE[1])
     SERVO_RANGE_DEG = (160, 120)
-    DEBOUNCE_TIME = .5 
+    DEBOUNCE_TIME = 5
     def __init__(self, **kwargs):
         self.active = kwargs.get('active', True)
 
@@ -43,8 +44,10 @@ class Tracking:
             return
         people = Tracking.filter_by_category(matches, 'person')
         if len(people) > 0:
-            print('Tracking people only!')
+            # print('Tracking people only!')
             matches = people
+        else:
+            return
         self.track_largest_match(matches)
         
     @staticmethod
@@ -79,8 +82,9 @@ class Tracking:
         w = x2-x
         h = y2-y
 
-        x_move = Tracking.calc_move_amount_variable(0, x, w)
-        y_move = Tracking.calc_move_amount_variable(1, y, h)
+        x_move = Tracking.calc_move_amount_from_dist(0, largest['distance_x'])
+        y_move = Tracking.calc_move_amount_from_dist(1, largest['distance_y'])
+        print(x_move, y_move)
 
         if x_move:
             pub.sendMessage('servo:pan:mv', percentage=x_move)
@@ -96,25 +100,41 @@ class Tracking:
         return True
 
     @staticmethod
+    def calc_move_amount_from_dist(axis, distance):
+
+        # Calculate difference between screen_c and target_c in pixels
+        if abs(distance) <= Tracking.TRACKING_THRESHOLD[axis]:
+            return 0
+        
+        # Translate to degrees using preset constants
+        difference_deg = distance * Tracking.DEG_PER_PIXEL[axis]
+        # print('difference_deg: ' + str(difference_deg))
+
+        # Set servo relative position as percentage of range.
+        move_pc = round(difference_deg / Tracking.SERVO_RANGE_DEG[axis] * 100)
+        # print(str(axis) + ' move_pc: ' + str(move_pc))
+        return move_pc
+    
+    @staticmethod
     def calc_move_amount_variable(axis, target_pos, target_w):
 
         target_c = target_pos + (target_w / 2)
-        print('target_c: ' + str(target_c))
-        print('screen_c: ' + str(Tracking.VIDEO_CENTER[axis]))
+        # print('target_c: ' + str(target_c))
+        # print('screen_c: ' + str(Tracking.VIDEO_CENTER[axis]))
         
         # Calculate difference between screen_c and target_c in pixels
         difference_px = (Tracking.VIDEO_CENTER[axis] - target_c)
-        print('difference_px: ' + str(difference_px))
+        # print('difference_px: ' + str(difference_px))
         if abs(difference_px) <= Tracking.TRACKING_THRESHOLD[axis]:
             return 0
         
         # Translate to degrees using preset constants
         difference_deg = difference_px * Tracking.DEG_PER_PIXEL[axis]
-        print('difference_deg: ' + str(difference_deg))
+        # print('difference_deg: ' + str(difference_deg))
 
         # Set servo relative position as percentage of range.
         move_pc = round(difference_deg / Tracking.SERVO_RANGE_DEG[axis] * 100)
-        print(str(axis) + ' move_pc: ' + str(move_pc))
+        # print(str(axis) + ' move_pc: ' + str(move_pc))
         return move_pc
 
     def _largest(self, matches, ids_to_track):
@@ -148,3 +168,13 @@ class Tracking:
             x, y, x2, y2 = match
             return float(x2-x) * float(y2-y)
         return 0
+
+
+if __name__ == "__main__":
+    from picamimx500 import PiCamImx500
+    mycam = PiCamImx500()
+    tracking = Tracking()
+    
+    while True:
+        mycam.scan(1)
+        
