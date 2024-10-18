@@ -28,8 +28,8 @@ class Detection:
     def json_out(self):
         return {
             'category': self.piCamImx500.get_labels()[int(self.category)],
-            'confidence': self.conf,
-            'box': self.box
+            'confidence': str(self.conf),
+            'bbox': self.box
         }
         
         
@@ -93,7 +93,7 @@ class PiCamImx500:
                 else:
                     json_array = this_capture
 
-        pub.sendMessage('vision:detections', data=json_array)                
+        pub.sendMessage('vision:detections', matches=json_array)
         return json_array
 
     def parse_detections(self, metadata: dict):
@@ -171,9 +171,10 @@ class PiCamImx500:
 
                 # Draw detection box
                 cv2.rectangle(m.array, (x, y), (x + w, y + h), (0, 255, 0, 0), thickness=2)
-
+                
             if self.intrinsics.preserve_aspect_ratio:
                 b_x, b_y, b_w, b_h = self.imx500.get_roi_scaled(request)
+                print(b_x, b_y, b_w, b_h)
                 color = (255, 0, 0)  # red
                 cv2.putText(m.array, "ROI", (b_x + 5, b_y + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
                 cv2.rectangle(m.array, (b_x, b_y), (b_x + b_w, b_y + b_h), (255, 0, 0, 0))
