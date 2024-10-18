@@ -45,6 +45,9 @@ pygame
 
 nltk
 
+
+transformers
+
 # viam-sdk[mlmodel]
 
 pigpio
