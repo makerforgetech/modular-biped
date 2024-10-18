@@ -110,10 +110,16 @@ def main():
     #return
     # power = Power(Config.POWER_ENABLE_PIN)
 
-    neopx = NeoPx(Config.get('neopixel','count'))
+
+    neopx = NeoPx(Config.get('neopixel','count')) 
+    if Config.get('neopixel', 'emotion_analysis', 'enabled'):
+        from modules.emotion_analysis import EmotionAnalysis
+        emotion_analysis = EmotionAnalysis()
+
     # tts = TTS(service=Config.get('tts','service'), voice_id=Config.get('tts','voice_id'))
     #openaichat = OpenAiChat()
     
+
     if Config.get('motion','pin') != '':
         motion = Sensor(Config.get('motion','pin'))
 
