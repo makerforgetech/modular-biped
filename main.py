@@ -36,6 +36,7 @@ import sys
 from modules.arduinoserial import ArduinoSerial
 from modules.neopx import NeoPx
 # from modules.tts import TTS
+# from modules.openaichat import OpenAiChat
 from modules.personality import Personality
 # from modules.battery import Battery
 from modules.braillespeak import Braillespeak
@@ -71,12 +72,11 @@ def main():
 
     # Throw exception to safely exit script when terminated
     signal.signal(signal.SIGTERM, Config.exit)
-
     # GPIO
     # gpio = pigpio.pi()
 
     # Arduino connection
-    serial = ArduinoSerial()
+    serial = ArduinoSerial(port=Config.get('servos','port'))
 
     servos = dict()
     servo_conf = Config.get('servos','conf')
@@ -110,12 +110,15 @@ def main():
     #return
     # power = Power(Config.POWER_ENABLE_PIN)
 
+
     neopx = NeoPx(Config.get('neopixel','count')) 
     if Config.get('neopixel', 'emotion_analysis', 'enabled'):
         from modules.emotion_analysis import EmotionAnalysis
         emotion_analysis = EmotionAnalysis()
 
-    # tts = TTS(translator=translator)
+    # tts = TTS(service=Config.get('tts','service'), voice_id=Config.get('tts','voice_id'))
+    #openaichat = OpenAiChat()
+    
 
     if Config.get('motion','pin') != '':
         motion = Sensor(Config.get('motion','pin'))
@@ -167,7 +170,7 @@ def main():
     #     sleep(1)  # @todo is this needed?
         # @todo this is throwing errors: ALSA lib confmisc.c:1281:(snd_func_refer) Unable to find definition 'defaults.bluealsa.device'
 
-    #speech = SpeechInput()
+    # speech = SpeechInput()
     # Output
     # if Config.get('buzzer', 'pin') != '':
         # speak = Braillespeak(Config.get('buzzer', 'pin'), duration=80/1000)
@@ -185,8 +188,13 @@ def main():
     ten_second_loop = time()
     minute_loop = time()
     loop = True
-    # pub.sendMessage('speak', message='hi')
-    # pub.sendMessage('animate', action='celebrate')
+    # pub.sendMessage('speak', msg='hi')
+    # print('taking over servos')
+    # pub.sendMessage('servo:pan:mvabs', percentage=50)
+    # print('done')
+    # print('nodding')
+    # pub.sendMessage('animate', action='head_nod')
+    # print('done')
 
     try:
         pub.sendMessage('log', msg="[Main] Loop started")

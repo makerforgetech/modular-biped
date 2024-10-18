@@ -24,8 +24,12 @@
 # OpenCV
 # sudo apt-get install libatlas-base-dev
 
+# CREATE VIRTUAL ENVIRONMENT
+python3 -m venv --system-site-package myenv
+source myenv/bin/activate
+
 # INSTALL ALL PYTHON DEPENDENCIES
-python3 -m pip install -r requirements.txt --break-system-packages
+python3 -m pip install -r requirements.txt
 
 # Activate other scripts
 chmod 777 startup.sh

@@ -78,8 +78,8 @@ class Braillespeak:
                 self.buzz(self.notes[n], self.duration)
         time.sleep(self.duration / 2)
 
-    def send(self, message):
-        print(message.lower())
-        if message:
-            for t in message.lower():
+    def send(self, msg):
+        print(msg.lower())
+        if msg:
+            for t in msg.lower():
                 self.handle_char(t)

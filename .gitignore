@@ -13,10 +13,8 @@ app.log*
 battery*.csv
 timelapse/*
 .coverage
-modular-biped-venv
-data
 
-# Viam demanded the modules get installed directly in the directory
+.venv/
 Adafruit_Blinka-8.28.0.dist-info/
 Adafruit_PlatformDetect-3.57.0.dist-info/
 Adafruit_PureIO-1.1.11.dist-info/
@@ -58,10 +56,13 @@ colorzero-2.0.dist-info/
 colorzero/
 colour-0.1.5.dist-info/
 colour.py
+config/tts.yml
+data/
 digitalio.py
 distutils-precedence.pth
 google/
 googleapis_common_protos-1.62.0.dist-info/
+googleapis_common_protos-1.63.0.dist-info/
 googletrans-3.1.0a0.dist-info/
 googletrans/
 gpiozero-2.0.dist-info/
@@ -72,8 +73,10 @@ grpclib/
 h11-0.9.0.dist-info/
 h11/
 h2-3.2.0.dist-info/
+h2-4.1.0.dist-info/
 h2/
 hpack-3.0.0.dist-info/
+hpack-4.0.0.dist-info/
 hpack/
 hstspreload-2023.1.1.dist-info/
 hstspreload/
@@ -82,6 +85,7 @@ httpcore/
 httpx-0.13.3.dist-info/
 httpx/
 hyperframe-5.2.0.dist-info/
+hyperframe-6.0.1.dist-info/
 hyperframe/
 idna-2.10.dist-info/
 idna/
@@ -92,7 +96,9 @@ keypad.py
 microcontroller/
 micropython-stubs/
 micropython.py
+modular-biped-venv/
 multidict-6.0.4.dist-info/
+multidict-6.0.5.dist-info/
 multidict/
 neopixel_write.py
 nltk-3.8.1.dist-info/
@@ -101,8 +107,11 @@ numpy-1.26.2.dist-info/
 numpy.libs/
 numpy/
 onewireio.py
+pillow-10.2.0.dist-info/
+pillow.libs/
 pkg_resources/
 protobuf-4.25.1.dist-info/
+protobuf-4.25.3.dist-info/
 pubsub/
 pulseio.py
 pwmio.py
@@ -133,12 +142,18 @@ sysv_ipc-1.1.0.dist-info/
 sysv_ipc.cpython-311-aarch64-linux-gnu.so
 tqdm-4.66.1.dist-info/
 tqdm/
+typing_extensions-4.10.0.dist-info/
 typing_extensions-4.9.0.dist-info/
 typing_extensions.py
 usb/
 usb_hid.py
 venv/
+viam-config-example.json
 viam/
 viam_sdk-0.12.0.dist-info/
+viam_sdk-0.15.0.dist-info/
 yaml/
-!modules/viam/
+myvenv/
+.circleci/
+.vscode
+myenv
