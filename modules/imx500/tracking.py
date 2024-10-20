@@ -5,15 +5,15 @@ from time import sleep
 
 class Tracking:
     TRACKING_THRESHOLD = (50, 50)
-    CAMERA_FOV = (60, 40)  # Field of view of the camera
     VIDEO_SIZE = (640, 480)  # Pixel dimensions of the image
     VIDEO_CENTER = (VIDEO_SIZE[0] / 2, VIDEO_SIZE[1] / 2)
-    PIXELS_PER_DEG = (CAMERA_FOV[0] / VIDEO_SIZE[0], CAMERA_FOV[1] / VIDEO_SIZE[1])
+    PIXELS_PER_DEG = (4.4, -2.6) # Set during calibration session. Run calibrate_servo_movement() to recalibrate
 
     def __init__(self, **kwargs):
         self.active = kwargs.get('active', True)
         self.moving = False
         self.camera = kwargs.get('camera', None)
+        self.filter = kwargs.get('filter', 'person')
 
         # Subscribe to vision and servo-related topics
         pub.subscribe(self.handle, 'vision:detections')
@@ -33,9 +33,9 @@ class Tracking:
 
     async def process_matches(self, matches):
         """Asynchronously process matches and track the largest."""
-        people = self.filter_by_category(matches, 'tv')
-        if len(people) > 0:
-            self.track_closest_to_center(people)
+        filtered = self.filter_by_category(matches, self.filter)
+        if len(filtered) > 0:
+            self.track_closest_to_center(filtered)
 
     def handle(self, matches):
         """Handle new detections by processing in an asynchronous thread."""
@@ -135,7 +135,7 @@ class Tracking:
         pub.sendMessage('servo:tilt:mv', percentage=servo_move_pct)
 
         # Wait for the servo movement to complete (e.g., debounce time)
-        sleep(2)  # This can be adjusted as per servo speed
+        sleep(5)  # This can be adjusted as per servo speed
         
         # Re-detect the object after the movement
         new_matches = self._get_latest_detections()  # You need a method to get the latest matches
