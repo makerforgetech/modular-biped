@@ -154,13 +154,13 @@ def main():
         vision = PiCamImx500()
     
         #     vision = Vision(preview=preview, mode=Config.get('vision','initial_mode'))
-        tracking = Tracking()
+        tracking = Tracking(camera=vision,active=False)
 
         #     if Config.get('vision', 'debug'):
         #         while True:
         #             pass
 
-        personality = Personality()
+        # personality = Personality()
     # elif mode() == Config.MODE_KEYBOARD:
         # keyboard = Keyboard()
 
@@ -181,7 +181,7 @@ def main():
         # speak = Braillespeak(Config.get('buzzer', 'pin'), duration=80/1000)
         # buzzer = Buzzer(Config.get('buzzer', 'pin'))
     
-    animate = Animate()
+    # animate = Animate()
 
     # @todo 2k resistor needs switching to > 3k for 20v+ support.
     #battery = Battery(0, serial, path=path) # note: needs ref for pubsub to work
@@ -200,6 +200,13 @@ def main():
     # print('nodding')
     # pub.sendMessage('animate', action='head_nod')
     # print('done')
+    
+    tracking.calibrate_servo_movement()
+    sleep(2)
+    # tracking.calibrate_servo_movement()
+    # sleep(2)
+    # tracking.calibrate_servo_movement()
+    # sleep(2)
 
     try:
         pub.sendMessage('log', msg="[Main] Loop started")

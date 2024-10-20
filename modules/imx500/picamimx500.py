@@ -21,25 +21,24 @@ class Detection:
         self.conf = conf
         self.box = imx500.convert_inference_coords(coords, metadata, picam2)
         self.piCamImx500 = selfref
-        Detection.calculate_detection_distances(self, 640, 480)
+        self.calculate_detection_distances(320, 240)
 
-    @staticmethod
-    def calculate_detection_distances(detection, screen_center_x, screen_center_y):
+    def calculate_detection_distances(self, screen_center_x, screen_center_y):
         """Calculate and store the X and Y distances for a detection."""
         # Extract the bounding box values (x, y, width, height)
-        x, y, w, h = detection.box
+        x, y, x2, y2 = self.box
 
         # Calculate the center of the detection box
-        detection_center_x = x + w // 2
-        detection_center_y = y + h // 2
+        detection_center_x = x + x2 // 2
+        detection_center_y = y + y2 // 2
 
         # Calculate the distances between detection center and screen center
-        distance_x = abs(detection_center_x - screen_center_x)
-        distance_y = abs(detection_center_y - screen_center_y)
+        distance_x = int(detection_center_x - screen_center_x)
+        distance_y = int(detection_center_y - screen_center_y)
 
         # Store distances in the detection object
-        detection.distance_x = distance_x
-        detection.distance_y = distance_y
+        self.distance_x = distance_x
+        self.distance_y = distance_y
         
     def display(self):
         label = f"{self.piCamImx500.get_labels()[int(self.category)]} ({self.conf:.2f}%): {self.box}"
@@ -95,7 +94,7 @@ class PiCamImx500:
         config = self.picam2.create_preview_configuration(controls={"FrameRate": self.intrinsics.inference_rate}, buffer_count=12, transform=Transform(vflip=False, hflip=False))
 
         self.imx500.show_network_fw_progress_bar()
-        self.picam2.start(config, show_preview=False)
+        self.picam2.start(config, show_preview=True)
 
         if self.intrinsics.preserve_aspect_ratio:
             self.imx500.set_auto_aspect_ratio()
@@ -158,47 +157,6 @@ class PiCamImx500:
             labels = [label for label in labels if label and label != "-"]
         return labels
 
-    # def draw_detections(self, request, stream="main"):
-    #     """Draw the detections for this request onto the ISP output."""
-    #     detections = self.last_results
-    #     if detections is None:
-    #         return
-    #     labels = self.get_labels()
-    #     with MappedArray(request, stream) as m:
-    #         for detection in detections:
-    #             x, y, w, h = detection.box
-    #             label = f"{labels[int(detection.category)]} ({detection.conf:.2f})"
-
-    #             # Calculate text size and position
-    #             (text_width, text_height), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-    #             text_x = x + 5
-    #             text_y = y + 15
-
-    #             # Create a copy of the array to draw the background with opacity
-    #             overlay = m.array.copy()
-
-    #             # Draw the background rectangle on the overlay
-    #             cv2.rectangle(overlay,
-    #                         (text_x, text_y - text_height),
-    #                         (text_x + text_width, text_y + baseline),
-    #                         (255, 255, 255),  # Background color (white)
-    #                         cv2.FILLED)
-
-    #             alpha = 0.30
-    #             cv2.addWeighted(overlay, alpha, m.array, 1 - alpha, 0, m.array)
-
-    #             # Draw text on top of the background
-    #             cv2.putText(m.array, label, (text_x, text_y),
-    #                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
-    #             # Draw detection box
-    #             cv2.rectangle(m.array, (x, y), (x + w, y + h), (0, 255, 0, 0), thickness=2)
-                
-    #         if self.intrinsics.preserve_aspect_ratio:
-    #             b_x, b_y, b_w, b_h = self.imx500.get_roi_scaled(request)
-    #             color = (255, 0, 0)  # red
-    #             cv2.putText(m.array, "ROI", (b_x + 5, b_y + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-    #             cv2.rectangle(m.array, (b_x, b_y), (b_x + b_w, b_y + b_h), (255, 0, 0, 0))
-
     def draw_detections_with_distance(self, request, stream="main"):
         """Draw the detections for this request onto the ISP output."""
         detections = self.last_results
@@ -225,8 +183,8 @@ class PiCamImx500:
                 distance_y = abs(detection.distance_y)
 
                 # Draw the distance as text near the detection box
-                distance_label_x = f"X-Dist: {int(distance_x)} px"
-                distance_label_y = f"Y-Dist: {int(distance_y)} px"
+                distance_label_x = f"X-Dist: {int(distance_x)} px {int(detection_center_x - screen_center_x)}"
+                distance_label_y = f"Y-Dist: {int(distance_y)} px {int(detection_center_y - screen_center_y)}"
 
                 # Text positions for the X and Y distances
                 (text_width_x, text_height_x), baseline_x = cv2.getTextSize(distance_label_x, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)

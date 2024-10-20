@@ -75,6 +75,7 @@ class Servo:
         :param sequence:
         :return:
         """
+        print('Moving servo...')
         s = sequence.pop(0)
 
         # @todo this prevents initial set of position
