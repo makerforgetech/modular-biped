@@ -7,7 +7,7 @@ class Tracking:
     TRACKING_THRESHOLD = (50, 50)
     VIDEO_SIZE = (640, 480)  # Pixel dimensions of the image
     VIDEO_CENTER = (VIDEO_SIZE[0] / 2, VIDEO_SIZE[1] / 2)
-    PIXELS_PER_DEG = (4.4, -2.6) # Set during calibration session. Run calibrate_servo_movement() to recalibrate
+    PIXELS_PER_DEG = (-12.5, 0.7) # Set during calibration session. Run calibrate_servo_movement() to recalibrate
 
     def __init__(self, **kwargs):
         self.active = kwargs.get('active', True)
@@ -78,11 +78,12 @@ class Tracking:
         print(f"Moving Y:  {y_move} ({match['distance_y']})")
         
         if x_move:
-            pub.sendMessage('servo:pan:mv', percentage=-x_move)
-        if y_move:
-            pub.sendMessage('servo:tilt:mv', percentage=-y_move)
+            pub.sendMessage('servo:pan:mv', percentage=x_move)
+        # if y_move:
+            # pub.sendMessage('servo:tilt:mv', percentage=y_move)
 
-        move_time = abs(max(x_move, y_move)) / 5
+        move_time = max(abs(max(x_move, y_move)) / 50, 1) # min 1 second
+        print(f"Move time: {move_time}")
         stop_moving = Thread(target=self.debounce, args=(move_time,))
         stop_moving.start()
 
@@ -109,7 +110,7 @@ class Tracking:
             return float(x2 - x) * float(y2 - y)
         return 0
 
-    def calibrate_servo_movement(self, match=None, servo_move_pct=10):
+    def calibrate_servo_movement(self, axis=0, label=None, match=None, servo_move_pct=10):
         """
         Calibrate the servos to determine the degree range for pan (x-axis) and tilt (y-axis).
         Moves the servo a preset percentage, then calculates the degree-per-pixel ratio.
@@ -117,62 +118,72 @@ class Tracking:
         :param match: The match (object) to track.
         :param servo_move_pct: Percentage of the servo's range to move for calibration.
         """
-        if match == None:
-            matches = self._get_latest_detections()
-            if len(matches) > 0:
-                match = matches[0] 
+        match = self._get_a_match(label)
             
         if match == None:
             print('Could not find match, skipping calibration')
             return
         # Get the initial position of the object
-        (x, y, x2, y2) = match['bbox']
-        initial_center_x = (x + x2) / 2
-        initial_center_y = (y + y2) / 2
+        # (x, y, x2, y2) = match['bbox']
+        # initial_center_x = (x + x2) / 2
+        # initial_center_y = (y + y2) / 2
         
         # Move the servos a preset percentage
-        pub.sendMessage('servo:pan:mv', percentage=servo_move_pct)
-        pub.sendMessage('servo:tilt:mv', percentage=servo_move_pct)
+        if axis == 0:
+            pub.sendMessage('servo:pan:mv', percentage=servo_move_pct)
+        else:
+            pub.sendMessage('servo:tilt:mv', percentage=servo_move_pct)
 
         # Wait for the servo movement to complete (e.g., debounce time)
         sleep(5)  # This can be adjusted as per servo speed
         
         # Re-detect the object after the movement
-        new_matches = self._get_latest_detections()  # You need a method to get the latest matches
-        new_match = self._find_same_match(new_matches, match)
+        new_match = None
+        for i in range(5):
+            new_matches = self._get_latest_detections()
+            if len(new_matches) > 0:
+                new_match = self._find_same_match(new_matches, match)
 
         if new_match:
             # Get the new position of the object
-            (nx, ny, nx2, ny2) = new_match['bbox']
-            new_center_x = (nx + nx2) / 2
-            new_center_y = (ny + ny2) / 2
+            # (nx, ny, nx2, ny2) = new_match['bbox']
+            # new_center_x = (nx + nx2) / 2
+            # new_center_y = (ny + ny2) / 2
 
             # Calculate the pixel movement
-            x_pixel_movement = new_center_x - initial_center_x
-            y_pixel_movement = new_center_y - initial_center_y
-            
-            print (servo_move_pct)
-            print(x_pixel_movement)
-            
+            # if axis == 0:
+            #     pixel_movement = new_center_x - initial_center_x
+            # else:
+            #     pixel_movement = new_center_y - initial_center_y
 
             # Calculate the degrees moved
-            pixels_per_percent_x = x_pixel_movement / servo_move_pct
-            pixels_per_percent_y = y_pixel_movement / servo_move_pct
-            print(pixels_per_percent_x)
+            # pixels_per_percent = pixel_movement / servo_move_pct
+            if axis == 0:
+                dist = match['distance_x'] - new_match['distance_x']
+            else:
+                dist = match['distance_y'] - new_match['distance_y']
+            dist_ppc = dist / servo_move_pct
             
-            Tracking.PIXELS_PER_DEG = (pixels_per_percent_x,
-                                        pixels_per_percent_y)
-
-            print(f"Calibration complete: New PIXELS_PER_DEG values: {Tracking.PIXELS_PER_DEG}")
-            sleep(5)
+            newvals = list(Tracking.PIXELS_PER_DEG)
+            newvals[axis] = dist_ppc
+            Tracking.PIXELS_PER_DEG = tuple(newvals)
             
-            self.track_match(new_match)
+            # print(f"Initial Dist: {match['distance_x']}, New Dist: {new_match['distance_x']}, Diff: {dist}, Px/%: {dist_ppc}")
+            # print(f'Initial: {initial_center_x}, New: {new_center_x}, Diff: {pixel_movement}, Px/%: {pixels_per_percent}')
             
-            print(f"Calibration: Centering on target: {new_match['category']}")
+            print(f"Calibration complete: New PIXELS_PER_DEG assigned for axis {axis}. values: {Tracking.PIXELS_PER_DEG}")
+            
         else:
             print('No second match to calibrate against!')
             
             
+    def _get_a_match(self, label):
+        for i in range(5):
+            matches = self._get_latest_detections()
+            if len(matches) > 0:
+                for m in matches:
+                    if m['category'] == label:
+                        return m 
 
     def _get_latest_detections(self):
         return self.camera.scan(1)
@@ -190,7 +201,7 @@ class Tracking:
                    abs(y1 - y2) < threshold * Tracking.VIDEO_SIZE[1]
 
         for match in matches:
-            if is_similar_bbox(original_match['bbox'], match['bbox']):
+            if original_match['category'] == match['category'] or is_similar_bbox(original_match['bbox'], match['bbox']):
                 return match
         return None
 
@@ -201,7 +212,8 @@ if __name__ == "__main__":
     tracking = Tracking(camera=mycam)
 
     # Calibrate the servo range with a sample match
-    tracking.calibrate_servo_movement()
+    tracking.calibrate_servo_movement(0)
+    tracking.calibrate_servo_movement(1)
 
     while True:
         mycam.scan(1)

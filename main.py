@@ -154,7 +154,11 @@ def main():
         vision = PiCamImx500()
     
         #     vision = Vision(preview=preview, mode=Config.get('vision','initial_mode'))
-        tracking = Tracking(camera=vision,active=False)
+        tracking = Tracking(camera=vision,active=False,filter='person')
+        tracking.calibrate_servo_movement(0, 'tv')
+        # tracking.calibrate_servo_movement(1, 'tv')
+        sleep(2)
+        tracking.active = True
 
         #     if Config.get('vision', 'debug'):
         #         while True:
@@ -201,8 +205,7 @@ def main():
     # pub.sendMessage('animate', action='head_nod')
     # print('done')
     
-    tracking.calibrate_servo_movement()
-    sleep(2)
+    
     # tracking.calibrate_servo_movement()
     # sleep(2)
     # tracking.calibrate_servo_movement()
@@ -215,7 +218,6 @@ def main():
             pub.sendMessage('vision:detect')
             if time() - second_loop > 1:
                 second_loop = time()
-                
                 pub.sendMessage('loop:1')
             if time() - ten_second_loop > 10:
                 ten_second_loop = time()
