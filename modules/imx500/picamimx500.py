@@ -30,11 +30,15 @@ class Detection:
 
         # Calculate the center of the detection box
         detection_center_x = x + x2 // 2
-        detection_center_y = y + y2 // 2
+        
+        # Calculate the position at the top 20% of the bounding box for Y-axis
+        box_height = y2 - y
+        detection_top_20_y = y + int(0.2 * box_height)
+        #detection_center_y = y + y2 // 2
 
         # Calculate the distances between detection center and screen center
         distance_x = int(detection_center_x - screen_center_x)
-        distance_y = int(detection_center_y - screen_center_y)
+        distance_y = int(detection_top_20_y - screen_center_y)
 
         # Store distances in the detection object
         self.distance_x = distance_x
@@ -52,8 +56,6 @@ class Detection:
             'distance_x': self.distance_x,
             'distance_y': self.distance_y
         }
-        
-        
         
 class PiCamImx500:
     def __init__(self, **kwargs):
@@ -101,24 +103,34 @@ class PiCamImx500:
 
         self.picam2.pre_callback = self.draw_detections_with_distance
         
+        self.previous_frame = None
+        self.stable_frame_count = 0
+        self.moving = False
+        
         pub.subscribe(self.scan, 'vision:detect')
 
-    def scan(self, captures=1):
-        json_array = []
-        for i in range(captures):
-            self.last_results = self.parse_detections(self.picam2.capture_metadata())
-            for i in self.last_results:
-                this_capture = [obj.json_out() for obj in self.last_results]
-                if captures > 1:
-                    json_array = json_array + [this_capture]
-                else:
-                    json_array = this_capture
+    def scan(self):
+        self.last_results = self.parse_detections(self.picam2.capture_metadata())
+        this_capture = []
+        for i in self.last_results:
+            this_capture = [obj.json_out() for obj in self.last_results]
 
-        pub.sendMessage('vision:detections', matches=json_array)
-        return json_array
+        pub.sendMessage('vision:detections', matches=this_capture)
+        return this_capture
 
     def parse_detections(self, metadata: dict):
         """Parse the output tensor into a number of detected objects, scaled to the ISP out."""
+        
+        self.last_detections = []
+         # Check if the image is stable before parsing detections
+        if not self.calculate_stabilization():
+            # print("Image is not stable. Skipping detections.")
+            self.moving = True
+            return self.last_detections
+        elif self.moving == True:
+            self.moving = False
+            pub.sendMessage('vision:stable')
+    
         bbox_normalization = self.intrinsics.bbox_normalization
         threshold = self.args.threshold
         iou = self.args.iou
@@ -148,6 +160,50 @@ class PiCamImx500:
             if score > threshold
         ]
         return self.last_detections
+
+
+    def calculate_stabilization(self, threshold=0.70, stable_frames_required=8):
+        """
+        Calculate if the image has stabilized based on frame differences.
+        Stability is defined as the average pixel difference between consecutive frames
+        being below a given threshold for a certain number of frames.
+        :param threshold: Percentage of pixels that must remain stable (default 1%).
+        :param stable_frames_required: Number of consecutive stable frames to confirm stabilization.
+        :return: Boolean indicating if the image is stable.
+        """
+        current_frame = self.picam2.capture_array()
+
+        if self.previous_frame is None:
+            # If this is the first frame, store it and return False (not yet stable)
+            self.previous_frame = current_frame
+            return False
+
+        # Calculate the absolute difference between the current frame and the previous frame
+        frame_diff = cv2.absdiff(current_frame, self.previous_frame)
+
+        # Convert the frame difference to grayscale for easier analysis
+        gray_diff = cv2.cvtColor(frame_diff, cv2.COLOR_BGR2GRAY)
+
+        # Calculate the percentage of pixels with significant change (non-zero value in diff)
+        non_zero_count = np.count_nonzero(gray_diff)
+        total_pixels = gray_diff.size
+        diff_percentage = non_zero_count / total_pixels
+
+        # Update the previous frame to be the current frame
+        self.previous_frame = current_frame
+
+        print(diff_percentage)
+        # Check if the difference is below the threshold
+        if diff_percentage < threshold:
+            self.stable_frame_count += 1
+        else:
+            self.stable_frame_count = 0
+
+        # If the number of consecutive stable frames is greater than or equal to the required count, return True
+        if self.stable_frame_count >= stable_frames_required:
+            return True
+
+        return False
 
     @lru_cache
     def get_labels(self):
@@ -276,4 +332,4 @@ if __name__ == "__main__":
     mycam = PiCamImx500()
     
     # while True:
-    print(mycam.scan(1))
+    print(mycam.scan())

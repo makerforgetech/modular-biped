@@ -47,6 +47,7 @@ from modules.translator import Translator
 
 from modules.imx500.picamimx500 import PiCamImx500
 from modules.imx500.tracking import Tracking
+from modules.imx500.calibration import Calibration
 
 # if Config.get('vision', 'tech') == 'opencv':
 #     from modules.opencv.vision import Vision
@@ -154,11 +155,9 @@ def main():
         vision = PiCamImx500()
     
         #     vision = Vision(preview=preview, mode=Config.get('vision','initial_mode'))
-        tracking = Tracking(camera=vision,active=False,filter='person')
-        tracking.calibrate_servo_movement(0, 'tv')
-        # tracking.calibrate_servo_movement(1, 'tv')
-        sleep(2)
-        tracking.active = True
+        tracking = Tracking(camera=vision,active=True,filter='person')
+        # calibration = Calibration(vision, tracking) ## Include to calibrate tracking before running, otherwise set tracking.active to True directly
+        
 
         #     if Config.get('vision', 'debug'):
         #         while True:
