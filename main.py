@@ -45,6 +45,10 @@ from modules.pitemperature import PiTemperature
 
 from modules.translator import Translator
 
+from modules.imx500.picamimx500 import PiCamImx500
+from modules.imx500.tracking import Tracking
+from modules.imx500.calibration import Calibration
+
 # if Config.get('vision', 'tech') == 'opencv':
 #     from modules.opencv.vision import Vision
 #     from modules.opencv.tracking import Tracking
@@ -84,11 +88,11 @@ def main():
         s = servo_conf[key]
         servos[key] = Servo(s['pin'], key, s['range'], s['id'], start_pos=s['start'])
         
-    piservos = dict()
-    piservo_conf = Config.get('piservo','conf')
-    for key in piservo_conf:
-        s = piservo_conf[key]
-        piservos[key] = PiServo(s['pin'], s['range'], start_pos=s['start'])
+    # piservos = dict()
+    # piservo_conf = Config.get('piservo','conf')
+    # for key in piservo_conf:
+    #     s = piservo_conf[key]
+    #     piservos[key] = PiServo(s['pin'], s['range'], start_pos=s['start'])
 
     # pub.sendMessage('log', msg="[Main] Starting pan test")
     # pub.sendMessage('servo:pan:mvabs', percentage=0)
@@ -148,14 +152,18 @@ def main():
         #         pub.sendMessage("servo:pan:mvabs", percentage=50)
         #         sleep(1)
 
+        vision = PiCamImx500()
+    
         #     vision = Vision(preview=preview, mode=Config.get('vision','initial_mode'))
-        #     tracking = Tracking()
+        tracking = Tracking(camera=vision,active=True,filter='person')
+        # calibration = Calibration(vision, tracking) ## Include to calibrate tracking before running, otherwise set tracking.active to True directly
+        
 
         #     if Config.get('vision', 'debug'):
         #         while True:
         #             pass
 
-        personality = Personality()
+        # personality = Personality()
     # elif mode() == Config.MODE_KEYBOARD:
         # keyboard = Keyboard()
 
@@ -176,7 +184,7 @@ def main():
         # speak = Braillespeak(Config.get('buzzer', 'pin'), duration=80/1000)
         # buzzer = Buzzer(Config.get('buzzer', 'pin'))
     
-    animate = Animate()
+    # animate = Animate()
 
     # @todo 2k resistor needs switching to > 3k for 20v+ support.
     #battery = Battery(0, serial, path=path) # note: needs ref for pubsub to work
@@ -195,11 +203,18 @@ def main():
     # print('nodding')
     # pub.sendMessage('animate', action='head_nod')
     # print('done')
+    
+    
+    # tracking.calibrate_servo_movement()
+    # sleep(2)
+    # tracking.calibrate_servo_movement()
+    # sleep(2)
 
     try:
         pub.sendMessage('log', msg="[Main] Loop started")
         while loop:
             pub.sendMessage('loop')
+            pub.sendMessage('vision:detect')
             if time() - second_loop > 1:
                 second_loop = time()
                 pub.sendMessage('loop:1')

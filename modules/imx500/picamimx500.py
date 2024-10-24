@@ -21,6 +21,29 @@ class Detection:
         self.conf = conf
         self.box = imx500.convert_inference_coords(coords, metadata, picam2)
         self.piCamImx500 = selfref
+        self.calculate_detection_distances(320, 240)
+
+    def calculate_detection_distances(self, screen_center_x, screen_center_y):
+        """Calculate and store the X and Y distances for a detection."""
+        # Extract the bounding box values (x, y, width, height)
+        x, y, x2, y2 = self.box
+
+        # Calculate the center of the detection box
+        detection_center_x = x + x2 // 2
+        
+        # Calculate the position at the top 20% of the bounding box for Y-axis
+        box_height = y2 - y
+        detection_top_20_y = y + int(0.2 * box_height)
+        #detection_center_y = y + y2 // 2
+
+        # Calculate the distances between detection center and screen center
+        distance_x = int(detection_center_x - screen_center_x)
+        distance_y = int(detection_top_20_y - screen_center_y)
+
+        # Store distances in the detection object
+        self.distance_x = distance_x
+        self.distance_y = distance_y
+        
     def display(self):
         label = f"{self.piCamImx500.get_labels()[int(self.category)]} ({self.conf:.2f}%): {self.box}"
         print(label)
@@ -28,11 +51,11 @@ class Detection:
     def json_out(self):
         return {
             'category': self.piCamImx500.get_labels()[int(self.category)],
-            'confidence': self.conf,
-            'box': self.box
+            'confidence': str(self.conf),
+            'bbox': self.box,
+            'distance_x': self.distance_x,
+            'distance_y': self.distance_y
         }
-        
-        
         
 class PiCamImx500:
     def __init__(self, **kwargs):
@@ -73,31 +96,41 @@ class PiCamImx500:
         config = self.picam2.create_preview_configuration(controls={"FrameRate": self.intrinsics.inference_rate}, buffer_count=12, transform=Transform(vflip=False, hflip=False))
 
         self.imx500.show_network_fw_progress_bar()
-        self.picam2.start(config, show_preview=False)
+        self.picam2.start(config, show_preview=True)
 
         if self.intrinsics.preserve_aspect_ratio:
             self.imx500.set_auto_aspect_ratio()
 
-        self.picam2.pre_callback = self.draw_detections
+        self.picam2.pre_callback = self.draw_detections_with_distance
+        
+        self.previous_frame = None
+        self.stable_frame_count = 0
+        self.moving = False
         
         pub.subscribe(self.scan, 'vision:detect')
 
-    def scan(self, captures=1):
-        json_array = []
-        for i in range(captures):
-            self.last_results = self.parse_detections(self.picam2.capture_metadata())
-            for i in self.last_results:
-                this_capture = [obj.json_out() for obj in self.last_results]
-                if captures > 1:
-                    json_array = json_array + [this_capture]
-                else:
-                    json_array = this_capture
+    def scan(self):
+        self.last_results = self.parse_detections(self.picam2.capture_metadata())
+        this_capture = []
+        for i in self.last_results:
+            this_capture = [obj.json_out() for obj in self.last_results]
 
-        pub.sendMessage('vision:detections', data=json_array)                
-        return json_array
+        pub.sendMessage('vision:detections', matches=this_capture)
+        return this_capture
 
     def parse_detections(self, metadata: dict):
         """Parse the output tensor into a number of detected objects, scaled to the ISP out."""
+        
+        self.last_detections = []
+         # Check if the image is stable before parsing detections
+        if not self.calculate_stabilization():
+            # print("Image is not stable. Skipping detections.")
+            self.moving = True
+            return self.last_detections
+        elif self.moving == True:
+            self.moving = False
+            pub.sendMessage('vision:stable')
+    
         bbox_normalization = self.intrinsics.bbox_normalization
         threshold = self.args.threshold
         iou = self.args.iou
@@ -128,6 +161,50 @@ class PiCamImx500:
         ]
         return self.last_detections
 
+
+    def calculate_stabilization(self, threshold=0.70, stable_frames_required=8):
+        """
+        Calculate if the image has stabilized based on frame differences.
+        Stability is defined as the average pixel difference between consecutive frames
+        being below a given threshold for a certain number of frames.
+        :param threshold: Percentage of pixels that must remain stable (default 1%).
+        :param stable_frames_required: Number of consecutive stable frames to confirm stabilization.
+        :return: Boolean indicating if the image is stable.
+        """
+        current_frame = self.picam2.capture_array()
+
+        if self.previous_frame is None:
+            # If this is the first frame, store it and return False (not yet stable)
+            self.previous_frame = current_frame
+            return False
+
+        # Calculate the absolute difference between the current frame and the previous frame
+        frame_diff = cv2.absdiff(current_frame, self.previous_frame)
+
+        # Convert the frame difference to grayscale for easier analysis
+        gray_diff = cv2.cvtColor(frame_diff, cv2.COLOR_BGR2GRAY)
+
+        # Calculate the percentage of pixels with significant change (non-zero value in diff)
+        non_zero_count = np.count_nonzero(gray_diff)
+        total_pixels = gray_diff.size
+        diff_percentage = non_zero_count / total_pixels
+
+        # Update the previous frame to be the current frame
+        self.previous_frame = current_frame
+
+        print(diff_percentage)
+        # Check if the difference is below the threshold
+        if diff_percentage < threshold:
+            self.stable_frame_count += 1
+        else:
+            self.stable_frame_count = 0
+
+        # If the number of consecutive stable frames is greater than or equal to the required count, return True
+        if self.stable_frame_count >= stable_frames_required:
+            return True
+
+        return False
+
     @lru_cache
     def get_labels(self):
         labels = self.intrinsics.labels
@@ -136,42 +213,93 @@ class PiCamImx500:
             labels = [label for label in labels if label and label != "-"]
         return labels
 
-    def draw_detections(self, request, stream="main"):
+    def draw_detections_with_distance(self, request, stream="main"):
         """Draw the detections for this request onto the ISP output."""
         detections = self.last_results
         if detections is None:
             return
         labels = self.get_labels()
+        
+        # Assuming m.array contains the frame, get the dimensions of the image to find the screen center
         with MappedArray(request, stream) as m:
+            height, width, _ = m.array.shape
+            screen_center_x = width // 2
+            screen_center_y = height // 2
+
             for detection in detections:
                 x, y, w, h = detection.box
                 label = f"{labels[int(detection.category)]} ({detection.conf:.2f})"
+                
+                # Calculate the center of the detection box
+                detection_center_x = x + w // 2
+                detection_center_y = y + h // 2
 
-                # Calculate text size and position
-                (text_width, text_height), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+                # Calculate the distances between detection center and screen center
+                distance_x = abs(detection.distance_x)
+                distance_y = abs(detection.distance_y)
+
+                # Draw the distance as text near the detection box
+                distance_label_x = f"X-Dist: {int(distance_x)} px {int(detection_center_x - screen_center_x)}"
+                distance_label_y = f"Y-Dist: {int(distance_y)} px {int(detection_center_y - screen_center_y)}"
+
+                # Text positions for the X and Y distances
+                (text_width_x, text_height_x), baseline_x = cv2.getTextSize(distance_label_x, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+                (text_width_y, text_height_y), baseline_y = cv2.getTextSize(distance_label_y, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
                 text_x = x + 5
-                text_y = y + 15
+                text_y_x = y + 30  # Below the detection box label
+                text_y_y = y + 45  # Below the X-distance label
 
                 # Create a copy of the array to draw the background with opacity
                 overlay = m.array.copy()
 
-                # Draw the background rectangle on the overlay
+                # Draw the background rectangles for the X and Y distance text
                 cv2.rectangle(overlay,
-                            (text_x, text_y - text_height),
-                            (text_x + text_width, text_y + baseline),
+                            (text_x, text_y_x - text_height_x),
+                            (text_x + text_width_x, text_y_x + baseline_x),
+                            (255, 255, 255),  # Background color (white)
+                            cv2.FILLED)
+                cv2.rectangle(overlay,
+                            (text_x, text_y_y - text_height_y),
+                            (text_x + text_width_y, text_y_y + baseline_y),
                             (255, 255, 255),  # Background color (white)
                             cv2.FILLED)
 
                 alpha = 0.30
                 cv2.addWeighted(overlay, alpha, m.array, 1 - alpha, 0, m.array)
 
-                # Draw text on top of the background
-                cv2.putText(m.array, label, (text_x, text_y),
+                # Draw the distance text for X and Y axes
+                cv2.putText(m.array, distance_label_x, (text_x, text_y_x),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+                cv2.putText(m.array, distance_label_y, (text_x, text_y_y),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
                 # Draw detection box
                 cv2.rectangle(m.array, (x, y), (x + w, y + h), (0, 255, 0, 0), thickness=2)
+                
+                # Draw horizontal line (X-axis)
+                cv2.line(m.array, (detection_center_x, detection_center_y), (screen_center_x, detection_center_y), (0, 255, 255), 2)
+                
+                # Draw vertical line (Y-axis)
+                cv2.line(m.array, (screen_center_x, detection_center_y), (screen_center_x, screen_center_y), (255, 0, 255), 2)
 
+                # Calculate text size and position for detection label
+                (text_width, text_height), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+                text_x = x + 5
+                text_y = y + 15
+
+                # Draw background rectangle for detection label
+                cv2.rectangle(overlay,
+                            (text_x, text_y - text_height),
+                            (text_x + text_width, text_y + baseline),
+                            (255, 255, 255),  # Background color (white)
+                            cv2.FILLED)
+
+                cv2.addWeighted(overlay, alpha, m.array, 1 - alpha, 0, m.array)
+
+                # Draw detection label
+                cv2.putText(m.array, label, (text_x, text_y),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+                
             if self.intrinsics.preserve_aspect_ratio:
                 b_x, b_y, b_w, b_h = self.imx500.get_roi_scaled(request)
                 color = (255, 0, 0)  # red
@@ -204,4 +332,4 @@ if __name__ == "__main__":
     mycam = PiCamImx500()
     
     # while True:
-    print(mycam.scan(1))
+    print(mycam.scan())
