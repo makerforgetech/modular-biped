@@ -33,7 +33,6 @@ python3 -m pip install -r requirements.txt
 
 # Activate other scripts
 chmod 777 startup.sh
-chmod 777 manual_startup.sh
 chmod 777 stop.sh
 
 # Snowboy hotword

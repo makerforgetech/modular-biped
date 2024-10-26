@@ -5,10 +5,20 @@ from googletrans import Translator as GoogleTranslator
     Set default languages in config/transalator.yml and reference in init call
 
 '''
-
-
 class Translator:
     def __init__(self, **kwargs):
+        """
+        Translator class
+        :param kwargs: src, dest
+        :param src: source language
+        :param dest: destination language
+        
+        Install: pip install googletrans==3.1.0a0
+        
+        Example:
+        translator = Translator(src='en', dest='es')
+        print(translator.request("This is a test of the translation from English to Spanish"))
+        """
         self.src = kwargs.get('src', 'en')
         self.dest = kwargs.get('dest', 'en')
         self.translator = None

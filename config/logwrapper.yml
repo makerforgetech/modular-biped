@@ -1,0 +1,3 @@
+logwrapper:
+  enabled: False
+  path: modules.logwrapper.LogWrapper

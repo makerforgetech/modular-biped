@@ -1,0 +1,6 @@
+tts:
+  enabled: false
+  path: "modules.audio.tts.TTS"
+  config:
+    service: "elevenlabs" # or pyttsx3
+    voice_id: "pMsXgVXv3BLzUgSXRplE"

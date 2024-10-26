@@ -1,35 +1,40 @@
 neopixel:
-  pin: None # GPIO2 and 3 are use for i2c
-  i2c: True
-  count: 12
-  positions: {
-    'status1': 0,
-    'status2': 1,
-    'status3': 2,
-    'status4': 3,
-    'status5': 4,
-    'right' : 5,
-    'top_right': 6,
-    'top_left' : 7,
-    'left' : 8,
-    'bottom_left' : 9,
-    'bottom_right' : 10,
-    'middle': 11,
-  }
-  brightness: [
-      0.2,
-      0.2,
-      0.2,
-      0.2,
-      0.2,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1
-  ]
+  
+  enabled: true
+  path: 'modules.neopixel.neopx.NeoPx'
+  config:
+    pin: None # GPIO2 and 3 are use for i2c
+    i2c: True
+    count: 12
+    positions: {
+      'status1': 0,
+      'status2': 1,
+      'status3': 2,
+      'status4': 3,
+      'status5': 4,
+      'right' : 5,
+      'top_right': 6,
+      'top_left' : 7,
+      'left' : 8,
+      'bottom_left' : 9,
+      'bottom_right' : 10,
+      'middle': 11,
+    }
+    brightness: [
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+    ]
+  
   docs:
     description: "The neopixel module is used to drive neopixel LEDs."
     events:

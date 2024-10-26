@@ -121,7 +121,7 @@ class Feel:
             val = Feel.RANGE_MIN
         return val
 
-    def speech(self, msg):
+    def speech(self, text):
         # It's fun to talk to someone
         self.input(Feel.INPUT_TYPE_FUN)
 

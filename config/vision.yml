@@ -1,8 +1,8 @@
 vision:
-  tech: "coral"
-  initial_mode: "face"
-  modes: ["object", "face"]
-  debug: False
+  enabled: true
+  path: 'modules.vision.imx500.vision.Vision'
+  config:
+    preview: False
   docs:
     description: "The vision module is used to detect objects and faces."
     events:

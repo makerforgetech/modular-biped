@@ -1,7 +1,10 @@
 translator:
-  default:
-    src: "en"
-    dest: "en"
+  enabled: true
+  path: modules.translator.Translator
+  config:
+    default:
+      src: "en"
+      dest: "en"
   docs:
     description: "The translator module is used to translate any text from one language to another"
     methods:

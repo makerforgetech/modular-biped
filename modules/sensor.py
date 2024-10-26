@@ -2,10 +2,23 @@ from gpiozero import MotionSensor
 from pubsub import pub
 
 class Sensor:
-    def __init__(self, pin, **kwargs):
-        self.pin = pin
+    def __init__(self, **kwargs):
+        """
+        Sensor class
+        :param kwargs: pin
+        
+        Install: pip install gpiozero
+        
+        Subscribes to 'loop:1' to read sensor
+        Publishes 'motion' when motion detected
+        
+        Example:
+        pub.subscribe(handleMotion, 'motion')
+        
+        """
+        self.pin = kwargs.get('pin')
         self.value = None
-        self.sensor = MotionSensor(pin)
+        self.sensor = MotionSensor(self.pin)
         pub.subscribe(self.loop, 'loop:1')
 
     def loop(self):

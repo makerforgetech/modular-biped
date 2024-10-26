@@ -1,0 +1,7 @@
+tracking:
+  enabled: true
+  path: 'modules.vision.imx500.tracking.Tracking'
+  config:
+    active: True
+    name: 'tracking'
+    filter: 'person'

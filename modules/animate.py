@@ -6,6 +6,18 @@ from gpiozero import LED
 
 class Animate:
     def __init__(self, **kwargs):
+        """
+        Animation module to move servos in sequence
+        :kwarg path: path to animation files
+        
+        Install: pip install gpiozero
+        
+        Subscribes to 'animate' to start an animation
+        - Argument: action (string) - name of animation file
+        
+        Example:
+        pub.sendMessage('animate', action='head_nod')
+        """
         self.path = kwargs.get('path', os.path.dirname(os.path.realpath(__file__)) + '/../animations') + '/'
         pub.subscribe(self.animate, "animate")
 

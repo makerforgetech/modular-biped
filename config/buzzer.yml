@@ -1,7 +1,8 @@
 buzzer:
-  pin: 27
+  enabled: true
+  path: "modules.audio.buzzer.Buzzer"
+  config:
+    pin: 27
+    name: 'buzzer'
   docs:
-    description: "The buzzer is a piezo speaker that can be used to play tones and melodies."
-    events: 
-      sub: 
-        - speech
+    description: "The buzzer module is used for sound alerts."
