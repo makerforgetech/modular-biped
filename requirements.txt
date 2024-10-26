@@ -45,7 +45,9 @@ pygame
 
 nltk
 
-
+#emotional analysis
+tensorflow
+torch
 transformers
 
 # viam-sdk[mlmodel]
