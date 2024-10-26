@@ -6,7 +6,6 @@ from viam.rpc.dial import Credentials, DialOptions
 from viam.services.vision import VisionClient
 from viam.services.generic import Generic
 from viam.components.camera import Camera
-import setenv # I added this
 from datetime import datetime
 
 from pubsub import pub

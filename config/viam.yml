@@ -1,0 +1,13 @@
+classifier:
+  enabled: false
+  path: 'modules.viam.viamclassifier.ViamClassifier'
+  config:
+    classifier_name: 'my-classifier'
+    camera_name: 'camera'
+objects:
+  enabled: false
+  path: 'modules.viam.viamobjects.ViamObjects'
+  config:
+    vision_client: 'objectDetector'
+    camera_name: 'camera'
+    timelapse_location: '/home/archie/modular-biped/data/viamobjects'
