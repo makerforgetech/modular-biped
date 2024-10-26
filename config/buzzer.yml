@@ -4,5 +4,7 @@ buzzer:
   config:
     pin: 27
     name: 'buzzer'
-  docs:
-    description: "The buzzer module is used for sound alerts."
+  dependencies:
+    python:
+      - gpiozero
+      - pypubsub

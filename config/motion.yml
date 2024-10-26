@@ -3,12 +3,7 @@ motion:
   path: 'modules.sensor.Sensor'
   config:
     pin: 26
-  docs:
-    description: "The motion module is used to detect motion using a microwave sensor."
-    event:
-      sub:
-        - loop:1:
-            description: "Trigger read every second."
-      pub:
-        - motion:
-            description: "Sent when motion is detected."
+  dependencies:
+    python:
+      - pypubsub
+      - gpiozero

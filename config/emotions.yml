@@ -1,6 +1,12 @@
 emotions:
   enabled: false
   path: modules.neopixel.emotion_analysis.EmotionAnalysis
+  dependencies:
+    python:
+      - tensorflow
+      - torch
+      - transformers
+      - pypubsub
   conf:
     colors:
       grief:

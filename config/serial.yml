@@ -4,3 +4,6 @@ serial:
   config:
     port: '/dev/ttyAMA0'
     baudrate: '115200'
+  dependencies:
+    pythion:
+      - pypubsub

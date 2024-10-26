@@ -1,55 +1,7 @@
-
-
-# Publisher / subscriber service
-pypubsub
-
-# pigpio ## not working, trying alternative
-gpiozero
-
-# Speech recognition
-SpeechRecognition
-#pocketsphinx
-
-# Chat bot
-openai
-elevenlabs
-#Cython
-#chatterbot==1.0.2
-#chatterbot_corpus
-
-# Braillespeak
-# pysine ## FAILING
-
-#cv2
-# opencv-python
-# face-recognition
-# imutils
-
-# nightly loop
-schedule
-
-colour
-
-#Config yaml
-pyyaml
-
-# Translator
-googletrans==3.1.0a0
-
-#i2c neopixels
-# adafruit-extended-bus
-# adafruit-blinka
-adafruit-circuitpython-seesaw
-
-pygame
-
-nltk
-
-#emotional analysis
-tensorflow
-torch
-transformers
-
-# viam-sdk[mlmodel]
-
-pigpio
+### NOTE
+# This file is not in use, please add your dependencies to the module's config file:
+# dependencies:
+#   python:
+#     - <dependency>
+#   unix:
+#     - <dependency>

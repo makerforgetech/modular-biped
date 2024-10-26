@@ -3,3 +3,7 @@ chatgpt:
   path: 'modules.chatgpt.ChatGPT'
   config:
     model: gpt-4o-mini
+  dependencies:
+    python:
+      - openai
+      - pypubsub

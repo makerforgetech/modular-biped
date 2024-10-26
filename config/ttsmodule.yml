@@ -4,3 +4,7 @@ tts:
   config:
     service: "elevenlabs" # or pyttsx3
     voice_id: "pMsXgVXv3BLzUgSXRplE"
+  dependencies:
+    python:
+      - pyttsx3
+      - elevenlabs

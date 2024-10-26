@@ -42,21 +42,7 @@ servos:
       pin: 3
       range: [30, 150]
       start: 50
-  docs:
-    description: "The servos module is used to control servos via the Arduino."
-    events:
-      sub:
-        - servo:[identifier]:mvabs:
-            description: "Move servo to absolute position."
-            args:
-              - percentage: integer
-        - servo:[identifier]:mv:
-            description: "Move servo to relative position."
-            args:
-              - percentage: integer
-              - safe: boolean
-      pub:
-        - log:
-            description: "Send messages to logger."
-        - power:use:
-            description: "Request power usage."
+  dependencies:
+    python:
+      - pypubsub
+      - pigpio
