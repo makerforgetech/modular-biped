@@ -26,7 +26,6 @@ def main():
     
     # Dynamically load and initialize modules
     loader = ModuleLoader(config_folder="config")
-    loader.load_yaml_files()
     module_instances = loader.load_modules()
 
     # Add your business logic here using module_instances as needed

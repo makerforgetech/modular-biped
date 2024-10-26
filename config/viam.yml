@@ -1,10 +1,10 @@
-classifier:
+viamclassifier:
   enabled: false
   path: 'modules.viam.viamclassifier.ViamClassifier'
   config:
     classifier_name: 'my-classifier'
     camera_name: 'camera'
-objects:
+viamobjectdetection:
   enabled: false
   path: 'modules.viam.viamobjects.ViamObjects'
   config:
