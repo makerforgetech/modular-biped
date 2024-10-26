@@ -2,10 +2,9 @@ import random
 from transformers import pipeline
 from itertools import combinations
 from pubsub import pub
-from config import Config 
 
 class EmotionAnalysis:
-    def __init__(self):
+    def __init__(self, **kwargs):
         """
         Emotion analysis module
         Analyzes text for emotions and sends colors to NeoPixel LEDs
@@ -19,7 +18,7 @@ class EmotionAnalysis:
         pub.sendMessage('speech', text='I am so happy today!')
         """
         # Load color sets from YAML file via Config class
-        self.color_sets = Config.get('emotions') 
+        self.color_sets = kwargs.get('colors')
 
         # Emotion analyzer
         self.emotion_analyzer = pipeline('text-classification', model='joeddav/distilbert-base-uncased-go-emotions-student')

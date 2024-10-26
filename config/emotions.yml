@@ -1,5 +1,6 @@
 emotions:
   enabled: false
+  path: modules.neopixel.emotion_analysis.EmotionAnalysis
   conf:
     colors:
       grief:

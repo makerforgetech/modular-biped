@@ -59,7 +59,8 @@ def main():
     # pub.sendMessage('servo:<identifier>:mv', percentage=50) # e.g. servo:pan:mv
     # pub.sendMessage('servo:<identifier>:mvabs', percentage=50) # Absolute position. e.g. servo:pan:mvabs
 
-
+    # Test emotion analysis
+    # pub.sendMessage('speech', text='I am so happy today!')
 
     # Start loops or other tasks
     pub.sendMessage('log', msg="[Main] Loop started")
