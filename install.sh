@@ -62,18 +62,18 @@ UNIQUE_UNIX_DEPENDENCIES=($(echo "${UNIX_DEPENDENCIES[@]}" | tr ' ' '\n' | sort 
 UNIQUE_ACTIVE_MODULES=($(echo "${ACTIVE_MODULES[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
 UNIQUE_ADDITIONAL_URLS=($(echo "${ADDITIONAL_URLS[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
 
-# # Update apt-get and install Unix dependencies
-# if [ ${#UNIQUE_UNIX_DEPENDENCIES[@]} -ne 0 ]; then
-#   sudo apt-get update
-#   for dep in "${UNIQUE_UNIX_DEPENDENCIES[@]}"; do
-#     sudo apt-get install -y "$dep"
-#   done
-# fi
+# Update apt-get and install Unix dependencies
+if [ ${#UNIQUE_UNIX_DEPENDENCIES[@]} -ne 0 ]; then
+  sudo apt-get update
+  for dep in "${UNIQUE_UNIX_DEPENDENCIES[@]}"; do
+    sudo apt-get install -y "$dep"
+  done
+fi
 
-# # Install Python dependencies explicitly using the virtual environment's pip
-# for dep in "${UNIQUE_PYTHON_DEPENDENCIES[@]}"; do
-#   myenv/bin/python3 -m pip install "$dep"
-# done
+# Install Python dependencies explicitly using the virtual environment's pip
+for dep in "${UNIQUE_PYTHON_DEPENDENCIES[@]}"; do
+  myenv/bin/python3 -m pip install "$dep"
+done
 
 # Set execute permissions for additional scripts
 chmod 777 startup.sh stop.sh
