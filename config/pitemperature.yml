@@ -1,0 +1,6 @@
+pitemperature:
+  enabled: true
+  path: modules.pitemperature.PiTemperature
+  dependencies:
+    python:
+      - pypubsub

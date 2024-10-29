@@ -10,22 +10,22 @@ class Respond:
         pub.subscribe(self.speech, 'speech')
         pub.subscribe(self.tracking, 'tracking:match')
 
-    def speech(self, msg):
+    def speech(self, text):
         if self.state.is_resting():
             return
 
         action = None
-        if 'are you sure' in msg:
+        if 'are you sure' in text:
             action = 'head_nod'
-        if 'you like' in msg:
+        if 'you like' in text:
             actions = ['head_shake', 'head_nod', 'speak']
-            action = actions[abs(hash(msg.split('like ')[1])) % len(actions)-1] # choose from the number of actions by hashing the item, so the answer is always the same
+            action = actions[abs(hash(text.split('like ')[1])) % len(actions)-1] # choose from the number of actions by hashing the item, so the answer is always the same
             # action = actions[randrange(len(actions) - 1)]
 
         if action:
             pub.sendMessage('log', msg='[Personality] Respond action: ' + str(action))
             if action is 'speak':
-                pub.sendMessage('speak', msg=msg)
+                pub.sendMessage('speak', msg=text)
             else:
                 pub.sendMessage('animate', action=action)
 

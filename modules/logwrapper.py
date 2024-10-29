@@ -9,6 +9,25 @@ class LogWrapper:
     levels = ['notset', 'debug', 'info', 'warning', 'error', 'critical']
 
     def __init__(self, **kwargs):
+        """
+        LogWrapper class
+        :param kwargs: path, filename, translator
+        
+        Install: pip install pubsub
+        
+        Subscribes to 'log' to log messages
+        - Argument: type (string) - log level
+        - Argument: msg (string) - message to log
+        
+        Example:
+        pub.sendMessage('log', type='info', msg='This is an info message')
+        pub.sendMessage('log:debug', msg='This is a debug message')
+        pub.sendMessage('log:info', msg='This is an info message')
+        pub.sendMessage('log:error', msg='This is an error message')
+        pub.sendMessage('log:critical', msg='This is a critical message')
+        pub.sendMessage('log:warning', msg='This is a warning message')
+        
+        """
         self.path = kwargs.get('path', '/')
         self.filename = kwargs.get('filename', 'app.log')
         self.file = self.path + '/' + self.filename

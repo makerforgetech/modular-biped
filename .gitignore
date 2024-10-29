@@ -56,7 +56,6 @@ colorzero-2.0.dist-info/
 colorzero/
 colour-0.1.5.dist-info/
 colour.py
-config/tts.yml
 data/
 digitalio.py
 distutils-precedence.pth
@@ -149,7 +148,7 @@ usb/
 usb_hid.py
 venv/
 viam-config-example.json
-viam/
+/viam/
 viam_sdk-0.12.0.dist-info/
 viam_sdk-0.15.0.dist-info/
 yaml/

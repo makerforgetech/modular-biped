@@ -17,10 +17,10 @@ class Sentiment:
         # initialize NLTK sentiment analyzer
         self.analyzer = SentimentIntensityAnalyzer()
 
-    def speech(self, msg):
+    def speech(self, text):
         if self.state.is_resting():
             return
-        score = self.get_sentiment(msg)
+        score = self.get_sentiment(text)
         pub.sendMessage('sentiment', score=score)
         
     def get_sentiment(self, text):

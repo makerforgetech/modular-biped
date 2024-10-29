@@ -1,18 +1,45 @@
 import pigpio
 import threading
 from modules.config import Config
-from modules.arduinoserial import ArduinoSerial
+from modules.network.arduinoserial import ArduinoSerial
 from time import sleep
 from pubsub import pub
 
 class Servo:
 
-    def __init__(self, pin, identifier, pwm_range, index, **kwargs):
-        self.pin = pin
-        self.identifier = identifier
-        self.index = index
-        self.range = pwm_range
-        self.power = kwargs.get('power', True)
+    def __init__(self, **kwargs):
+        """
+        Servo class
+        Uses ArduinoSerial to communicate with Arduino
+        
+        :param kwargs: pin, name, id, range, power, start_pos, buffer, delta, serial, pi
+        :param pin: GPIO pin number
+        :param name: servo name
+        :param id: servo id
+        :param range: [min, max] angle range
+        :param power: True to use power
+        :param start_pos: initial angle
+        :param buffer: PWM amount to specify as acceleration / deceleration buffer
+        :param delta: amount of change in acceleration / deceleration (as a multiple)
+        :param serial: True to use serial connection
+        
+        Install: pip install pigpio (optional, untested in this version)
+        
+        Subscribes to 'servo:<name>:mvabs' to move servo to absolute position
+        - Argument: percentage (int) - percentage to move servo
+        
+        Subscribes to 'servo:<name>:mv' to move servo to relative position
+        - Argument: percentage (int) - percentage to move servo
+        
+        Example:
+        pub.sendMessage('servo:pan:mvabs', percentage=90)
+        pub.sendMessage('servo:pan:mv', percentage=10)
+        """
+        self.pin = kwargs.get('pin')
+        self.identifier = kwargs.get('name')
+        self.index = kwargs.get('id')
+        self.range = kwargs.get('range')
+        self.power = kwargs.get('power', False)
 
         self.start = kwargs.get('start_pos', 50)
         self.pos = self.translate(self.start)
@@ -23,12 +50,12 @@ class Servo:
         self.serial = kwargs.get('serial', True)
         if self.serial is None:
             self.pi = kwargs.get('pi', pigpio.pi())
-            self.pi.set_mode(pin, pigpio.OUTPUT)
+            self.pi.set_mode(self.pin, pigpio.OUTPUT)
 
         self.move(self.start)
 
-        pub.subscribe(self.move, 'servo:' + identifier + ':mvabs')
-        pub.subscribe(self.move_relative, 'servo:' + identifier + ':mv')
+        pub.subscribe(self.move, 'servo:' + self.identifier + ':mvabs')
+        pub.subscribe(self.move_relative, 'servo:' + self.identifier + ':mv')
 
     def __del__(self):
         pass #self.reset()

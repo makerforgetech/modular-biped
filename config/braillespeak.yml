@@ -1,0 +1,8 @@
+braillespeak:
+  enabled: true
+  path: modules.audio.braillespeak.BrailleSpeak
+  config:
+    pin: 27
+  dependencies:
+    python:
+      - pypubsub

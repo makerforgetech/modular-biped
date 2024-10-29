@@ -1,7 +1,10 @@
 buzzer:
-  pin: 27
-  docs:
-    description: "The buzzer is a piezo speaker that can be used to play tones and melodies."
-    events: 
-      sub: 
-        - speech
+  enabled: true
+  path: "modules.audio.buzzer.Buzzer"
+  config:
+    pin: 27
+    name: 'buzzer'
+  dependencies:
+    python:
+      - gpiozero
+      - pypubsub
