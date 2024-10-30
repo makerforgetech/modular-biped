@@ -7,7 +7,7 @@ emotions:
       - torch
       - transformers
       - pypubsub
-  conf:
+  config:
     colors:
       grief:
         COLOR_ABBEY: '(76, 79, 86)'
