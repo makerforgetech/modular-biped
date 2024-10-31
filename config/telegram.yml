@@ -1,0 +1,8 @@
+telegram:
+  path: modules.network.telegram.Telegram
+  enabled: false
+  dependencies:
+    python:
+      - python-telegram-bot
+    additional:
+      - https://core.telegram.org/bots/tutorial#obtain-your-bot-token
