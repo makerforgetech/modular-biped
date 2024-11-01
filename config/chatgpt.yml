@@ -1,0 +1,11 @@
+chatgpt:
+  enabled: false
+  path: 'modules.chatgpt.ChatGPT'
+  config:
+    model: gpt-4o-mini
+  dependencies:
+    python:
+      - openai
+      - pypubsub
+    additional:
+      - https://platform.openai.com/api-keys

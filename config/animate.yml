@@ -1,0 +1,6 @@
+animate:
+  enabled: true
+  path: modules.animate.Animate    
+  dependencies:
+    python:
+      - pypubsub

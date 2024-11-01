@@ -1,0 +1,9 @@
+serial:
+  enabled: true
+  path: "modules.network.arduinoserial.ArduinoSerial"
+  config:
+    port: '/dev/ttyAMA0'
+    baudrate: '115200'
+  dependencies:
+    pythion:
+      - pypubsub

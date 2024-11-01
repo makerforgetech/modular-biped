@@ -1,0 +1,5 @@
+speechinput:
+  enabled: false
+  path: modules.audio.speechinput.SpeechInput
+  config:
+    device_name: lp

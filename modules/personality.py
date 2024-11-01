@@ -53,7 +53,7 @@ class Personality:
         self.behaviours = SimpleNamespace(**behaviours)
 
     def loop(self):
-        # pub.sendMessage('speech', msg="Hello, I am happy") # for testing sentiment responses
+        # pub.sendMessage('speech', text="Hello, I am happy") # for testing sentiment responses
         if not self.is_asleep() and not self.behaviours.faces.face_detected and not self.behaviours.motion.is_motion() and not self.behaviours.objects.is_detected:
             self.set_eye('red')
 

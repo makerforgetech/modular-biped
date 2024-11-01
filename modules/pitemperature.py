@@ -18,12 +18,12 @@ class PiTemperature:
     def monitor(self):
         val = self.read()
         pub.sendMessage('log', msg='[TEMP] ' + val)
+        pub.sendMessage('temperature', value=val)
         val = float(val)
         if val >= PiTemperature.THROTTLED_TEMP:
             pub.sendMessage('led', identifiers='status2', color='red') # WARNING
         else:
             pub.sendMessage('led', identifiers='status2', color=self.map_range(round(val)), gradient='br')  # right
-
 
     def map_range(self, value):
         # Cap range for LED

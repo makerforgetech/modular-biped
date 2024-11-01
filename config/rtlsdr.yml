@@ -1,0 +1,18 @@
+rtl_sdr:
+  enabled: false
+  path: modules.network.rtlsdr.RTLSDR
+  config:
+    udp_host: "127.0.0.1"
+    udp_port: 8433
+    timeout: 70
+    topics:
+      publish_data: "sdr/data"
+      subscribe_listen: "sdr/listen"
+      subscribe_start: "sdr/start"
+      subscribe_stop: "sdr/stop"
+  dependencies:
+    unix:
+      - "rtl-433"
+    python:
+      - "pypubsub"
+      - "requests"
