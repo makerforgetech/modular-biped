@@ -1,5 +1,5 @@
 rtl_sdr:
-  enabled: true
+  enabled: false
   path: modules.network.rtlsdr.RTLSDR
   config:
     udp_host: "127.0.0.1"

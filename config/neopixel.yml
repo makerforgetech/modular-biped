@@ -1,5 +1,4 @@
 neopixel:
-  
   enabled: true
   path: 'modules.neopixel.neopx.NeoPx'
   config:

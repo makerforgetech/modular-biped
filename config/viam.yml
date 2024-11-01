@@ -17,3 +17,5 @@ viamobjectdetection:
   dependencies:
     python:
       - viam-sdk
+    additional:
+      - https://docs.viam.com/installation/viam-server-setup/

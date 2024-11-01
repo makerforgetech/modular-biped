@@ -17,6 +17,8 @@ class TTS:
         
         Install: pip install pyttsx3 elevenlabs
         
+        Requires API key environment variable ELEVENLABS_KEY or use pyttsx3
+        
         Subscribes to 'tts' to speak message
         - Argument: msg (string) - message to speak
         

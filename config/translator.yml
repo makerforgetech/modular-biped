@@ -1,5 +1,5 @@
 translator:
-  enabled: true
+  enabled: false
   path: modules.translator.Translator
   config:
     default:

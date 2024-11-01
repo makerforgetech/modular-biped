@@ -1,5 +1,5 @@
 buzzer:
-  enabled: true
+  enabled: false
   path: "modules.audio.buzzer.Buzzer"
   config:
     pin: 27

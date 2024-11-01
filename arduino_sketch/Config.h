@@ -80,10 +80,10 @@ int PosLookDown[SERVO_COUNT] = {NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, 120, 9
 // Array of poses except PosRest and PosSleep (which are used for initialization and reset of position)
 int *Poses[] = {PosStand, PosLookLeft, PosLookRight, PosLookUp, PosLookDown, PosLookRandom};
 
-int backpackPin = 12;
+int backpackPin = PIN_A1;
 bool backpack = false;
 
-int restrainPin = PIN_A1;
+int restrainPin = 12;
 bool restrainingBolt = false;
 
 void blinkLED()

@@ -1,41 +1,22 @@
 #!/usr/bin/env python
 # pylint: disable=unused-argument
-# This program is dedicated to the public domain under the CC0 license.
-
-"""
-Simple Bot to reply to Telegram messages.
-
-First, a few handler functions are defined. Then, those functions are passed to
-the Application and registered at their respective places.
-Then, the bot is started and runs until we press Ctrl-C on the command line.
-
-Usage:
-Basic Echobot example, repeats messages.
-Press Ctrl-C on the command line or send a signal to the process to stop the
-bot.
-"""
 import logging
 import os
+import asyncio
+from pubsub import pub
 
 from telegram import ForceReply, Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
-
-# Enable logging
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
-# set higher logging level for httpx to avoid all GET and POST requests being logged
-logging.getLogger("httpx").setLevel(logging.WARNING)
-
-logger = logging.getLogger(__name__)
 
 class TelegramBot:
     def __init__(self, **kwargs):
         """
         Telegram Bot
         :param kwargs: token
-        
+
         Create a bot via Telegram's BotFather and get the token.
+        
+        Set the token as an environment variable 'TELEGRAM_BOT_TOKEN' (preferred) or pass it as a keyword argument.
         
         1. Search for BotFather in Telegram
         2. Start the BotFather
@@ -45,26 +26,40 @@ class TelegramBot:
         6. Create an environment variable called TELEGRAM_BOT_TOKEN and set it to the token (can also be set in the config yaml)
         7. Run the script
         
-        """
-        # get token from environment variable
-        self.token = os.getenv('TELEGRAM_BOT_TOKEN', kwargs.get('token', None))
+        Note: 
+        Currently the run_polling method will block the script from running any further code. 
+        Run the bot in a separate thread or process if you want to run other code alongside the bot.
         
-        """Start the bot."""
-        # Create the Application and pass it your bot's token.
+        """
+        # Get token from environment variable
+        self.token = os.getenv('TELEGRAM_BOT_TOKEN', kwargs.get('token', None))
+        print(self.token)
+        # Topics for pubsub communication
+        self.topics = kwargs.get('topics', {
+            'publish_received': 'telegram/received',
+            'subscribe_respond': 'telegram/respond'
+        })
+        self.update = None
+        self.user_whitelist = kwargs.get('user_whitelist', [])
+
+        # Create the Application and pass it your bot's token
         application = Application.builder().token(self.token).build()
 
-        # on different commands - answer in Telegram
+        # Set up command handlers
         application.add_handler(CommandHandler("start", TelegramBot.start))
         application.add_handler(CommandHandler("help", TelegramBot.help_command))
 
-        # on non command i.e message - echo the message on Telegram
-        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, TelegramBot.echo))
+        # Set up message handlers
+        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.publish))
+
+        # Subscribe to the response topic with async wrapper
+        pub.subscribe(self.async_handle_wrapper, self.topics['subscribe_respond'])
+        
+        print("Starting Telegram bot...")
 
         # Run the bot until the user presses Ctrl-C
         application.run_polling(allowed_updates=Update.ALL_TYPES)
-        
-    # Define a few command handlers. These usually take the two arguments update and
-    # context.
+
     @staticmethod
     async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Send a message when the command /start is issued."""
@@ -79,11 +74,53 @@ class TelegramBot:
         """Send a message when the command /help is issued."""
         await update.message.reply_text("Help!")
 
-    @staticmethod
-    async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        """Echo the user message."""
-        await update.message.reply_text(update.message.text)
+    async def publish(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """Publish the user's message to the application via pubsub."""
+        user_id = update.effective_user.id
+        message = update.message.text
+        
+        # Save the update for response handling
+        self.update = update
+        
+        # Publish the message to other parts of the application
+        pub.sendMessage(self.topics['publish_received'], user_id=user_id, message=message)
+        print(f"Published message from user {user_id}: {message} on topic {self.topics['publish_received']}")
 
+    async def handle(self, user_id: int, response: str) -> None:
+        """Handle responses from the application and send them back to the user."""
+        if (user_id not in self.user_whitelist):
+            print(f"User {user_id} not in whitelist, skipping response")
+            return
+        print(f"Handling response for user {user_id}: {response}")
+        
+        # Send the response back to the user on Telegram
+        if self.update and self.update.effective_user.id == user_id:
+            await self.update.message.reply_text(response)
+
+    def async_handle_wrapper(self, user_id: int, response: str) -> None:
+        """Wrapper to handle asynchronous calling of the handle coroutine."""
+        print(f"Scheduling async handling for user {user_id}")
+        asyncio.create_task(self.handle(user_id, response))
 
 if __name__ == "__main__":
+    # Enable logging
+    logging.basicConfig(
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+    )
+    # Set higher logging level for httpx to avoid all GET and POST requests being logged
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+
+    logger = logging.getLogger(__name__)
+
+    # Define the simulate_echo function, which will be triggered on 'publish_received'
+    def simulate_echo(user_id, message):
+        print(f"Simulating echo for user {user_id} with message: {message}")
+        # This would echo back as a response to the handle method
+        pub.sendMessage('telegram/respond', user_id=user_id, response=message)
+    
+    # Subscribe the simulate_echo function to the publish_received topic
+    pub.subscribe(simulate_echo, 'telegram/received')
+    print("Subscribed to 'telegram/received' topic")
+    
     bot = TelegramBot()
+    bot.user_whitelist = []
