@@ -131,10 +131,10 @@ class NeoPx:
         self.i2c.deinit()
         sleep(1)
 
-    def speech(self, msg):
-        if 'light on' in msg:
+    def speech(self, text):
+        if 'light on' in text:
             self.flashlight(True)
-        if 'light off' in msg:
+        if 'light off' in text:
             self.flashlight(False)
 
     def set(self, identifiers, color, gradient=False):

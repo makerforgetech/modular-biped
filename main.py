@@ -8,7 +8,7 @@ from modules.config import Config
 from module_loader import ModuleLoader
 
 # Set up logging
-logging.basicConfig(filename=os.path.dirname(__file__) + '/app.log', level=logging.DEBUG, format='%(levelname)s: %(asctime)s %(message)s',
+logging.basicConfig(filename=os.path.dirname(__file__) + '/app.log', level=logging.INFO, format='%(levelname)s: %(asctime)s %(message)s',
                             datefmt='%m/%d/%Y %I:%M:%S %p') # this doesn't work unless it's here
 from modules.logwrapper import LogWrapper
 
@@ -36,6 +36,10 @@ def main():
     # print(module_instances.keys())
     # dict_keys(['ArduinoSerial', 'NeoPx', 'BrailleSpeak', 'Animate', 'Vision', 'PiTemperature', 'Servo_leg_l_hip', 'Servo_leg_l_knee', 'Servo_leg_l_ankle', 'Servo_leg_r_hip', 'Servo_leg_r_knee', 'Servo_leg_r_ankle', 'Servo_tilt', 'Servo_pan', 'Translator', 'Tracking_tracking', 'Sensor', 'Buzzer_buzzer'])
 
+    # Use animate to nod head
+    # pub.sendMessage('animate', action='head_nod')
+    # sleep(1)
+    # pub.sendMessage('animate', action='head_shake')
     
     # Enable translator in log wrapper
     # log.translator = module_instances['Translator'] # Set the translator for the log wrapper
@@ -46,21 +50,23 @@ def main():
     # Play happy birthday with buzzer
     # pub.sendMessage('play', song="happy birthday") # Also available: 'merry christmas'
 
-    # Use animate to nod head
-    # pub.sendMessage('animate', action='head_nod')
     
     # Check temperature of Raspberry Pi
     # pub.subscribe(self.handleTemp, 'temperature') # handleTemp should accept 'value' as a parameter
     
     # Move pi servo
-    # pub.sendMessage('piservo:move', percentage=50)
+    # pub.sendMessage('piservo:move', angle=30)
+    # pub.sendMessage('piservo:move', angle=-30)
     
     # Move servo
     # pub.sendMessage('servo:<identifier>:mv', percentage=50) # e.g. servo:pan:mv
     # pub.sendMessage('servo:<identifier>:mvabs', percentage=50) # Absolute position. e.g. servo:pan:mvabs
 
     # Test emotion analysis
-    pub.sendMessage('speech', text='I am so happy today!')
+    # pub.sendMessage('speech', text='I am so happy today!')
+    
+    # Test speech input
+    # pub.sendMessage('speech:listen')
 
     # Start loops or other tasks
     pub.sendMessage('log', msg="[Main] Loop started")

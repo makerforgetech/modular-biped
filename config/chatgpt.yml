@@ -7,3 +7,5 @@ chatgpt:
     python:
       - openai
       - pypubsub
+    additional:
+      - https://platform.openai.com/api-keys

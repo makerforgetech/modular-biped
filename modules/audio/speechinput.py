@@ -11,13 +11,14 @@ class SpeechInput:
         self.recognizer = sr.Recognizer()
         self.recognizer.pause_threshold = 1
 
-        self.device = kwargs.get('device_index', self.get_device_index('lp'))
+        self.device_name = kwargs.get('device_name', 'lp')
+        self.device = self.get_device_index(self.device_name)
         self.sample_rate = kwargs.get('sample_rate', 16000)
 
         self.mic = sr.Microphone(device_index=self.device, sample_rate=self.sample_rate)
         self.listening = False
 
-        pub.subscribe(self.start, 'wake')
+        pub.subscribe(self.start, 'speech:listen')
         pub.subscribe(self.stop, 'rest')
         pub.subscribe(self.stop, 'sleep')
         pub.subscribe(self.stop, 'exit')

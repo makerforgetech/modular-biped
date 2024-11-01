@@ -20,6 +20,12 @@ class ViamClassifier:
         Install the VIAM SDK before using.
         pip install viam-sdk
         
+        Requires secrets to be set in the environment variables:
+        - ROBOT_API_KEY
+        - ROBOT_API_KEY_ID
+        - ROBOT_ADDRESS
+        See wiki for more information.
+        
         Subscribes to:
         - vision:start
         - exit
