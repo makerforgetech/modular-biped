@@ -1,0 +1,12 @@
+batterymonitor:
+  enabled: false
+  path: modules.battery.Battery
+  config: 
+    pin: A0
+    bat_max: 760
+    bat_low: 690
+    bat_min: 670
+    logfile: 'battery.csv'
+  dependencies:
+    python:
+      - pypubsub
