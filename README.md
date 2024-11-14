@@ -1,190 +1,43 @@
-[![Companion Robot](https://circleci.com/gh/danic85/companion-robot.svg?style=shield)](https://app.circleci.com/pipelines/github/danic85/companion-robot)
+# Open Source, 3D Printable, Modular Bipedal Robot Project
 
-# Robotics Development Framework
-This platform has been created to allow modular development and experimentation of robotics in python / C++ using the Raspberry Pi and Arduino.
+The **Modular Bipedal Robot** project aims to educate and inspire individuals interested in robotics and electronics. This open-source initiative focuses on creating a fully autonomous companion robot with a variety of advanced features.
 
-## Coral TPU Accelerator
+## Key Features
 
-To use the Googla Coral USB Accelerator, first flash the Pi SD card with the image found in the [AIY Maker Kit](https://aiyprojects.withgoogle.com/maker/)
-([Download as of 2022-08-05](https://github.com/google-coral/aiy-maker-kit-tools/releases/download/v20220518/aiy-maker-kit-2022-05-18.img.xz))
+- **Bipedal Design**: The robot includes articulated legs for bipedal movement.
+- **Control Systems**: Utilizes Arduino and Raspberry Pi, managed through custom PCBs.
+- **Modular Body**: Configurable body components allow for easy customization and adaptability.
+- **Software Modules**:
+  - Animation: Handles the animation of the robot, including walking, turning, and other movements.
+  - Braillespeak: Converts text to Braille and speaks it using a proprietary audio output using the onboard buzzer.
+  - Buzzer: Controls the buzzer for audio output. Includes the ability to play tones and melodies.
+  - ChatGPT: Uses the OpenAI GPT models to process text based on user input.
+  - Logging: Logs data to a file for debugging and analysis.
+  - Motion Detection: Handles motion detection using an onboard microwave motion sensor.
+  - Neopixel: Controls the onboard Neopixel LEDs for visual feedback.
+  - PiServo: Controls the servos connected to the Raspberry Pi.
+  - PiTemperature: Reads the temperature from the integrated temperature sensor on the Raspberry Pi.
+  - RTLSDR: Uses an RTL-SDR dongle to receive and process radio signals.
+  - Serial Connection: Handles serial communication between the Raspberry Pi and Arduino.
+  - Servos: Controls the servos connected to the Arduino via the Raspberry Pi and the serial connection.
+  - Tracking: Uses computer vision to track objects and faces using the onboard camera.
+  - Translator: Translates text between languages using the Google Translate API.
+  - TTS: Converts text to speech using the onboard speaker.
+  - Viam: Uses the VIAM API to integrate Viam modules for additional functionality.
+  - Vision: Handles image processing and computer vision tasks using the onboard IMX500 Raspberry Pi AI camera.
+  - [Read more](https://github.com/makerforgetech/modular-biped/wiki/Software#modules)!
 
-(I attempted to install the required software from the coral [getting started guide](https://coral.ai/docs/accelerator/get-started#1-install-the-edge-tpu-runtime) but I was unable to get past an error relating to grpico "GLIBC_2.29' not found")
+## Project Background
 
-Alternatively, set Config.vision.tech to `opencv` for the original (slower) facial recognition. I am not updating this anymore so you may find some integration issues.
+The Modular Biped Robot Project is designed to provide a flexible and modular framework for robotics development using Python and C++ on the Raspberry Pi and Arduino platforms. It aims to enable developers, robotics enthusiasts, and curious individuals to experiment, create, and customize their own biped robots. With a range of features and functionalities and the option to add your own easily, the Modular Biped Robot Project offers an exciting opportunity to explore the world of robotics.
 
-## Installation
-```
-chmod 777 install.sh
-./install.sh
-```
+## Modularity
 
-Disable audio (see Neopixels section below)
+The open source framework is designed for flexibility, allowing users to easily add or remove components to suit their specific needs. Comprehensive [guides](https://github.com/makerforgetech/modular-biped/wiki/Software#creating-a-module) are provided for integrating new modules seamlessly.
 
-## Running
-```
-./startup.sh
-```
-To execute manual control via keyboard:
-```
-./manual_startup.sh
-```
-To execute startup including a preview of the video feed (not available via SSH):
-```
-./preview_startup.sh
-```
+## Resources
 
-###Testing
-```
-python3 -m pytest --cov=modules --cov-report term-missing
-```
-
-## Run on Startup
-
-Execute `sudo vim /etc/rc/local` and add the following lines before the `exit 0` statement:
-```
-python3 /home/archie/companion-robot/shutdown_pi.py
-/home/archie/companion-robot/startup.sh
-```
-
-### Auto shutdown
-GPIO 26 is wired to allow shutdown when brought to ground via a switch. 
-
-The script `shutdown_pi.py` manages this.
-
-Guide:
-https://howchoo.com/g/mwnlytk3zmm/how-to-add-a-power-button-to-your-raspberry-pi
-
-## Features
-
-### Facial detection and tracking
-Using the Raspberry Pi camera
-
-### Servo control
-Control of up to 9 servos via an arduino serial connection
-
-### Battery monitor
-Both external and software integrated via the arduino serial connection
-
-### Buzzer
-A buzzer is connected to GPIO 27 to allow for tones to be played in absence of audio output (see Neopixel below).
-https://github.com/gumslone/raspi_buzzer_player.git
-
-### Motion Sensor
-An RCWL-0516 microwave radar sensor is equipped on GPIO 13
-
-### Stereo MEMS Mics
-GPIO 18, 19 and 20 allow stereo MEMS microphones as audio input
-```
-Mic 3V to Pi 3.3V
-Mic GND to Pi GND
-Mic SEL to Pi GND (this is used for channel selection, connect to either 3.3V or GND)
-Mic BCLK to BCM 18 (pin 12)
-Mic DOUT to BCM 20 (pin 38)
-Mic LRCL to BCM 19 (pin 35)
-```
-https://learn.adafruit.com/adafruit-i2s-mems-microphone-breakout/raspberry-pi-wiring-test
-
-
-```
-cd ~
-sudo pip3 install --upgrade adafruit-python-shell
-wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/i2smic.py
-sudo python3 i2smic.py
-```
-
-####Test
-`arecord -l`
-`arecord -D plughw:0 -c2 -r 48000 -f S32_LE -t wav -V stereo -v file_stereo.wav`
-
-_Note:_ See below for additional configuration to support voice recognition
-
-### Speech Recognition
-Trigger word for voice recognition (currently not used):
-https://snowboy.kitt.ai/
-
-Speech recognition is enabled whenever a face is visible. 
-Ensure that the `device_index` specified in `modules/speechinput.py` matches your microphone. 
-
-See `scripts/speech.py` to list input devices and test. See below for MEMS microphone configuration
-
-### MEMS Microphone configuration for speech recognition
-
-By default the Adafruit I2S MEMS Microphone Breakout does not work with speech recognition. 
-
-To support voice recognition on the MEMS microphone(s) the following configuration changes are needed.
-
-`sudo apt-get install ladspa-sdk`
-
-Create `/etc/asound.conf` with the following content:
-
-``` 
-pcm.pluglp {
-    type ladspa
-    slave.pcm "plughw:0"
-    path "/usr/lib/ladspa"
-    capture_plugins [
-   {   
-      label hpf
-      id 1042
-   }
-        {
-                label amp_mono
-                id 1048
-                input {
-                    controls [ 30 ]
-                }
-        }
-    ]
-}
-
-pcm.lp {
-    type plug
-    slave.pcm pluglp
-}
-```
-
-This enables the device 'lp' to be referenced in voice recognition. Shown with index `18` in the example below.
-
-Sample rate should also be set to `16000`
-
-`mic = sr.Microphone(device_index=18, sample_rate=16000)`
-
-References: 
-
-* [MEMS Microphone Installation Guide](https://learn.adafruit.com/adafruit-i2s-mems-microphone-breakout/raspberry-pi-wiring-test)
-
-* [Adafruit Support discussing issue](https://forums.adafruit.com/viewtopic.php?f=50&t=181675&p=883853&hilit=MEMS#p883853)
-
-* [Referenced documentation of fix](https://github.com/mpromonet/v4l2rtspserver/issues/94)
-
-### Serial communication with Arduino
-
-In order to use the Raspberry Pi’s serial port, we need to disable getty (the program that displays login screen)
-
-`sudo raspi-config ->  Interfacing Options -> Serial -> "Would you like a login shell to be accessible over serial" = 'No'. Restart`
-
-#### Connection via serial pins
-Connect the Pi GPIO 14 & 15 (tx & rx) to the arduino tx & rx (tx -> rx in both directions!) via a logic level shifter, as the Pi is 3v3 and the arduino is (most likely) 5v.
-
-####Upload to Arduino over serial pins
-To upload over serial pins, press the reset button on the Arduino at the point that the IDE starts 'uploading' (after compile), otherwise a sync error will display.
-
-### Neopixel
-
-WS1820B support is included via the Pi GPIO pin 12. Unfortunately to support this you must disable audio on the Pi.
-
-```
-sudo vim /boot/config.txt
-#dtparam=audio=on
-```
-
-This is also why the application must be executed with `sudo`
-
-https://learn.adafruit.com/neopixels-on-raspberry-pi/python-usage
-
-## PCBs
-Prefabricated PCBs are available for this project in the `circuits` folder. This allows the connection between the core components as described above.
-
-![Top](circuits/v2/Upper/Top%20Feb%202021_pcb.png)
-
-![Bottom](circuits/v2/Lower/Lower%20Feb%202021_pcb.png)
+- **Documentation**: For detailed information, visit the project’s GitHub wiki: [Modular Biped Documentation](https://github.com/makerforgetech/modular-biped/wiki)
+- **Code**: Check out the modular open source software on [GitHub](https://github.com/makerforgetech/modular-biped)
+- **YouTube Playlist**: Explore the development process through our build videos: [Watch on YouTube](https://www.youtube.com/watch?v=2DVJ5xxAuWY&list=PL_ua9QbuRTv6Kh8hiEXXVqywS8pklZraT)
+- **Community**: Have a question or want to show off your build? Join the communities on [GitHub](https://bit.ly/maker-forge-community) and [Discord](https://bit.ly/makerforge-community)!
