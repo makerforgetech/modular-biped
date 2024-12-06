@@ -32,10 +32,10 @@
           <mxGeometry x="580" y="80" width="180" height="180" as="geometry" />
         </mxCell>
         <mxCell id="dYm7dDyOneSl2GsxLzdn-11" value="Breakout" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="610" y="120" width="120" height="60" as="geometry" />
+          <mxGeometry x="610" y="130" width="120" height="30" as="geometry" />
         </mxCell>
         <mxCell id="dYm7dDyOneSl2GsxLzdn-12" value="RCWL-0516" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="610" y="190" width="120" height="60" as="geometry" />
+          <mxGeometry x="610" y="210" width="120" height="30" as="geometry" />
         </mxCell>
         <mxCell id="dYm7dDyOneSl2GsxLzdn-13" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;GPIO&lt;/span&gt;&lt;/h1&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="600" y="80" width="70" height="40" as="geometry" />
@@ -108,6 +108,9 @@
         </mxCell>
         <mxCell id="dYm7dDyOneSl2GsxLzdn-37" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;USB&lt;/span&gt;&lt;/h1&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="484" y="580" width="66" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="dYm7dDyOneSl2GsxLzdn-40" value="Servo" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="610" y="170" width="120" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
