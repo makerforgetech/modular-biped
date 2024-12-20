@@ -10,6 +10,9 @@ UNIX_DEPENDENCIES=()
 ADDITIONAL_URLS=()
 ACTIVE_MODULES=()
 
+# Install yaml package for Python
+myenv/bin/python3 -m pip install pyyaml
+
 # Helper function to parse dependencies from YAML files using Python
 parse_dependencies() {
   myenv/bin/python3 - <<EOF
