@@ -1,9 +1,10 @@
 neopixel:
   enabled: true
-  path: 'modules.neopixel.neopx.NeoPx'
+  # path: 'modules.neopixel.neopx.NeoPx'
+  path: 'modules.neopixel.neopixel_spi.NeopixelSPI'
   config:
-    pin: None # GPIO2 and 3 are use for i2c
-    i2c: True
+    pin: None # GPIO2 and 3 are use for i2c, GPIO10 is used for SPI
+    i2c: False # The paths need merging for SPI, I2C and PWM @todo
     count: 12
     positions: {
       'status1': 0,
@@ -36,6 +37,8 @@ neopixel:
   dependencies:
     python:
       - pypubsub
-      - adafruit-circuitpython-seesaw
+      - adafruit-circuitpython-seesaw # i2c SUPPORT
+      - adafruit-blinka # SPI SUPPORT
+      - adafruit-circuitpython-neopixel-spi # SPI SUPPORT
   emotion_analysis:
     enable: false
