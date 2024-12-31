@@ -101,6 +101,34 @@ class NeoPx:
                 ss = seesaw.Seesaw(self.i2c, addr=0x60)
             neo_pin = 15 # Unclear how this is used
             self.pixels = neopixel.NeoPixel(ss, neo_pin, self.count, brightness = 0.1)
+        elif kwargs.get('spi'):
+            import neopixel_spi as neopixel
+            spi = board.SPI()
+            self.pixels = neopixel.NeoPixel_SPI(spi, self.count, brightness=0.1, auto_write=False, pixel_order=neopixel.GRB)    
+            
+            DELAY = 3
+            print("All neopixels OFF")
+            self.pixels.fill((0,0,0))
+            self.pixels.show()
+            sleep(DELAY)
+
+            print("First neopixel red, last neopixel blue")
+            self.pixels[0] = (10,0,0)
+            self.pixels[self.count - 1] = (0,0,10)
+            self.pixels.show()
+            sleep(DELAY)
+
+            print("All " + str(self.count) + " neopixels green")
+            self.pixels.fill((0,10,0))
+            self.pixels.show()
+            sleep(DELAY)
+
+            print("All neopixels OFF")
+            self.pixels.fill((0,0,0))
+            self.pixels.show()
+            sleep(DELAY)
+
+            print("End of test")
         else:
             import neopixel
             self.pixels = neopixel.NeoPixel(board.D12, self.count)
