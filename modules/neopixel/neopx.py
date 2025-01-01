@@ -87,7 +87,8 @@ class NeoPx:
         self.animation = False
         self.thread = None
         self.overridden = False  # prevent any further changes until released (for flashlight)
-        if kwargs.get('i2c'):
+        self.protocol = kwargs.get('protocol')
+        if self.protocol == 'I2C':
             import busio
             from rainbowio import colorwheel
             from adafruit_seesaw import seesaw, neopixel
@@ -101,9 +102,37 @@ class NeoPx:
                 ss = seesaw.Seesaw(self.i2c, addr=0x60)
             neo_pin = 15 # Unclear how this is used
             self.pixels = neopixel.NeoPixel(ss, neo_pin, self.count, brightness = 0.1)
-        else:
+        elif self.protocol == 'SPI':
+            import neopixel_spi as neopixel
+            spi = board.SPI()
+            self.pixels = neopixel.NeoPixel_SPI(spi, self.count, brightness=0.1, auto_write=False, pixel_order=neopixel.GRB)    
+            
+            DELAY = 3
+            print("All neopixels OFF")
+            self.pixels.fill((0,0,0))
+            self.pixels.show()
+            sleep(DELAY)
+
+            print("First neopixel red, last neopixel blue")
+            self.pixels[0] = (10,0,0)
+            self.pixels[self.count - 1] = (0,0,10)
+            self.pixels.show()
+            sleep(DELAY)
+
+            print("All " + str(self.count) + " neopixels green")
+            self.pixels.fill((0,10,0))
+            self.pixels.show()
+            sleep(DELAY)
+
+            print("All neopixels OFF")
+            self.pixels.fill((0,0,0))
+            self.pixels.show()
+            sleep(DELAY)
+
+            print("End of test")
+        else: # GPIO
             import neopixel
-            self.pixels = neopixel.NeoPixel(board.D12, self.count)
+            self.pixels = neopixel.NeoPixel(kwargs.get('pin'), self.count)
         # Default states
         self.set(self.all, NeoPx.COLOR_OFF)
         sleep(0.1)
@@ -128,7 +157,8 @@ class NeoPx:
             self.animation = False
             self.thread.join()
         self.set(self.all, NeoPx.COLOR_OFF)
-        self.i2c.deinit()
+        if self.protocol == 'I2C':
+            self.i2c.deinit()
         sleep(1)
 
     def speech(self, text):

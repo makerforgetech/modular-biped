@@ -1,5 +1,5 @@
 vision:
-  enabled: true
+  enabled: false
   path: 'modules.vision.imx500.vision.Vision'
   config:
     preview: False
@@ -7,5 +7,4 @@ vision:
     unix:
       - imx500-all
     python:
-      - python3-opencv
-      - python3-munkres
+      - opencv-python
