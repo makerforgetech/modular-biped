@@ -157,7 +157,8 @@ class NeoPx:
             self.animation = False
             self.thread.join()
         self.set(self.all, NeoPx.COLOR_OFF)
-        self.i2c.deinit()
+        if self.protocol == 'I2C':
+            self.i2c.deinit()
         sleep(1)
 
     def speech(self, text):
