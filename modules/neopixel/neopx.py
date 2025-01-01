@@ -87,7 +87,8 @@ class NeoPx:
         self.animation = False
         self.thread = None
         self.overridden = False  # prevent any further changes until released (for flashlight)
-        if kwargs.get('i2c'):
+        self.protocol = kwargs.get('protocol')
+        if self.protocol == 'I2C':
             import busio
             from rainbowio import colorwheel
             from adafruit_seesaw import seesaw, neopixel
@@ -101,7 +102,7 @@ class NeoPx:
                 ss = seesaw.Seesaw(self.i2c, addr=0x60)
             neo_pin = 15 # Unclear how this is used
             self.pixels = neopixel.NeoPixel(ss, neo_pin, self.count, brightness = 0.1)
-        elif kwargs.get('spi'):
+        elif self.protocol == 'SPI':
             import neopixel_spi as neopixel
             spi = board.SPI()
             self.pixels = neopixel.NeoPixel_SPI(spi, self.count, brightness=0.1, auto_write=False, pixel_order=neopixel.GRB)    
@@ -129,9 +130,9 @@ class NeoPx:
             sleep(DELAY)
 
             print("End of test")
-        else:
+        else: # GPIO
             import neopixel
-            self.pixels = neopixel.NeoPixel(board.D12, self.count)
+            self.pixels = neopixel.NeoPixel(kwargs.get('pin'), self.count)
         # Default states
         self.set(self.all, NeoPx.COLOR_OFF)
         sleep(0.1)

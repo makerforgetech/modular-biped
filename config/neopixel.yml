@@ -2,10 +2,9 @@ neopixel:
   enabled: true
   path: 'modules.neopixel.neopx.NeoPx'
   config:
-    pin: None # GPIO2 and 3 are use for i2c, GPIO10 is used for SPI
-    i2c: False
-    spi: True
-    count: 16
+    pin: 12 # Only used for GPIO. GPIO2 and 3 are use for i2c, GPIO10 is used for SPI, GPIO12 is used for GPIO
+    protocol: 'SPI' # choose between GPIO, I2C and SPI
+    count: 12
     positions: {
       'status1': 0,
       'status2': 1,
