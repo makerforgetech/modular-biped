@@ -14,7 +14,8 @@ class ArduinoSerial:
     DEVICE_PIN = 2
     DEVICE_PIN_READ = 3
     DEVICE_SERVO_RELATIVE = 4
-    ORDER_RECEIVED = 5
+    DEVICE_MOTOR = 5  # Added MOTOR device type
+    ORDER_RECEIVED = 6
     def __init__(self, **kwargs):
         self.port = kwargs.get('port', '/dev/ttyAMA0')
         self.baudrate = kwargs.get('baudrate', 115200)
@@ -121,4 +122,14 @@ class ArduinoSerial:
             write_i8(self.serial_file, identifier)
             pub.sendMessage('led', identifiers='status5', color='off')
             return read_i16(self.serial_file)
+        elif type == ArduinoSerial.DEVICE_MOTOR or type == 'motor':  # Added MOTOR handling
+            write_order(self.serial_file, Order.MOTOR)
+            write_i8(self.serial_file, identifier)
+            write_i8(self.serial_file, message)
+            pub.sendMessage('log', msg="[ArduinoSerial] Motor command sent: ID={}, Speed={}".format(identifier, message))
         pub.sendMessage('led', identifiers='status5', color='off')
+
+    def set_led_pin(self, on):
+        write_order(self.serial_file, Order.PIN)
+        write_i8(self.serial_file, 13)
+        write_i8(self.serial_file, 1 if on else 0)

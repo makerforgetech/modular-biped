@@ -20,6 +20,7 @@ class Order(Enum):
     LED = 7
     PIN = 8
     READ = 9
+    MOTOR = 10  # Added MOTOR order
 
 def read_order(f):
     """
@@ -104,7 +105,7 @@ def decode_order(f, byte, debug=False):
             msg = "SERVO {}".format(angle)
         elif order == Order.MOTOR:
             speed = read_i8(f)
-            msg = "motor {}".format(speed)
+            msg = "MOTOR {}".format(speed)
         elif order == Order.ALREADY_CONNECTED:
             msg = "ALREADY_CONNECTED"
         elif order == Order.ERROR:

@@ -48,7 +48,8 @@ class CommandThread(threading.Thread):
                 write_order(self.serial_file, order)
                 # print("Sent {}".format(order))
                 if order == Order.MOTOR:
-                    write_i8(self.serial_file, param)
+                    write_i8(self.serial_file, param['motor_id'])  # Added MOTOR handling
+                    write_i8(self.serial_file, param['speed'])
                 elif order == Order.SERVO:
                     write_i16(self.serial_file, param)
             time.sleep(rate)

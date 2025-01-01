@@ -2,6 +2,7 @@ from pubsub import pub
 from time import sleep
 from colour import Color
 import board
+from modules.network.arduinoserial import set_led_pin
     
 import threading
 
@@ -197,10 +198,12 @@ class NeoPx:
     def flashlight(self, on):
         if on:
             self.set(self.all_eye, NeoPx.COLOR_WHITE_FULL)
+            set_led_pin(True)
             self.overridden = True
         else:
             self.overridden = False
             self.set(self.all_eye, NeoPx.COLOR_OFF)
+            set_led_pin(False)
 
     def off(self):
         if self.thread:

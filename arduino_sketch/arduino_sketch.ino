@@ -79,6 +79,13 @@ void setup()
 
   // Custom log message (enable DEBUG in Config.h to see this)
   cLog("Start loop");
+
+  #ifdef MOTOR_ENABLED
+  pinMode(MOTOR_IN1, OUTPUT);
+  pinMode(MOTOR_IN2, OUTPUT);
+  pinMode(MOTOR_IN3, OUTPUT);
+  pinMode(MOTOR_IN4, OUTPUT);
+  #endif
 }
 /**
  * @brief Set all servos to 90 degrees for mechanical calibration. Wait for 20 seconds.
@@ -313,6 +320,13 @@ boolean getOrdersFromPi()
         PiConnect::write_i16(value);
         break;
       }
+      case MOTOR:
+      {
+        int motorId = PiConnect::read_i8(); // 0 or 1 for left/right, etc.
+        int direction = PiConnect::read_i8(); // 0=stop,1=forward,2=backward
+        driveMotor(motorId, direction);
+        return true;
+      }
       // Unknown order
       default:
       {
@@ -322,4 +336,16 @@ boolean getOrdersFromPi()
     }
   }
   return false;
+}
+
+void driveMotor(int motorId, int direction)
+{
+#ifdef MOTOR_ENABLED
+  // Example for two motors:
+  if (motorId == 0) {
+    // ...set MOTOR_IN1, MOTOR_IN2 according to direction...
+  } else {
+    // ...set MOTOR_IN3, MOTOR_IN4 according to direction...
+  }
+#endif
 }

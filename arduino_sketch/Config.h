@@ -50,6 +50,13 @@
 //#define MPU6050_DEBUG // Debug in serial plotter
 #define ANIMATE_ENABLED // Enable random animations
 
+#define MOTOR_ENABLED
+
+#define MOTOR_IN1 30   // L298N IN1
+#define MOTOR_IN2 31   // L298N IN2
+#define MOTOR_IN3 32   // L298N IN3
+#define MOTOR_IN4 33   // L298N IN4
+
 // Arrays to store servo min / max positions to avoid mechanical issues due
 // NOTE: attach() disregards this, set PosRest to be within range of the servo's physical boundaries
 int PosMin[SERVO_COUNT] = {0, 0, 5, 0, 0, 20, 60, 30};

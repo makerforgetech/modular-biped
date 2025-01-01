@@ -12,7 +12,8 @@ enum Order {
   STOP = 6,
   LED = 7,
   PIN = 8,
-  READ = 9
+  READ = 9,
+  MOTOR = 10
 };
 
 typedef enum Order Order;
