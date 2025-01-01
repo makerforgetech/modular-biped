@@ -85,6 +85,11 @@ void setup()
   pinMode(MOTOR_IN2, OUTPUT);
   pinMode(MOTOR_IN3, OUTPUT);
   pinMode(MOTOR_IN4, OUTPUT);
+  pinMode(MOTOR_ENA, OUTPUT);
+  pinMode(MOTOR_ENB, OUTPUT);
+  
+  digitalWrite(MOTOR_ENA, HIGH); // Enable Motor A
+  digitalWrite(MOTOR_ENB, HIGH); // Enable Motor B
   #endif
 }
 /**
@@ -340,12 +345,37 @@ boolean getOrdersFromPi()
 
 void driveMotor(int motorId, int direction)
 {
-#ifdef MOTOR_ENABLED
-  // Example for two motors:
-  if (motorId == 0) {
-    // ...set MOTOR_IN1, MOTOR_IN2 according to direction...
-  } else {
-    // ...set MOTOR_IN3, MOTOR_IN4 according to direction...
+  #ifdef MOTOR_ENABLED
+  if (motorId == 0) { // Left Motor
+      switch(direction) {
+          case 0: // Stop
+              digitalWrite(MOTOR_IN1, LOW);
+              digitalWrite(MOTOR_IN2, LOW);
+              break;
+          case 1: // Forward
+              digitalWrite(MOTOR_IN1, HIGH);
+              digitalWrite(MOTOR_IN2, LOW);
+              break;
+          case 2: // Backward
+              digitalWrite(MOTOR_IN1, LOW);
+              digitalWrite(MOTOR_IN2, HIGH);
+              break;
+      }
+  } else { // Right Motor
+      switch(direction) {
+          case 0: // Stop
+              digitalWrite(MOTOR_IN3, LOW);
+              digitalWrite(MOTOR_IN4, LOW);
+              break;
+          case 1: // Forward
+              digitalWrite(MOTOR_IN3, HIGH);
+              digitalWrite(MOTOR_IN4, LOW);
+              break;
+          case 2: // Backward
+              digitalWrite(MOTOR_IN3, LOW);
+              digitalWrite(MOTOR_IN4, HIGH);
+              break;
+      }
   }
-#endif
+  #endif
 }
