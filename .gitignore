@@ -156,3 +156,7 @@ myvenv/
 .circleci/
 .vscode
 myenv
+
+# installation flags
+installers/i2s_mic_installed.flag
+installers/i2s_speech_recognition_installed.flag

@@ -22,6 +22,9 @@ class SpeechInput:
         pub.subscribe(self.stop, 'rest')
         pub.subscribe(self.stop, 'sleep')
         pub.subscribe(self.stop, 'exit')
+        
+        if kwargs.get('start_on_boot', True):
+            self.start()
 
     def __del__(self):
         self.stop()
@@ -36,6 +39,7 @@ class SpeechInput:
             # print("Microphone with name \"{1}\" found for `Microphone(device_index={0})`".format(index, name))
             if name == device_name:
                 pub.sendMessage('log', msg='[Speech] Mapping mic to index ' + str(index))
+                # print('Mapping mic to index ' + str(index))
                 return index
 
     def detect(self):

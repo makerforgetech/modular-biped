@@ -52,7 +52,7 @@ class LogWrapper:
         # if type == 'error' or type == 'warning':
         if self.translator is not None:
             msg = self.translator.request(msg)
-        #print('LogWrapper: ' + type + ' - ' + str(msg))
+        print('LogWrapper: ' + type + ' - ' + str(msg))
         # self.log_viam(type, msg)
         
     # def log_viam(self, type, msg):
