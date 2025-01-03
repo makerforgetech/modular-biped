@@ -2,7 +2,8 @@ i2c:
   enabled: false
   path: modules.i2c.I2C
   config:
-    port: 1 # port 1 is used for i2c on the raspberry pi newer than October 2012, port 0 is used for older models
+    test_on_boot: false
+    servo_count: 16
   dependencies:
     unix:
       - python3-smbus
