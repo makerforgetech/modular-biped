@@ -143,7 +143,7 @@ else
 fi
 
 # Create the install flag file to prevent reinstallation
-# touch $INSTALL_FLAG
+touch $INSTALL_FLAG
 
 cat << EOF
 DONE.

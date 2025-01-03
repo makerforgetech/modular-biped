@@ -8,3 +8,5 @@ tts:
     python:
       - pyttsx3
       - elevenlabs
+    additional:
+      - installers/install-amp.sh
