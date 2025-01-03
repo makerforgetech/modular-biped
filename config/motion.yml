@@ -3,6 +3,7 @@ motion:
   path: 'modules.sensor.Sensor'
   config:
     pin: 26
+    test_on_boot: false
   dependencies:
     python:
       - pypubsub

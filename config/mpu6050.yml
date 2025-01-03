@@ -1,0 +1,8 @@
+mpu6050:
+  enabled: false
+  path: modules.mpu6050.MPU6050
+  config:
+    test_on_boot: true
+  dependencies:
+    unix:
+      - python3-smbus

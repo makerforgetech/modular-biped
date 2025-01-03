@@ -8,7 +8,7 @@ sudo pkill -f "$BASE_DIR/main.py"
 
 # Start necessary services
 # sudo modprobe bcm2835-v4l2 # Enable camera (if needed)
-sudo pigpiod # Start the GPIO daemon
+sudo pigpiod # Start the GPIO daemon.
 
 # Run main.py using the virtual environment's Python interpreter
 "$BASE_DIR/myenv/bin/python3" "$BASE_DIR/main.py"

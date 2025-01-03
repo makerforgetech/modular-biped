@@ -1,6 +1,6 @@
 from gpiozero import MotionSensor
 from pubsub import pub
-
+from time import sleep
 class Sensor:
     def __init__(self, **kwargs):
         """
@@ -20,6 +20,9 @@ class Sensor:
         self.value = None
         self.sensor = MotionSensor(self.pin)
         pub.subscribe(self.loop, 'loop:1')
+        
+        if kwargs.get('test_on_boot'):
+            self.test()
 
     def loop(self):
         if self.read():
@@ -28,6 +31,11 @@ class Sensor:
     def read(self):
         self.value = self.sensor.motion_detected
         return self.value
+    
+    def test(self):
+        while True:
+            print(self.read())
+            sleep(1)
 
     # def watch(self, edge, callback):
     #     """
