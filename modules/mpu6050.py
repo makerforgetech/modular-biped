@@ -45,9 +45,10 @@ class MPU6050:
 
     def read_raw_data(self, addr):
         #Accelero and Gyro value are 16-bit
+            # catch and ignore OSError: [Errno 121] Remote I/O error
             high = self.bus.read_byte_data(self.Device_Address, addr)
             low = self.bus.read_byte_data(self.Device_Address, addr+1)
-        
+            
             #concatenate higher and lower value
             value = ((high << 8) | low)
             
@@ -60,17 +61,19 @@ class MPU6050:
         print (" Reading Data of Gyroscope and Accelerometer")
 
         while True:
-            
-            #Read Accelerometer raw value
-            acc_x = self.read_raw_data(ACCEL_XOUT_H)
-            acc_y = self.read_raw_data(ACCEL_YOUT_H)
-            acc_z = self.read_raw_data(ACCEL_ZOUT_H)
-            
-            #Read Gyroscope raw value
-            gyro_x = self.read_raw_data(GYRO_XOUT_H)
-            gyro_y = self.read_raw_data(GYRO_YOUT_H)
-            gyro_z = self.read_raw_data(GYRO_ZOUT_H)
-            
+            try:
+                #Read Accelerometer raw value
+                acc_x = self.read_raw_data(ACCEL_XOUT_H)
+                acc_y = self.read_raw_data(ACCEL_YOUT_H)
+                acc_z = self.read_raw_data(ACCEL_ZOUT_H)
+                
+                #Read Gyroscope raw value
+                gyro_x = self.read_raw_data(GYRO_XOUT_H)
+                gyro_y = self.read_raw_data(GYRO_YOUT_H)
+                gyro_z = self.read_raw_data(GYRO_ZOUT_H)
+            except OSError:
+                #print('OSError: [Errno 121] Remote I/O error. Continuing...')
+                continue
             #Full scale range +/- 250 degree/C as per sensitivity scale factor
             Ax = acc_x/16384.0
             Ay = acc_y/16384.0
@@ -82,5 +85,5 @@ class MPU6050:
             
 
             print ("Gx=%.2f" %Gx, u'\u00b0'+ "/s", "\tGy=%.2f" %Gy, u'\u00b0'+ "/s", "\tGz=%.2f" %Gz, u'\u00b0'+ "/s", "\tAx=%.2f g" %Ax, "\tAy=%.2f g" %Ay, "\tAz=%.2f g" %Az) 	
-            sleep(2)
+            sleep(.1)
     
