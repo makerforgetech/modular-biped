@@ -7,5 +7,4 @@ vision:
     unix:
       - imx500-all
     python:
-      - python3-opencv
-      - python3-munkres
+      - opencv-python

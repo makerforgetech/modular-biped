@@ -2,7 +2,7 @@ import os, sys
 import logging
 from time import sleep, time
 import signal
-import schedule
+# import schedule
 from pubsub import pub
 from modules.config import Config
 from module_loader import ModuleLoader
@@ -88,7 +88,7 @@ def main():
             if time() - minute_loop > 60:
                 minute_loop = time()
                 pub.sendMessage('loop:60')
-                schedule.run_pending()
+                # schedule.run_pending()
 
     except Exception as ex:
         logging.error(f"Exception: {ex}", exc_info=True)
