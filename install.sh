@@ -82,6 +82,7 @@ done
 
 # Set execute permissions for additional scripts
 chmod 777 startup.sh stop.sh
+chmod 777 installers/*.sh
 
 # change permissions of installer files
 chmod 777 installers/*.sh
@@ -109,4 +110,11 @@ for dep in "${UNIQUE_ADDITIONAL_URLS[@]}"; do
   echo " - $dep"
 done
 fi
+
+# Tell the user about autolaunch
+echo -e "\nTo enable autolaunch on boot, run the following command:"
+echo "installer/autolaunch.sh enable"
+echo "To disable autolaunch, run:"
+echo "installer/autolaunch.sh disable"
+
 echo "============================="
