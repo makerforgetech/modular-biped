@@ -6,8 +6,10 @@ USER=$(whoami)
 # Dynamically determine the base directory (parent of the installers folder)
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 BASE_DIR=$(dirname "$SCRIPT_DIR")
+LAST_DIR=$(basename "$BASE_DIR")
 
-SERVICE_NAME="modular-biped-launcher.service"
+
+SERVICE_NAME="$LAST_DIR-launcher.service"
 SERVICE_FILE_PATH="/etc/systemd/system/$SERVICE_NAME"
 
 # Function to install the service
