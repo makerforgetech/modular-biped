@@ -60,6 +60,8 @@
 #define MOTOR_ENA 34 // L298N Enable A
 #define MOTOR_ENB 35 // L298N Enable B
 
+#define OPENCV_RELAY_PIN 36
+
 // Arrays to store servo min / max positions to avoid mechanical issues due
 // NOTE: attach() disregards this, set PosRest to be within range of the servo's physical boundaries
 int PosMin[SERVO_COUNT] = {0, 0, 5, 0, 0, 20, 60, 30};

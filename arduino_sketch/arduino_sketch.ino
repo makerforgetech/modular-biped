@@ -35,6 +35,8 @@ bool shouldMove = false;
 
 bool piControl = false;
 
+bool servosDisabled = false;
+
 void setup()
 {
   // Init LED pin
@@ -80,17 +82,20 @@ void setup()
   // Custom log message (enable DEBUG in Config.h to see this)
   cLog("Start loop");
 
-  #ifdef MOTOR_ENABLED
+#ifdef MOTOR_ENABLED
   pinMode(MOTOR_IN1, OUTPUT);
   pinMode(MOTOR_IN2, OUTPUT);
   pinMode(MOTOR_IN3, OUTPUT);
   pinMode(MOTOR_IN4, OUTPUT);
   pinMode(MOTOR_ENA, OUTPUT);
   pinMode(MOTOR_ENB, OUTPUT);
-  
+
   digitalWrite(MOTOR_ENA, HIGH); // Enable Motor A
   digitalWrite(MOTOR_ENB, HIGH); // Enable Motor B
-  #endif
+#endif
+
+  pinMode(OPENCV_RELAY_PIN, OUTPUT);
+  digitalWrite(OPENCV_RELAY_PIN, HIGH); // Servos powered by default
 }
 /**
  * @brief Set all servos to 90 degrees for mechanical calibration. Wait for 20 seconds.
@@ -175,31 +180,50 @@ void hipAdjust()
 }
 #endif
 
+void handleOpenCVFollowMode()
+{
+  // Perform sit-down animation
+  doRest();
+  // Disable servos
+  servosDisabled = true;
+  // Cut relay power
+  digitalWrite(OPENCV_RELAY_PIN, LOW);
+  // Optionally log
+  cLog("OpenCV mode activated, servos off");
+}
+
 void loop()
 {
-  #ifdef SERVO_CALIBRATION_ENABLED
-    servoManager.calibrate();
-  #endif
+#ifdef SERVO_CALIBRATION_ENABLED
+  servoManager.calibrate();
+#endif
 
-  #ifdef MPU6050_ENABLED
+#ifdef MPU6050_ENABLED
   hipAdjust();
-  #endif
+#endif
   //  This needs to be here rather than in the ServoManager, otherwise it doesn't work.
   while (ServoEasing::areInterruptsActive())
   {
     blinkLED();
   }
 
+  if (servosDisabled)
+  {
+    // Only handle motor commands; skip servo updates
+    // ...existing code for motor handling...
+    return;
+  }
+
   // Check for orders from pi
   bool receiving = getOrdersFromPi();
-  while(receiving) 
+  while(receiving)
   {
     piControl = true;
     delay(50); // Wait a short time for any other orders
     receiving = getOrdersFromPi();
     shouldMove = !receiving; // Only move when there are no other orders
   }
-  
+
   // Once all orders received (or animating without orders)
   if (shouldMove)
   {
@@ -294,50 +318,53 @@ boolean getOrdersFromPi()
   {
     switch (order_received)
     {
-      case SERVO:
-      case SERVO_RELATIVE:
-      {
-        int servo_identifier = PiConnect::read_i8();
-        int servo_angle_percent = PiConnect::read_i16();
-  #ifdef DEBUG
-        PiConnect::write_order(SERVO);
-        PiConnect::write_i8(servo_identifier);
-        PiConnect::write_i16(servo_angle_percent);
-  #endif
-        // sleep animations for 2 seconds to allow pi to control servos
-        setSleep(2000);
-        servoManager.moveSingleServoByPercentage(servo_identifier, servo_angle_percent, order_received == SERVO_RELATIVE);
-        return true;
-      }
-      case PIN:
-      {
-        int pin = PiConnect::read_i8();
-        int value = PiConnect::read_i8();
-        pinMode(pin, OUTPUT);
-        digitalWrite(pin, value);
-        break;
-      }
-      case READ:
-      {
-        int pin = PiConnect::read_i8();
-        pinMode(pin, INPUT);
-        long value = analogRead(pin);
-        PiConnect::write_i16(value);
-        break;
-      }
-      case MOTOR:
-      {
-        int motorId = PiConnect::read_i8(); // 0 or 1 for left/right, etc.
+    case SERVO:
+    case SERVO_RELATIVE:
+    {
+      int servo_identifier = PiConnect::read_i8();
+      int servo_angle_percent = PiConnect::read_i16();
+#ifdef DEBUG
+      PiConnect::write_order(SERVO);
+      PiConnect::write_i8(servo_identifier);
+      PiConnect::write_i16(servo_angle_percent);
+#endif
+      // sleep animations for 2 seconds to allow pi to control servos
+      setSleep(2000);
+      servoManager.moveSingleServoByPercentage(servo_identifier, servo_angle_percent, order_received == SERVO_RELATIVE);
+      return true;
+    }
+    case PIN:
+    {
+      int pin = PiConnect::read_i8();
+      int value = PiConnect::read_i8();
+      pinMode(pin, OUTPUT);
+      digitalWrite(pin, value);
+      break;
+    }
+    case READ:
+    {
+      int pin = PiConnect::read_i8();
+      pinMode(pin, INPUT);
+      long value = analogRead(pin);
+      PiConnect::write_i16(value);
+      break;
+    }
+    case MOTOR:
+    {
+      int motorId = PiConnect::read_i8(); // 0 or 1 for left/right, etc.
         int direction = PiConnect::read_i8(); // 0=stop,1=forward,2=backward
         driveMotor(motorId, direction);
-        return true;
-      }
-      // Unknown order
-      default:
-      {
-        PiConnect::write_order(order_received);
-        // PiConnect::write_i16(404);
-      }
+      return true;
+    }
+    case OPENCV_MODE:
+      handleOpenCVFollowMode();
+      return true;
+    // Unknown order
+    default:
+    {
+      PiConnect::write_order(order_received);
+      // PiConnect::write_i16(404);
+    }
     }
   }
   return false;
@@ -345,37 +372,37 @@ boolean getOrdersFromPi()
 
 void driveMotor(int motorId, int direction)
 {
-  #ifdef MOTOR_ENABLED
+#ifdef MOTOR_ENABLED
   if (motorId == 0) { // Left Motor
-      switch(direction) {
-          case 0: // Stop
-              digitalWrite(MOTOR_IN1, LOW);
-              digitalWrite(MOTOR_IN2, LOW);
-              break;
-          case 1: // Forward
-              digitalWrite(MOTOR_IN1, HIGH);
-              digitalWrite(MOTOR_IN2, LOW);
-              break;
-          case 2: // Backward
-              digitalWrite(MOTOR_IN1, LOW);
-              digitalWrite(MOTOR_IN2, HIGH);
-              break;
-      }
+    switch(direction) {
+    case 0: // Stop
+      digitalWrite(MOTOR_IN1, LOW);
+      digitalWrite(MOTOR_IN2, LOW);
+      break;
+    case 1: // Forward
+      digitalWrite(MOTOR_IN1, HIGH);
+      digitalWrite(MOTOR_IN2, LOW);
+      break;
+    case 2: // Backward
+      digitalWrite(MOTOR_IN1, LOW);
+      digitalWrite(MOTOR_IN2, HIGH);
+      break;
+    }
   } else { // Right Motor
-      switch(direction) {
-          case 0: // Stop
-              digitalWrite(MOTOR_IN3, LOW);
-              digitalWrite(MOTOR_IN4, LOW);
-              break;
-          case 1: // Forward
-              digitalWrite(MOTOR_IN3, HIGH);
-              digitalWrite(MOTOR_IN4, LOW);
-              break;
-          case 2: // Backward
-              digitalWrite(MOTOR_IN3, LOW);
-              digitalWrite(MOTOR_IN4, HIGH);
-              break;
-      }
+    switch(direction) {
+    case 0: // Stop
+      digitalWrite(MOTOR_IN3, LOW);
+      digitalWrite(MOTOR_IN4, LOW);
+      break;
+    case 1: // Forward 
+      digitalWrite(MOTOR_IN3, HIGH);
+      digitalWrite(MOTOR_IN4, LOW);
+      break;
+    case 2: // Backward
+      digitalWrite(MOTOR_IN3, LOW);
+      digitalWrite(MOTOR_IN4, HIGH);
+      break;
+    }
   }
-  #endif
+#endif
 }

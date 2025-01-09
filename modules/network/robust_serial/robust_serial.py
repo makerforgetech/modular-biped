@@ -21,6 +21,8 @@ class Order(Enum):
     PIN = 8
     READ = 9
     MOTOR = 10  # Added MOTOR order
+    OPENCV_MODE = 11
+
 
 def read_order(f):
     """
@@ -118,6 +120,8 @@ def decode_order(f, byte, debug=False):
         elif order == Order.LED:
             identifier = read_i8(f)
             msg = "led {}".format(identifier)
+        elif order == Order.OPENCV_MODE:
+            msg = "OPENCV_MODE"
         else:
             msg = ""
             print("Unknown Order", byte)
