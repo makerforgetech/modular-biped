@@ -32,9 +32,9 @@ class TTSModule:
         """
         self.translator = kwargs.get('translator', None)
         self.service = kwargs.get('service', 'pyttsx3')
-        print(self.service)
+        # print(self.service)
         self.voice_id = kwargs.get('voice_id', '')
-        print(self.voice_id)
+        # print(self.voice_id)
         if self.service == 'elevenlabs':
             self.init_elevenlabs(self.voice_id)
         else:
@@ -43,7 +43,7 @@ class TTSModule:
         pub.subscribe(self.speak, 'tts')
 
     def speak(self, msg):
-        print('Attempting to speak')
+        # print('Attempting to speak with service: ' + self.service)
         if self.service == 'elevenlabs':
             self.speak_elevenlabs(msg)
         else:
@@ -57,15 +57,15 @@ class TTSModule:
         #for i in voices:
         engine.setProperty('voice', voices[10].id)
         print('voice' + voices[10].id)
-        #engine.say('Hello, World!')
-        #engine.runAndWait()
         self.engine = engine        
 
     def speak_pyttsx3(self, msg):
         pub.sendMessage('log', msg="[TTS] {}".format(msg))
         if self.translator is not None:
             msg = self.translator.request(msg)
-        self.engine.say(msg)
+
+        self.engine.say(f"{msg}. I have spoken.") # Apparently this is the only way to get pyttsx3 to output anything (by including actual text)
+        # self.engine.say(msg) # This doesn't output anything
         self.engine.runAndWait()
     
     def init_elevenlabs(self, voice_id):
@@ -92,12 +92,12 @@ class TTSModule:
                 
 if __name__ == '__main__':
     # test with `myenv/bin/python3 modules/audio/ttsmodule.py`
-    # tts = TTSModule()
-    # tts.speak('Test') # broken currently, thinks espeak-ng is not installed
+    tts = TTSModule()
+    tts.speak("this is a test") # broken currently, thinks espeak-ng is not installed
     
     tts2 = TTSModule(service='elevenlabs', voice_id='pMsXgVXv3BLzUgSXRplE')
     tts2.speak('Test')
     
-    import speechinput as speechinput
-    speech = speechinput.SpeechInput(device_name='pulse', start_on_boot=True)
+    # import speechinput as speechinput
+    # speech = speechinput.SpeechInput(device_name='pulse', start_on_boot=True)
         

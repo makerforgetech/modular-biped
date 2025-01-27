@@ -7,7 +7,10 @@ ttsmodule:
   dependencies:
     python:
       - pyttsx3
-      - py-espeak-ng
       - elevenlabs
+    unix:
+      - espeak
+      - ffmpeg
+      - libespeak1
     additional:
       - installers/install-amp.sh
