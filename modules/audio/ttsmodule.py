@@ -2,10 +2,15 @@ from pubsub import pub
 from time import sleep
 import pyttsx3
 
-from elevenlabs import ElevenLabs, VoiceSettings, play
+import elevenlabs
 import os
 
-class TTS:
+import httpx
+print(httpx.__version__)
+print(f"HTTPX file path: {httpx.__file__}")
+
+
+class TTSModule:
     
     def __init__(self, **kwargs):
         """
@@ -27,14 +32,18 @@ class TTS:
         """
         self.translator = kwargs.get('translator', None)
         self.service = kwargs.get('service', 'pyttsx3')
+        print(self.service)
+        self.voice_id = kwargs.get('voice_id', '')
+        print(self.voice_id)
         if self.service == 'elevenlabs':
-            self.init_elevenlabs(kwargs.get('voice_id', ''))
+            self.init_elevenlabs(self.voice_id)
         else:
             self.init_pyttsx3()
         # Set subscribers
         pub.subscribe(self.speak, 'tts')
 
     def speak(self, msg):
+        print('Attempting to speak')
         if self.service == 'elevenlabs':
             self.speak_elevenlabs(msg)
         else:
@@ -60,31 +69,35 @@ class TTS:
         self.engine.runAndWait()
     
     def init_elevenlabs(self, voice_id):
-        self.client = ElevenLabs(
+        self.ttsclient = elevenlabs.ElevenLabs(
             api_key=os.getenv('ELEVENLABS_KEY') or ''
         )
         self.voice_id = voice_id
         
     def speak_elevenlabs(self, msg):
         # This uses ElevenLabs, create an API key and export in your .bashrc file using `export ELEVENLABS_KEY=<KEY>` before use
-        output = self.client.text_to_speech.convert(
+        output = self.ttsclient.text_to_speech.convert(
             voice_id=self.voice_id,
             optimize_streaming_latency="0",
             output_format="mp3_22050_32",
-            text="msg",
-            voice_settings=VoiceSettings(
+            text=msg,
+            voice_settings=elevenlabs.VoiceSettings(
                 stability=0.1,
                 similarity_boost=0.3,
                 style=0.2,
             ),
         )
 
-        play(output)
+        elevenlabs.play(output)
                 
 if __name__ == '__main__':
-    tts = TTS()
-    tts.speak('Test')
+    # test with `myenv/bin/python3 modules/audio/ttsmodule.py`
+    # tts = TTSModule()
+    # tts.speak('Test') # broken currently, thinks espeak-ng is not installed
     
-    tts2 = TTS(service='elevenlabs', voice_id='pMsXgVXv3BLzUgSXRplE')
+    tts2 = TTSModule(service='elevenlabs', voice_id='pMsXgVXv3BLzUgSXRplE')
     tts2.speak('Test')
+    
+    import speechinput as speechinput
+    speech = speechinput.SpeechInput(device_name='pulse', start_on_boot=True)
         

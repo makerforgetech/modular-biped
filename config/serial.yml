@@ -1,5 +1,5 @@
 serial:
-  enabled: true
+  enabled: false
   path: "modules.network.arduinoserial.ArduinoSerial"
   config:
     port: '/dev/ttyAMA0'

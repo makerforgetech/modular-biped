@@ -67,7 +67,7 @@ def main():
     
     # Test speech input
     # pub.sendMessage('speech:listen')
-
+    
     # Start loops or other tasks
     pub.sendMessage('log', msg="[Main] Loop started")
 

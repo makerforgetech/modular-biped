@@ -1,12 +1,13 @@
-tts:
-  enabled: false
-  path: "modules.audio.tts.TTS"
+ttsmodule:
+  enabled: true
+  path: "modules.audio.ttsmodule.TTSModule"
   config:
     service: "elevenlabs" # or pyttsx3
     voice_id: "pMsXgVXv3BLzUgSXRplE"
   dependencies:
     python:
       - pyttsx3
+      - py-espeak-ng
       - elevenlabs
     additional:
       - installers/install-amp.sh

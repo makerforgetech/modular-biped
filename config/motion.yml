@@ -1,5 +1,5 @@
 motion:
-  enabled: true
+  enabled: false
   path: 'modules.sensor.Sensor'
   config:
     pin: 26

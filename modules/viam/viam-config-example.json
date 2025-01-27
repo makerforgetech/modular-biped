@@ -1,0 +1,268 @@
+{
+  "services": [
+    {
+      "type": "mlmodel",
+      "depends_on": [],
+      "model": "tflite_cpu",
+      "attributes": {
+        "package_reference": "5ebfb22b-8bc2-4b55-98f8-09f48552059f/left-and-right",
+        "model_path": "${packages.left-and-right}/left-and-right.tflite",
+        "label_path": "${packages.left-and-right}/labels.txt",
+        "num_threads": 1
+      },
+      "name": "gesture-classifier-model"
+    },
+    {
+      "model": "tflite_cpu",
+      "attributes": {
+        "package_reference": "5ebfb22b-8bc2-4b55-98f8-09f48552059f/gesture-detection",
+        "model_path": "${packages.gesture-detection}/gesture-detection.tflite",
+        "label_path": "${packages.gesture-detection}/labels.txt",
+        "num_threads": 1
+      },
+      "depends_on": [],
+      "name": "gesture-detector-model",
+      "type": "mlmodel"
+    },
+    {
+      "name": "animation-service",
+      "model": "makerforge:viam-modules:animation",
+      "type": "generic",
+      "namespace": "rdk",
+      "attributes": {
+        "path": "/home/archie/modular-biped/animations/"
+      },
+      "depends_on": []
+    },
+    {
+      "attributes": {
+        "local": false,
+        "project": "hand-gesture-r7qgb",
+        "version": 2,
+        "api_key": "8lsZh0nFvPEEXZn5DDCo"
+      },
+      "depends_on": [],
+      "model": "viam-labs:vision:roboflow",
+      "name": "roboflow-test",
+      "namespace": "rdk",
+      "type": "vision"
+    },
+    {
+      "type": "data_manager",
+      "namespace": "rdk",
+      "attributes": {
+        "sync_disabled": true,
+        "additional_sync_paths": [],
+        "capture_disabled": true,
+        "sync_interval_mins": 0.1,
+        "capture_dir": "",
+        "tags": [
+          "right"
+        ]
+      },
+      "name": "Data-Management-Service"
+    },
+    {
+      "depends_on": [],
+      "attributes": {
+        "mlmodel_name": "gesture-classifier-model"
+      },
+      "name": "gesture-classifier",
+      "type": "vision",
+      "model": "mlmodel"
+    },
+    {
+      "attributes": {
+        "mlmodel_name": "gesture-detector-model"
+      },
+      "depends_on": [],
+      "name": "gesture-detector",
+      "type": "vision",
+      "model": "mlmodel"
+    },
+    {
+      "model": "tflite_cpu",
+      "attributes": {
+        "package_reference": "viam-labs/EfficientDet-COCO",
+        "model_path": "${packages.EfficientDet-COCO}/effdet0 (3).tflite",
+        "label_path": "${packages.EfficientDet-COCO}/effdetlabels.txt",
+        "num_threads": 1
+      },
+      "depends_on": [],
+      "name": "object-model",
+      "type": "mlmodel"
+    },
+    {
+      "attributes": {
+        "mlmodel_name": "object-model"
+      },
+      "depends_on": [],
+      "name": "object-detector",
+      "type": "vision",
+      "model": "mlmodel"
+    }
+  ],
+  "packages": [
+    {
+      "package": "viam-labs/EfficientDet-COCO",
+      "name": "EfficientDet-COCO",
+      "type": "ml_model",
+      "version": "latest"
+    },
+    {
+      "type": "ml_model",
+      "version": "latest",
+      "package": "5ebfb22b-8bc2-4b55-98f8-09f48552059f/gesture-detection",
+      "name": "gesture-detection"
+    },
+    {
+      "version": "latest",
+      "package": "5ebfb22b-8bc2-4b55-98f8-09f48552059f/left-and-right",
+      "name": "left-and-right",
+      "type": "ml_model"
+    }
+  ],
+  "components": [
+    {
+      "depends_on": [],
+      "model": "customlinux",
+      "name": "pi5",
+      "namespace": "rdk",
+      "type": "board",
+      "attributes": {
+        "board_defs_file_path": "/home/archie/viamboard.json"
+      }
+    },
+    {
+      "namespace": "rdk",
+      "type": "camera",
+      "attributes": {
+        "source": "camera",
+        "pipeline": [
+          {
+            "attributes": {
+              "confidence_threshold": 0.5,
+              "classifier_name": "gesture-classifier",
+              "max_classifications": 2,
+              "valid_labels": [
+                "left",
+                "right"
+              ]
+            },
+            "type": "classifications"
+          }
+        ]
+      },
+      "depends_on": [
+        "camera"
+      ],
+      "model": "transform",
+      "name": "gesture-classifier-camera-transform"
+    },
+    {
+      "type": "camera",
+      "attributes": {
+        "frame_rate": 30,
+        "height_px": 480,
+        "width_px": 640,
+        "debug": false
+      },
+      "depends_on": [
+        "pi5"
+      ],
+      "model": "viam:camera:csi-pi",
+      "name": "camera",
+      "namespace": "rdk"
+    },
+    {
+      "type": "camera",
+      "namespace": "rdk",
+      "attributes": {
+        "source": "camera",
+        "pipeline": [
+          {
+            "attributes": {
+              "confidence_threshold": 0.5,
+              "detector_name": "gesture-detector"
+            },
+            "type": "detections"
+          }
+        ]
+      },
+      "depends_on": [
+        "camera"
+      ],
+      "name": "gesture-detection-camera-transform",
+      "model": "transform"
+    },
+    {
+      "model": "transform",
+      "type": "camera",
+      "namespace": "rdk",
+      "attributes": {
+        "source": "camera",
+        "pipeline": [
+          {
+            "type": "detections",
+            "attributes": {
+              "detector_name": "object-detector",
+              "confidence_threshold": 0.5
+            }
+          }
+        ]
+      },
+      "depends_on": [
+        "camera"
+      ],
+      "name": "object-camera-transform"
+    }
+  ],
+  "agent_config": {
+    "subsystems": {
+      "viam-agent": {
+        "disable_subsystem": false,
+        "release_channel": "stable",
+        "pin_version": "",
+        "pin_url": ""
+      },
+      "viam-server": {
+        "disable_subsystem": false,
+        "release_channel": "stable",
+        "pin_version": "",
+        "pin_url": ""
+      },
+      "agent-provisioning": {
+        "pin_version": "",
+        "pin_url": "",
+        "disable_subsystem": false,
+        "release_channel": "stable"
+      },
+      "agent-syscfg": {
+        "disable_subsystem": false,
+        "release_channel": "stable",
+        "pin_version": "",
+        "pin_url": ""
+      }
+    }
+  },
+  "modules": [
+    {
+      "type": "registry",
+      "version": "latest",
+      "module_id": "viam:csi-cam-pi",
+      "name": "viam_csi-cam-pi"
+    },
+    {
+      "executable_path": "/home/archie/projects/viam-modules/generic-animation/run.sh",
+      "type": "local",
+      "name": "animation-module"
+    },
+    {
+      "type": "registry",
+      "version": "0.0.1",
+      "module_id": "viam-labs:roboflow-vision",
+      "name": "viam-labs_roboflow-vision"
+    }
+  ],
+  "processes": []
+}

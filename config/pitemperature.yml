@@ -1,5 +1,5 @@
 pitemperature:
-  enabled: true
+  enabled: false
   path: modules.pitemperature.PiTemperature
   dependencies:
     python:

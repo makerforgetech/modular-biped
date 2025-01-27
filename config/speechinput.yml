@@ -2,8 +2,8 @@ speechinput:
   enabled: false
   path: modules.audio.speechinput.SpeechInput
   config:
-    device_name: lp
-    start_on_boot: false
+    device_name: "pulse"
+    start_on_boot: true
   dependencies:
     unix:
       - flac

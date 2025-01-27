@@ -36,10 +36,10 @@ class SpeechInput:
 
     def get_device_index(self, device_name):
         for index, name in enumerate(sr.Microphone.list_microphone_names()):
-            # print("Microphone with name \"{1}\" found for `Microphone(device_index={0})`".format(index, name))
+            print("Microphone with name \"{1}\" found for `Microphone(device_index={0})`".format(index, name))
             if name == device_name:
                 pub.sendMessage('log', msg='[Speech] Mapping mic to index ' + str(index))
-                # print('Mapping mic to index ' + str(index))
+                print('Mapping mic to index ' + str(index))
                 return index
 
     def detect(self):
@@ -60,6 +60,7 @@ class SpeechInput:
                     val = self.recognizer.recognize_google(audio)
                     pub.sendMessage('log', msg='[Speech] I heard: ' + str(val))
                     pub.sendMessage('speech', text=val.lower())
+                    pub.sendMessage('tts', msg='I heard ' + val.lower())
                 except sr.WaitTimeoutError as e:
                     pub.sendMessage('log:error', msg='[Speech] Timeout Error: ' + str(e))
                 except sr.UnknownValueError as e:

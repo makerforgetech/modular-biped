@@ -1,5 +1,5 @@
 animate:
-  enabled: true
+  enabled: false
   path: modules.animate.Animate    
   dependencies:
     python:

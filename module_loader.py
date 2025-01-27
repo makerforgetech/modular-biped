@@ -59,7 +59,10 @@ class ModuleLoader:
             # Dynamically load the module
             spec = importlib.util.spec_from_file_location(module_name, f"{module_path}.py")
             mod = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(mod)
+            try:
+                spec.loader.exec_module(mod)
+            except Exception as e:
+                print(f"Error loading module {module_name}: {e}")
 
             # Create instances of the module
             for instance_config in instances_config:

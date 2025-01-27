@@ -35,15 +35,15 @@ class ChatGPT:
         :param text: message to chat
         
         Publishes 'log' with response
-        Publishes 'animate' with head nod or shake
+        Publishes 'animate' with available animations listed in config yaml
         Publishes 'tts' with response
         """
         completion = self.client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=self.model,
             messages=[
                 {
                     "role": "system", 
-                    "content": "You are a helpful assistant. You respond with short phrases or yes / no as a strong preference."
+                    "content": self.persona
                 },
                 {
                     "role": "user",
@@ -52,18 +52,15 @@ class ChatGPT:
             ]
         )
 
-        pub.sendMessage('log', msg='[ChatGPT] ' + completion.choices[0].message.content)
-        # print(completion.choices[0].message.content)
-        output = re.sub(r'[^\w\s]','',completion.choices[0].message.content).lower()
-        # print(output)
-        if output == 'yes':
-            # Nod head if answer is just 'yes'
-            pub.sendMessage('animate', action='head_nod')
-        elif output == 'no':
-            # Shake head if answer is just 'no'
-            pub.sendMessage('animate', action='head_shake')
-        pub.sendMessage('tts', msg=completion.choices[0].message.content)
-        return completion.choices[0].message.content
+        output = completion.choices[0].message.content
+        pub.sendMessage('log', msg='[ChatGPT] ' + output)
+        # if output includes 'animate:', split on colon and sendMessage 'animate' with action
+        if 'animate:' in output:
+            action = output.split(':')[1]
+            pub.sendMessage('animate', action='action')
+        else:
+            pub.sendMessage('tts', msg=output)
+        return output
 
                 
 if __name__ == '__main__':
