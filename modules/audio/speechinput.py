@@ -9,7 +9,7 @@ class SpeechInput:
     """
     def __init__(self, **kwargs):
         self.recognizer = sr.Recognizer()
-        self.recognizer.pause_threshold = 1
+        self.recognizer.pause_threshold = 2
 
         self.device_name = kwargs.get('device_name', 'lp')
         self.device = self.get_device_index(self.device_name)
@@ -49,18 +49,22 @@ class SpeechInput:
         """
         pub.sendMessage('log', msg='[Speech] Initialising Detection')
         with self.mic as source:
-            self.recognizer.adjust_for_ambient_noise(source)
+            self.recognizer.adjust_for_ambient_noise(source, duration=2)
+            # self.recognizer.energy_threshold = 300  # Adjust based on your environment
             pub.sendMessage('log', msg='[Speech] Detecting...')
             while self.listening:
                 try:
-                    audio = self.recognizer.listen(source)#, timeout=10, phrase_time_limit=5)
+                    audio = self.recognizer.listen(source, timeout=10, phrase_time_limit=15)
                     # pub.sendMessage('led', identifiers='top5', color='white')
                     # pub.sendMessage('log', msg='[Speech] End Detection')
+                    with open("speech.wav", "wb") as f:
+                        f.write(audio.get_wav_data())
 
                     val = self.recognizer.recognize_google(audio)
                     pub.sendMessage('log', msg='[Speech] I heard: ' + str(val))
                     pub.sendMessage('speech', text=val.lower())
                     pub.sendMessage('tts', msg='I heard ' + val.lower())
+                    self.listening = False
                 except sr.WaitTimeoutError as e:
                     pub.sendMessage('log:error', msg='[Speech] Timeout Error: ' + str(e))
                 except sr.UnknownValueError as e:

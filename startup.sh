@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Force release of audio devices, fixes "Device or resource busy" error on amplifier
+sudo fuser -k /dev/snd/*
+
 # Set the base directory to the location of this script
 BASE_DIR="$(dirname "$(realpath "$0")")"
 

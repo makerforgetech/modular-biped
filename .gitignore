@@ -25,3 +25,5 @@ myenv
 # installation flags and installed libraries
 installers/i2s_mic_installed.flag
 installers/i2s_speech_recognition_installed.flag
+
+speech.wav
