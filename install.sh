@@ -82,7 +82,6 @@ done
 
 # Set execute permissions for additional scripts
 chmod 777 startup.sh stop.sh
-chmod 777 installers/*.sh
 
 # change permissions of installer files
 chmod 777 installers/*.sh

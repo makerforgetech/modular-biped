@@ -64,7 +64,6 @@ class SpeechInput:
                     pub.sendMessage('log', msg='[Speech] I heard: ' + str(val))
                     pub.sendMessage('speech', text=val.lower())
                     pub.sendMessage('tts', msg='I heard ' + val.lower())
-                    self.listening = False
                 except sr.WaitTimeoutError as e:
                     pub.sendMessage('log:error', msg='[Speech] Timeout Error: ' + str(e))
                 except sr.UnknownValueError as e:
