@@ -9,7 +9,7 @@ class PiTemperature(BaseModule):
     
     def setup_messaging(self):
         """Subscribe to necessary topics."""
-        self.subscribe('system/loop/60', self.monitor)
+        self.subscribe('system/loop/1', self.monitor)
 
     @staticmethod
     def read():

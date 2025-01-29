@@ -30,7 +30,6 @@ class Personality(BaseModule):
             self.move_antenna,
             self.move_antenna,
         ]
-        # self.publish('log', f"[Personality] Actions: {self.actions}")
 
     def setup_messaging(self):
         """Subscribe to necessary topics."""

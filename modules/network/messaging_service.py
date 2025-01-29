@@ -75,6 +75,7 @@ class MQTTMessagingService(MessagingService):
                 self.subscriptions[topic](payload)
 
     def subscribe(self, topic, callback, **kwargs):
+        print(f"MQTTMessagingService: Subscribing to {topic}")
         self.subscriptions[topic] = callback
         self.client.subscribe(topic) # @todo add **kwargs support
 
@@ -89,21 +90,46 @@ class MQTTMessagingService(MessagingService):
         :param args: Optional positional arguments.
         :param kwargs: Optional keyword arguments.
         """
-        message = None
-        if len(args) == 1 and not kwargs:
-            # Single argument, send directly
-            message = args[0]
-        elif args or kwargs:
-            # Convert multiple arguments into a JSON object
-            message_data = {"args": args} if args else {}
-            message_data.update(kwargs)
-            message = json.dumps(message_data)
-
-        # Publish the message if present or just the topic
-        if message is not None:
-            self.client.publish(topic, message)
-        else:
+        
+        # print args and kwargs if topic does not contain the word system
+        # if topic != 'system/loop':
+            # print(f"MQTTMessagingService: Publishing to {topic}: {args} {kwargs}")
+        
+        if len(args) == 0 and len(kwargs) == 0:
+            # print(f"MQTTMessagingService: Publishing to {topic}")
             self.client.publish(topic)
+        elif len(args) == 1 and not kwargs:
+            # print(f"MQTTMessagingService: Publishing to {topic}: {args[0]}")
+            # If there's only one argument, send it as the message payload
+            self.client.publish(topic, args[0])
+        else:
+            
+            # Convert multiple arguments or keyword arguments into a JSON string
+            message_data = {}
+            if args:
+                message_data["args"] = args
+            message_data.update(kwargs)  # Add any keyword arguments
+
+            payload = json.dumps(message_data)  # Convert to JSON
+            # print(f"MQTTMessagingService: Publishing to {topic}: {payload}")
+            self.client.publish(topic, payload)
+            
+        # message = None
+        # if len(args) == 1 and not kwargs:
+        #     # Single argument, send directly
+        #     message = args[0]
+        # elif args or kwargs:
+        #     # Convert multiple arguments into a JSON object
+        #     message_data = {"args": args} if args else {}
+        #     message_data.update(kwargs)
+        #     message = json.dumps(message_data)
+
+        # # print(f"MQTTMessagingService: Publishing to {topic}: {message}")
+        # # Publish the message if present or just the topic
+        # if message is not None:
+        #     self.client.publish(topic, message)
+        # else:
+        #     self.client.publish(topic)
             
     def loop_start(self):
         self.client.loop_start()
