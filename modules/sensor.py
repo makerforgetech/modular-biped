@@ -1,7 +1,8 @@
 from gpiozero import MotionSensor
-from pubsub import pub
 from time import sleep
-class Sensor:
+from modules.base_module import BaseModule
+
+class Sensor(BaseModule):
     def __init__(self, **kwargs):
         """
         Sensor class
@@ -19,14 +20,17 @@ class Sensor:
         self.pin = kwargs.get('pin')
         self.value = None
         self.sensor = MotionSensor(self.pin)
-        pub.subscribe(self.loop, 'loop:1')
         
         if kwargs.get('test_on_boot'):
             self.test()
+            
+    def setup_messaging(self):
+        """Subscribe to necessary topics."""
+        self.subscribe('system/loop/1', self.loop)
 
     def loop(self):
         if self.read():
-            pub.sendMessage('motion')
+            self.publish('motion')
 
     def read(self):
         self.value = self.sensor.motion_detected

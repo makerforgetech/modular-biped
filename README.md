@@ -41,3 +41,60 @@ The open source framework is designed for flexibility, allowing users to easily 
 - **Code**: Check out the modular open source software on [GitHub](https://github.com/makerforgetech/modular-biped)
 - **YouTube Playlist**: Explore the development process through our build videos: [Watch on YouTube](https://www.youtube.com/watch?v=2DVJ5xxAuWY&list=PL_ua9QbuRTv6Kh8hiEXXVqywS8pklZraT)
 - **Community**: Have a question or want to show off your build? Join the communities on [GitHub](https://bit.ly/maker-forge-community) and [Discord](https://bit.ly/makerforge-community)!
+
+
+## Modules
+
+The 'Cody' release includes a new BaseModule class that must be extended by all modules. This class provides a common interface for all modules to interact with the main robot controller. The BaseModule class includes a messaging_service object that references the main robot controller's messaging service. This object is used to send and receive messages between modules and the main robot controller.
+
+Both `pypubsub` and `paho-mqtt` can be used to facilitate message passing between modules. Which service is used can be set in the messaging_service configuration YAML file.
+
+```yaml
+messaging_service:
+  enabled: true
+  config:
+    protocol: 'pubsub' # 'mqtt' or 'pubsub'
+    mqtt_host: 'localhost' 
+    mqtt_port: 1883
+```
+
+The introduction of mqtt allows distributed communication between modules, even across different devices.
+
+The methods publish() and subscribe() can be utilised from within any module to send and receive messages to topics.
+
+For example:
+  
+  ```python
+  class MyModule(BaseModule):
+    def __init__(self):
+        # Don't subscribe here
+        pass
+    
+    def setup_messaging(self):
+        """Subscribe to necessary topics."""
+        self.subscribe('my_topic', self.my_callback)
+        
+    def my_callback(self, message):
+        print(f'Received message: {message}')
+        self.publish('my_response_topic', 'Hello from MyModule!')
+        self.publish('log', type='info', message='MyModule received a message!')
+  ```
+Core and common topics include:
+- `log` - Used for logging messages, accepts a string. or kwargs `type` (info by default) and `message`.
+- `log/info` - Used for logging informational messages.
+- `log/warning` - Used for logging warning messages.
+- `log/error` - Used for logging error messages.
+- `log/debug` - Used for logging debug messages.
+- `log/critical` - Used for logging critical messages. 
+- `system/loop` - The main loop event. Subscribe to this for an action to trigger every loop.
+- `system/loop/1` - Triggers a loop every second.
+- `system/loop/10` - Triggers a loop every 10 seconds.
+- `system/loop/60` - Triggers a loop every 60 seconds.
+- `system/loop/exit` - Triggers a loop exit event.
+- `system/temperature` - The current temperature of the Pi.
+- `motion` - Output from the motion sensor, only triggered if motion is detected.
+- `speech` - Input from speech recognition module converted to text.
+- `tts` - Output to be spoken by the TTS module.
+- `animate` - Output to be animated by the Animation module.
+- `vision/detections` - Output from the Vision module, containing detected objects.
+- `led` - Output to the Neopixel LED module.

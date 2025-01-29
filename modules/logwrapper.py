@@ -1,8 +1,8 @@
-import logging
-from pubsub import pub
+import logging, json
 import os
+from modules.base_module import BaseModule
 
-class LogWrapper:
+class LogWrapper(BaseModule):
     levels = ['notset', 'debug', 'info', 'warning', 'error', 'critical']
 
     def __init__(self, **kwargs):
@@ -14,15 +14,16 @@ class LogWrapper:
         
         Subscribes to 'log' to log messages
         - Argument: type (string) - log level
-        - Argument: msg (string) - message to log
+        - Argument: message (string) - message to log
         
         Example:
-        pub.sendMessage('log', type='info', msg='This is an info message')
-        pub.sendMessage('log:debug', msg='This is a debug message')
-        pub.sendMessage('log:info', msg='This is an info message')
-        pub.sendMessage('log:error', msg='This is an error message')
-        pub.sendMessage('log:critical', msg='This is a critical message')
-        pub.sendMessage('log:warning', msg='This is a warning message')
+        self.publish('log', 'My message to log')
+        self.publish('log', type='info', message='This is an info message')
+        self.publish('log/debug', 'This is a debug message')
+        self.publish('log/info', 'This is an info message')
+        self.publish('log/error', 'This is an error message')
+        self.publish('log/critical', 'This is a critical message')
+        self.publish('log/warning', 'This is a warning message')
         
         """
         self.path = kwargs.get('path',  os.path.dirname(os.path.dirname(__file__)))
@@ -37,24 +38,33 @@ class LogWrapper:
         
         self.translator = kwargs.get('translator', None)
 
-        pub.subscribe(self.log, 'log', type='info')
-        pub.subscribe(self.log, 'log:debug', type='debug')
-        pub.subscribe(self.log, 'log:info', type='info')
-        pub.subscribe(self.log, 'log:error', type='error')
-        pub.subscribe(self.log, 'log:critical', type='critical')
-        pub.subscribe(self.log, 'log:warning', type='warning')
+    def setup_messaging(self):
+        """Subscribe to necessary topics."""
+        self.subscribe('log', self.log)
+        self.subscribe('log/debug', self.log, type='debug')
+        self.subscribe('log/info', self.log, type='info')
+        self.subscribe('log/error', self.log, type='error')
+        self.subscribe('log/critical', self.log, type='critical')
+        self.subscribe('log/warning', self.log, type='warning')
 
     def __del__(self):
         if os.path.isfile(self.file):
             os.rename(self.file, self.file + '.previous')
 
-    def log(self, type, msg):
+    def log(self, message):
+        self.log('info', message)
+
+    def log(self,  message, type='info'):
+        # if message is a json object as a string
+        if isinstance(message, str) and message.startswith('{'):
+            message = json.loads(message)['message']
+                
         if self.translator is not None:
-            msg = self.translator.request(msg)
+            message = self.translator.request(message)
 
         # Translate type string to log level (0 - 50)
-        logging.log(LogWrapper.levels.index(type)*10, msg)
-        
+        logging.log(LogWrapper.levels.index(type)*10, message, exc_info=True)       
+         
         if self.print:
-            print('LogWrapper: ' + type + ' - ' + str(msg))
+            print('LogWrapper: ' + type + ' - ' + str(message))
         

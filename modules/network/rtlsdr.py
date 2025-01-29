@@ -4,9 +4,9 @@ import requests
 import json
 import subprocess
 from time import sleep
-from pubsub import pub
+from modules.base_module import BaseModule
 
-class RTLSDR:
+class RTLSDR(BaseModule):
     def __init__(self, **kwargs):
         """
         RTL Software Defined Radio (SDR) class.
@@ -26,9 +26,11 @@ class RTLSDR:
         self.timeout = kwargs.get('timeout', 70)
         self.topics = kwargs.get('topics')
         self.rtl_process = None  # Handle for the rtl_433 process
-        pub.subscribe(self.start_rtl_433, self.topics['subscribe_start'])
-        pub.subscribe(self.listen_once, self.topics['subscribe_listen'])
-        pub.subscribe(self.stop_rtl_433, self.topics['subscribe_stop'])
+    
+    def setup_messaging(self):
+        self.subscribe('sdr/start', self.start_rtl_433)
+        self.subscribe('sdr/listen', self.listen_once)
+        self.subscribe('sdr/stop', self.stop_rtl_433)
 
     def start_rtl_433(self):
         """Starts the rtl_433 process with HTTP (line) streaming enabled."""
@@ -75,7 +77,7 @@ class RTLSDR:
         try:
             data = json.loads(line)
             print(data)
-            pub.sendMessage(self.topics['publish_data'], data=data)
+            self.publish('sdr/data', data=data)
 
             # Additional custom handling below
             # Example: print battery and temperature information

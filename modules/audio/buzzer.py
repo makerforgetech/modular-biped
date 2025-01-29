@@ -2,13 +2,13 @@ from gpiozero import TonalBuzzer
 from gpiozero.tones import Tone
 import time
 
-from pubsub import pub
-
 from modules.audio.melodies.deck_the_halls import MelodyDeckTheHalls
 from modules.audio.melodies.happy_birthday import MelodyHappyBirthday
 from modules.audio.melodies.notes import MelodyNotes
 
-class Buzzer:
+from modules.base_module import BaseModule
+
+class Buzzer(BaseModule):
     def __init__(self, **kwargs):
         """
         Buzzer class
@@ -19,15 +19,16 @@ class Buzzer:
         Subscribe to 'play' and 'buzz' events
         
         Example:
-        pub.sendMessage('play', song="happy birthday") # Also available: 'merry christmas'
-        pub.sendMessage('buzz', frequency=440, length=0.5)
+        self.publish('play', song="happy birthday") # Also available: 'merry christmas'
+        self.publish('buzz', frequency=440, length=0.5)
         
         """
         self.pin = kwargs.get('pin')
         self.buzzer = TonalBuzzer(self.pin)
-
-        pub.subscribe(self.play_song, 'play')
-        pub.subscribe(self.buzz, 'buzz')
+    
+    def setup_messaging(self):
+        self.subscribe('play', self.play_song)
+        self.subscribe('buzz', self.buzz)
         
     def buzz(self, frequency, length):
         """

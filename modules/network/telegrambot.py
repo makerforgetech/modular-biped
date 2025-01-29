@@ -3,12 +3,12 @@
 import logging
 import os
 import asyncio
-from pubsub import pub
+from modules.base_module import BaseModule
 
 from telegram import ForceReply, Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
-class TelegramBot:
+class TelegramBot(BaseModule):
     def __init__(self, **kwargs):
         """
         Telegram Bot
@@ -35,10 +35,7 @@ class TelegramBot:
         self.token = os.getenv('TELEGRAM_BOT_TOKEN', kwargs.get('token', None))
         print(self.token)
         # Topics for pubsub communication
-        self.topics = kwargs.get('topics', {
-            'publish_received': 'telegram/received',
-            'subscribe_respond': 'telegram/respond'
-        })
+        self.topics = kwargs.get('topics')
         self.update = None
         self.user_whitelist = kwargs.get('user_whitelist', [])
 
@@ -52,13 +49,14 @@ class TelegramBot:
         # Set up message handlers
         application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.publish))
 
-        # Subscribe to the response topic with async wrapper
-        pub.subscribe(self.async_handle_wrapper, self.topics['subscribe_respond'])
-        
         print("Starting Telegram bot...")
 
         # Run the bot until the user presses Ctrl-C
         application.run_polling(allowed_updates=Update.ALL_TYPES)
+        
+    def setup_messaging(self):
+        """Set up messaging for the module."""
+        self.subscribe('telegram/respond', self.async_handle_wrapper)
 
     @staticmethod
     async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -83,7 +81,7 @@ class TelegramBot:
         self.update = update
         
         # Publish the message to other parts of the application
-        pub.sendMessage(self.topics['publish_received'], user_id=user_id, message=message)
+        self.publish('telegram/received', user_id=user_id, message=message)
         print(f"Published message from user {user_id}: {message} on topic {self.topics['publish_received']}")
 
     async def handle(self, user_id: int, response: str) -> None:
@@ -111,16 +109,18 @@ if __name__ == "__main__":
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
     logger = logging.getLogger(__name__)
+    
+    bot = TelegramBot()
+    bot.user_whitelist = []
 
     # Define the simulate_echo function, which will be triggered on 'publish_received'
     def simulate_echo(user_id, message):
         print(f"Simulating echo for user {user_id} with message: {message}")
         # This would echo back as a response to the handle method
-        pub.sendMessage('telegram/respond', user_id=user_id, response=message)
+        bot.publish('telegram/respond', user_id=user_id, response=message)
     
     # Subscribe the simulate_echo function to the publish_received topic
-    pub.subscribe(simulate_echo, 'telegram/received')
+    bot.subscribe('telegram/received', simulate_echo)
     print("Subscribed to 'telegram/received' topic")
     
-    bot = TelegramBot()
-    bot.user_whitelist = []
+    

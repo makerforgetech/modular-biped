@@ -1,0 +1,14 @@
+messaging_service:
+  enabled: true # Required for framework to function
+  path: modules.network.messaging_service.MessagingService
+  config:
+    protocol: 'pubsub' # 'mqtt' or 'pubsub'
+    mqtt_host: 'localhost' 
+    mqtt_port: 1883
+  dependencies:
+    python:
+      - paho-mqtt
+      - pypubsub
+    unix:
+      - mosquitto
+      - mosquitto-clients

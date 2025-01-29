@@ -1,5 +1,5 @@
 logwrapper:
-  enabled: true
+  enabled: true # Highly recommended to enable this module
   path: modules.logwrapper.LogWrapper
   config:
     filename: app.log

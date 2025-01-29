@@ -2,9 +2,10 @@ from __future__ import print_function, division, absolute_import
 import time
 from modules.network.robust_serial.robust_serial import write_order, Order, write_i8, write_i16, read_i8, read_i16, read_i32, read_order
 from modules.network.robust_serial.utils import open_serial_port
-from pubsub import pub
 
-class ArduinoSerial:
+from modules.base_module import BaseModule
+
+class ArduinoSerial(BaseModule):
     """
     Communicate with Arduino over Serial
     """
@@ -20,7 +21,9 @@ class ArduinoSerial:
         self.baudrate = kwargs.get('baudrate', 115200)
         self.serial_file = ArduinoSerial.initialise(self.port, self.baudrate)
         self.file = None
-        pub.subscribe(self.send, 'serial')
+    
+    def setup_messaging(self):
+        self.subscribe('serial', self.send)
 
     @staticmethod
     def initialise(port, baudrate):
@@ -35,7 +38,7 @@ class ArduinoSerial:
         # # Initialize communication with Arduino
         # while not is_connected and attempts > 0:
         #     attempts = attempts -1
-        #     pub.sendMessage('log', msg="[ArduinoSerial] Waiting for arduino...")
+        #     self.publish('log', "[ArduinoSerial] Waiting for arduino...")
         #     write_order(serial_file, Order.HELLO)
         #     bytes_array = bytearray(serial_file.read(1))
         #     if not bytes_array:
@@ -45,9 +48,9 @@ class ArduinoSerial:
         #     if byte in [Order.HELLO.value, Order.ALREADY_CONNECTED.value]:
         #         is_connected = True
         # if is_connected:
-        #     pub.sendMessage('log', msg="[ArduinoSerial] Connected to Arduino")
+        #     self.publish('log', "[ArduinoSerial] Connected to Arduino")
         # else:
-        #     pub.sendMessage('log', msg="[ArduinoSerial] NOT CONNECTED")
+        #     self.publish('log', "[ArduinoSerial] NOT CONNECTED")
         #     serial_file = None
         return serial_file
     
@@ -69,30 +72,26 @@ class ArduinoSerial:
         """
         # If serial_file is None, call initialise(), if still fails then exit
         if self.serial_file is None:
-            pub.sendMessage('led', identifiers='status5', color='red')
-            pub.sendMessage('log', msg="[ArduinoSerial] Attempting to recover connection...")
+            self.publish('log', "[ArduinoSerial] Attempting to recover connection...")
             self.serial_file = ArduinoSerial.initialise()
         if self.serial_file is None:
             return
 
-        pub.sendMessage('led', identifiers='status5', color='blue')
-        # print('[ArduinoSerial] ' + str(ArduinoSerial.type_map[type]) + ' id: ' + str(identifier) + ' val: ' + str(message))
-
-        pub.sendMessage('log', msg='[ArduinoSerial] ' + str(ArduinoSerial.type_map[type]) + ' id: ' + str(identifier) + ' val: ' + str(message))
+        self.publish('log', '[ArduinoSerial] ' + str(ArduinoSerial.type_map[type]) + ' id: ' + str(identifier) + ' val: ' + str(message))
         if type == ArduinoSerial.DEVICE_SERVO or type == 'servo':
             write_order(self.serial_file, Order.SERVO)
             write_i8(self.serial_file, identifier)
             write_i16(self.serial_file, int(message))
-            pub.sendMessage('log', msg="[ArduinoSerial] Servo(relative) " + str(identifier) + " " + str(message))
+            self.publish('log', "[ArduinoSerial] Servo(relative) " + str(identifier) + " " + str(message))
             # print('[ArduinoSerial] Moved value from Arduino: ' + str(self.read16()))
-            pub.sendMessage('log', msg='[ArduinoSerial] Moved value from Arduino: ' + str(self.read16()))
+            self.publish('log', '[ArduinoSerial] Moved value from Arduino: ' + str(self.read16()))
         if type == ArduinoSerial.DEVICE_SERVO_RELATIVE or type == 'servo_relative':
             write_order(self.serial_file, Order.SERVO_RELATIVE)
             write_i8(self.serial_file, identifier)
             write_i16(self.serial_file, int(message))
-            pub.sendMessage('log', msg="[ArduinoSerial] Servo(relative) " + str(identifier) + " " + str(message))
+            self.publish('log', "[ArduinoSerial] Servo(relative) " + str(identifier) + " " + str(message))
             # print('[ArduinoSerial] Moved value from Arduino: ' + str(self.read16()))
-            pub.sendMessage('log', msg='[ArduinoSerial] Moved value from Arduino: ' + str(self.read16()))
+            self.publish('log', '[ArduinoSerial] Moved value from Arduino: ' + str(self.read16()))
         elif type == ArduinoSerial.DEVICE_LED or type == 'led':
             write_order(self.serial_file, Order.LED)
             if isinstance(identifier, list) or isinstance(identifier, range):
@@ -116,9 +115,6 @@ class ArduinoSerial:
             write_i8(self.serial_file, message)
 
         elif type == ArduinoSerial.DEVICE_PIN_READ or type == 'pin_read':
-            pub.sendMessage('led', identifiers='status5', color='green')
             write_order(self.serial_file, Order.READ)
             write_i8(self.serial_file, identifier)
-            pub.sendMessage('led', identifiers='status5', color='off')
             return read_i16(self.serial_file)
-        pub.sendMessage('led', identifiers='status5', color='off')

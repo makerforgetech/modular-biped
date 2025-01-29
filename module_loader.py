@@ -31,7 +31,7 @@ class ModuleLoader:
 
     def load_yaml_files(self):
         """Load and parse YAML files from the config folder."""
-        config_files = [os.path.join(self.config_folder, f) for f in os.listdir(self.config_folder) if f.endswith('.yml')]
+        config_files = [os.path.join(self.config_folder, f) for f in os.listdir(self.config_folder) if f.endswith('.yml') and f != 'generic.yml']
         loaded_modules = []
         for file_path in config_files:
             with open(file_path, 'r') as stream:
@@ -43,6 +43,16 @@ class ModuleLoader:
                 except yaml.YAMLError as e:
                     print(f"Error loading {file_path}: {e}")
         return loaded_modules
+
+    def set_messaging_service(self, module_instances, messaging_service):
+        """Set the messaging service for the modules."""
+        # Iterate through the module instances, extract name and module
+        for name, module in module_instances.items():
+            # get module name from object
+            # if module is not messaging_service:
+            if 'MessagingService' in name:
+                continue
+            module.messaging_service = messaging_service
 
     def load_modules(self):
         """Dynamically load and instantiate the modules based on the config."""
@@ -72,7 +82,7 @@ class ModuleLoader:
 
                 # Store the instance in the dictionary
                 instances[instance_name] = instance
-                pub.sendMessage('log', msg=f"[ModuleLoader] Loaded module: {module_name} instance: {instance_name}")
+                # print(f"[ModuleLoader] Loaded module: {module_name} instance: {instance_name}")
 
         print("All modules loaded")
         return instances  # Return the dictionary of instances

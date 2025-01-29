@@ -1,16 +1,19 @@
-from pubsub import pub
 from time import sleep
 from colour import Color
 import board
     
 import threading
+from modules.base_module import BaseModule
 
-class NeoPx:
+class NeoPx(BaseModule):
     COLOR_OFF = (0, 0, 0)
     COLOR_RED = (100, 0, 0)
     COLOR_GREEN = (0, 100, 0)
     COLOR_BLUE = (0, 0, 100)
     COLOR_PURPLE = (100, 0, 100)
+    COLOR_YELLOW = (100, 100, 0)
+    COLOR_ORANGE = (100, 50, 0)
+    COLOR_PINK = (100, 0, 50)
     COLOR_WHITE = (100, 100, 100)
     COLOR_WHITE_FULL = (255, 255, 255)
     COLOR_WHITE_DIM = (50, 50, 50)
@@ -26,7 +29,10 @@ class NeoPx:
         'white': COLOR_WHITE,
         'white_full': COLOR_WHITE_FULL,
         'off': COLOR_OFF,
-        'white_dim': COLOR_WHITE_DIM
+        'white_dim': COLOR_WHITE_DIM,
+        'yellow': COLOR_YELLOW,
+        'orange': COLOR_ORANGE,
+        'pink': COLOR_PINK
     }
 
     def __init__(self, **kwargs):
@@ -44,21 +50,21 @@ class NeoPx:
         - Argument: identifiers (int or list) - pixel number (starting from 0)
         - Argument: color (string or tuple) - string map of COLOR_MAP or tuple (R, G, B)
         
-        Subscribes to 'led:full' to set all pixels to one color
+        Subscribes to 'led/full' to set all pixels to one color
         - Argument: color (string or tuple) - string map of COLOR_MAP or tuple (R, G, B)
         
-        Subscribes to 'led:eye' to set eye color
+        Subscribes to 'led/eye' to set eye color
         - Argument: color (string or tuple) - string map of COLOR_MAP or tuple (R, G, B)
         
-        Subscribes to 'led:ring' to set ring color
+        Subscribes to 'led/ring' to set ring color
         - Argument: color (string or tuple) - string map of COLOR_MAP or tuple (R, G, B)
         
-        Subscribes to 'led:off' to turn off all pixels
+        Subscribes to 'led/off' to turn off all pixels
         
-        Subscribes to 'led:flashlight' to turn on/off all pixels
+        Subscribes to 'led/flashlight' to turn on/off all pixels
         - Argument: on (bool) - turn on or off
         
-        Subscribes to 'led:party' to start party mode
+        Subscribes to 'led/party' to start party mode
         
         Subscribes to 'exit' to clean up
         
@@ -66,15 +72,15 @@ class NeoPx:
         - Argument: msg (string) - speech command
         
         Example:
-        pub.sendMessage('led', identifiers=1, color='red')
-        pub.sendMessage('led:full', color='red')
-        pub.sendMessage('led:eye', color='red')
-        pub.sendMessage('led:ring', color='red')
-        pub.sendMessage('led:off')
-        pub.sendMessage('led:flashlight', on=True)
-        pub.sendMessage('led:party')
-        pub.sendMessage('exit')
-        pub.sendMessage('speech', msg='light on')
+        self.publish('led', identifiers=1, color='red')
+        self.publish('led/full', color='red')
+        self.publish('led/eye', color='red')
+        self.publish('led/ring', color='red')
+        self.publish('led/off')
+        self.publish('led/flashlight', on=True)
+        self.publish('led/party')
+        self.publish('exit')
+        self.publish('speech', msg='light on')
         """
         # Initialise
         self.count = kwargs.get('count')
@@ -107,29 +113,29 @@ class NeoPx:
             spi = board.SPI()
             self.pixels = neopixel.NeoPixel_SPI(spi, self.count, brightness=0.1, auto_write=False, pixel_order=neopixel.GRB)    
             
-            DELAY = 3
-            print("All neopixels OFF")
-            self.pixels.fill((0,0,0))
-            self.pixels.show()
-            sleep(DELAY)
+            # DELAY = 3
+            # print("All neopixels OFF")
+            # self.pixels.fill((0,0,0))
+            # self.pixels.show()
+            # sleep(DELAY)
 
-            print("First neopixel red, last neopixel blue")
-            self.pixels[0] = (10,0,0)
-            self.pixels[self.count - 1] = (0,0,10)
-            self.pixels.show()
-            sleep(DELAY)
+            # print("First neopixel red, last neopixel blue")
+            # self.pixels[0] = (10,0,0)
+            # self.pixels[self.count - 1] = (0,0,10)
+            # self.pixels.show()
+            # sleep(DELAY)
 
-            print("All " + str(self.count) + " neopixels green")
-            self.pixels.fill((0,10,0))
-            self.pixels.show()
-            sleep(DELAY)
+            # print("All " + str(self.count) + " neopixels green")
+            # self.pixels.fill((0,10,0))
+            # self.pixels.show()
+            # sleep(DELAY)
 
-            print("All neopixels OFF")
-            self.pixels.fill((0,0,0))
-            self.pixels.show()
-            sleep(DELAY)
+            # print("All neopixels OFF")
+            # self.pixels.fill((0,0,0))
+            # self.pixels.show()
+            # sleep(DELAY)
 
-            print("End of test")
+            # print("End of test")
         else: # GPIO
             import neopixel
             self.pixels = neopixel.NeoPixel(kwargs.get('pin'), self.count)
@@ -137,17 +143,17 @@ class NeoPx:
         self.set(self.all, NeoPx.COLOR_OFF)
         sleep(0.1)
         self.set(self.positions['middle'], NeoPx.COLOR_BLUE)
-
+    def setup_messaging(self):
         # Set subscribers
-        pub.subscribe(self.set, 'led')
-        pub.subscribe(self.full, 'led:full')
-        pub.subscribe(self.eye, 'led:eye')
-        pub.subscribe(self.ring, 'led:ring')
-        pub.subscribe(self.off, 'led:off')
-        pub.subscribe(self.eye, 'led:flashlight')
-        pub.subscribe(self.party, 'led:party')
-        pub.subscribe(self.exit, 'exit')
-        pub.subscribe(self.speech, 'speech')
+        self.subscribe('led', self.set)
+        self.subscribe('led/full', self.full)
+        self.subscribe('led/eye', self.eye)
+        self.subscribe('led/ring', self.ring)
+        self.subscribe('led/off', self.off)
+        self.subscribe('led/flashlight', self.flashlight)
+        self.subscribe('led/party', self.party)
+        self.subscribe('exit', self.exit)
+        self.subscribe('speech', self.speech)
 
     def exit(self):
         """
@@ -205,13 +211,13 @@ class NeoPx:
             # print(str(i) + str(color))
             try:
                 if i >= self.count:
-                    pub.sendMessage('log', msg='[LED] Error in set pixels: index out of range')
+                    self.publish('log','[LED] Error in set pixels: index out of range')
                     print('Error in set pixels: index out of range')
                     i = self.count-1                
                 self.pixels[i] = self.apply_brightness_modifier(i, color)
             except Exception as e:
                 print(e)
-                pub.sendMessage('log', msg='[LED] Error in set pixels: ' + str(e))
+                self.publish('log','[LED] Error in set pixels: ' + str(e))
                 pass
         
         self.pixels.show()
@@ -234,7 +240,7 @@ class NeoPx:
 
     def off(self):
         if self.thread:
-            pub.sendMessage('log', msg='[LED] Animation stopping')
+            self.publish('log','[LED] Animation stopping')
             self.animation = False
             self.thread.animation = False
             self.thread.join()
@@ -253,9 +259,9 @@ class NeoPx:
         index = self.positions['middle']
         if (self.count < index):
             index = self.count - 1
-            pub.sendMessage('log', msg='[LED] Error in set pixels: index out of range, changing to last pixel')
+            self.publish('log','[LED] Error in set pixels: index out of range, changing to last pixel')
         if self.pixels[index] != color:
-            pub.sendMessage('log', msg='[LED] Setting eye colour: ' + color)
+            self.publish('log','[LED] Setting eye colour: ' + color)
             self.set(index, NeoPx.COLOR_MAP[color])
 
     def party(self):
@@ -279,10 +285,10 @@ class NeoPx:
         :return:
         """
         if self.animation:
-            pub.sendMessage('log', msg='[LED] Animation already started. Command ignored')
+            self.publish('log','[LED] Animation already started. Command ignored')
             return
 
-        pub.sendMessage('log', msg='[LED] Animation starting: ' + animation)
+        self.publish('log','[LED] Animation starting: ' + animation)
 
         animations = {
             'spinner': self.spinner,

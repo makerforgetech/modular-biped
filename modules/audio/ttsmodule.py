@@ -1,12 +1,12 @@
-from pubsub import pub
 from time import sleep
 import pyttsx3
 
 import elevenlabs
 import os
 
+from modules.base_module import BaseModule
 
-class TTSModule:
+class TTSModule(BaseModule):
     
     def __init__(self, **kwargs):
         """
@@ -24,7 +24,7 @@ class TTSModule:
         - Argument: msg (string) - message to speak
         
         Example:
-        pub.sendMessage('tts', msg='Hello, World!')
+        self.publish('tts', msg='Hello, World!')
         """
         self.translator = kwargs.get('translator', None)
         self.service = kwargs.get('service', 'pyttsx3')
@@ -35,8 +35,9 @@ class TTSModule:
             self.init_elevenlabs(self.voice_id)
         else:
             self.init_pyttsx3()
+    def setup_messaging(self):
         # Set subscribers
-        pub.subscribe(self.speak, 'tts')
+        self.subscribe('tts', self.speak)
 
     def speak(self, msg):
         # print('Attempting to speak with service: ' + self.service)
@@ -56,7 +57,7 @@ class TTSModule:
         self.engine = engine        
 
     def speak_pyttsx3(self, msg):
-        pub.sendMessage('log', msg="[TTS] {}".format(msg))
+        self.publish('log', "[TTS] {}".format(msg))
         if self.translator is not None:
             msg = self.translator.request(msg)
 

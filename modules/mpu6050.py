@@ -5,6 +5,7 @@ from pubsub import pub
 '''
 import smbus					#import SMBus module of I2C
 from time import sleep          #import
+from modules.base_module import BaseModule
 
 #some MPU6050 Registers and their Address
 PWR_MGMT_1   = 0x6B
@@ -19,7 +20,7 @@ GYRO_XOUT_H  = 0x43
 GYRO_YOUT_H  = 0x45
 GYRO_ZOUT_H  = 0x47
 
-class MPU6050:
+class MPU6050(BaseModule):
     def __init__(self, **kwargs):
         self.bus = smbus.SMBus(1) 	# or bus = smbus.SMBus(0) for older version boards
         sleep(2)
