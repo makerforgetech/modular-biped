@@ -1,26 +1,12 @@
 import os, sys
-import logging
 from time import sleep, time
 import signal
-# import schedule
 from pubsub import pub
 from modules.config import Config
 from module_loader import ModuleLoader
 
-# Set up logging
-logging.basicConfig(filename=os.path.dirname(__file__) + '/app.log', level=logging.INFO, format='%(levelname)s: %(asctime)s %(message)s',
-                            datefmt='%m/%d/%Y %I:%M:%S %p') # this doesn't work unless it's here
-from modules.logwrapper import LogWrapper
-
-def mode():
-    return Config.MODE_KEYBOARD if len(sys.argv) > 1 and sys.argv[1] == 'manual' else Config.MODE_LIVE
-
 def main():
     print('Starting...')
-    
-    path = os.path.dirname(__file__)
-    log = LogWrapper(path=os.path.dirname(__file__))
-
     # Throw exception to safely exit script when terminated
     signal.signal(signal.SIGTERM, Config.exit)
     
@@ -91,7 +77,7 @@ def main():
                 # schedule.run_pending()
 
     except Exception as ex:
-        logging.error(f"Exception: {ex}", exc_info=True)
+        print(f"Exception: {ex}")
         loop = False
 
     finally:

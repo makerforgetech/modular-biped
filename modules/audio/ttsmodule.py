@@ -5,10 +5,6 @@ import pyttsx3
 import elevenlabs
 import os
 
-import httpx
-print(httpx.__version__)
-print(f"HTTPX file path: {httpx.__file__}")
-
 
 class TTSModule:
     

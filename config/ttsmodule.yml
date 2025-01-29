@@ -1,5 +1,5 @@
 ttsmodule:
-  enabled: true
+  enabled: false
   path: "modules.audio.ttsmodule.TTSModule"
   config:
     service: "elevenlabs" # or pyttsx3

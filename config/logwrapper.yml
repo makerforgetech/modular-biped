@@ -1,6 +1,9 @@
 logwrapper:
-  enabled: false #TODO work in progress, currently hardcoded in main.py
+  enabled: true
   path: modules.logwrapper.LogWrapper
+  config:
+    filename: app.log
+    print: true
   dependencies:
     python:
       - pypubsub

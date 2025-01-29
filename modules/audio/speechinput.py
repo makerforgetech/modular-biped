@@ -55,12 +55,13 @@ class SpeechInput:
             while self.listening:
                 try:
                     audio = self.recognizer.listen(source, timeout=10, phrase_time_limit=15)
-                    # pub.sendMessage('led', identifiers='top5', color='white')
-                    # pub.sendMessage('log', msg='[Speech] End Detection')
-                    with open("speech.wav", "wb") as f:
-                        f.write(audio.get_wav_data())
-
                     val = self.recognizer.recognize_google(audio)
+                    
+                    #save audio with filename as val substituting any non alphanumeric characters with underscores
+                    filename = str(val).replace(' ', '_').replace('[^a-zA-Z0-9]', '_')
+                    with open("speech_" + filename +  ".wav", "wb") as f:
+                        f.write(audio.get_wav_data())
+                        
                     pub.sendMessage('log', msg='[Speech] I heard: ' + str(val))
                     pub.sendMessage('speech', text=val.lower())
                     pub.sendMessage('tts', msg='I heard ' + val.lower())
