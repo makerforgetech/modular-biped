@@ -35,7 +35,6 @@ class TelegramBot(BaseModule):
         self.token = os.getenv('TELEGRAM_BOT_TOKEN', kwargs.get('token', None))
         print(self.token)
         # Topics for pubsub communication
-        self.topics = kwargs.get('topics')
         self.update = None
         self.user_whitelist = kwargs.get('user_whitelist', [])
 
@@ -82,7 +81,7 @@ class TelegramBot(BaseModule):
         
         # Publish the message to other parts of the application
         self.publish('telegram/received', user_id=user_id, message=message)
-        print(f"Published message from user {user_id}: {message} on topic {self.topics['publish_received']}")
+        print(f"Published message from user {user_id}: {message} on topic telegram/received")
 
     async def handle(self, user_id: int, response: str) -> None:
         """Handle responses from the application and send them back to the user."""

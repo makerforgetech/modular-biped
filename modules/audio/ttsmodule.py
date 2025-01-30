@@ -62,6 +62,8 @@ class TTSModule(BaseModule):
             msg = self.translator.request(msg)
 
         self.engine.say(f"{msg}. I have spoken.") # Apparently this is the only way to get pyttsx3 to output anything (by including actual text)
+        # self.engine.say("{}".format(msg)) # @todo: Test this
+        
         # self.engine.say(msg) # This doesn't output anything
         self.engine.runAndWait()
     

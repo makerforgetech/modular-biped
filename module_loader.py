@@ -31,7 +31,7 @@ class ModuleLoader:
 
     def load_yaml_files(self):
         """Load and parse YAML files from the config folder."""
-        config_files = [os.path.join(self.config_folder, f) for f in os.listdir(self.config_folder) if f.endswith('.yml') and f != 'generic.yml']
+        config_files = [os.path.join(self.config_folder, f) for f in os.listdir(self.config_folder) if f.endswith('.yml')]
         loaded_modules = []
         for file_path in config_files:
             with open(file_path, 'r') as stream:
