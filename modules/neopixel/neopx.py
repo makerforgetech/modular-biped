@@ -211,13 +211,13 @@ class NeoPx(BaseModule):
             # print(str(i) + str(color))
             try:
                 if i >= self.count:
-                    self.publish('log','[LED] Error in set pixels: index out of range')
+                    self.log('Error in set pixels: index out of range')
                     print('Error in set pixels: index out of range')
                     i = self.count-1                
                 self.pixels[i] = self.apply_brightness_modifier(i, color)
             except Exception as e:
                 print(e)
-                self.publish('log','[LED] Error in set pixels: ' + str(e))
+                self.log('Error in set pixels: ' + str(e))
                 pass
         
         self.pixels.show()
@@ -240,7 +240,7 @@ class NeoPx(BaseModule):
 
     def off(self):
         if self.thread:
-            self.publish('log','[LED] Animation stopping')
+            self.log('Animation stopping')
             self.animation = False
             self.thread.animation = False
             self.thread.join()
@@ -259,9 +259,9 @@ class NeoPx(BaseModule):
         index = self.positions['middle']
         if (self.count < index):
             index = self.count - 1
-            self.publish('log','[LED] Error in set pixels: index out of range, changing to last pixel')
+            self.log('Error in set pixels: index out of range, changing to last pixel')
         if self.pixels[index] != color:
-            self.publish('log','[LED] Setting eye colour: ' + color)
+            self.log('Setting eye colour: ' + color)
             self.set(index, NeoPx.COLOR_MAP[color])
 
     def party(self):
@@ -285,10 +285,10 @@ class NeoPx(BaseModule):
         :return:
         """
         if self.animation:
-            self.publish('log','[LED] Animation already started. Command ignored')
+            self.log('Animation already started. Command ignored')
             return
 
-        self.publish('log','[LED] Animation starting: ' + animation)
+        self.log('Animation starting: ' + animation)
 
         animations = {
             'spinner': self.spinner,

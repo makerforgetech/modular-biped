@@ -1,3 +1,4 @@
+import inspect
 class BaseModule:
     
     @property
@@ -24,3 +25,17 @@ class BaseModule:
         if self.messaging_service is None:
             raise ValueError("Messaging service not set.")
         self.messaging_service.subscribe(topic, callback, **kwargs)
+        
+    def log(self, message, level='info'):
+        """
+        Advanced logging, includes class name, method name, and line number to message string
+        """
+        # get class name, method name
+        class_name = self.__class__.__name__
+        method_name = inspect.stack()[1].function
+        
+        #get line number of calling class
+        frame = inspect.stack()[1]
+
+        message = f"[{class_name}.{method_name}:{frame.lineno}] {str(message)}"
+        self.publish(f'log/{level}', message=message)

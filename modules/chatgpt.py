@@ -56,7 +56,7 @@ class ChatGPT(BaseModule):
         )
 
         output = completion.choices[0].message.content
-        self.publish('log', '[ChatGPT] ' + output)
+        self.log(output)
         # if output includes 'animate:', split on colon and sendMessage 'animate' with action
         if 'animate:' in output:
             action = output.split(':')[1]

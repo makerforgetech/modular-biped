@@ -14,7 +14,7 @@ class Sensor(BaseModule):
         Publishes 'motion' when motion detected
         
         Example:
-        pub.subscribe(handleMotion, 'motion')
+        self.subscribe('motion', callback)
         
         """
         self.pin = kwargs.get('pin')

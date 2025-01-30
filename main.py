@@ -40,7 +40,7 @@ def main():
     # messaging_service.publish('play', song="happy birthday") # Also available: 'merry christmas'
     
     # Check temperature of Raspberry Pi
-    # pub.subscribe(self.handleTemp, 'temperature') # handleTemp should accept 'value' as a parameter
+    # messaging_service.subscribe('temperature', callback) # callback should accept 'value' as a parameter
     
     # Move pi servo
     # messaging_service.publish('piservo:move', angle=30)

@@ -25,7 +25,7 @@ class SpeechInput(BaseModule):
         self.subscribe('rest', self.stop)
         self.subscribe('sleep', self.stop)
         self.subscribe('exit', self.stop)
-        self.publish('log','[Speech] Mapping mic to index ' + str(self.device))
+        self.log('Mapping mic to index ' + str(self.device))
         if self.start_on_boot:
             self.start()
 
@@ -49,11 +49,11 @@ class SpeechInput(BaseModule):
         Not background
         :return:
         """
-        self.publish('log','[Speech] Initialising Detection')
+        self.log('Initialising Detection')
         with self.mic as source:
             self.recognizer.adjust_for_ambient_noise(source, duration=2)
             # self.recognizer.energy_threshold = 300  # Adjust based on your environment
-            self.publish('log','[Speech] Detecting...')
+            self.log('Detecting...')
             while self.listening:
                 try:
                     audio = self.recognizer.listen(source, timeout=10, phrase_time_limit=15)
@@ -64,7 +64,7 @@ class SpeechInput(BaseModule):
                     with open("speech_" + filename +  ".wav", "wb") as f:
                         f.write(audio.get_wav_data())
                         
-                    self.publish('log','[Speech] I heard: ' + str(val))
+                    self.log('I heard: ' + str(val))
                     self.publish('speech', text=val.lower())
                     self.publish('tts', msg='I heard ' + val.lower())
                 except sr.WaitTimeoutError as e:
@@ -77,7 +77,7 @@ class SpeechInput(BaseModule):
 
     def stop(self):
         self.listening = False
-        self.publish('log','[Speech] Stopping')
+        self.log('Stopping')
         
 # allow script to be run directly
 if __name__ == '__main__':

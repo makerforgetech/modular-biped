@@ -73,7 +73,7 @@ class Personality(BaseModule):
             'celebrate'
         ]
         animation = choice(animations)
-        self.publish('log', f"[Personality] Random animation triggered: {animation}")
+        self.log(f"Random animation triggered: {animation}")
         self.publish('animate', action=animation)
 
     # Calculate the next action time
@@ -86,27 +86,27 @@ class Personality(BaseModule):
         messages = ["Hi", "Hello", "Hai", "Hey"]
         msg = choice(messages)
         self.publish('speak', msg=msg)
-        self.publish('log', f"[Personality] Braillespeak triggered: {msg}")
+        self.log(f"Braillespeak triggered: {msg}")
 
     # Buzzer: Outputs a specific tone
     def buzzer_tone(self):
         frequency = randint(300, 1000)  # Random frequency between 300Hz and 1000Hz
         length = round(randint(1, 5) / 10, 1)  # Random length between 0.1s and 0.5s
         self.publish('buzz', frequency=frequency, length=length)
-        self.publish('log', f"[Personality] Buzzer tone triggered: {frequency}Hz for {length}s")
+        self.log(f"Buzzer tone triggered: {frequency}Hz for {length}s")
 
     # Buzzer: Plays one of two predefined tunes
     def buzzer_song(self):
         songs = ["happy birthday", "merry christmas"]
         song = choice(songs)
         self.publish('play', song=song)
-        self.publish('log', f"[Personality] Buzzer song triggered: {song}")
+        self.log(f"Buzzer song triggered: {song}")
 
     # Neopixels: Toggles random status LEDs
     def random_neopixel_status(self):
         if not self.last_status_time or datetime.now() - self.last_status_time > timedelta(seconds=3):
             self.last_status_time = datetime.now()
-            color = choice(["red", "green", "blue", "white_dim", "purple", "yellow", "orange", "pink", "off"])
+            color = choice(["red", "green", "blue", "white_dim", "purple", "yellow", "orange", "pink"])
             self.publish('led', identifiers=[0], color=color)
             for i in range(4, 0, -1):
                 if i+1 < 5:
@@ -114,7 +114,7 @@ class Personality(BaseModule):
             for i in range(1, 5):
                 self.publish('led', identifiers=[i], color=self.led_colors[i])
             self.led_colors[0] = color
-            self.publish('log', message=f"[Personality] Neopixel status triggered set to {color}")
+            self.log(message=f"Neopixel status triggered set to {color}", level='debug')
 
     # Neopixels: Toggles random eye LEDs
     def random_neopixel_eye(self):
@@ -125,19 +125,19 @@ class Personality(BaseModule):
         position = choice(positions)
         color = choice(["white_dim"])
         self.publish('led', identifiers=positions, color=color)
-        self.publish('log', f"[Personality] Neopixel eye ring set to {color}")
+        self.log(f"Neopixel eye ring set to {color}")
 
     # Antenna: Moves to a random angle between -40 and 40 degrees
     def move_antenna(self):
         angle = randint(-40, 40)
         self.publish('piservo/move', angle=angle)
-        self.publish('log', f"[Personality] Antenna moved to angle: {angle}")
+        self.log(f"Antenna moved to angle: {angle}")
 
     # Vision: Handles detected objects
     def handle_vision_detections(self, matches):
         # if there are matches and the object reaction end time is in the past
         if matches and len(matches) > 0 and (self.object_reaction_end_time is None or datetime.now() >= self.object_reaction_end_time):
-            self.publish('log', f"[Personality] Vision detected objects: {matches}")
+            self.log(f"Vision detected objects: {matches}")
             self.last_vision_time = datetime.now()
             # Trigger temporary reaction for detected objects
             self.random_neopixel_eye()

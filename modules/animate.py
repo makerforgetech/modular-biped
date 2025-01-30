@@ -33,7 +33,7 @@ class Animate(BaseModule):
         if not os.path.isfile(file):
             raise ValueError('Animation does not exist: ' + action)
         
-        self.publish('log', '[Animate] Animating: ' + action)
+        self.log(f"Animating: {action}")
 
         with open(file, 'r') as f:
             parsed = json.load(f)

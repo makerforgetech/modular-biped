@@ -57,7 +57,7 @@ class TTSModule(BaseModule):
         self.engine = engine        
 
     def speak_pyttsx3(self, msg):
-        self.publish('log', "[TTS] {}".format(msg))
+        self.log("{}".format(msg))
         if self.translator is not None:
             msg = self.translator.request(msg)
 

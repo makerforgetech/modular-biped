@@ -9,7 +9,7 @@ class PiTemperature(BaseModule):
     
     def setup_messaging(self):
         """Subscribe to necessary topics."""
-        self.subscribe('system/loop/1', self.monitor)
+        self.subscribe('system/loop/60', self.monitor)
 
     @staticmethod
     def read():
@@ -18,14 +18,16 @@ class PiTemperature(BaseModule):
 
     def monitor(self):
         val = self.read()
-        self.publish('log', '[TEMP] ' + val)
+        #get degrees celsius symbol
+        outputval = val + u"\u00b0" + "C"
         self.publish('system/temperature', val)
         float_val = float(val)
         if float_val > PiTemperature.THROTTLED_TEMP:
-            self.publish('log/critical', '[TEMP] ' + val)
+            self.log(f'Temperature is critical: {outputval}', 'critical')
         elif float_val > PiTemperature.WARNING_TEMP:
-            self.publish('log/warning', '[TEMP] ' + val)
-
+            self.log(f'Temperature is high: {outputval}', 'warning')
+        else:
+            self.log(f'Temperature: {outputval}', 'debug')
     def map_range(self, value):
         # Cap range for LED
         if value > PiTemperature.WARNING_TEMP:
