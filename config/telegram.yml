@@ -5,7 +5,6 @@ telegram:
     user_whitelist: []
   dependencies:
     python:
-      - pypubsub
       - python-telegram-bot
     additional:
       - https://core.telegram.org/bots/tutorial#obtain-your-bot-token

@@ -5,6 +5,3 @@ tracking:
     active: True
     name: 'tracking'
     filter: 'person'
-  dependencies:
-    python:
-      - pypubsub

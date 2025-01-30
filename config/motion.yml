@@ -6,5 +6,4 @@ motion:
     test_on_boot: false
   dependencies:
     python:
-      - pypubsub
       - gpiozero

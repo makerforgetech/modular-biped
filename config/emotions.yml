@@ -6,7 +6,6 @@ emotions:
       - tensorflow
       - torch
       - transformers
-      - pypubsub
   config:
     colors:
       grief:

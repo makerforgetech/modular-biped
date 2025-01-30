@@ -14,17 +14,10 @@ class RTLSDR(BaseModule):
         
         Service must be started using `rtl_433 -F http` before listening. 
         This is handled with the start and stop methods.
-        
-        Subscribes (topics defined in config):
-        - listen: Listen to all messages and publish.
-        
-        Publishes (topics defined in config):
-        - data: Publish the data to the topic defined in config.
         """
         self.udp_host = kwargs.get('udp_host', "127.0.0.1")
         self.udp_port = kwargs.get('udp_port', 8433)
         self.timeout = kwargs.get('timeout', 70)
-        self.topics = kwargs.get('topics')
         self.rtl_process = None  # Handle for the rtl_433 process
     
     def setup_messaging(self):
@@ -119,12 +112,7 @@ class RTLSDR(BaseModule):
 
 if __name__ == "__main__":
     try:
-        sdr = RTLSDR(topics={
-            'subscribe_listen': 'sdr/listen',
-            'publish_data': 'sdr/data',
-            'subscribe_start': 'sdr/start',
-            'subscribe_stop': 'sdr/stop'
-            })
+        sdr = RTLSDR()
         sdr.rtl_433_listen()
     except KeyboardInterrupt:
         print('\nExiting.')

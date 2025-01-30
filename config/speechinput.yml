@@ -12,7 +12,6 @@ speechinput:
       # - scipy
       - ladspa-sdk
     python:
-      - pypubsub
       - SpeechRecognition
       # - adafruit-python-shell
       # - libportaudio0

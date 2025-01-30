@@ -7,8 +7,8 @@ messaging_service:
     mqtt_port: 1883
   dependencies:
     python:
-      - paho-mqtt
+      # - paho-mqtt
       - pypubsub
-    unix:
-      - mosquitto
-      - mosquitto-clients
+    # unix:
+      # - mosquitto
+      # - mosquitto-clients

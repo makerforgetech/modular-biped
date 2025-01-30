@@ -5,6 +5,3 @@ logwrapper:
     filename: app.log
     log_level: 'debug' # debug, info, warning, error, critical
     cli_level: 'info' # debug, info, warning, error, critical
-  dependencies:
-    python:
-      - pypubsub
