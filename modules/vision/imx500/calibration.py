@@ -1,11 +1,10 @@
-from pubsub import pub
 from time import sleep
 from .tracking import Tracking
-
+from modules.base_module import BaseModule
 """
 To enable, disable tracking.active, import into main.py and pass the vision and tracking instances from ModuleLoader.
 """
-class Calibration:
+class Calibration(BaseModule):
     def __init__(self, vision, tracking):
         self.vision = vision
         self.tracking = tracking
@@ -35,9 +34,9 @@ class Calibration:
         
         # Move the servos a preset percentage
         if axis == 0:
-            pub.sendMessage('servo:pan:mv', percentage=servo_move_pct)
+            self.publish('servo:pan:mv', percentage=servo_move_pct)
         else:
-            pub.sendMessage('servo:tilt:mv', percentage=servo_move_pct)
+            self.publish('servo:tilt:mv', percentage=servo_move_pct)
 
         # Wait for the servo movement to complete (e.g., debounce time)
         sleep(5)  # This can be adjusted as per servo speed

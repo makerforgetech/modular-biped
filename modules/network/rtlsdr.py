@@ -4,9 +4,9 @@ import requests
 import json
 import subprocess
 from time import sleep
-from pubsub import pub
+from modules.base_module import BaseModule
 
-class RTLSDR:
+class RTLSDR(BaseModule):
     def __init__(self, **kwargs):
         """
         RTL Software Defined Radio (SDR) class.
@@ -14,21 +14,16 @@ class RTLSDR:
         
         Service must be started using `rtl_433 -F http` before listening. 
         This is handled with the start and stop methods.
-        
-        Subscribes (topics defined in config):
-        - listen: Listen to all messages and publish.
-        
-        Publishes (topics defined in config):
-        - data: Publish the data to the topic defined in config.
         """
         self.udp_host = kwargs.get('udp_host', "127.0.0.1")
         self.udp_port = kwargs.get('udp_port', 8433)
         self.timeout = kwargs.get('timeout', 70)
-        self.topics = kwargs.get('topics')
         self.rtl_process = None  # Handle for the rtl_433 process
-        pub.subscribe(self.start_rtl_433, self.topics['subscribe_start'])
-        pub.subscribe(self.listen_once, self.topics['subscribe_listen'])
-        pub.subscribe(self.stop_rtl_433, self.topics['subscribe_stop'])
+    
+    def setup_messaging(self):
+        self.subscribe('sdr/start', self.start_rtl_433)
+        self.subscribe('sdr/listen', self.listen_once)
+        self.subscribe('sdr/stop', self.stop_rtl_433)
 
     def start_rtl_433(self):
         """Starts the rtl_433 process with HTTP (line) streaming enabled."""
@@ -75,7 +70,7 @@ class RTLSDR:
         try:
             data = json.loads(line)
             print(data)
-            pub.sendMessage(self.topics['publish_data'], data=data)
+            self.publish('sdr/data', data=data)
 
             # Additional custom handling below
             # Example: print battery and temperature information
@@ -117,12 +112,7 @@ class RTLSDR:
 
 if __name__ == "__main__":
     try:
-        sdr = RTLSDR(topics={
-            'subscribe_listen': 'sdr/listen',
-            'publish_data': 'sdr/data',
-            'subscribe_start': 'sdr/start',
-            'subscribe_stop': 'sdr/stop'
-            })
+        sdr = RTLSDR()
         sdr.rtl_433_listen()
     except KeyboardInterrupt:
         print('\nExiting.')

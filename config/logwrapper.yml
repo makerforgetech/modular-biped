@@ -1,9 +1,7 @@
 logwrapper:
-  enabled: true
+  enabled: true # Highly recommended to enable this module
   path: modules.logwrapper.LogWrapper
   config:
     filename: app.log
-    print: true
-  dependencies:
-    python:
-      - pypubsub
+    log_level: 'debug' # debug, info, warning, error, critical
+    cli_level: 'info' # debug, info, warning, error, critical

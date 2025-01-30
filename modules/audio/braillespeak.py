@@ -1,8 +1,9 @@
 import time
-from pubsub import pub
 #import pysine  #@todo this breaks the microphone (https://trello.com/c/qNVW2I5O/44-audio-reactions)
 
-class BrailleSpeak:
+from modules.base_module import BaseModule
+
+class BrailleSpeak(BaseModule):
     """
     Communicate with tones, letters converted to tone pairs
     Uses Buzzer module to play tones via pubsub
@@ -12,11 +13,11 @@ class BrailleSpeak:
     Subscribes to 'speak' event
     
     Example:
-    pub.sendMessage('speak', msg="Hi")
+    self.publish('speak', msg="Hi")
 
     """
     def __init__(self, **kwargs):
-        pub.subscribe(self.send, 'speak')
+        
         self.pin = kwargs.get('pin')
         self.speaker = False
         self.duration = kwargs.get('duration', 100 / 1000)  # ms to seconds
@@ -52,6 +53,9 @@ class BrailleSpeak:
             [5, 7],
             [5, 3]
         ]
+        
+    def setup_messaging(self):
+        self.subscribe('speak', self.send)
 
     def exit(self):
         pass
@@ -66,7 +70,7 @@ class BrailleSpeak:
                 pass
                 #pysine.sine(frequency=self.notes[n], duration=self.duration)
             else:
-                pub.sendMessage('buzz', frequency=self.notes[n], length=self.duration)
+                self.publish('buzz', frequency=self.notes[n], length=self.duration)
         time.sleep(self.duration / 2)
 
     def send(self, msg):

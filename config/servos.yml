@@ -44,5 +44,4 @@ servos:
       start: 50
   dependencies:
     python:
-      - pypubsub
       - pigpio

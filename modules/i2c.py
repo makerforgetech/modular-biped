@@ -1,10 +1,10 @@
-from pubsub import pub
 import os
 from time import sleep
+from modules.base_module import BaseModule
 
 from adafruit_servokit import ServoKit
 
-class I2C:
+class I2C(BaseModule):
     def __init__(self, **kwargs):
         # Scan with `sudo i2cdetect -y 1`
         self.servos = ServoKit(channels=16)

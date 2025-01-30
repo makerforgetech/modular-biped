@@ -1,5 +1,5 @@
 neopixel:
-  enabled: false
+  enabled: true
   path: 'modules.neopixel.neopx.NeoPx'
   config:
     pin: 12 # Only used for GPIO. GPIO2 and 3 are use for i2c, GPIO10 is used for SPI, GPIO12 is used for GPIO
@@ -35,7 +35,7 @@ neopixel:
     ]
   dependencies:
     python:
-      - pypubsub
+      - colour
       - adafruit-circuitpython-seesaw # i2c SUPPORT
       - adafruit-blinka # SPI SUPPORT
       - adafruit-circuitpython-neopixel-spi # SPI SUPPORT

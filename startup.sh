@@ -15,3 +15,6 @@ sudo pigpiod # Start the GPIO daemon.
 
 # Run main.py using the virtual environment's Python interpreter
 "$BASE_DIR/myenv/bin/python3" "$BASE_DIR/main.py"
+
+# start mosquitto for mqtt broker
+# sudo systemctl start mosquitto

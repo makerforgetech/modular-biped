@@ -3,9 +3,9 @@ import threading
 from modules.config import Config
 from modules.network.arduinoserial import ArduinoSerial
 from time import sleep
-from pubsub import pub
+from modules.base_module import BaseModule
 
-class Servo:
+class Servo(BaseModule):
 
     def __init__(self, **kwargs):
         """
@@ -32,8 +32,8 @@ class Servo:
         - Argument: percentage (int) - percentage to move servo
         
         Example:
-        pub.sendMessage('servo:pan:mvabs', percentage=90)
-        pub.sendMessage('servo:pan:mv', percentage=10)
+        self.publish('servo:pan:mvabs', percentage=90)
+        self.publish('servo:pan:mv', percentage=10)
         """
         self.pin = kwargs.get('pin')
         self.identifier = kwargs.get('name')
@@ -54,8 +54,9 @@ class Servo:
 
         self.move(self.start)
 
-        pub.subscribe(self.move, 'servo:' + self.identifier + ':mvabs')
-        pub.subscribe(self.move_relative, 'servo:' + self.identifier + ':mv')
+    def setup_messaging(self):
+        self.subscribe('servo:' + self.identifier + ':mvabs', self.move)
+        self.subscribe('servo:' + self.identifier + ':mv', self.move_relative)
 
     def __del__(self):
         pass #self.reset()
@@ -76,7 +77,7 @@ class Servo:
                 self.execute_move(this_move, True)
                 self.pos = new
             else:
-                pub.sendMessage('log:error', '[Servo] Percentage %d out of range' % percentage)
+                self.publish('log/error', '[Servo] Percentage %d out of range' % percentage)
                 raise ValueError('Percentage %d out of range' % percentage)
         else:
             self.execute_move([(percentage, 0)], True)
@@ -91,7 +92,7 @@ class Servo:
             self.execute_move([(percentage, 0)])
             self.pos = new
         else:
-            pub.sendMessage('log:error', '[Servo] Percentage %d out of range' % percentage)
+            self.publish('log/error', '[Servo] Percentage %d out of range' % percentage)
             raise ValueError('Percentage %d out of range' % percentage)
 
     def execute_move(self, sequence, is_relative=False):
@@ -111,7 +112,7 @@ class Servo:
         #     return
 
         if self.power:
-            pub.sendMessage('power:use')
+            self.publish('power:use')
         if self.serial:
             # just move the pan servo for now. Remove after debugging
             # if self.index != 7 and self.index != 6 and self.index != 5 and self.index != 4  and self.index != 3  and self.index != 2:
@@ -119,7 +120,7 @@ class Servo:
             type = ArduinoSerial.DEVICE_SERVO
             if is_relative:
                 type = ArduinoSerial.DEVICE_SERVO_RELATIVE
-            pub.sendMessage('serial', type=type, identifier=self.index, message=s[0])
+            self.publish('serial', type=type, identifier=self.index, message=s[0])
         else:
             self.pi.set_servo_pulsewidth(self.pin, s[0])
         if len(sequence) > 1:
@@ -128,7 +129,7 @@ class Servo:
         else:
             pass #sleep(s[1])
         if self.power and self.pos == self.start:
-            pub.sendMessage('power:release')
+            self.publish('power:release')
 
     def calculate_move(self, old, new, time=0.1, translate=False):
         if translate:
