@@ -7,24 +7,18 @@ import requests
 
 class DeskGUI(QtWidgets.QMainWindow):
     def __init__(self, **kwargs):
-        """
-        DeskGUI displays three camera feeds, a log area, and an I/O panel for LLM interaction.
-        
-        Configuration kwargs:
-          - ollama_url: URL of the LLM (Ollama) API (e.g., "http://localhost:5000/api")
-        """
         super(DeskGUI, self).__init__()
         self.setWindowTitle("Robot Desk GUI")
         self.resize(1200, 800)
         
         self.ollama_url = kwargs.get('ollama_url', 'http://localhost:5000/api')
 
-        # Set up the main layout.
+        # Create the main layout
         self.central_widget = QtWidgets.QWidget()
         self.setCentralWidget(self.central_widget)
         self.layout = QtWidgets.QGridLayout(self.central_widget)
 
-        # Create labels for three camera feeds.
+        # Create camera labels
         self.camera_labels = []
         for i in range(3):
             label = QtWidgets.QLabel()
@@ -33,12 +27,12 @@ class DeskGUI(QtWidgets.QMainWindow):
             self.camera_labels.append(label)
             self.layout.addWidget(label, 0, i)
 
-        # Log display area.
+        # Log display
         self.log_text = QtWidgets.QTextEdit()
         self.log_text.setReadOnly(True)
         self.layout.addWidget(self.log_text, 1, 0, 1, 3)
 
-        # I/O panel for LLM interaction.
+        # I/O panel
         self.io_input = QtWidgets.QLineEdit()
         self.io_output = QtWidgets.QTextEdit()
         self.io_output.setReadOnly(True)
@@ -53,30 +47,31 @@ class DeskGUI(QtWidgets.QMainWindow):
 
         self.send_button.clicked.connect(self.send_to_llm)
 
-        # Start video capture for three cameras.
+        # Initialize cameras
         self.captures = []
+        self.camera_errors = [False] * 3  # Prevent duplicate error logs
         for i in range(3):
             cap = cv2.VideoCapture(i)
             if not cap.isOpened():
-                self.log(f"Camera {i} could not be opened.")
+                self.log_once(i, f"Camera {i} could not be opened.")
+                cap = None
             self.captures.append(cap)
 
-        # Use QTimer to update camera frames.
+        # Use QTimer to update camera frames
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.update_frames)
         self.timer.start(30)  # ~33 FPS
 
-        # Subscribe to log and LLM response messages.
+        # Subscribe to log and LLM response events
         pub.subscribe(self.update_log, 'log')
         pub.subscribe(self.display_llm_response, 'llm_response')
 
     def update_frames(self):
-        """Grab frames from each camera and display them."""
+        """Capture frames from cameras and display them."""
         for idx, cap in enumerate(self.captures):
-            if cap.isOpened():
+            if cap and cap.isOpened():
                 ret, frame = cap.read()
                 if ret:
-                    # Convert color for display.
                     processed_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     height, width, channel = processed_frame.shape
                     bytes_per_line = 3 * width
@@ -88,17 +83,17 @@ class DeskGUI(QtWidgets.QMainWindow):
                         pixmap.scaled(self.camera_labels[idx].size(), QtCore.Qt.KeepAspectRatio)
                     )
             else:
-                self.log(f"Camera {idx} is not opened.")
+                self.log_once(idx, f"Camera {idx} is not opened.")
 
     def send_to_llm(self):
-        """Send input text to the LLM API."""
+        """Send text input to the LLM API."""
         input_text = self.io_input.text().strip()
         if input_text:
             self.log(f"Sending to LLM: {input_text}")
             threading.Thread(target=self.llm_request, args=(input_text,)).start()
 
     def llm_request(self, input_text):
-        """Make an HTTP POST request to the LLM API."""
+        """Send an HTTP request to the LLM API."""
         payload = {'input': input_text}
         try:
             response = requests.post(self.ollama_url, json=payload, timeout=10)
@@ -112,34 +107,44 @@ class DeskGUI(QtWidgets.QMainWindow):
             self.log(f"Error contacting LLM API: {e}")
 
     def display_llm_response(self, response_text):
-        """Display LLM response in the log and output panels."""
+        """Display the response received from the LLM."""
         self.log(f"Received LLM response: {response_text}")
         self.io_output.append(response_text)
 
     def update_log(self, msg):
+        """Update the log display."""
         self.log(msg)
 
     def log(self, message):
+        """Append a message to the log display."""
         self.log_text.append(message)
 
+    def log_once(self, camera_index, message):
+        """Log an error message only once per camera."""
+        if not self.camera_errors[camera_index]:
+            self.log(message)
+            self.camera_errors[camera_index] = True  # Mark the error as logged
+
     def closeEvent(self, event):
-        # Release camera resources.
+        """Release camera resources on application close."""
         for cap in self.captures:
-            cap.release()
+            if cap:
+                cap.release()
         event.accept()
 
+
 def launch_gui(**kwargs):
-    """
-    Launches the DeskGUI. This function can be called via the dynamic module loader,
-    or directly when running the code on the laptop.
-    """
-    app = QtWidgets.QApplication(sys.argv)
-    gui = DeskGUI(**kwargs)
-    gui.show()
-    sys.exit(app.exec_())
+    """Launch the GUI application. Handles errors gracefully."""
+    try:
+        app = QtWidgets.QApplication(sys.argv)
+        gui = DeskGUI(**kwargs)
+        gui.show()
+        sys.exit(app.exec_())
+    except Exception as e:
+        print(f"Error launching GUI: {e}")
+
 
 if __name__ == '__main__':
-    # Example configuration for standalone launch.
     config = {
         'ollama_url': 'http://localhost:5000/api'
     }
