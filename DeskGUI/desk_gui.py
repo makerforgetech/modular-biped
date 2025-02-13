@@ -10,7 +10,6 @@ class DeskGUI(QtWidgets.QMainWindow):
         super(DeskGUI, self).__init__()
         self.setWindowTitle("Robot Desk GUI")
         self.resize(1200, 800)
-        
         self.ollama_url = kwargs.get('ollama_url', 'http://localhost:5000/api')
 
         # Create the main layout
@@ -47,6 +46,20 @@ class DeskGUI(QtWidgets.QMainWindow):
 
         self.send_button.clicked.connect(self.send_to_llm)
 
+        # Image processing mode
+        self.image_processing_mode = False
+        self.selected_camera_index = 0
+
+        # Add image processing controls
+        self.process_button = QtWidgets.QPushButton("Toggle Image Processing")
+        self.camera_selector = QtWidgets.QComboBox()
+        self.camera_selector.addItems([f"Camera {i}" for i in range(3)])
+        self.layout.addWidget(self.process_button, 3, 0)
+        self.layout.addWidget(self.camera_selector, 3, 1)
+
+        self.process_button.clicked.connect(self.toggle_image_processing)
+        self.camera_selector.currentIndexChanged.connect(self.select_camera)
+
         # Initialize cameras
         self.captures = []
         self.camera_errors = [False] * 3  # Prevent duplicate error logs
@@ -66,12 +79,24 @@ class DeskGUI(QtWidgets.QMainWindow):
         pub.subscribe(self.update_log, 'log')
         pub.subscribe(self.display_llm_response, 'llm_response')
 
+    def toggle_image_processing(self):
+        """Toggle the image processing mode."""
+        self.image_processing_mode = not self.image_processing_mode
+        self.log(f"Image processing mode {'enabled' if self.image_processing_mode else 'disabled'}.")
+
+    def select_camera(self, index):
+        """Select the camera for image processing."""
+        self.selected_camera_index = index
+        self.log(f"Selected Camera {index} for image processing.")
+
     def update_frames(self):
         """Capture frames from cameras and display them."""
         for idx, cap in enumerate(self.captures):
             if cap and cap.isOpened():
                 ret, frame = cap.read()
                 if ret:
+                    if self.image_processing_mode and idx == self.selected_camera_index:
+                        frame = self.process_frame(frame)
                     processed_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     height, width, channel = processed_frame.shape
                     bytes_per_line = 3 * width
@@ -84,6 +109,11 @@ class DeskGUI(QtWidgets.QMainWindow):
                     )
             else:
                 self.log_once(idx, f"Camera {idx} is not opened.")
+
+    def process_frame(self, frame):
+        """Apply image processing to the frame."""
+        # Example: Convert to grayscale
+        return cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     def send_to_llm(self):
         """Send text input to the LLM API."""
