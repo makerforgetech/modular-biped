@@ -33,7 +33,8 @@ class AudioLLM:
         # Optionally translate the input text.
         if self.translator is not None:
             try:
-                text = self.translator.translate(text, self.source_lang, self.target_lang)
+                # Changed to use translator.request(msg) instead of translator.translate(...)
+                text = self.translator.request(text, src=self.source_lang, dest=self.target_lang)
                 print(f"[AudioLLM] Translated text: {text}")
             except Exception as e:
                 print(f"[AudioLLM] Translation error: {e}")

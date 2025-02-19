@@ -1,8 +1,15 @@
 vision:
   enabled: true
-  path: 'modules.vision.imx500.vision.Vision'
-  config:
-    preview: False
+  # Seçim: "imx500" (geçerli modül) veya "opencv" (arşivlenmiş)
+  type: imx500
+  imx500:
+    path: "SentryBOT.modules.vision.imx500.vision.Vision"
+    config:
+      preview: False
+  opencv:
+    path: "SentryBOT.modules.vision.opencv.vision.Vision"
+    config:
+      preview: True
   dependencies:
     unix:
       - imx500-all
