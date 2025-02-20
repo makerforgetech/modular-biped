@@ -1,6 +1,6 @@
 vision:
   enabled: true
-  # Seçim: "imx500" (geçerli modül) veya "opencv" (arşivlenmiş)
+  # Choose: "imx500", "opencv" or "remote"
   type: imx500
   imx500:
     path: "SentryBOT.modules.vision.imx500.vision.Vision"
@@ -9,6 +9,11 @@ vision:
   opencv:
     path: "SentryBOT.modules.vision.opencv.vision.Vision"
     config:
+      preview: True
+  remote:
+    path: "SentryBOT.modules.vision.remote.vision.RemoteVision"
+    config:
+      remote_source: "http://robot_ip:port/video"   # Replace with actual source URL
       preview: True
   dependencies:
     unix:
