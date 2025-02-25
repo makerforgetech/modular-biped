@@ -87,7 +87,13 @@ class NeoPx:
         self.animation = False
         self.thread = None
         self.overridden = False  # prevent any further changes until released (for flashlight)
+        
+        # Ensure only one valid protocol is active
+        accepted_protocols = ['I2C', 'SPI', 'ESP32', 'GPIO']
         self.protocol = kwargs.get('protocol')
+        if self.protocol not in accepted_protocols:
+            raise ValueError("Invalid protocol specified. Choose one of: " + ", ".join(accepted_protocols))
+        
         if self.protocol == 'I2C':
             import busio
             from rainbowio import colorwheel
@@ -130,6 +136,14 @@ class NeoPx:
             sleep(DELAY)
 
             print("End of test")
+        elif self.protocol == 'ESP32':
+            import serial
+            # Open USB serial port (configured via kwargs)
+            self.serial = serial.Serial(
+                kwargs.get('serial_port', '/dev/ttyUSB0'),
+                kwargs.get('baudrate', 115200),
+                timeout=1
+            )
         else: # GPIO
             import neopixel
             self.pixels = neopixel.NeoPixel(kwargs.get('pin'), self.count)
@@ -159,6 +173,8 @@ class NeoPx:
         self.set(self.all, NeoPx.COLOR_OFF)
         if self.protocol == 'I2C':
             self.i2c.deinit()
+        elif self.protocol == 'ESP32':
+            self.serial.close()
         sleep(1)
 
     def speech(self, text):
@@ -199,6 +215,16 @@ class NeoPx:
             color = (round(color[0]*100), round(color[1]*100), round(color[2]*100)) # increase values to be used as LED RGB
         elif type(color) is str:
             color = NeoPx.COLOR_MAP[color]
+        # If protocol is ESP32, send commands via serial and exit early
+        if self.protocol == 'ESP32':
+            for i in identifiers:
+                if type(i) is str:
+                    i = self.positions[i]
+                cmd = "SET {} {} {} {}\n".format(i, color[0], color[1], color[2])
+                self.serial.write(cmd.encode())
+                # minimal delay for serial transmission
+                sleep(0.01)
+            return
         for i in identifiers:
             if type(i) is str:
                 i = self.positions[i]
