@@ -1,7 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <Arduino.h>
 
-#define LED_PIN    5
+#define LED_PIN    D5
 #define LED_COUNT  23
 
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -19,7 +19,6 @@ uint32_t wheel(byte pos) {
 }
 
 void rainbow() {
-  // Simple rainbow that affects all pixels
   for (int j = 0; j < 256; j++) {
     for (int i = 0; i < LED_COUNT; i++) {
       strip.setPixelColor(i, wheel((i + j) & 255));
@@ -30,7 +29,6 @@ void rainbow() {
 }
 
 void rainbowCycle() {
-  // Uniformly distribute rainbow colors on strip
   for (int j = 0; j < 256; j++) {
     for (int i = 0; i < LED_COUNT; i++) {
       int pos = ((i * 256 / LED_COUNT) + j) & 255;
@@ -42,7 +40,6 @@ void rainbowCycle() {
 }
 
 void spinner() {
-  // Spinner effect on LED strip: rotate one lit LED
   for (int i = 0; i < LED_COUNT; i++) {
     strip.clear();
     strip.setPixelColor(i, strip.Color(255, 0, 0));
@@ -52,7 +49,6 @@ void spinner() {
 }
 
 void breathe() {
-  // Breathe animation for entire strip using fade in/out
   for (int brightness = 0; brightness <= 255; brightness += 5) {
     for (int i = 0; i < LED_COUNT; i++) {
       strip.setPixelColor(i, strip.Color((255 * brightness) / 255, 0, 0));
@@ -69,17 +65,58 @@ void breathe() {
   }
 }
 
+void meteorRain(int r, int g, int b, int size, int decay) {
+  for (int i = 0; i < LED_COUNT + size; i++) {
+    strip.clear();
+    for (int j = 0; j < size; j++) {
+      if (i - j >= 0 && i - j < LED_COUNT) {
+        strip.setPixelColor(i - j, strip.Color(r / (j + 1), g / (j + 1), b / (j + 1)));
+      }
+    }
+    strip.show();
+    delay(decay);
+  }
+}
+
+void fireFlicker() {
+  for (int i = 0; i < LED_COUNT; i++) {
+    int flicker = random(50, 255);
+    strip.setPixelColor(i, strip.Color(flicker, flicker / 2, 0));
+  }
+  strip.show();
+  delay(random(50, 150));
+}
+
+void comet(int r, int g, int b, int speed) {
+  for (int i = 0; i < LED_COUNT; i++) {
+    strip.clear();
+    strip.setPixelColor(i, strip.Color(r, g, b));
+    if (i > 0) strip.setPixelColor(i - 1, strip.Color(r / 2, g / 2, b / 2));
+    strip.show();
+    delay(speed);
+  }
+}
+
+void wave() {
+  for (int j = 0; j < 256; j += 5) {
+    for (int i = 0; i < LED_COUNT; i++) {
+      strip.setPixelColor(i, wheel((i * 256 / LED_COUNT + j) & 255));
+    }
+    strip.show();
+    delay(50);
+  }
+}
+
 void setup() {
   Serial.begin(115200);
   strip.begin();
-  strip.show(); // Initialize all pixels to 'off'
+  strip.show();
 }
 
 void loop() {
   if (Serial.available()) {
     String cmd = Serial.readStringUntil('\n');
     cmd.trim();
-    
     // Expected "SET" command: "SET index r g b"
     if (cmd.startsWith("SET")) {
       int idx, r, g, b;
@@ -100,16 +137,14 @@ void loop() {
     else if (cmd.startsWith("ANIMATE")) {
       char anim[20];
       if (sscanf(cmd.c_str(), "ANIMATE %s", anim) == 1) {
-        // Compare animation type and call corresponding function
-        if (strcmp(anim, "RAINBOW") == 0) {
-          rainbow();
-        } else if (strcmp(anim, "RAINBOW_CYCLE") == 0) {
-          rainbowCycle();
-        } else if (strcmp(anim, "SPINNER") == 0) {
-          spinner();
-        } else if (strcmp(anim, "BREATHE") == 0) {
-          breathe();
-        }
+        if (strcmp(anim, "RAINBOW") == 0) rainbow();
+        else if (strcmp(anim, "RAINBOW_CYCLE") == 0) rainbowCycle();
+        else if (strcmp(anim, "SPINNER") == 0) spinner();
+        else if (strcmp(anim, "BREATHE") == 0) breathe();
+        else if (strcmp(anim, "METEOR") == 0) meteorRain(255, 255, 255, 5, 50);
+        else if (strcmp(anim, "FIRE") == 0) fireFlicker();
+        else if (strcmp(anim, "COMET") == 0) comet(0, 255, 255, 50);
+        else if (strcmp(anim, "WAVE") == 0) wave();
       }
     }
   }
