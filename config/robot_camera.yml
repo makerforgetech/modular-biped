@@ -1,0 +1,22 @@
+camera_streamer:
+  enabled: true
+  path: "modules.vision.robot.camera_streamer.CameraStreamer"
+  config:
+    port: 8089
+    camera_id: 0
+    quality: 90
+    max_fps: 24
+    resolution: [640, 480]
+    autostart: true
+
+command_receiver:
+  enabled: true
+  path: "modules.vision.robot.command_receiver.CommandReceiver"
+  config:
+    port: 8090
+    autostart: true
+
+dependencies:
+  python:
+    - opencv-python
+    - numpy

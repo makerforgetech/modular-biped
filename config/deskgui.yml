@@ -1,0 +1,17 @@
+deskgui:
+  enabled: true
+  path: "DeskGUI.desk_gui.launch_gui"
+  config:
+    robot_ip: "192.168.1.10"
+    video_port: 8089
+    command_port: 8090
+    ollama_url: "http://localhost:5000/api"
+    encodings_file: "encodings.pickle"
+
+dependencies:
+  python:
+    - PyQt5
+    - opencv-python
+    - face_recognition
+    - numpy
+    - requests

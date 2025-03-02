@@ -41,3 +41,80 @@ The open source framework is designed for flexibility, allowing users to easily 
 - **Code**: Check out the modular open source software on [GitHub](https://github.com/makerforgetech/modular-biped)
 - **YouTube Playlist**: Explore the development process through our build videos: [Watch on YouTube](https://www.youtube.com/watch?v=2DVJ5xxAuWY&list=PL_ua9QbuRTv6Kh8hiEXXVqywS8pklZraT)
 - **Community**: Have a question or want to show off your build? Join the communities on [GitHub](https://bit.ly/maker-forge-community) and [Discord](https://bit.ly/makerforge-community)!
+
+# Remote Vision System
+
+This system allows offloading computer vision processing from the robot to a remote laptop/desktop computer.
+
+## System Architecture
+
+- **Robot**: Runs a camera streaming service and command receiver
+- **Laptop/Desktop**: Runs DeskGUI application that processes video streams and controls the robot
+
+## Setup Instructions
+
+### Robot Side Setup
+
+1. Install dependencies:
+   ```bash
+   pip install opencv-python numpy pypubsub pyyaml
+   ```
+
+2. Update configuration in `config/robot_camera.yml` if needed
+
+3. Run the camera streaming service:
+   ```bash
+   python run_robot_camera.py
+   ```
+
+### Laptop/Desktop Side Setup
+
+1. Install dependencies:
+   ```bash
+   pip install opencv-python numpy pypubsub pyyaml PyQt5 face_recognition requests
+   ```
+
+2. Update configuration in `config/deskgui.yml` if needed
+
+3. Run the DeskGUI application:
+   ```bash
+   python run_deskgui.py [robot_ip]
+   ```
+   - Replace `[robot_ip]` with the IP address of your robot (optional, can also be configured in the GUI)
+
+## Usage
+
+1. Launch the DeskGUI application
+2. Enter the robot's IP address and click "Connect"
+3. Use the control panel to:
+   - Toggle vision processing modes (Face Detection, Motion Detection)
+   - Enable/disable tracking
+   - Control robot movement
+   - Run animations
+   - Send speech commands
+   - Play sounds
+   - Train face recognition models
+
+## Vision Processing Modes
+
+- **Face Detection**: Detects and recognizes faces in the video stream
+- **Motion Detection**: Detects movement in the video stream
+- **Tracking**: When enabled, automatically moves the robot to follow detected faces or motion
+
+## Ollama LLM Integration
+
+The system integrates with Ollama for natural language processing:
+
+1. Enter text in the input field
+2. Click "Send to LLM"
+3. The response will appear in the output field
+
+## Face Recognition Model Training
+
+To train the face recognition model:
+
+1. Create a `dataset` folder with subfolders for each person
+2. Add face images to each person's folder
+3. Click "Train Face Recognition Model" in the DeskGUI
+
+## Folder Structure
