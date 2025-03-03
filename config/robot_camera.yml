@@ -1,6 +1,6 @@
 camera_streamer:
   enabled: true
-  path: "modules.vision.robot.camera_streamer.CameraStreamer"
+  path: "modules.vision.remote.network.camera_streamer.CameraStreamer"
   config:
     port: 8089
     camera_id: 0
@@ -11,7 +11,7 @@ camera_streamer:
 
 command_receiver:
   enabled: true
-  path: "modules.vision.robot.command_receiver.CommandReceiver"
+  path: "modules.vision.remote.network.command_receiver.CommandReceiver"
   config:
     port: 8090
     autostart: true
