@@ -29,6 +29,30 @@ class NeoPx:
         'white_dim': COLOR_WHITE_DIM
     }
 
+    # Add named colors from Arduino for ESP32 compatibility
+    ARDUINO_COLOR_MAP = {
+        'RED': (255, 0, 0),
+        'GREEN': (0, 255, 0),
+        'BLUE': (0, 0, 255),
+        'YELLOW': (255, 255, 0),
+        'PURPLE': (255, 0, 255),
+        'CYAN': (0, 255, 255),
+        'WHITE': (255, 255, 255),
+        'ORANGE': (255, 165, 0),
+        'PINK': (255, 105, 180),
+        'GOLD': (255, 215, 0),
+        'TEAL': (0, 128, 128),
+        'MAGENTA': (255, 0, 127),
+        'LIME': (50, 205, 50),
+        'SKY_BLUE': (135, 206, 235),
+        'NAVY': (0, 0, 128),
+        'MAROON': (128, 0, 0),
+        'AQUA': (127, 255, 212),
+        'VIOLET': (138, 43, 226),
+        'CORAL': (255, 127, 80),
+        'TURQUOISE': (64, 224, 208)
+    }
+
     def __init__(self, **kwargs):
         """
         NeoPx class
@@ -64,6 +88,12 @@ class NeoPx:
         
         Subscribes to 'speech' to handle speech commands
         - Argument: msg (string) - speech command
+
+        Subscribes to 'led:animate' to trigger animations (when ESP32 protocol is used)
+        - Argument: animation (string) - animation name
+        - Argument: color (string or tuple) - optional color
+        - Argument: color2 (string or tuple) - optional second color for animations that need it
+        - Argument: repeat (int) - optional repeat count
         
         Example:
         pub.sendMessage('led', identifiers=1, color='red')
@@ -75,6 +105,9 @@ class NeoPx:
         pub.sendMessage('led:party')
         pub.sendMessage('exit')
         pub.sendMessage('speech', msg='light on')
+        pub.sendMessage('led:animate', animation='RAINBOW', repeat=3)
+        pub.sendMessage('led:animate', animation='COLOR_WIPE', color='RED', repeat=2)
+        pub.sendMessage('led:animate', animation='ALTERNATING', color='RED', color2='BLUE', repeat=5)
         """
         # Initialise
         self.count = kwargs.get('count')
@@ -162,6 +195,7 @@ class NeoPx:
         pub.subscribe(self.party, 'led:party')
         pub.subscribe(self.exit, 'exit')
         pub.subscribe(self.speech, 'speech')
+        pub.subscribe(self.handle_animate, 'led:animate')
 
     def exit(self):
         """
@@ -182,6 +216,24 @@ class NeoPx:
             self.flashlight(True)
         if 'light off' in text:
             self.flashlight(False)
+
+    def color_to_arduino_format(self, color):
+        """Convert color to a format understood by Arduino code"""
+        # If color is a string, check if it's in our Arduino color map
+        if isinstance(color, str):
+            # First try Arduino color map (upper case names)
+            if color.upper() in self.ARDUINO_COLOR_MAP:
+                return color.upper()
+            # Then try our standard color map
+            elif color in self.COLOR_MAP:
+                # Return the RGB values directly
+                rgb = self.COLOR_MAP[color]
+                return f"{rgb[0]},{rgb[1]},{rgb[2]}"
+        # If it's already an RGB tuple
+        elif isinstance(color, tuple) and len(color) == 3:
+            return f"{color[0]},{color[1]},{color[2]}"
+        # Default to empty string if no valid color format found
+        return ""
 
     def set(self, identifiers, color, gradient=False):
         """
@@ -285,8 +337,14 @@ class NeoPx:
             self.set(index, NeoPx.COLOR_MAP[color])
 
     def party(self):
+        if self.protocol == 'ESP32':
+            # For ESP32, use the RAINBOW_CYCLE animation
+            self.send_animation_command('RAINBOW_CYCLE')
+            return
+            
+        # Original party implementation for other protocols
         # self.animate(self.all, 'off', 'rainbow_cycle')
-
+        
         for j in range(256 * 1):
             for i in range(self.count):
                 self.set(i, NeoPx._wheel((int(i * 256 / self.count) + j) & 255))
@@ -310,6 +368,11 @@ class NeoPx:
 
         pub.sendMessage('log', msg='[LED] Animation starting: ' + animation)
 
+        # For ESP32, use the send_animation_command method
+        if self.protocol == 'ESP32':
+            self.send_animation_command(animation, color)
+            return
+
         animations = {
             'spinner': self.spinner,
             'breathe': self.breathe,
@@ -320,8 +383,125 @@ class NeoPx:
         self.animation = True
         if animation in animations:
             self.thread = threading.Thread(target=animations[animation], args=(identifiers, color,))
-        self.thread.start()
+            self.thread.start()
 
+    def handle_animate(self, animation, color=None, color2=None, repeat=1):
+        """
+        Handle animation requests from pubsub
+        :param animation: animation name
+        :param color: optional first color
+        :param color2: optional second color
+        :param repeat: optional repeat count (1-10)
+        """
+        if self.protocol == 'ESP32':
+            self.send_animation_command(animation, color, color2, repeat)
+        else:
+            # Fall back to standard animation system
+            color_val = color if color else NeoPx.COLOR_RED
+            self.animate(self.all, color_val, animation.lower())
+
+    def send_animation_command(self, animation, color=None, color2=None, repeat=1):
+        """
+        Send animation command to ESP32
+        :param animation: animation name
+        :param color: optional first color (string or RGB tuple)
+        :param color2: optional second color (string or RGB tuple)
+        :param repeat: optional repeat count (1-10)
+        """
+        if self.protocol != 'ESP32':
+            return
+        
+        # Ensure repeat is within bounds
+        repeat = max(1, min(10, int(repeat)))
+        
+        # Convert colors to Arduino format
+        color_str = self.color_to_arduino_format(color) if color else ""
+        color2_str = self.color_to_arduino_format(color2) if color2 else ""
+        
+        # Build command
+        cmd = f"ANIMATE {animation} {color_str} {color2_str} {repeat}\n"
+        
+        # Log and send command
+        pub.sendMessage('log', msg=f'[LED] Sending animation command: {cmd.strip()}')
+        self.serial.write(cmd.encode())
+        sleep(0.1)  # Brief pause to ensure command is processed
+
+    # Animation methods for ESP32 protocol
+    def rainbow_esp32(self, repeat=1):
+        """Trigger rainbow animation on ESP32"""
+        self.send_animation_command('RAINBOW', repeat=repeat)
+    
+    def rainbow_cycle_esp32(self, repeat=1):
+        """Trigger rainbow cycle animation on ESP32"""
+        self.send_animation_command('RAINBOW_CYCLE', repeat=repeat)
+    
+    def spinner_esp32(self, color='RED', repeat=1):
+        """Trigger spinner animation on ESP32"""
+        self.send_animation_command('SPINNER', color, repeat=repeat)
+    
+    def breathe_esp32(self, color='RED', repeat=1):
+        """Trigger breathing animation on ESP32"""
+        self.send_animation_command('BREATHE', color, repeat=repeat)
+    
+    def meteor_esp32(self, color='WHITE', repeat=1):
+        """Trigger meteor rain animation on ESP32"""
+        self.send_animation_command('METEOR', color, repeat=repeat)
+    
+    def fire_esp32(self, repeat=1):
+        """Trigger fire animation on ESP32"""
+        self.send_animation_command('FIRE', repeat=repeat)
+    
+    def comet_esp32(self, color='CYAN', repeat=1):
+        """Trigger comet animation on ESP32"""
+        self.send_animation_command('COMET', color, repeat=repeat)
+    
+    def wave_esp32(self, repeat=1):
+        """Trigger wave animation on ESP32"""
+        self.send_animation_command('WAVE', repeat=repeat)
+    
+    def pulse_esp32(self, color='MAGENTA', repeat=1):
+        """Trigger pulse animation on ESP32"""
+        self.send_animation_command('PULSE', color, repeat=repeat)
+    
+    def twinkle_esp32(self, color='WHITE', repeat=1):
+        """Trigger twinkle animation on ESP32"""
+        self.send_animation_command('TWINKLE', color, repeat=repeat)
+    
+    def color_wipe_esp32(self, color='RED', repeat=1):
+        """Trigger color wipe animation on ESP32"""
+        self.send_animation_command('COLOR_WIPE', color, repeat=repeat)
+    
+    def random_blink_esp32(self, repeat=1):
+        """Trigger random blink animation on ESP32"""
+        self.send_animation_command('RANDOM_BLINK', repeat=repeat)
+    
+    def theater_chase_esp32(self, color='WHITE', repeat=1):
+        """Trigger theater chase animation on ESP32"""
+        self.send_animation_command('THEATER_CHASE', color, repeat=repeat)
+    
+    def snow_esp32(self, color='WHITE', repeat=1):
+        """Trigger snow animation on ESP32"""
+        self.send_animation_command('SNOW', color, repeat=repeat)
+    
+    def alternating_esp32(self, color='RED', color2='BLUE', repeat=1):
+        """Trigger alternating colors animation on ESP32"""
+        self.send_animation_command('ALTERNATING', color, color2, repeat)
+    
+    def gradient_esp32(self, repeat=1):
+        """Trigger gradient animation on ESP32"""
+        self.send_animation_command('GRADIENT', repeat=repeat)
+    
+    def bouncing_ball_esp32(self, color='RED', repeat=1):
+        """Trigger bouncing ball animation on ESP32"""
+        self.send_animation_command('BOUNCING_BALL', color, repeat=repeat)
+    
+    def running_lights_esp32(self, color='RED', repeat=1):
+        """Trigger running lights animation on ESP32"""
+        self.send_animation_command('RUNNING_LIGHTS', color, repeat=repeat)
+    
+    def stacked_bars_esp32(self, repeat=1):
+        """Trigger stacked bars animation on ESP32"""
+        self.send_animation_command('STACKED_BARS', repeat=repeat)
 
     def spinner(self, identifiers, color, index=1):
         """
