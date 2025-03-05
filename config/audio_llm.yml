@@ -1,0 +1,11 @@
+audio_llm:
+  enabled: true
+  path: "modules.ollama.audio_llm.AudioLLM"
+  config:
+    ollama_url: "http://192.168.1.100:5000/api"
+    source_lang: "auto"
+    target_lang: "en"
+  dependencies:
+    python:
+      - requests
+      - pubsub

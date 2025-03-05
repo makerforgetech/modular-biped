@@ -1,11 +1,29 @@
-vision:
-  enabled: true
-  path: 'modules.vision.imx500.vision.Vision'
+# Set the vision module selection:
+# 1 = imx500, 2 = opencv, 3 = remote
+selected_vision: 1
+
+# Update the 'enabled' flags below manually based on the selection above.
+imx500_vision:
+  enabled: true    # Set to true if selected_vision is 1, otherwise false
+  path: "modules.vision.imx500.vision.Vision"
   config:
     preview: False
-  dependencies:
-    unix:
-      - imx500-all
-    python:
-      - python3-opencv
-      - python3-munkres
+
+opencv_vision:
+  enabled: false   # Set to true if selected_vision is 2, otherwise false
+  path: "modules.vision.opencv.vision.Vision"
+  config:
+    preview: True
+
+remote_vision:
+  enabled: false   # Set to true if selected_vision is 3, otherwise false
+  path: "modules.vision.remote.vision.RemoteVision"
+  config:
+    remote_source: "http://robot_ip:port/video"   # Replace with actual URL
+    preview: True
+
+dependencies:
+  unix:
+    - imx500-all
+  python:
+    - opencv-python
