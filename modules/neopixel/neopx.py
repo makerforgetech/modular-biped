@@ -2,7 +2,7 @@ from pubsub import pub
 from time import sleep
 from colour import Color
 import board
-from modules.network.arduinoserial import set_led_pin
+from modules.network.arduinoserial import ArduinoSerial
     
 import threading
 
@@ -335,6 +335,15 @@ class NeoPx:
         if (self.count < index):
             index = self.count - 1
             pub.sendMessage('log', msg='[LED] Error in set pixels: index out of range, changing to last pixel')
+        
+        # Handle ESP32 protocol differently
+        if self.protocol == 'ESP32':
+            pub.sendMessage('log', msg='[LED] Setting eye colour: ' + color)
+            # For ESP32, use the set method which already handles serial communication
+            self.set(index, NeoPx.COLOR_MAP[color])
+            return
+        
+        # For other protocols, continue with existing approach
         if self.pixels[index] != color:
             pub.sendMessage('log', msg='[LED] Setting eye colour: ' + color)
             self.set(index, NeoPx.COLOR_MAP[color])
