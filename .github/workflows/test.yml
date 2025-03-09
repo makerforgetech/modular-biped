@@ -24,6 +24,7 @@ jobs:
 
       - name: Run unittests
         id: run-tests
+        continue-on-error: true
         run: |
           python -m unittest discover -s tests -p 'test_*.py' > results.log 2>&1 || echo "TESTS_FAILED=true" >> $GITHUB_ENV
 
@@ -48,6 +49,10 @@ jobs:
             ${{ env.TEST_RESULTS }}
             ```
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fail job if tests failed
+        if: env.TESTS_FAILED == 'true'
+        run: exit 1
 
     permissions:
       pull-requests: write
