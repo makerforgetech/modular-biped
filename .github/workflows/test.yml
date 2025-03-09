@@ -54,6 +54,14 @@ jobs:
         if: env.TESTS_FAILED == 'true'
         run: exit 1
 
+      - name: Delete previous failure comment if tests pass
+        if: env.TESTS_FAILED != 'true'
+        uses: peter-evans/delete-pull-request-comment@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-author: 'github-actions[bot]'
+          filter: '❌ Unit tests failed:'
+
     permissions:
       pull-requests: write
       contents: read
