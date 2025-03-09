@@ -27,7 +27,7 @@ class TestSensor(unittest.TestCase):
         sensor_instance.motion_detected = True
         sensor = Sensor(pin=self.pin)
         self.assertTrue(sensor.read())
-        self.assertFalse(sensor.value) # Expected fail
+        self.assertTrue(sensor.value)
 
     @patch('modules.sensor.MotionSensor')
     @patch('pubsub.pub.sendMessage')
