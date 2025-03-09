@@ -2,8 +2,8 @@ neopixel:
   enabled: true
   path: 'modules.neopixel.neopx.NeoPx'
   config:
-    pin: 12 # Only used for GPIO. GPIO2 and 3 are use for i2c, GPIO10 is used for SPI, GPIO12 is used for GPIO
-    protocol: 'I2C' # choose between GPIO, I2C and SPI
+    pin: 12 # Only used for GPIO. GPIO2 and 3 are used for i2c, GPIO10 is used for SPI, GPIO12 is used for GPIO
+    protocol: 'I2C' # choose between GPIO, I2C, SPI and ESP32
     count: 12
     positions: {
       'status1': 0,
@@ -33,6 +33,9 @@ neopixel:
         1,
         1
     ]
+    # New keys for ESP32 configuration (used when protocol is ESP32)
+    serial_port: '/dev/ttyUSB0'
+    baudrate: 115200
   dependencies:
     python:
       - pypubsub
