@@ -31,6 +31,13 @@ jobs:
         if: env.TESTS_FAILED == 'true'
         run: cat results.log
 
+      - name: Read test results into env
+        if: env.TESTS_FAILED == 'true'
+        run: |
+          echo "TEST_RESULTS<<EOF" >> $GITHUB_ENV
+          cat results.log >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Comment on PR if tests fail
         if: env.TESTS_FAILED == 'true'
         uses: mshick/add-pr-comment@v2
@@ -38,7 +45,7 @@ jobs:
           message: |
             ❌ Unit tests failed:
             ```
-            $(<results.log)
+            ${{ env.TEST_RESULTS }}
             ```
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
