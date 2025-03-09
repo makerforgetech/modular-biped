@@ -27,7 +27,7 @@ jobs:
     - name: Run tests
       run: |
         mkdir -p test-reports
-        python -m unittest discover -s tests -p "test_*.py" --buffer --output=test-reports/results.xml
+        python -m unittest discover -s tests -p "test_*.py" --buffer | tee test-reports/results.txt
       continue-on-error: true
 
     - name: Publish test results
@@ -43,7 +43,7 @@ jobs:
       with:
         script: |
           const fs = require('fs');
-          const results = fs.readFileSync('test-reports/results.xml', 'utf8');
+          const results = fs.readFileSync('test-reports/results.txt', 'utf8');
           github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
