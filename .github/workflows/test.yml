@@ -25,7 +25,7 @@ jobs:
       - name: Run unittests
         id: run-tests
         run: |
-          python -m unittest discover -s . -p 'test_*.py' > results.log 2>&1 || echo "TESTS_FAILED=true" >> $GITHUB_ENV
+          python -m unittest discover -s tests -p 'test_*.py' > results.log 2>&1 || echo "TESTS_FAILED=true" >> $GITHUB_ENV
 
       - name: Output test results
         if: env.TESTS_FAILED == 'true'
