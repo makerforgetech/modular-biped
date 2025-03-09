@@ -38,7 +38,7 @@ jobs:
         path: test-reports/
 
     - name: Comment on PR
-      if: failure()
+      # if: failure()
       uses: actions/github-script@v6
       with:
         script: |
