@@ -1,10 +1,11 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from pubsub import pub
 
-# Mock gpiozero library
+# Mock gpiozero and pubsub libraries
 import sys
 sys.modules['gpiozero'] = MagicMock()
+sys.modules['pubsub'] = MagicMock()
+sys.modules['pubsub.pub'] = MagicMock()
 
 from modules.sensor import Sensor
 
@@ -29,14 +30,14 @@ class TestSensor(unittest.TestCase):
         self.assertTrue(sensor.value)
 
     @patch('modules.sensor.MotionSensor')
-    def test_loop(self, MockMotionSensor):
+    @patch('pubsub.pub.sendMessage')
+    def test_loop(self, mock_sendMessage, MockMotionSensor):
         sensor_instance = MockMotionSensor.return_value
         sensor_instance.motion_detected = True
         sensor = Sensor(pin=self.pin)
 
-        with patch.object(pub, 'sendMessage') as mock_sendMessage:
-            sensor.loop()
-            mock_sendMessage.assert_called_with('motion')
+        sensor.loop()
+        mock_sendMessage.assert_called_with('motion')
 
 if __name__ == '__main__':
     unittest.main()
