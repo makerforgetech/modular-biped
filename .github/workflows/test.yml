@@ -29,6 +29,7 @@ jobs:
         pip install unittest-xml-reporting
 
     - name: Run tests
+      id: run_tests
       run: |
         mkdir -p test-reports
         python -m unittest discover -s tests -p "test_*.py" --buffer | tee test-reports/results.txt
@@ -48,9 +49,11 @@ jobs:
         script: |
           const fs = require('fs');
           const results = fs.readFileSync('test-reports/results.txt', 'utf8');
+          const failed = results.includes('FAILED') || results.includes('ERROR');
+          const status = failed ? 'Test failures detected' : 'All tests passed';
           github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: `Test results:\n\n\`\`\`\n${results}\n\`\`\``
+            body: `${status}:\n\n\`\`\`\n${results}\n\`\`\``
           });
