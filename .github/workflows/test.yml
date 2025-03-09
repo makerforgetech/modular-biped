@@ -23,45 +23,9 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Run unittests
-        id: run-tests
-        continue-on-error: true
         run: |
-          python -m unittest discover -s tests -p 'test_*.py' > results.log 2>&1 || echo "TESTS_FAILED=true" >> $GITHUB_ENV
-
-      - name: Output test results
-        if: env.TESTS_FAILED == 'true'
-        run: cat results.log
-
-      - name: Read test results into env
-        if: env.TESTS_FAILED == 'true'
-        run: |
-          echo "TEST_RESULTS<<EOF" >> $GITHUB_ENV
-          cat results.log >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-      - name: Comment on PR if tests fail
-        if: env.TESTS_FAILED == 'true'
-        uses: mshick/add-pr-comment@v2
-        with:
-          message: |
-            ❌ Unit tests failed:
-            ```
-            ${{ env.TEST_RESULTS }}
-            ```
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Fail job if tests failed
-        if: env.TESTS_FAILED == 'true'
-        run: exit 1
-
-      - name: Delete previous failure comment if tests pass
-        if: env.TESTS_FAILED != 'true'
-        uses: peter-evans/delete-pull-request-comment@v2
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          comment-author: 'github-actions[bot]'
-          filter: '❌ Unit tests failed:'
-
+          python -m unittest discover -s tests -p 'test_*.py'
+    
     permissions:
       pull-requests: write
       contents: read
