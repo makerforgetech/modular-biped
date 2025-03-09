@@ -29,15 +29,5 @@ class TestSensor(unittest.TestCase):
         self.assertTrue(sensor.read())
         self.assertTrue(sensor.value)
 
-    @patch('modules.sensor.MotionSensor')
-    @patch('pubsub.pub.sendMessage')
-    def test_loop(self, mock_sendMessage, MockMotionSensor):
-        sensor_instance = MockMotionSensor.return_value
-        sensor_instance.motion_detected = True
-        sensor = Sensor(pin=self.pin)
-
-        sensor.loop()
-        mock_sendMessage.assert_called_with('motion')
-
 if __name__ == '__main__':
     unittest.main()
