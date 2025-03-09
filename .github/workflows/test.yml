@@ -38,7 +38,7 @@ jobs:
           message: |
             ❌ Unit tests failed:
             ```
-            $(cat results.log)
+            $(<results.log)
             ```
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
