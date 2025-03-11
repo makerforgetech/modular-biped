@@ -11,10 +11,10 @@ from picamera2.devices.imx500 import (NetworkIntrinsics,
                                       postprocess_nanodet_detection)
 from libcamera import Transform
 
-from pubsub import pub
+from modules.base_module import BaseModule
 
 
-class Detection:
+class Detection(BaseModule):
     def __init__(self, imx500, picam2, selfref, coords, category, conf, metadata):
         """Create a Detection object, recording the bounding box, category and confidence."""
         self.category = category
@@ -145,8 +145,10 @@ class Vision:
         self.previous_frame = None
         self.stable_frame_count = 0
         self.moving = False
-        
-        pub.subscribe(self.scan, 'loop')
+
+    def setup_messaging(self):
+        """Subscribe to necessary topics."""
+        self.subscribe('system/loop', self.scan)
 
     def scan(self):
         self.last_results = self.parse_detections(self.picam2.capture_metadata())
@@ -154,7 +156,7 @@ class Vision:
         for i in self.last_results:
             this_capture = [obj.json_out() for obj in self.last_results]
 
-        pub.sendMessage('vision:detections', matches=this_capture)
+        self.publish('vision:detections', matches=this_capture)
         return this_capture
 
     def parse_detections(self, metadata: dict):
@@ -168,7 +170,7 @@ class Vision:
             return self.last_detections
         elif self.moving == True:
             self.moving = False
-            pub.sendMessage('vision:stable')
+            self.publish('vision:stable')
     
         bbox_normalization = self.intrinsics.bbox_normalization
         threshold = self.args.threshold

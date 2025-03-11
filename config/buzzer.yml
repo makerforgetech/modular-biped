@@ -7,4 +7,3 @@ buzzer:
   dependencies:
     python:
       - gpiozero
-      - pypubsub

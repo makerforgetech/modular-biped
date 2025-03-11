@@ -59,10 +59,10 @@ class Tracking:
 
         if x_move:
             pub.sendMessage('servo:pan:mv', percentage=x_move)
-            pub.sendMessage('log:info', msg="[Tracking] panning " + str(x_move) + "%")
+            pub.sendMessage('log/info', msg="[Tracking] panning " + str(x_move) + "%")
         if y_move:
             pub.sendMessage('servo:tilt:mv', percentage=-y_move)
-            pub.sendMessage('log:info', msg="[Tracking] tilting " + str(-y_move) + "% and moving neck " + str(y_move) + "%")
+            pub.sendMessage('log/info', msg="[Tracking] tilting " + str(-y_move) + "% and moving neck " + str(y_move) + "%")
         return True
 
     @staticmethod

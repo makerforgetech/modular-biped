@@ -1,11 +1,8 @@
-import logging
-from pubsub import pub
-import os
-# from viam.logging import getLogger
-# LOGGER = getLogger(__name__)
-# LOGGER.debug('INIT MAKERFORGE LOGGER')
+import logging, json
+import os, datetime
+from modules.base_module import BaseModule
 
-class LogWrapper:
+class LogWrapper(BaseModule):
     levels = ['notset', 'debug', 'info', 'warning', 'error', 'critical']
 
     def __init__(self, **kwargs):
@@ -17,52 +14,60 @@ class LogWrapper:
         
         Subscribes to 'log' to log messages
         - Argument: type (string) - log level
-        - Argument: msg (string) - message to log
+        - Argument: message (string) - message to log
         
-        Example:
-        pub.sendMessage('log', type='info', msg='This is an info message')
-        pub.sendMessage('log:debug', msg='This is a debug message')
-        pub.sendMessage('log:info', msg='This is an info message')
-        pub.sendMessage('log:error', msg='This is an error message')
-        pub.sendMessage('log:critical', msg='This is a critical message')
-        pub.sendMessage('log:warning', msg='This is a warning message')
+        Examples (require module to extend BaseModule):
+        self.log('My message to log') 
+        self.publish('log', 'My message to log')
+        self.publish('log', type='info', message='This is an info message')
+        self.publish('log/debug', 'This is a debug message')
+        self.publish('log/info', 'This is an info message')
+        self.publish('log/error', 'This is an error message')
+        self.publish('log/critical', 'This is a critical message')
+        self.publish('log/warning', 'This is a warning message')
         
         """
-        self.path = kwargs.get('path', '/')
-        self.filename = kwargs.get('filename', 'app.log')
+        self.path = kwargs.get('path',  os.path.dirname(os.path.dirname(__file__)))
+        self.filename = kwargs.get('filename', kwargs.get('filename','app.log'))
         self.file = self.path + '/' + self.filename
+        self.log_level = kwargs.get('log_level', 'debug') # level of logs to output to file
+        self.cli_level = kwargs.get('cli_level', 'debug') # level of logs to output to console
+        print(f"[Creating log at {self.file}]")
+        self.print = kwargs.get('print', False)
+        
+        logging.basicConfig(filename=self.file, 
+                    level=LogWrapper.levels.index(self.log_level)*10, format='%(levelname)s: %(asctime)s %(message)s',
+                    datefmt='%Y/%m/%d %I:%M:%S %p') 
         
         self.translator = kwargs.get('translator', None)
 
-        pub.subscribe(self.log, 'log', type='info')
-        pub.subscribe(self.log, 'log:debug', type='debug')
-        pub.subscribe(self.log, 'log:info', type='info')
-        pub.subscribe(self.log, 'log:error', type='error')
-        pub.subscribe(self.log, 'log:critical', type='critical')
-        pub.subscribe(self.log, 'log:warning', type='warning')
+    def setup_messaging(self):
+        """Subscribe to necessary topics."""
+        self.subscribe('log', self.log)
+        self.subscribe('log/debug', self.log, type='debug')
+        self.subscribe('log/info', self.log, type='info')
+        self.subscribe('log/error', self.log, type='error')
+        self.subscribe('log/critical', self.log, type='critical')
+        self.subscribe('log/warning', self.log, type='warning')
 
     def __del__(self):
         if os.path.isfile(self.file):
             os.rename(self.file, self.file + '.previous')
+        print(f"[Log file stored at {self.file}.previous]")
 
-    def log(self, type, msg):
-        #msg = '[LOGGING] ' + msg
-        # Translate type string to log level (0 - 50)
-        logging.log(LogWrapper.levels.index(type)*10, msg)
-        # if type == 'error' or type == 'warning':
+    def log(self, message):
+        self.log('info', message)
+
+    def log(self,  message, type='info'):
+        # if message is a json object as a string
+        if isinstance(message, str) and message.startswith('{'):
+            message = json.loads(message)['message']
+                
         if self.translator is not None:
-            msg = self.translator.request(msg)
-        #print('LogWrapper: ' + type + ' - ' + str(msg))
-        # self.log_viam(type, msg)
-        
-    # def log_viam(self, type, msg):
-    #     if type == 'debug':
-    #         LOGGER.debug(msg)
-    #     elif type == 'info':
-    #         LOGGER.info(msg)
-    #     elif type == 'warning':
-    #         LOGGER.warn(msg)
-    #     elif type == 'error':
-    #         LOGGER.error(msg)
-    #     elif type == 'critical':
-    #         LOGGER.critical(msg)
+            message = self.translator.request(message)
+
+        logging.log(LogWrapper.levels.index(type)*10, message) # Filter on log level is handled by logging module
+         
+        if LogWrapper.levels.index(self.cli_level) <= LogWrapper.levels.index(type):
+            print('log/' + type + ': ' + str(message))
+    

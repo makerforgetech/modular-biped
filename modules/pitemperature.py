@@ -1,14 +1,15 @@
 import os
-from pubsub import pub
+from modules.base_module import BaseModule
 
-class PiTemperature:
+class PiTemperature(BaseModule):
     WARNING_TEMP = 80
     THROTTLED_TEMP = 85
     AVG_TEMP = 50
     MIN_TEMP = 15
-
-    def __init__(self):
-        pub.subscribe(self.monitor, 'loop:60')
+    
+    def setup_messaging(self):
+        """Subscribe to necessary topics."""
+        self.subscribe('system/loop/60', self.monitor)
 
     @staticmethod
     def read():
@@ -17,14 +18,16 @@ class PiTemperature:
 
     def monitor(self):
         val = self.read()
-        pub.sendMessage('log', msg='[TEMP] ' + val)
-        pub.sendMessage('temperature', value=val)
-        val = float(val)
-        if val >= PiTemperature.THROTTLED_TEMP:
-            pub.sendMessage('led', identifiers='status2', color='red') # WARNING
+        #get degrees celsius symbol
+        outputval = val + u"\u00b0" + "C"
+        self.publish('system/temperature', val)
+        float_val = float(val)
+        if float_val > PiTemperature.THROTTLED_TEMP:
+            self.log(f'Temperature is critical: {outputval}', 'critical')
+        elif float_val > PiTemperature.WARNING_TEMP:
+            self.log(f'Temperature is high: {outputval}', 'warning')
         else:
-            pub.sendMessage('led', identifiers='status2', color=self.map_range(round(val)), gradient='br')  # right
-
+            self.log(f'Temperature: {outputval}', 'debug')
     def map_range(self, value):
         # Cap range for LED
         if value > PiTemperature.WARNING_TEMP:

@@ -3,6 +3,3 @@ braillespeak:
   path: modules.audio.braillespeak.BrailleSpeak
   config:
     pin: 27
-  dependencies:
-    python:
-      - pypubsub

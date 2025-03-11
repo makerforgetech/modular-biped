@@ -1,10 +1,7 @@
 tracking:
-  enabled: true
+  enabled: false
   path: 'modules.vision.imx500.tracking.Tracking'
   config:
     active: True
     name: 'tracking'
     filter: 'person'
-  dependencies:
-    python:
-      - pypubsub

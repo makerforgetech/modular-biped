@@ -1,10 +1,10 @@
 import json
 import os.path
-from pubsub import pub
 from time import sleep
 from gpiozero import LED
+from modules.base_module import BaseModule
 
-class Animate:
+class Animate(BaseModule):
     def __init__(self, **kwargs):
         """
         Animation module to move servos in sequence
@@ -16,10 +16,13 @@ class Animate:
         - Argument: action (string) - name of animation file
         
         Example:
-        pub.sendMessage('animate', action='head_nod')
+        self.publish('animate', action='head_nod')
         """
         self.path = kwargs.get('path', os.path.dirname(os.path.realpath(__file__)) + '/../animations') + '/'
-        pub.subscribe(self.animate, "animate")
+
+    def setup_messaging(self):
+        """Subscribe to necessary topics."""
+        self.subscribe('animate', self.animate)
 
     def animate(self, action):
         """
@@ -29,6 +32,8 @@ class Animate:
         file = self.path + action + '.json'
         if not os.path.isfile(file):
             raise ValueError('Animation does not exist: ' + action)
+        
+        self.log(f"Animating: {action}")
 
         with open(file, 'r') as f:
             parsed = json.load(f)
@@ -37,15 +42,15 @@ class Animate:
             cmd = list(step.keys())[0]
             args = list(step.values())
             if 'servo:' in cmd:
-                pub.sendMessage(cmd, percentage=args[0])
+                self.publish(cmd, percentage=args[0])
             elif 'sleep' == cmd:
                 sleep(args[0])
             elif 'animate' == cmd:
-                pub.sendMessage(cmd, action=args[0])
-            elif 'led:' in cmd:
-                pub.sendMessage(cmd, color=args[0])
+                self.publish(cmd, action=args[0])
+            elif 'led/' in cmd:
+                self.publish(cmd, color=args[0])
             elif 'speak' == cmd:
-                pub.sendMessage(cmd, message=args[0])
+                self.publish(cmd, message=args[0])
             elif 'pin' in cmd:
                 led = LED(args[0])
                 if 'pin:high' == cmd:

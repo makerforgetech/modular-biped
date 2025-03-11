@@ -13,6 +13,8 @@ ACTIVE_MODULES=()
 # Install yaml package for Python
 myenv/bin/python3 -m pip install pyyaml
 
+
+
 # Helper function to parse dependencies from YAML files using Python
 parse_dependencies() {
   myenv/bin/python3 - <<EOF
@@ -80,6 +82,8 @@ done
 
 # Set execute permissions for additional scripts
 chmod 777 startup.sh stop.sh
+
+# change permissions of installer files
 chmod 777 installers/*.sh
 
 # Summary of modules and dependencies installed

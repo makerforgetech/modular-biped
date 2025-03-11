@@ -1,9 +1,9 @@
 import random
 from transformers import pipeline
 from itertools import combinations
-from pubsub import pub
+from modules.base_module import BaseModule
 
-class EmotionAnalysis:
+class EmotionAnalysis(BaseModule):
     def __init__(self, **kwargs):
         """
         Emotion analysis module
@@ -15,7 +15,7 @@ class EmotionAnalysis:
         - Argument: text (string) - text to analyze
         
         Example:
-        pub.sendMessage('speech', text='I am so happy today!')
+        self.publish('speech', text='I am so happy today!')
         """
         # Load color sets from YAML file via Config class
         self.color_sets = kwargs.get('colors')
@@ -54,8 +54,9 @@ class EmotionAnalysis:
             'anger': 'anger',
             'amusement': 'amusement',
         }
-
-        pub.subscribe(self.analyze_text, 'speech')
+        
+    def setup_messaging(self):
+        self.subscribe('speech', self.analyze_text)
 
     def get_different_colors(self, color_dict, num_colors):
         colors = list(color_dict.values())
@@ -107,4 +108,4 @@ class EmotionAnalysis:
         
         # Send colors to NeoPixel LEDs
         for i, color in enumerate(rgb_colors):
-            pub.sendMessage('led', identifiers=i, color=color)
+            self.publish('led', identifiers=i, color=color)

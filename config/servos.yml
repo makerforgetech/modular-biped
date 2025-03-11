@@ -1,5 +1,5 @@
 servos:
-  enabled: true
+  enabled: false
   path: "modules.actuators.servo.Servo" # Include class name here
   instances:
     - name: "leg_l_hip"
@@ -44,5 +44,4 @@ servos:
       start: 50
   dependencies:
     python:
-      - pypubsub
       - pigpio

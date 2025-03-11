@@ -2,4 +2,22 @@ speechinput:
   enabled: false
   path: modules.audio.speechinput.SpeechInput
   config:
-    device_name: lp
+    device_name: "pulse"
+    start_on_boot: true
+  dependencies:
+    unix:
+      - flac
+      - python3-pyaudio
+      # - matplotlib
+      # - scipy
+      - ladspa-sdk
+    python:
+      - SpeechRecognition
+      # - adafruit-python-shell
+      # - libportaudio0
+      # - libportaudio2
+      # - libportaudiocpp0
+      # - portaudio19-dev
+    additional:
+      - installers/install-mics.sh
+      - installers/install-speech-recognition.sh

@@ -1,9 +1,9 @@
 from gpiozero import AngularServo
 from modules.config import Config
 from time import sleep
-from pubsub import pub
+from modules.base_module import BaseModule
 
-class PiServo:
+class PiServo(BaseModule):
 
     def __init__(self, **kwargs):
         """
@@ -19,14 +19,13 @@ class PiServo:
         - Argument: angle (int) - angle to move servo
         
         Example:
-        pub.sendMessage('piservo:move', angle=90)        
+        self.publish('piservo:move', angle=90)        
         """
         
         self.pin = kwargs.get('pin')
         self.range = kwargs.get('range')
         self.start = kwargs.get('start', 0)
         self.servo = None
-        pub.subscribe(self.move, 'piservo:move')
         # print(self.range)
         # self.move(0)
         # sleep(2)
@@ -36,6 +35,8 @@ class PiServo:
         # sleep(2)
         self.move(self.start)
         
+    def setup_messaging(self):
+        self.subscribe('piservo:move', self.move)
 
     def move(self, angle):
         if self.servo is None:
