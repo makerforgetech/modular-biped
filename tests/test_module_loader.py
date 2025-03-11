@@ -13,7 +13,17 @@ class TestModuleLoader(unittest.TestCase):
             pin: 27
             name: 'buzzer'
     """)
-    def test_load_yaml_files(self, mock_open, mock_listdir):
+    @mock.patch('yaml.safe_load', return_value={
+        'buzzer': {
+            'enabled': True,
+            'path': "modules.audio.buzzer.Buzzer",
+            'config': {
+                'pin': 27,
+                'name': 'buzzer'
+            }
+        }
+    })
+    def test_load_yaml_files(self, mock_yaml, mock_open, mock_listdir):
         # Mock the listdir to return a list of YAML files
         mock_listdir.return_value = ['modules.yml']
 
@@ -34,7 +44,17 @@ class TestModuleLoader(unittest.TestCase):
             pin: 27
             name: 'buzzer'
     """)
-    def test_load_yaml_files_disabled_module(self, mock_open, mock_listdir):
+    @mock.patch('yaml.safe_load', return_value={
+        'buzzer': {
+            'enabled': False,
+            'path': "modules.audio.buzzer.Buzzer",
+            'config': {
+                'pin': 27,
+                'name': 'buzzer'
+            }
+        }
+    })
+    def test_load_yaml_files_disabled_module(self, mock_yaml, mock_open, mock_listdir):
         # Mock the listdir to return a list of YAML files
         mock_listdir.return_value = ['modules.yml']
 
