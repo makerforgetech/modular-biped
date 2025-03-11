@@ -4,7 +4,8 @@ from modules.base_module import BaseModule
 
 from adafruit_servokit import ServoKit
 
-class I2C(BaseModule):
+# @todo: Merge with main servo module
+class I2CServo(BaseModule):
     def __init__(self, **kwargs):
         # Scan with `sudo i2cdetect -y 1`
         self.servos = ServoKit(channels=16)

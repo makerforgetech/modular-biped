@@ -1,5 +1,5 @@
 personality:
-  enabled: true
+  enabled: false
   path: modules.personality.Personality
   config:
     mode: 6 # Config.MODE_LIVE

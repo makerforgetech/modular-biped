@@ -59,8 +59,7 @@ class MPU6050(BaseModule):
             return value
 
     def read_data(self):
-        print (" Reading Data of Gyroscope and Accelerometer")
-
+        # print (" Reading Data of Gyroscope and Accelerometer")
         while True:
             try:
                 #Read Accelerometer raw value
@@ -87,4 +86,13 @@ class MPU6050(BaseModule):
 
             print ("Gx=%.2f" %Gx, u'\u00b0'+ "/s", "\tGy=%.2f" %Gy, u'\u00b0'+ "/s", "\tGz=%.2f" %Gz, u'\u00b0'+ "/s", "\tAx=%.2f g" %Ax, "\tAy=%.2f g" %Ay, "\tAz=%.2f g" %Az) 	
             sleep(.1)
+            # return data as map
+            return {
+                'Gx': Gx,
+                'Gy': Gy,
+                'Gz': Gz,
+                'Ax': Ax,
+                'Ay': Ay,
+                'Az': Az
+            }
     

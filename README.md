@@ -25,6 +25,7 @@ The **Modular Bipedal Robot** project aims to educate and inspire individuals in
   - TTS: Converts text to speech using the onboard speaker.
   - Viam: Uses the VIAM API to integrate Viam modules for additional functionality.
   - Vision: Handles image processing and computer vision tasks using the onboard IMX500 Raspberry Pi AI camera.
+  - Voice Recognition: Uses the Google Speech API to convert speech to text.
   - [Read more](https://github.com/makerforgetech/modular-biped/wiki/Software#modules)!
 
 ## Project Background
@@ -42,6 +43,12 @@ The open source framework is designed for flexibility, allowing users to easily 
 - **YouTube Playlist**: Explore the development process through our build videos: [Watch on YouTube](https://www.youtube.com/watch?v=2DVJ5xxAuWY&list=PL_ua9QbuRTv6Kh8hiEXXVqywS8pklZraT)
 - **Community**: Have a question or want to show off your build? Join the communities on [GitHub](https://bit.ly/maker-forge-community) and [Discord](https://bit.ly/makerforge-community)!
 
+
+## A Note On Branches
+
+The `main` branch is the latest stable release of the Modular Biped Robot project. This is compatible with the 'buddy' release, the latest supported release.
+
+The `develop` branch is the development branch and may contain experimental features and changes that are not yet stable. Please use the `main` branch for the most stable experience. This will eventually become the next release, 'cody'. To facilitate testing modules are disabled by default in the `develop` branch. Enable each as needed in the config yaml files to test.
 
 ## Modules
 

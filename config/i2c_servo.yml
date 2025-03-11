@@ -1,6 +1,6 @@
-i2c:
+i2c_servo:
   enabled: false
-  path: modules.i2c.I2C
+  path: modules.i2c_servo.I2CServo
   config:
     test_on_boot: false
     servo_count: 16

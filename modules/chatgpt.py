@@ -16,8 +16,6 @@ class ChatGPT(BaseModule):
         Requires API key environment variable OPENAI_API_KEY
         Read here for config steps : https://platform.openai.com/docs/quickstart
         
-        Install: pip install openai
-        
         Subscribes to 'speech' to chat
         - Argument: text (string) - message to chat
         

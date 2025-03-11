@@ -10,6 +10,7 @@ sys.path.append("..")
 from modules.display.lib import LCD_1inch28
 from PIL import Image,ImageDraw,ImageFont
 
+# @todo: Do we need the library and images?
 class TFTDisplay:
     def __init__(self, **kwargs):
         try:
