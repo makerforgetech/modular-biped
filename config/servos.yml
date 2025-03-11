@@ -1,6 +1,6 @@
-servos:
+uart_servos:
   enabled: false
-  path: "modules.actuators.servo.Servo" # Include class name here
+  path: "modules.actuators.uart_servo.UARTServo" # Include class name here
   instances:
     - name: "leg_l_hip"
       id: 0
@@ -45,3 +45,28 @@ servos:
   dependencies:
     python:
       - pigpio
+
+gpio_servos:
+  enabled: false
+  path: "modules.actuators.gpio_servo.GPIOServo" # Include class name here
+  instances:
+    - name: "ear"
+      id: 0
+      pin: 12 
+      range: [-40, 40]
+      start: 0
+  dependencies:
+    python:
+      - gpiozero
+
+i2c_servos:
+  enabled: false
+  path: modules.i2c_servo.I2CServo
+  config:
+    test_on_boot: false
+    servo_count: 16
+  dependencies:
+    unix:
+      - python3-smbus
+    python:
+      - adafruit-circuitpython-servokit
