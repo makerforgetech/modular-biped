@@ -46,13 +46,8 @@ void setup()
   // Init serial
   Serial.begin(115200);
 
-
-  pinMode(backpackPin, INPUT_PULLUP); // sets the digital pin as input
-  if (digitalRead(backpackPin) == LOW) // Check once on startup
-  {
-    Serial.println("Backpack detected");
-    backpack = true;
-  }
+  pinMode(legModePin, INPUT); // sets the digital pin as input
+  setLegModeFromPin();
 
   pinMode(restrainPin, INPUT_PULLUP); // sets the digital pin as input
   if (digitalRead(restrainPin) == LOW) // Check once on startup
@@ -82,6 +77,28 @@ void setup()
   // Custom log message (enable DEBUG in Config.h to see this)
   cLog("Start loop");
 }
+
+void setLegModeFromPin()
+{
+  int legModeVal = analogRead(legModePin);
+  Serial.println("Analog value of legModePin: ");
+  Serial.println(legModeVal);
+
+  for (int i = 0; i < 5; i++)
+  {
+    if (legModeVal < legModeThresholds[i])
+    {
+      legMode = i;
+      break;
+    }
+  }
+  legMode = 2; // Override leg mode for DEBUGGING
+
+  Serial.println("Leg mode: ");
+  Serial.println(legModeNames[legMode]);
+  StartingPos = legModePoses[legMode];
+}
+
 /**
  * @brief Set all servos to 90 degrees for mechanical calibration. Wait for 20 seconds.
  */
