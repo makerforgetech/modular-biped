@@ -100,7 +100,7 @@ void setLegModeFromPin()
       break;
     }
   }
-  legMode = 3; // Override leg mode for DEBUGGING @todo remove once selector is installed
+  legMode = 2; // Override leg mode for DEBUGGING @todo remove once selector is installed
 
   // Serial.println("Leg mode: ");
   // Serial.println(legModeNames[legMode]);
