@@ -26,25 +26,14 @@ public:
     void doInit()
     {
         // IMPORTANT: Communication from Pi uses index, these must be attached in the same order as they are referenced in the pi config
-        if (backpack == true)
-        {
-            ServoLLH.attach(PIN_SLLH, PosBackpack[0]);
-            ServoLLK.attach(PIN_SLLK, PosBackpack[1]);
-            ServoLLA.attach(PIN_SLLA, PosBackpack[2]);
-            ServoRLH.attach(PIN_SRLH, PosBackpack[3]);
-            ServoRLK.attach(PIN_SRLK, PosBackpack[4]);
-            ServoRLA.attach(PIN_SRLA, PosBackpack[5]);
-        }
-        else {
-            ServoLLH.attach(PIN_SLLH, PosStart[0]);
-            ServoLLK.attach(PIN_SLLK, PosStart[1]);
-            ServoLLA.attach(PIN_SLLA, PosStart[2]);
-            ServoRLH.attach(PIN_SRLH, PosStart[3]);
-            ServoRLK.attach(PIN_SRLK, PosStart[4]);
-            ServoRLA.attach(PIN_SRLA, PosStart[5]);
-        }
-        ServoNT.attach(PIN_SNT, PosStart[6]);
-        ServoNP.attach(PIN_SNP, PosStart[7]);
+        ServoLLH.attach(PIN_SLLH, StartingPos[0]);
+        ServoLLK.attach(PIN_SLLK, StartingPos[1]);
+        ServoLLA.attach(PIN_SLLA, StartingPos[2]);
+        ServoRLH.attach(PIN_SRLH, StartingPos[3]);
+        ServoRLK.attach(PIN_SRLK, StartingPos[4]);
+        ServoRLA.attach(PIN_SRLA, StartingPos[5]);
+        ServoNT.attach(PIN_SNT, StartingPos[6]);
+        ServoNP.attach(PIN_SNP, StartingPos[7]);
 
         // Initialise IK with min and max angles and leg section lengths
         ik.doInit(PosMin[3], PosMax[3], PosMin[4], PosMax[4], PosMin[5], PosMax[5], LEG_LENGTH_THIGH, LEG_LENGTH_SHIN, LEG_LENGTH_FOOT);
@@ -129,9 +118,9 @@ public:
 
     void moveSingleServo(uint8_t pServoIndex, int pPos, boolean isRelative)
     {
-        if ((backpack == true || restrainingBolt == true) && pServoIndex < 6)
+        if (((legMode != 2 || restrainingBolt == true) && pServoIndex < 6) || legMode == 0)
         {
-            // Serial.println("Backpack or restrained mode, skipping leg servos");
+            // Serial.println("Restrained mode, skipping some / all servos");
         }
         else if (isRelative)
         {

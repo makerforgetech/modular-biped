@@ -46,24 +46,24 @@ void setup()
   // Init serial
   Serial.begin(115200);
 
-
-  pinMode(backpackPin, INPUT_PULLUP); // sets the digital pin as input
-  if (digitalRead(backpackPin) == LOW) // Check once on startup
-  {
-    Serial.println("Backpack detected");
-    backpack = true;
-  }
+  pinMode(legModePin, INPUT); // sets the digital pin as input
+  setLegModeFromPin();
 
   pinMode(restrainPin, INPUT_PULLUP); // sets the digital pin as input
   if (digitalRead(restrainPin) == LOW) // Check once on startup
   {
-    Serial.println("Restraint detected");
+    // Serial.println("Restraint detected");
     restrainingBolt = true;
+    StartingPos = PosStart; // Override starting position @todo remove once selector is installed
   }
 
   // Init ServoManager
   servoManager.doInit();
   servoManager.setSpeed(SERVO_SPEED_MIN);
+
+  #ifdef SERVO_CALIBRATION_ENABLED
+    servoManager.calibrate(); // Must be in legMode 2
+  #endif
 
   #ifdef MPU6050_ENABLED
   tilt.doInit();
@@ -77,9 +77,36 @@ void setup()
   // Move to rest position + calculate IK and store as rest position
   // doRest();
 
+  if (legMode == 2)
+  {
+    servoManager.moveServos(PosStand); // Stand once
+  }
+
   // Custom log message (enable DEBUG in Config.h to see this)
   cLog("Start loop");
 }
+
+void setLegModeFromPin()
+{
+  int legModeVal = analogRead(legModePin);
+  // Serial.println("Analog value of legModePin: ");
+  // Serial.println(legModeVal);
+
+  for (int i = 0; i < 5; i++)
+  {
+    if (legModeVal < legModeThresholds[i])
+    {
+      legMode = i;
+      break;
+    }
+  }
+  legMode = 3; // Override leg mode for DEBUGGING @todo remove once selector is installed
+
+  // Serial.println("Leg mode: ");
+  // Serial.println(legModeNames[legMode]);
+  StartingPos = legModePoses[legMode];
+}
+
 /**
  * @brief Set all servos to 90 degrees for mechanical calibration. Wait for 20 seconds.
  */
@@ -165,9 +192,7 @@ void hipAdjust()
 
 void loop()
 {
-  #ifdef SERVO_CALIBRATION_ENABLED
-    servoManager.calibrate();
-  #endif
+  
 
   #ifdef MPU6050_ENABLED
   hipAdjust();
@@ -237,10 +262,10 @@ void animateRandomly()
   float headTiltOffset = ServoEasing::ServoEasingNextPositionArray[7] - 90;
   // Attempt to compensate movement of head by adjusting leg height
   // Scale headTiltOffset value between 0 and 180 (inverted) to scale of LEG_IK_MIN and LEG_IK_MAX
-  float legHeight = map(headTiltOffset, 180, 0, LEG_IK_MIN, LEG_IK_MAX);
+  // float legHeight = map(headTiltOffset, 180, 0, LEG_IK_MIN, LEG_IK_MAX);
   // Move legs to that height
   // servoManager.moveLegs(LEG_IK_MAX, 0);
-  servoManager.moveServos(PosStand);
+  // servoManager.moveServos(PosStand);
   shouldMove = true;
 #ifdef DEBUG
   Serial.print("Moving legs ");
