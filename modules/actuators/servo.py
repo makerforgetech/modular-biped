@@ -52,11 +52,11 @@ class Servo(BaseModule):
             self.pi = kwargs.get('pi', pigpio.pi())
             self.pi.set_mode(self.pin, pigpio.OUTPUT)
 
-        self.move(self.start)
-
     def setup_messaging(self):
         self.subscribe('servo:' + self.identifier + ':mvabs', self.move)
         self.subscribe('servo:' + self.identifier + ':mv', self.move_relative)
+        
+        self.move(self.start) # @todo move to a more appropriate place, can't be in init because messaging is not set up yet
 
     def __del__(self):
         pass #self.reset()

@@ -1,5 +1,5 @@
 servos:
-  enabled: false
+  enabled: true
   path: "modules.actuators.servo.Servo" # Include class name here
   instances:
     - name: "leg_l_hip"

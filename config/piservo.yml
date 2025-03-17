@@ -1,5 +1,5 @@
 piservo:
-  enabled: false
+  enabled: true
   path: modules.actuators.piservo.PiServo
   instances:
     - name: "ear"
