@@ -46,24 +46,8 @@ void setup()
   // Init serial
   Serial.begin(115200);
 
-  pinMode(legModePin, INPUT); // sets the digital pin as input
-  setLegModeFromPin();
-
-  pinMode(restrainPin, INPUT_PULLUP); // sets the digital pin as input
-  if (digitalRead(restrainPin) == LOW) // Check once on startup
-  {
-    // Serial.println("Restraint detected");
-    restrainingBolt = true;
-    StartingPos = PosStart; // Override starting position @todo remove once selector is installed
-  }
-
   // Init ServoManager
   servoManager.doInit();
-  servoManager.setSpeed(SERVO_SPEED_MIN);
-
-  #ifdef SERVO_CALIBRATION_ENABLED
-    servoManager.calibrate(); // Must be in legMode 2
-  #endif
 
   #ifdef MPU6050_ENABLED
   tilt.doInit();
@@ -77,34 +61,8 @@ void setup()
   // Move to rest position + calculate IK and store as rest position
   // doRest();
 
-  if (legMode == 2)
-  {
-    servoManager.moveServos(PosStand); // Stand once
-  }
-
   // Custom log message (enable DEBUG in Config.h to see this)
   cLog("Start loop");
-}
-
-void setLegModeFromPin()
-{
-  int legModeVal = analogRead(legModePin);
-  // Serial.println("Analog value of legModePin: ");
-  // Serial.println(legModeVal);
-
-  for (int i = 0; i < 5; i++)
-  {
-    if (legModeVal < legModeThresholds[i])
-    {
-      legMode = i;
-      break;
-    }
-  }
-  legMode = 2; // Override leg mode for DEBUGGING @todo remove once selector is installed
-
-  // Serial.println("Leg mode: ");
-  // Serial.println(legModeNames[legMode]);
-  StartingPos = legModePoses[legMode];
 }
 
 /**

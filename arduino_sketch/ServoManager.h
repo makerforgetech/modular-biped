@@ -25,6 +25,8 @@ public:
     double currentX, currentY;
     void doInit()
     {
+        initInputs();
+
         // IMPORTANT: Communication from Pi uses index, these must be attached in the same order as they are referenced in the pi config
         ServoLLH.attach(PIN_SLLH, StartingPos[0]);
         ServoLLK.attach(PIN_SLLK, StartingPos[1]);
@@ -45,9 +47,56 @@ public:
             ServoEasing::ServoEasingArray[tIndex]->setEasingType(EASING_TYPE);
             ServoEasing::ServoEasingArray[tIndex]->setMinMaxConstraint(PosMin[tIndex], PosMax[tIndex]);
         }
+
+        setSpeed(SERVO_SPEED_MIN);
+
+        #ifdef SERVO_CALIBRATION_ENABLED
+        servoManager.calibrate(); // Must be in servoMode 2
+        #endif
+
         // Wait for servos to reach start position.
         delay(3000);
         cLog("Servos initialised");
+
+        if (servoMode == 2)
+        {
+            moveServos(PosStand); // Stand once
+        }
+
+    }
+
+    void initInputs()
+    {
+        #ifdef SERVO_MODE_PIN_ENABLED
+            pinMode(servoModePin, INPUT); // sets the digital pin as input
+            int servoModeVal = analogRead(servoModePin);
+            for (int i = 0; i < 5; i++)
+            {
+                if (servoModeVal < servoModeThresholds[i])
+                {
+                    servoMode = i;
+                    break;
+                }
+            }
+            // Serial.print("Servo mode: ");
+            // Serial.println(servoMode);
+            #ifdef SERVO_MODE_OVERRIDE
+            servoMode = SERVO_MODE_OVERRIDE; // Define and set in Config.h if appropriate
+            // Serial.print("Servo mode override: ");
+            // Serial.println(servoMode);
+            #endif
+            
+            StartingPos = servoModePoses[servoMode];
+        #endif
+
+        #ifdef RESTRAIN_PIN_ENABLED
+            pinMode(restrainPin, INPUT_PULLUP); // sets the digital pin as input
+            if (digitalRead(restrainPin) == LOW) // Check once on startup
+            {
+                restrainingBolt = true;
+                StartingPos = PosStart; // Override starting position @todo remove once selector is installed
+            }
+        #endif
     }
 
     // Adjust hips to compensate for angle of body
@@ -118,7 +167,7 @@ public:
 
     void moveSingleServo(uint8_t pServoIndex, int pPos, boolean isRelative)
     {
-        if (((legMode != 2 || restrainingBolt == true) && pServoIndex < 6) || legMode == 0)
+        if (((servoMode != 2 || restrainingBolt == true) && pServoIndex < 6) || servoMode == 0)
         {
             // Serial.println("Restrained mode, skipping some / all servos");
         }

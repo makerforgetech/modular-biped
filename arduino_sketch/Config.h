@@ -50,6 +50,10 @@
 //#define MPU6050_DEBUG // Debug in serial plotter
 #define ANIMATE_ENABLED // Enable random animations
 
+// #define SERVO_MODE_PIN_ENABLED // Enable behavior related to servoModePin
+// #define SERVO_MODE_OVERRIDE 3 // Override input from pin and set specific mode for debugging
+#define RESTRAIN_PIN_ENABLED // Enable behavior related to restrainPin
+
 // Arrays to store servo min / max positions to avoid mechanical issues due
 // NOTE: attach() disregards this, set PosRest to be within range of the servo's physical boundaries
 int PosMin[SERVO_COUNT] = {0, 0, 5, 0, 0, 20, 60, 30};
@@ -62,7 +66,7 @@ int PosSleep[SERVO_COUNT] = {40, 60, 95, 140, 120, 85, PosMax[7], 90};
 //0, 3 = HIP
 int PosStart[SERVO_COUNT] = {60, 0, 165, 120, 180, 20, 90, 90};
 
-int PosBackpack[SERVO_COUNT] = {30, 5, 70, 130, 120, 160, 90, 90}; // Position legs to support when mounted to backpack
+int PosBackpack[SERVO_COUNT] = {30, 5, 90, 130, 120, 160, 90, 90}; // Position legs to support when mounted to backpack
 int PosStraight[SERVO_COUNT] = {45, 90, 165, 135, 90, 20, 90, 90}; // straighten legs and point feet to fit in backpack upright
 
 //int PosRest[SERVO_COUNT] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, S9_REST};
@@ -82,16 +86,18 @@ int PosLookDown[SERVO_COUNT] = {NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, 120, 9
 int *Poses[] = {PosStand, PosLookLeft, PosLookRight, PosLookUp, PosLookDown, PosLookRandom};
 
 int *StartingPos = PosStart;
+int servoMode = 2; // Default to standing pose
 
-int legModePin = PIN_A1;
+#ifdef SERVO_MODE_PIN_ENABLED
+int servoModePin = PIN_A1;
 // Define 5 threshold values between 0 and 1024 for the 5 leg modes
-int legModeThresholds[5] = {205, 410, 615, 820, 1024};
-String legModeNames[] = {"Disabled", "Sit", "Stand", "BackPack", "Straight"};
-int *legModePoses[] = {PosStart, PosStart, PosStart, PosBackpack, PosStraight};
-int legMode = 0;
+int servoModeThresholds[5] = {205, 410, 615, 820, 1024};
+String servoModeNames[] = {"Disabled", "Sit", "Stand", "BackPack", "Straight"};
+int *servoModePoses[] = {PosStart, PosStart, PosStart, PosBackpack, PosStraight};
+#endif
 
 int restrainPin = 12;
-bool restrainingBolt = false;
+bool restrainingBolt = false; // Needed in either case as it is checked by ServoManager
 
 void blinkLED()
 {
