@@ -1,1 +1,1 @@
-# Incorporated into SerialConnection.h
+// Incorporated into SerialConnection.h. Will delete.
