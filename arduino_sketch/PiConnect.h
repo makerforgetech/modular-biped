@@ -1,1 +1,1 @@
-# Renamedto SerialConnection.h
+// Renamed to SerialConnection.h - will delete
