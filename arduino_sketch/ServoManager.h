@@ -70,9 +70,11 @@ public:
         #ifdef SERVO_MODE_PIN_ENABLED
             pinMode(servoModePin, INPUT); // sets the digital pin as input
             int servoModeVal = analogRead(servoModePin);
+            // Serial.print("Servo Mode Val:");
+            // Serial.println(servoModeVal);
             for (int i = 0; i < 5; i++)
             {
-                if (servoModeVal < servoModeThresholds[i])
+                if (servoModeVal <= servoModeThresholds[i])
                 {
                     servoMode = i;
                     break;

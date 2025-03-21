@@ -50,7 +50,7 @@
 //#define MPU6050_DEBUG // Debug in serial plotter
 #define ANIMATE_ENABLED // Enable random animations
 
-// #define SERVO_MODE_PIN_ENABLED // Enable behavior related to servoModePin
+#define SERVO_MODE_PIN_ENABLED // Enable behavior related to servoModePin
 // #define SERVO_MODE_OVERRIDE 3 // Override input from pin and set specific mode for debugging
 #define RESTRAIN_PIN_ENABLED // Enable behavior related to restrainPin
 
@@ -91,7 +91,8 @@ int servoMode = 2; // Default to standing pose
 #ifdef SERVO_MODE_PIN_ENABLED
 int servoModePin = PIN_A1;
 // Define 5 threshold values between 0 and 1024 for the 5 leg modes
-int servoModeThresholds[5] = {205, 410, 615, 820, 1024};
+// vals: 0, 545, 617, 711, 839
+int servoModeThresholds[5] = {0, 550, 650, 750, 850};
 String servoModeNames[] = {"Disabled", "Sit", "Stand", "BackPack", "Straight"};
 int *servoModePoses[] = {PosStart, PosStart, PosStart, PosBackpack, PosStraight};
 #endif
