@@ -14,7 +14,7 @@ from libcamera import Transform
 from modules.base_module import BaseModule
 
 
-class Detection(BaseModule):
+class Detection:
     def __init__(self, imx500, picam2, selfref, coords, category, conf, metadata):
         """Create a Detection object, recording the bounding box, category and confidence."""
         self.category = category
@@ -57,7 +57,7 @@ class Detection(BaseModule):
             'distance_y': self.distance_y
         }
         
-class Vision:
+class Vision(BaseModule):
     def __init__(self, **kwargs):
         """
         Vision class
@@ -152,6 +152,7 @@ class Vision:
 
     def scan(self):
         self.last_results = self.parse_detections(self.picam2.capture_metadata())
+        # self.log(f"Vision detections: {self.last_results}")
         this_capture = []
         for i in self.last_results:
             this_capture = [obj.json_out() for obj in self.last_results]
