@@ -5,7 +5,7 @@
  * @brief Configuration file for the Arduino sketch.
  * @details This file contains the configuration for the Arduino sketch.
  */
-//#define SERVO_CALIBRATION_ENABLED // Enable servo calibration (see ServoManager::calibrate())
+// #define SERVO_CALIBRATION_ENABLED // Enable servo calibration (see ServoManager::calibrate())
 //#define SERVO_CALIBRATION_SYMMETRICAL // Calculate and apply equivelant changes on other leg.
 
 #define SERVO_PIN_OFFSET 2 // Legacy, used to identify pin from pi communication
@@ -34,7 +34,7 @@
 
 #define EASING_TYPE EASE_QUADRATIC_IN_OUT
 #define ENABLE_EASE_QUADRATIC
-#define SERVO_SPEED_MIN 20
+#define SERVO_SPEED_MIN 30 // Was 20
 #define SERVO_SPEED_MAX 80
 
 // #define DEBUG
@@ -50,6 +50,10 @@
 //#define MPU6050_DEBUG // Debug in serial plotter
 #define ANIMATE_ENABLED // Enable random animations
 
+#define SERVO_MODE_PIN_ENABLED // Enable behavior related to servoModePin
+// #define SERVO_MODE_OVERRIDE 3 // Override input from pin and set specific mode for debugging
+#define RESTRAIN_PIN_ENABLED // Enable behavior related to restrainPin
+
 // Arrays to store servo min / max positions to avoid mechanical issues due
 // NOTE: attach() disregards this, set PosRest to be within range of the servo's physical boundaries
 int PosMin[SERVO_COUNT] = {0, 0, 5, 0, 0, 20, 60, 30};
@@ -62,7 +66,8 @@ int PosSleep[SERVO_COUNT] = {40, 60, 95, 140, 120, 85, PosMax[7], 90};
 //0, 3 = HIP
 int PosStart[SERVO_COUNT] = {60, 0, 165, 120, 180, 20, 90, 90};
 
-int PosBackpack[SERVO_COUNT] = {45, 90, 165, 135, 90, 20, 90, 90}; // straighten legs and point feet to fit in backpack upright
+int PosBackpack[SERVO_COUNT] = {30, 5, 90, 130, 120, 160, 90, 90}; // Position legs to support when mounted to backpack
+int PosStraight[SERVO_COUNT] = {45, 90, 165, 135, 90, 20, 90, 90}; // straighten legs and point feet to fit in backpack upright
 
 //int PosRest[SERVO_COUNT] = {S1_REST, S2_REST, S3_REST, S4_REST, S5_REST, S6_REST, S7_REST, S8_REST, S9_REST};
 int PosRest[SERVO_COUNT] = {60, 0, 165, 120, 180, 20, 90, 90};
@@ -70,7 +75,7 @@ int PosRest[SERVO_COUNT] = {60, 0, 165, 120, 180, 20, 90, 90};
 int PosConfig[SERVO_COUNT] = {90, 90, 90, 90, 90, 90, 90, 90};
 
 // Poses
-int PosStand[SERVO_COUNT] = {45, 75, 80, 135, 105, 100, NOVAL, NOVAL};
+int PosStand[SERVO_COUNT] = {45, 70, 80, 135, 110, 100, NOVAL, NOVAL};
 int PosLookLeft[SERVO_COUNT] = {NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, 180};
 int PosLookRight[SERVO_COUNT] = {NOVAL, NOVAL, NOVAL, NOVAL, NOVAL,  NOVAL, NOVAL, 0};
 int PosLookRandom[SERVO_COUNT] = {NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, -1, -1}; // Made random by calling the function moveRandom() if the value is -1
@@ -80,11 +85,20 @@ int PosLookDown[SERVO_COUNT] = {NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, NOVAL, 120, 9
 // Array of poses except PosRest and PosSleep (which are used for initialization and reset of position)
 int *Poses[] = {PosStand, PosLookLeft, PosLookRight, PosLookUp, PosLookDown, PosLookRandom};
 
-int backpackPin = PIN_A1;
-bool backpack = false;
+int *StartingPos = PosStart;
+int servoMode = 2; // Default to standing pose
+
+#ifdef SERVO_MODE_PIN_ENABLED
+int servoModePin = PIN_A1;
+// Define 5 threshold values between 0 and 1024 for the 5 leg modes
+// vals: 0, 545, 617, 711, 839
+int servoModeThresholds[5] = {0, 550, 650, 750, 850};
+String servoModeNames[] = {"Disabled", "Sit", "Stand", "BackPack", "Straight"};
+int *servoModePoses[] = {PosStart, PosStart, PosStart, PosBackpack, PosStraight};
+#endif
 
 int restrainPin = 12;
-bool restrainingBolt = false;
+bool restrainingBolt = false; // Needed in either case as it is checked by ServoManager
 
 void blinkLED()
 {

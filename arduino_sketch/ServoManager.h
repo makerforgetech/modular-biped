@@ -25,26 +25,17 @@ public:
     double currentX, currentY;
     void doInit()
     {
+        initInputs();
+
         // IMPORTANT: Communication from Pi uses index, these must be attached in the same order as they are referenced in the pi config
-        if (backpack == true)
-        {
-            ServoLLH.attach(PIN_SLLH, PosBackpack[0]);
-            ServoLLK.attach(PIN_SLLK, PosBackpack[1]);
-            ServoLLA.attach(PIN_SLLA, PosBackpack[2]);
-            ServoRLH.attach(PIN_SRLH, PosBackpack[3]);
-            ServoRLK.attach(PIN_SRLK, PosBackpack[4]);
-            ServoRLA.attach(PIN_SRLA, PosBackpack[5]);
-        }
-        else {
-            ServoLLH.attach(PIN_SLLH, PosStart[0]);
-            ServoLLK.attach(PIN_SLLK, PosStart[1]);
-            ServoLLA.attach(PIN_SLLA, PosStart[2]);
-            ServoRLH.attach(PIN_SRLH, PosStart[3]);
-            ServoRLK.attach(PIN_SRLK, PosStart[4]);
-            ServoRLA.attach(PIN_SRLA, PosStart[5]);
-        }
-        ServoNT.attach(PIN_SNT, PosStart[6]);
-        ServoNP.attach(PIN_SNP, PosStart[7]);
+        ServoLLH.attach(PIN_SLLH, StartingPos[0]);
+        ServoLLK.attach(PIN_SLLK, StartingPos[1]);
+        ServoLLA.attach(PIN_SLLA, StartingPos[2]);
+        ServoRLH.attach(PIN_SRLH, StartingPos[3]);
+        ServoRLK.attach(PIN_SRLK, StartingPos[4]);
+        ServoRLA.attach(PIN_SRLA, StartingPos[5]);
+        ServoNT.attach(PIN_SNT, StartingPos[6]);
+        ServoNP.attach(PIN_SNP, StartingPos[7]);
 
         // Initialise IK with min and max angles and leg section lengths
         ik.doInit(PosMin[3], PosMax[3], PosMin[4], PosMax[4], PosMin[5], PosMax[5], LEG_LENGTH_THIGH, LEG_LENGTH_SHIN, LEG_LENGTH_FOOT);
@@ -56,9 +47,58 @@ public:
             ServoEasing::ServoEasingArray[tIndex]->setEasingType(EASING_TYPE);
             ServoEasing::ServoEasingArray[tIndex]->setMinMaxConstraint(PosMin[tIndex], PosMax[tIndex]);
         }
+
+        setSpeed(SERVO_SPEED_MIN);
+
+        #ifdef SERVO_CALIBRATION_ENABLED
+        servoManager.calibrate(); // Must be in servoMode 2
+        #endif
+
         // Wait for servos to reach start position.
         delay(3000);
         cLog("Servos initialised");
+
+        if (servoMode == 2)
+        {
+            moveServos(PosStand); // Stand once
+        }
+
+    }
+
+    void initInputs()
+    {
+        #ifdef SERVO_MODE_PIN_ENABLED
+            pinMode(servoModePin, INPUT); // sets the digital pin as input
+            int servoModeVal = analogRead(servoModePin);
+            // Serial.print("Servo Mode Val:");
+            // Serial.println(servoModeVal);
+            for (int i = 0; i < 5; i++)
+            {
+                if (servoModeVal <= servoModeThresholds[i])
+                {
+                    servoMode = i;
+                    break;
+                }
+            }
+            // Serial.print("Servo mode: ");
+            // Serial.println(servoMode);
+            #ifdef SERVO_MODE_OVERRIDE
+            servoMode = SERVO_MODE_OVERRIDE; // Define and set in Config.h if appropriate
+            // Serial.print("Servo mode override: ");
+            // Serial.println(servoMode);
+            #endif
+            
+            StartingPos = servoModePoses[servoMode];
+        #endif
+
+        #ifdef RESTRAIN_PIN_ENABLED
+            pinMode(restrainPin, INPUT_PULLUP); // sets the digital pin as input
+            if (digitalRead(restrainPin) == LOW) // Check once on startup
+            {
+                restrainingBolt = true;
+                StartingPos = PosStart; // Override starting position @todo remove once selector is installed
+            }
+        #endif
     }
 
     // Adjust hips to compensate for angle of body
@@ -129,9 +169,9 @@ public:
 
     void moveSingleServo(uint8_t pServoIndex, int pPos, boolean isRelative)
     {
-        if ((backpack == true || restrainingBolt == true) && pServoIndex < 6)
+        if (((servoMode != 2 || restrainingBolt == true) && pServoIndex < 6) || servoMode == 0)
         {
-            // Serial.println("Backpack or restrained mode, skipping leg servos");
+            // Serial.println("Restrained mode, skipping some / all servos");
         }
         else if (isRelative)
         {
