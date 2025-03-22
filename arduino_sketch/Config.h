@@ -36,8 +36,8 @@ namespace ModularBiped
         constexpr int KNEE_ADJUSTMENT = 90;
         constexpr int ANKLE_ADJUSTMENT = 85;
 
-// Servo easing configuration
-#define EASING_TYPE EASE_QUADRATIC_IN_OUT
+        // Servo easing configuration
+        #define EASING_TYPE EASE_QUADRATIC_IN_OUT
         constexpr int SERVO_SPEED_MIN = 30; // Minimum servo speed
         constexpr int SERVO_SPEED_MAX = 80; // Maximum servo speed
 
@@ -51,13 +51,13 @@ namespace ModularBiped
         // Special values
         constexpr int NOVAL = 1000;
 
-// Feature flags
-#define MPU6050_ENABLED // Enable MPU6050
-// #define MPU6050_DEBUG // Debug in serial plotter
-// #define DEBUG // Main debug via cLog method
-#define SERVO_MODE_PIN_ENABLED // Enable behavior related to servoModePin
-// #define SERVO_MODE_OVERRIDE 3 // Override input from pin and set specific mode for debugging
-#define RESTRAIN_PIN_ENABLED // Enable behavior related to restrainPin
+        // Feature flags
+        #define MPU6050_ENABLED // Enable MPU6050
+        // #define MPU6050_DEBUG // Debug in serial plotter
+        // #define DEBUG // Main debug via cLog method
+        #define SERVO_MODE_PIN_ENABLED // Enable behavior related to servoModePin
+        // #define SERVO_MODE_OVERRIDE 3 // Override input from pin and set specific mode for debugging
+        #define RESTRAIN_PIN_ENABLED // Enable behavior related to restrainPin
 
         // Uncomment to enable servo calibration
         // #define SERVO_CALIBRATION_ENABLED // Enable servo calibration (see ServoManager::calibrate())
@@ -88,17 +88,6 @@ namespace ModularBiped
         int servoMode = 2; // Default to standing pose
 
 #ifdef SERVO_MODE_PIN_ENABLED
-        constexpr int servoModePin = PIN_A1;
-        // Define 5 threshold values between 0 and 1024 for the 5 leg modes
-        constexpr int servoModeThresholds[5] = {205, 410, 615, 820, 1024};
-        String servoModeNames[] = {"Disabled", "Sit", "Stand", "BackPack", "Straight"};
-        int *servoModePoses[] = {PosStart, PosStart, PosStart, PosBackpack, PosStraight};
-#endif
-
-        int *StartingPos = PosStart;
-        int servoMode = 2; // Default to standing pose
-
-#ifdef SERVO_MODE_PIN_ENABLED
         int servoModePin = PIN_A1;
         // Define 5 threshold values between 0 and 1024 for the 5 leg modes
         // vals: 0, 545, 617, 711, 839
@@ -109,30 +98,30 @@ namespace ModularBiped
 
         int restrainPin = 12;
         bool restrainingBolt = false; // Needed in either case as it is checked by ServoManager
+    }
 
-        void blinkLED()
-        {
-            digitalWrite(LED_BUILTIN, HIGH);
-            delay(100);
-            digitalWrite(LED_BUILTIN, LOW);
-            delay(100);
-        }
+    void blinkLED()
+    {
+        digitalWrite(LED_BUILTIN, HIGH);
+        delay(100);
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(100);
+    }
 
-        /**
-         * Custom logging function to avoid having to wrap every Serial.println() in #ifdef DEBUG
-         */
-        void cLog(String message, boolean newline = true)
-        {
+    /**
+     * Custom logging function to avoid having to wrap every Serial.println() in #ifdef DEBUG
+     */
+    void cLog(String message, boolean newline = true)
+    {
 #ifdef DEBUG
-            if (newline)
-            {
-                Serial.println(message);
-            }
-            else
-            {
-                Serial.print(message);
-            }
-#endif
+        if (newline)
+        {
+            Serial.println(message);
         }
+        else
+        {
+            Serial.print(message);
+        }
+#endif
     }
 }

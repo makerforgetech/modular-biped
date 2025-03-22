@@ -88,19 +88,19 @@ namespace ModularBiped {
                 {
                     if (servoModeVal < Config::servoModeThresholds[i])
                     {
-                        servoMode = i;
+                        Config::servoMode = i;
                         break;
                     }
                 }
                 // Serial.print("Servo mode: ");
                 // Serial.println(servoMode);
                 #ifdef SERVO_MODE_OVERRIDE
-                servoMode = SERVO_MODE_OVERRIDE; // Define and set in Config.h if appropriate
+                Config::servoMode = SERVO_MODE_OVERRIDE; // Define and set in Config.h if appropriate
                 // Serial.print("Servo mode override: ");
                 // Serial.println(servoMode);
                 #endif
                 
-                Config::StartingPos = servoModePoses[servoMode];
+                Config::StartingPos = Config::servoModePoses[Config::servoMode];
             #endif
 
             #ifdef RESTRAIN_PIN_ENABLED
