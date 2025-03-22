@@ -1,9 +1,9 @@
 import asyncio
-from pubsub import pub
 from threading import Thread
 from time import sleep
+from modules.base_module import BaseModule
 
-class Tracking:
+class Tracking(BaseModule):
     TRACKING_THRESHOLD = (50, 50)
     VIDEO_SIZE = (640, 480)  # Pixel dimensions of the image
     VIDEO_CENTER = (VIDEO_SIZE[0] / 2, VIDEO_SIZE[1] / 2)
@@ -25,25 +25,22 @@ class Tracking:
         Subscribes to 'exit' to set tracking state to inactive
         
         Example:
-        pub.sendMessage('vision:detections', matches=matches)
-        pub.sendMessage('vision:stable')
-        pub.sendMessage('rest')
-        pub.sendMessage('wake')
-        pub.sendMessage('sleep')
-        pub.sendMessage('exit')
+        self.publish('vision:detections', matches=matches)
+        self.publish('vision:stable')
+        self.publish('rest')
+        self.publish('wake')
+        self.publish('sleep')
+        self.publish('exit')
         """
         self.active = kwargs.get('active', True)
         self.moving = False
         self.camera = kwargs.get('camera', None)
         self.filter = kwargs.get('filter', 'person')
 
-        # Subscribe to vision and servo-related topics
-        pub.subscribe(self.handle, 'vision:detections')
-        pub.subscribe(self.unfreeze, 'vision:stable')
-        pub.subscribe(self.set_state, 'rest', active=True)
-        pub.subscribe(self.set_state, 'wake', active=True)
-        pub.subscribe(self.set_state, 'sleep', active=False)
-        pub.subscribe(self.set_state, 'exit', active=False)
+    def setup_messaging(self):
+        """Subscribe to necessary topics."""
+        self.subscribe('vision:detections', self.handle)
+        self.subscribe('vision:stable', self.unfreeze, )
 
     def set_state(self, active):
         """Set the tracking state (active/inactive)."""
@@ -104,9 +101,9 @@ class Tracking:
         print(f"Moving Y:  {y_move} ({match['distance_y']})")
         
         if x_move:
-            pub.sendMessage('servo:pan:mv', percentage=x_move)
+            self.publish('servo:pan:mv', percentage=x_move)
         if y_move:
-            pub.sendMessage('servo:tilt:mv', percentage=y_move)
+            self.publish('servo:tilt:mv', percentage=y_move)
 
         # move_time = max(abs(max(x_move, y_move)) / 50, 1) # min 1 second
         # print(f"Move time: {move_time}")

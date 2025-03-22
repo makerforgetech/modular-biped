@@ -1,6 +1,7 @@
 logwrapper:
-  enabled: false #TODO work in progress, currently hardcoded in main.py
+  enabled: true # Highly recommended to enable this module
   path: modules.logwrapper.LogWrapper
-  dependencies:
-    python:
-      - pypubsub
+  config:
+    filename: app.log
+    log_level: 'debug' # debug, info, warning, error, critical
+    cli_level: 'info' # debug, info, warning, error, critical

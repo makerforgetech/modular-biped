@@ -22,12 +22,12 @@ class Battery:
         val = self.check()
         if val == 0:
             pub.sendMessage('led:full', color='red')
-            pub.sendMessage('log:error', msg="[Battery] Battery Read Error - Value: " + str(val))
+            pub.sendMessage('log/error', msg="[Battery] Battery Read Error - Value: " + str(val))
             return
         if self.low_voltage(val):
             pub.sendMessage('led:full', color='red')
             if not self.safe_voltage(val):
-                pub.sendMessage('log:critical', msg="[Battery] EMERGENCY SHUTDOWN! Value: " + str(val))
+                pub.sendMessage('log/critical', msg="[Battery] EMERGENCY SHUTDOWN! Value: " + str(val))
                 pub.sendMessage('exit')
                 sleep(5)
                 subprocess.call(['shutdown', '-h'], shell=False)

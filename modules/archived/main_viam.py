@@ -191,7 +191,7 @@ async def main():
         # output stack trace
         print(ex.with_traceback())
         print(message)
-        pub.sendMessage('log:error', msg=ex)
+        pub.sendMessage('log/error', msg=ex)
         loop = False
         sleep(5)
         quit()

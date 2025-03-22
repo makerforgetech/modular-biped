@@ -1,6 +1,6 @@
-tts:
+ttsmodule:
   enabled: false
-  path: "modules.audio.tts.TTS"
+  path: "modules.audio.ttsmodule.TTSModule"
   config:
     service: "elevenlabs" # or pyttsx3
     voice_id: "pMsXgVXv3BLzUgSXRplE"
@@ -8,3 +8,9 @@ tts:
     python:
       - pyttsx3
       - elevenlabs
+    unix:
+      - espeak
+      - ffmpeg
+      - libespeak1
+    additional:
+      - installers/install-amp.sh

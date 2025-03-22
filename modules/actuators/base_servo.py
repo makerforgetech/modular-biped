@@ -1,18 +1,15 @@
-import pigpio
 import threading
-from modules.config import Config
-from modules.network.arduinoserial import ArduinoSerial
 from time import sleep
-from pubsub import pub
+from modules.base_module import BaseModule
 
-class Servo:
+class BaseServo(BaseModule):
 
     def __init__(self, **kwargs):
         """
-        Servo class
-        Uses ArduinoSerial to communicate with Arduino
+        BaseServo class
+        Handles generic functionality for all servo types
         
-        :param kwargs: pin, name, id, range, power, start_pos, buffer, delta, serial, pi
+        :param kwargs: pin, name, id, range, power, start_pos, buffer, delta
         :param pin: GPIO pin number
         :param name: servo name
         :param id: servo id
@@ -21,19 +18,6 @@ class Servo:
         :param start_pos: initial angle
         :param buffer: PWM amount to specify as acceleration / deceleration buffer
         :param delta: amount of change in acceleration / deceleration (as a multiple)
-        :param serial: True to use serial connection
-        
-        Install: pip install pigpio (optional, untested in this version)
-        
-        Subscribes to 'servo:<name>:mvabs' to move servo to absolute position
-        - Argument: percentage (int) - percentage to move servo
-        
-        Subscribes to 'servo:<name>:mv' to move servo to relative position
-        - Argument: percentage (int) - percentage to move servo
-        
-        Example:
-        pub.sendMessage('servo:pan:mvabs', percentage=90)
-        pub.sendMessage('servo:pan:mv', percentage=10)
         """
         self.pin = kwargs.get('pin')
         self.identifier = kwargs.get('name')
@@ -46,40 +30,25 @@ class Servo:
         self.buffer = kwargs.get('buffer', 0)  # PWM amount to specify as acceleration / deceleration buffer
         self.delta = kwargs.get('delta', 1.5)  # amount of change in acceleration / deceleration (as a multiple)
 
-        # Accepts either serial connection or PI pin
-        self.serial = kwargs.get('serial', True)
-        if self.serial is None:
-            self.pi = kwargs.get('pi', pigpio.pi())
-            self.pi.set_mode(self.pin, pigpio.OUTPUT)
-
         self.move(self.start)
 
-        pub.subscribe(self.move, 'servo:' + self.identifier + ':mvabs')
-        pub.subscribe(self.move_relative, 'servo:' + self.identifier + ':mv')
-
-    def __del__(self):
-        pass #self.reset()
+    def setup_messaging(self):
+        self.subscribe('servo:' + self.identifier + ':mvabs', self.move)
+        self.subscribe('servo:' + self.identifier + ':mv', self.move_relative)
 
     def move_relative(self, percentage, safe=True):
-        # Only calculate relative position if not using serial
-        # Otherwise it is done by the arduino
-        if not self.serial:
-            new = self.pos + (self.translate(percentage) - self.range[0])
-        
-        
-            if new > self.range[1] and safe:
-                new = self.range[1]
-            elif new < self.range[0] and safe:
-                new = self.range[0]
-            if self.range[0] <= new <= self.range[1]:
-                this_move = self.calculate_move(self.pos, new)
-                self.execute_move(this_move, True)
-                self.pos = new
-            else:
-                pub.sendMessage('log:error', '[Servo] Percentage %d out of range' % percentage)
-                raise ValueError('Percentage %d out of range' % percentage)
+        new = self.pos + (self.translate(percentage) - self.range[0])
+        if new > self.range[1] and safe:
+            new = self.range[1]
+        elif new < self.range[0] and safe:
+            new = self.range[0]
+        if self.range[0] <= new <= self.range[1]:
+            this_move = self.calculate_move(self.pos, new)
+            self.execute_move(this_move, True)
+            self.pos = new
         else:
-            self.execute_move([(percentage, 0)], True)
+            self.publish('log/error', '[Servo] Percentage %d out of range' % percentage)
+            raise ValueError('Percentage %d out of range' % percentage)
 
     def move(self, percentage, safe=True):
         if 0 <= percentage <= 100 or safe:
@@ -91,7 +60,7 @@ class Servo:
             self.execute_move([(percentage, 0)])
             self.pos = new
         else:
-            pub.sendMessage('log:error', '[Servo] Percentage %d out of range' % percentage)
+            self.publish('log/error', '[Servo] Percentage %d out of range' % percentage)
             raise ValueError('Percentage %d out of range' % percentage)
 
     def execute_move(self, sequence, is_relative=False):
@@ -105,30 +74,17 @@ class Servo:
         print('Moving servo...')
         s = sequence.pop(0)
 
-        # @todo this prevents initial set of position
-        # # ignore request if position matches current position
-        # if s[0] == self.pos:
-        #     return
-
         if self.power:
-            pub.sendMessage('power:use')
-        if self.serial:
-            # just move the pan servo for now. Remove after debugging
-            # if self.index != 7 and self.index != 6 and self.index != 5 and self.index != 4  and self.index != 3  and self.index != 2:
-                # return
-            type = ArduinoSerial.DEVICE_SERVO
-            if is_relative:
-                type = ArduinoSerial.DEVICE_SERVO_RELATIVE
-            pub.sendMessage('serial', type=type, identifier=self.index, message=s[0])
-        else:
-            self.pi.set_servo_pulsewidth(self.pin, s[0])
+            self.publish('power:use')
+        self.perform_move(s[0])
         if len(sequence) > 1:
             timer = threading.Timer(s[1], self.execute_move, [sequence])
             timer.start()
-        else:
-            pass #sleep(s[1])
         if self.power and self.pos == self.start:
-            pub.sendMessage('power:release')
+            self.publish('power:release')
+
+    def perform_move(self, position):
+        raise NotImplementedError("Subclasses should implement this!")
 
     def calculate_move(self, old, new, time=0.1, translate=False):
         if translate:
@@ -150,8 +106,6 @@ class Servo:
             if current == new:
                 return sequence
 
-            # Accelerate / Decelerate
-            # @todo simplify
             if old < new:
                 if increment < self.buffer and not decelerate:
                     increment = increment * self.delta if increment * self.delta < self.buffer else self.buffer
@@ -177,12 +131,7 @@ class Servo:
         self.move(self.start)
     
     def translate(self, value):
-        # Figure out how 'wide' each range is
         leftSpan = 100 - 0
         rightSpan = self.range[1] - self.range[0]
-
-        # Convert the left range into a 0-1 range (float)
         valueScaled = float(value) / float(leftSpan)
-
-        # Convert the 0-1 range into a value in the right range.
         return self.range[0] + (valueScaled * rightSpan)

@@ -1,32 +1,21 @@
 import os, sys
-import logging
 from time import sleep, time
 import signal
-# import schedule
-from pubsub import pub
 from modules.config import Config
 from module_loader import ModuleLoader
 
-# Set up logging
-logging.basicConfig(filename=os.path.dirname(__file__) + '/app.log', level=logging.INFO, format='%(levelname)s: %(asctime)s %(message)s',
-                            datefmt='%m/%d/%Y %I:%M:%S %p') # this doesn't work unless it's here
-from modules.logwrapper import LogWrapper
-
-def mode():
-    return Config.MODE_KEYBOARD if len(sys.argv) > 1 and sys.argv[1] == 'manual' else Config.MODE_LIVE
-
 def main():
     print('Starting...')
-    
-    path = os.path.dirname(__file__)
-    log = LogWrapper(path=os.path.dirname(__file__))
-
     # Throw exception to safely exit script when terminated
     signal.signal(signal.SIGTERM, Config.exit)
-    
+
     # Dynamically load and initialize modules
     loader = ModuleLoader(config_folder="config")
     module_instances = loader.load_modules()
+    
+    # Set messaging service for all modules
+    messaging_service = module_instances['MessagingService'].messaging_service
+    loader.set_messaging_service(module_instances, messaging_service)
 
     # Add your business logic here using module_instances as needed
     # Example: module_instances[0].some_method()
@@ -37,39 +26,38 @@ def main():
     # dict_keys(['ArduinoSerial', 'NeoPx', 'BrailleSpeak', 'Animate', 'Vision', 'PiTemperature', 'Servo_leg_l_hip', 'Servo_leg_l_knee', 'Servo_leg_l_ankle', 'Servo_leg_r_hip', 'Servo_leg_r_knee', 'Servo_leg_r_ankle', 'Servo_tilt', 'Servo_pan', 'Translator', 'Tracking_tracking', 'Sensor', 'Buzzer_buzzer'])
 
     # Use animate to nod head
-    # pub.sendMessage('animate', action='head_nod')
+    # messaging_service.publish('animate', action='head_nod')
     # sleep(1)
-    # pub.sendMessage('animate', action='head_shake')
+    # messaging_service.publish('animate', action='head_shake')
     
     # Enable translator in log wrapper
     # log.translator = module_instances['Translator'] # Set the translator for the log wrapper
 
     # Use braillespeak to say hi
-    # pub.sendMessage('speak', msg="Hi")
+    # messaging_service.publish('speak', msg="Hi")
     
     # Play happy birthday with buzzer
-    # pub.sendMessage('play', song="happy birthday") # Also available: 'merry christmas'
-
+    # messaging_service.publish('play', song="happy birthday") # Also available: 'merry christmas'
     
     # Check temperature of Raspberry Pi
-    # pub.subscribe(self.handleTemp, 'temperature') # handleTemp should accept 'value' as a parameter
+    # messaging_service.subscribe('temperature', callback) # callback should accept 'value' as a parameter
     
     # Move pi servo
-    # pub.sendMessage('piservo:move', angle=30)
-    # pub.sendMessage('piservo:move', angle=-30)
+    # messaging_service.publish('piservo:move', angle=30)
+    # messaging_service.publish('piservo:move', angle=-30)
     
     # Move servo
-    # pub.sendMessage('servo:<identifier>:mv', percentage=50) # e.g. servo:pan:mv
-    # pub.sendMessage('servo:<identifier>:mvabs', percentage=50) # Absolute position. e.g. servo:pan:mvabs
+    # messaging_service.publish('servo:<identifier>:mv', percentage=50) # e.g. servo:pan:mv
+    # messaging_service.publish('servo:<identifier>:mvabs', percentage=50) # Absolute position. e.g. servo:pan:mvabs
 
     # Test emotion analysis
-    # pub.sendMessage('speech', text='I am so happy today!')
+    # messaging_service.publish('speech', text='I am so happy today!')
     
     # Test speech input
-    # pub.sendMessage('speech:listen')
-
+    # messaging_service.publish('speech:listen')
+    
     # Start loops or other tasks
-    pub.sendMessage('log', msg="[Main] Loop started")
+    messaging_service.publish('log', message=f"[Main] Loop started using {messaging_service.protocol} protocol")
 
     second_loop = time()
     ten_second_loop = time()
@@ -78,25 +66,32 @@ def main():
     
     try:
         while loop:
-            pub.sendMessage('loop')
+            messaging_service.publish('system/loop')
             if time() - second_loop > 1:
                 second_loop = time()
-                pub.sendMessage('loop:1')
+                messaging_service.publish('system/loop/1')
             if time() - ten_second_loop > 10:
                 ten_second_loop = time()
-                pub.sendMessage('loop:10')
+                messaging_service.publish('system/loop/10')
             if time() - minute_loop > 60:
                 minute_loop = time()
-                pub.sendMessage('loop:60')
-                # schedule.run_pending()
+                messaging_service.publish('system/loop/60')
+            
+            if messaging_service.protocol == 'mqtt':
+                sleep(0.01) # Needed to prevent MQTT broker from jamming when system/loop is included
 
     except Exception as ex:
-        logging.error(f"Exception: {ex}", exc_info=True)
+        # output exception details
+        print(ex)
+        messaging_service.publish('log', message="[Main] Exception occurred: " + str(ex))
+        #output full details
+        import traceback
+        traceback.print_exc()
         loop = False
 
     finally:
-        pub.sendMessage("exit")
-        pub.sendMessage("log", msg="[Main] loop ended")
+        messaging_service.publish('system/exit')
+        messaging_service.publish('log', message="[Main] Loop ended")
 
 if __name__ == '__main__':
     main()

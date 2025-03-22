@@ -1,0 +1,17 @@
+tft_display:
+  enabled: false
+  path: modules.display.tft_display.TFTDisplay
+  config:
+    bus: 0 # Use `ls /dev/spi*` to identify. (/dev/spidev0.0) is bus 0, device 0
+    device: 0 # Use `ls /dev/spi*` to identify. (/dev/spidev0.0) is bus 0, device 0
+    rst_pin: 27
+    dc_pin: 25
+    bl_pin: 18 # Not used if no backlight pin on device
+    test_on_boot: true
+  dependencies:
+    unix:
+      - python3-pip
+      - python3-pil
+      - python3-numpy
+    python:
+      - spidev

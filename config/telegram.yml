@@ -1,14 +1,10 @@
 telegram:
-  path: modules.network.telegrambot.TelegramBot
   enabled: false
+  path: modules.network.telegrambot.TelegramBot
   config:
     user_whitelist: []
-    topics:
-      publish_received: "telegram/received"
-      subscribe_respond: "telegram/respond"
   dependencies:
     python:
-      - pypubsub
       - python-telegram-bot
     additional:
       - https://core.telegram.org/bots/tutorial#obtain-your-bot-token

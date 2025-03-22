@@ -1,11 +1,12 @@
-from pubsub import pub
 from time import sleep
 import pyttsx3
 
-from elevenlabs import ElevenLabs, VoiceSettings, play
+import elevenlabs
 import os
 
-class TTS:
+from modules.base_module import BaseModule
+
+class TTSModule(BaseModule):
     
     def __init__(self, **kwargs):
         """
@@ -23,18 +24,23 @@ class TTS:
         - Argument: msg (string) - message to speak
         
         Example:
-        pub.sendMessage('tts', msg='Hello, World!')
+        self.publish('tts', msg='Hello, World!')
         """
         self.translator = kwargs.get('translator', None)
         self.service = kwargs.get('service', 'pyttsx3')
+        # print(self.service)
+        self.voice_id = kwargs.get('voice_id', '')
+        # print(self.voice_id)
         if self.service == 'elevenlabs':
-            self.init_elevenlabs(kwargs.get('voice_id', ''))
+            self.init_elevenlabs(self.voice_id)
         else:
             self.init_pyttsx3()
+    def setup_messaging(self):
         # Set subscribers
-        pub.subscribe(self.speak, 'tts')
+        self.subscribe('tts', self.speak)
 
     def speak(self, msg):
+        # print('Attempting to speak with service: ' + self.service)
         if self.service == 'elevenlabs':
             self.speak_elevenlabs(msg)
         else:
@@ -48,43 +54,49 @@ class TTS:
         #for i in voices:
         engine.setProperty('voice', voices[10].id)
         print('voice' + voices[10].id)
-        #engine.say('Hello, World!')
-        #engine.runAndWait()
         self.engine = engine        
 
     def speak_pyttsx3(self, msg):
-        pub.sendMessage('log', msg="[TTS] {}".format(msg))
+        self.log("{}".format(msg))
         if self.translator is not None:
             msg = self.translator.request(msg)
-        self.engine.say(msg)
+
+        self.engine.say(f"{msg}. I have spoken.") # Apparently this is the only way to get pyttsx3 to output anything (by including actual text)
+        # self.engine.say("{}".format(msg)) # @todo: Test this
+        
+        # self.engine.say(msg) # This doesn't output anything
         self.engine.runAndWait()
     
     def init_elevenlabs(self, voice_id):
-        self.client = ElevenLabs(
+        self.ttsclient = elevenlabs.ElevenLabs(
             api_key=os.getenv('ELEVENLABS_KEY') or ''
         )
         self.voice_id = voice_id
         
     def speak_elevenlabs(self, msg):
         # This uses ElevenLabs, create an API key and export in your .bashrc file using `export ELEVENLABS_KEY=<KEY>` before use
-        output = self.client.text_to_speech.convert(
+        output = self.ttsclient.text_to_speech.convert(
             voice_id=self.voice_id,
             optimize_streaming_latency="0",
             output_format="mp3_22050_32",
-            text="msg",
-            voice_settings=VoiceSettings(
+            text=msg,
+            voice_settings=elevenlabs.VoiceSettings(
                 stability=0.1,
                 similarity_boost=0.3,
                 style=0.2,
             ),
         )
 
-        play(output)
+        elevenlabs.play(output)
                 
 if __name__ == '__main__':
-    tts = TTS()
-    tts.speak('Test')
+    # test with `myenv/bin/python3 modules/audio/ttsmodule.py`
+    tts = TTSModule()
+    tts.speak("this is a test") # broken currently, thinks espeak-ng is not installed
     
-    tts2 = TTS(service='elevenlabs', voice_id='pMsXgVXv3BLzUgSXRplE')
+    tts2 = TTSModule(service='elevenlabs', voice_id='pMsXgVXv3BLzUgSXRplE')
     tts2.speak('Test')
+    
+    # import speechinput as speechinput
+    # speech = speechinput.SpeechInput(device_name='pulse', start_on_boot=True)
         
