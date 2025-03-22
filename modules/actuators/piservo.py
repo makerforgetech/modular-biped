@@ -36,7 +36,7 @@ class PiServo(BaseModule):
         self.move(self.start)
         
     def setup_messaging(self):
-        self.subscribe('piservo:move', self.move)
+        self.subscribe('piservo/move', self.move)
 
     def move(self, angle):
         if self.servo is None:
