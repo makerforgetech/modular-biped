@@ -1,0 +1,6 @@
+sync:
+  defaults:
+    ignore:
+      vcs: true
+      paths:
+        - config/overrides/*.local.yml

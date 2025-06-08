@@ -26,4 +26,8 @@ myenv
 installers/i2s_mic_installed.flag
 installers/i2s_speech_recognition_installed.flag
 
-speech.wav
+speech*.wav
+
+# ignore local configuration files
+config/overrides/*.local.yml
+config/local_overrides.yml

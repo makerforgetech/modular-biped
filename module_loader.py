@@ -3,8 +3,17 @@ import yaml
 import importlib.util
 from pubsub import pub
 
+def deep_merge(a, b):
+    """Recursively merge dict b into dict a."""
+    for k, v in b.items():
+        if isinstance(v, dict) and k in a and isinstance(a[k], dict):
+            a[k] = deep_merge(a[k], v)
+        else:
+            a[k] = v
+    return a
+
 class ModuleLoader:
-    def __init__(self, config_folder='config'):
+    def __init__(self, config_folder='config', override_folder='config/overrides'):
         """
         ModuleLoader class
         :param config_folder: folder containing the module configuration files
@@ -27,16 +36,29 @@ class ModuleLoader:
         translator_inst = modules['Translator']        
         """
         self.config_folder = config_folder
+        self.override_folder = override_folder
         self.modules = self.load_yaml_files()
 
     def load_yaml_files(self):
-        """Load and parse YAML files from the config folder."""
+        """Load and parse YAML files from the config folder, merging with local overrides if present."""
         config_files = [os.path.join(self.config_folder, f) for f in os.listdir(self.config_folder) if f.endswith('.yml')]
         loaded_modules = []
         for file_path in config_files:
             with open(file_path, 'r') as stream:
                 try:
                     config = yaml.safe_load(stream)
+                    # Try to load override file
+                    base_filename = os.path.basename(file_path)
+                    override_path = os.path.join(self.override_folder, base_filename.replace('.yml', '.local.yml'))
+                    if os.path.exists(override_path):
+                        with open(override_path, 'r') as o_stream:
+                            override = yaml.safe_load(o_stream)
+                        # Merge override into base config
+                        for module_name, module_config in override.items():
+                            if module_name in config:
+                                config[module_name] = deep_merge(config[module_name], module_config)
+                            else:
+                                config[module_name] = module_config
                     for module_name, module_config in config.items():
                         if module_config.get('enabled', False):
                             loaded_modules.append(module_config)
