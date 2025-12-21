@@ -8,7 +8,7 @@ class SystemLoop:
     STATE_SLEEPING = 1
     STATE_THROTTLED = 2
     STATE_RUNNING = 3
-    DEFAULT_SLEEP_INTERVAL = 0.1  # 10ms
+    DEFAULT_SLEEP_INTERVAL = 0.01  # 10ms
     
     def __init__(self, messaging_service):
         self.messaging_service = messaging_service
