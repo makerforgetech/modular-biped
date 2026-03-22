@@ -1,0 +1,5 @@
+gpio_read:
+  class: Read
+  dependencies:
+    python:
+      - gpiozero

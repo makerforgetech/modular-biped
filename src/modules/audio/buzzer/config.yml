@@ -1,0 +1,8 @@
+buzzer:
+  config:
+    pin: 27
+    name: buzzer
+  dependencies:
+    python:
+    - gpiozero
+  class: Buzzer

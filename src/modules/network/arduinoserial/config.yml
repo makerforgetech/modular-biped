@@ -1,0 +1,5 @@
+serial:
+  config:
+    port: /dev/ttyAMA0
+    baudrate: '115200'
+  class: ArduinoSerial

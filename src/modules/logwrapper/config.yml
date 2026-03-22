@@ -1,0 +1,6 @@
+logwrapper:
+  config:
+    filename: app.log
+    log_level: debug
+    cli_level: info
+  class: LogWrapper

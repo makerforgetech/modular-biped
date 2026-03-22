@@ -1,0 +1,40 @@
+neopixel:
+  config:
+    pin: 12
+    protocol: I2C
+    count: 12
+    positions:
+      status1: 0
+      status2: 1
+      status3: 2
+      status4: 3
+      status5: 4
+      right: 5
+      top_right: 6
+      top_left: 7
+      left: 8
+      bottom_left: 9
+      bottom_right: 10
+      middle: 11
+    brightness:
+    - 0.2
+    - 0.2
+    - 0.2
+    - 0.2
+    - 0.2
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+  dependencies:
+    python:
+    - colour
+    - adafruit-circuitpython-seesaw
+    - adafruit-blinka
+    - adafruit-circuitpython-neopixel-spi
+  emotion_analysis:
+    enable: false
+  class: NeoPx

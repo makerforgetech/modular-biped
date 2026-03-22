@@ -1,0 +1,6 @@
+bno055:
+  class: BNO055
+  dependencies:
+    python:
+      - adafruit-circuitpython-bno055
+      - adafruit-blinka

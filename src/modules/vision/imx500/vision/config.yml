@@ -1,0 +1,9 @@
+vision_imx500:
+  config:
+    preview: false
+  dependencies:
+    unix:
+    - imx500-all
+    python:
+    - opencv-python
+  class: Vision

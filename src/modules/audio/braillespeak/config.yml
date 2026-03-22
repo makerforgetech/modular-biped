@@ -1,0 +1,4 @@
+braillespeak:
+  config:
+    pin: 27
+  class: BrailleSpeak

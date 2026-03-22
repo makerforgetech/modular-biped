@@ -1,0 +1,11 @@
+rtl_sdr:
+  config:
+    udp_host: 127.0.0.1
+    udp_port: 8433
+    timeout: 70
+  dependencies:
+    unix:
+    - rtl-433
+    python:
+    - requests
+  class: RTLSDR

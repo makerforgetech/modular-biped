@@ -1,0 +1,22 @@
+messaging_service:
+  config:
+    # Messaging backend(s) to activate.
+    #
+    # pubsub  — in-process pypubsub only (default, no broker required)
+    # mqtt    — MQTT broker only
+    # both    — pypubsub + MQTT available simultaneously
+    #
+    # Routing (all modes):
+    #   publish()       → primary backend (pubsub when "pubsub"/"both"; mqtt when "mqtt")
+    #   publish_mqtt()  → MQTT backend only (no-op if MQTT not active)
+    #   subscribe()     → registered on ALL active backends
+    protocol: pubsub
+    mqtt_host: localhost
+    mqtt_port: 1883
+  dependencies:
+    python:
+    - paho-mqtt
+    - pypubsub
+    unix:
+    - mosquitto
+  class: MessagingService

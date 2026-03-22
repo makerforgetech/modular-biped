@@ -1,0 +1,19 @@
+tft_display:
+  class: TFTDisplayEye
+  config:
+    colors:
+      red: (255, 32, 32)
+      blue: (0, 245, 255)
+      green: (0, 255, 180)
+      purple: (255, 0, 255)
+      yellow: (255, 255, 0)
+      white: (255, 255, 255)
+      gray: (128, 128, 128)
+      dark_gray: (64, 64, 64)
+  dependencies:
+    unix:
+      - python3-pip
+      - python3-pil
+      - python3-numpy
+    python:
+      - spidev

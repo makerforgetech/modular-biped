@@ -1,0 +1,7 @@
+mpu6050:
+  config:
+    test_on_boot: true
+  dependencies:
+    unix:
+    - python3-smbus
+  class: MPU6050

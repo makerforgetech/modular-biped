@@ -1,0 +1,5 @@
+personality:
+  config:
+    mode: 6
+    sleep_timeout: 60
+  class: Personality

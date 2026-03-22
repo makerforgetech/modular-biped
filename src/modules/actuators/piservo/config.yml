@@ -1,0 +1,5 @@
+piservo:
+  class: PiServo
+  dependencies:
+    python:
+      - gpiozero

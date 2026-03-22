@@ -1,0 +1,5 @@
+gpio_motion:
+  class: Motion
+  dependencies:
+    python:
+      - gpiozero

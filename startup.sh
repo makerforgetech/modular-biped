@@ -9,6 +9,16 @@ BASE_DIR="$(dirname "$(realpath "$0")")"
 # Ensure any existing instance of main.py is terminated
 sudo pkill -f "$BASE_DIR/main.py"
 
+# Source /home/$USER/.myenv to set environment variables for this session
+if [ -f "/home/$USER/.myenv" ]; then
+    echo "Sourcing environment variables from /home/$USER/.myenv"
+    set -a # Automatically export all variables
+    source "/home/$USER/.myenv"
+    set +a # Disable automatic export
+else
+    echo "No environment file found at /home/$USER/.myenv. Continuing without sourcing environment variables."
+fi
+
 # Start necessary services
 # sudo modprobe bcm2835-v4l2 # Enable camera (if needed)
 sudo pigpiod # Start the GPIO daemon.
@@ -30,5 +40,5 @@ if [ -n "$1" ]; then
 else
 	ENV_ARG=""
 fi
-"$BASE_DIR/myenv/bin/python3" "$BASE_DIR/main.py" $ENV_ARG
+"$BASE_DIR/myenv/bin/python3" "$BASE_DIR/src/main.py" $ENV_ARG
 

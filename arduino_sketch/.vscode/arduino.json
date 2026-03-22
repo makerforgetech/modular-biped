@@ -1,7 +1,0 @@
-{
-    "board": "arduino:avr:pro",
-    "port": "/dev/ttyUSB0",
-    "programmer": "avrispmkii",
-    "sketch": "arduino_sketch.ino",
-    "configuration": "cpu=16MHzatmega328"
-}

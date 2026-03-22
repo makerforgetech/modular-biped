@@ -1,0 +1,4 @@
+vision_opencv:
+  config:
+    preview: false
+  class: Vision

@@ -1,0 +1,20 @@
+# Server — headless server environment with no hardware modules.
+# Runs the Discord bot and core logging/messaging service only.
+
+# ── Core ──────────────────────────────────────────────────────────────────────
+
+messaging_service:
+  enabled: true
+
+logwrapper:
+  enabled: true
+
+# ── Connectivity ──────────────────────────────────────────────────────────────
+
+chatgpt:
+  enabled: true
+
+discordbot:
+  enabled: true
+  inject:
+    ai_instance: ChatGPT

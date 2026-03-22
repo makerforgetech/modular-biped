@@ -1,0 +1,422 @@
+# Cody — biped robot with bus servos, IMU, vision, and TFT display.
+# Based on the develop branch robot-environment configuration.
+# Device-specific hardware configuration (servo pins, GPIO pins, I2C addresses) lives here.
+# Generic module configuration stays in each module's config.yml.
+animate:
+  enabled: true
+
+bno055:
+  enabled: true
+  instances:
+    - name: imu_head
+      test_on_boot: false
+      address: 0x28
+    - name: imu_body
+      test_on_boot: false
+      line_offset: 1
+      address: 0x29
+
+bus_servo:
+  enabled: true
+  config:
+    poses:
+      - legs_forward: {'leg_r_tilt': 2806, 'leg_r_hip': 1989, 'leg_r_knee': 1349, 'leg_r_ankle': 2754, 'neck_pan': 1698, 'neck_tilt': 118, 'leg_l_tilt': 1619, 'leg_l_hip': 1028, 'leg_l_knee': 2634, 'leg_l_ankle': 1567}
+      - sit: {'leg_r_tilt': 2806, 'leg_r_hip': 2063, 'leg_r_knee': 1840, 'leg_r_ankle': 3641, 'neck_pan': 1697, 'neck_tilt': 118, 'leg_l_tilt': 1621, 'leg_l_hip': 853, 'leg_l_knee': 2161, 'leg_l_ankle': 614}
+      - wave_1: {'leg_r_tilt': 2809, 'leg_r_hip': 2063, 'leg_r_knee': 1840, 'leg_r_ankle': 3641, 'neck_pan': 1697, 'neck_tilt': 118, 'leg_l_tilt': 1618, 'leg_l_hip': 855, 'leg_l_knee': 2614, 'leg_l_ankle': 1337}
+      - wave_2: {'leg_r_tilt': 2807, 'leg_r_hip': 2063, 'leg_r_knee': 1840, 'leg_r_ankle': 3641, 'neck_pan': 1697, 'neck_tilt': 118, 'leg_l_tilt': 1618, 'leg_l_hip': 855, 'leg_l_knee': 2614, 'leg_l_ankle': 874}      
+      - stand_low: {'leg_r_tilt': 2790, 'leg_r_hip': 422, 'leg_r_knee': 717, 'leg_r_ankle': 3174, 'neck_pan': 1697, 'neck_tilt': 119, 'leg_l_tilt': 1578, 'leg_l_hip': 2668, 'leg_l_knee': 3342, 'leg_l_ankle': 1107}      
+      - stand_high: {'leg_r_tilt': 2790, 'leg_r_hip': 692, 'leg_r_knee': 1322, 'leg_r_ankle': 2861, 'neck_pan': 1700, 'neck_tilt': 123, 'leg_l_tilt': 1578, 'leg_l_hip': 2510, 'leg_l_knee': 2712, 'leg_l_ankle': 1560}     
+      - sit_edge: {'leg_r_tilt': 2790, 'leg_r_hip': 1918, 'leg_r_knee': 2768, 'leg_r_ankle': 2854, 'neck_pan': 1704, 'neck_tilt': 124, 'leg_l_tilt': 1577, 'leg_l_hip': 1183, 'leg_l_knee': 1332, 'leg_l_ankle': 1562}    
+      - sit_edge_swing_l: {'leg_r_tilt': 2790, 'leg_r_hip': 1918, 'leg_r_knee': 2768, 'leg_r_ankle': 2854, 'neck_pan': 1704, 'neck_tilt': 124, 'leg_l_tilt': 1577, 'leg_l_hip': 1185, 'leg_l_knee': 1789, 'leg_l_ankle': 1988}    
+      - sit_edge_swing_r: {'leg_r_tilt': 2790, 'leg_r_hip': 1918, 'leg_r_knee': 2222, 'leg_r_ankle': 2496, 'neck_pan': 1704, 'neck_tilt': 124, 'leg_l_tilt': 1577, 'leg_l_hip': 1182, 'leg_l_knee': 1345, 'leg_l_ankle': 1511}    
+  instances:
+    - name: "leg_r_tilt"
+      model: 'ST3215'
+      id: 1
+      range: [2511, 3944] # 1433 total range (4095 = 360 degrees)
+      range_degrees: 125.9
+      start: 2810
+      # calibrate_on_boot: true
+    - name: "leg_r_hip"
+      model: 'ST3215'
+      id: 3
+      range: [0, 2063]
+      range_degrees: 181.3
+      # calibrate_on_boot: true
+      # start: 1688
+    - name: "leg_r_knee"
+      model: 'ST3215'
+      id: 2
+      range: [717, 3297]
+      range_degrees: 226.2
+      # start: 1345
+    - name: "leg_r_ankle"
+      model: 'ST3215'
+      id: 6
+      range: [2459, 3872]
+      range_degrees: 123.7
+      # start: 2762
+    - name: "neck_pan"
+      model: 'ST3215'
+      id: 12
+      range: [0, 3412] # 300 degrees = 3412, 360 degrees = 4095
+      range_degrees: 299.7
+      start: 1706
+      # calibrate_on_boot: true
+      # demonstrate_on_boot: true
+    # - name: "neck_pan"
+    #   model: 'SC09'
+    #   baudrate: 115200
+    #   id: 4
+    #   range: [0, 1023]
+    #   range_degrees: 300
+    #   start: 511
+      # calibrate_on_boot: true
+      # demonstrate_on_boot: true
+      # speed: 60 # tested up to 600
+    - name: "neck_tilt"
+      model: 'SC09'
+      baudrate: 115200
+      id: 11
+      range: [30, 220]
+      range_degrees: 55.6
+      start: 120
+      speed: 60 # max=0, 1 - 3000 tested
+      # acceleration: 0 # max (no significant difference between this and 1 - 3000)
+      # demonstrate_on_boot: true
+    # - name: "neck_tilt2"
+    #   model: 'SC09'
+    #   baudrate: 115200
+    #   id: 5
+    #   range: [0, 610] # 180 degree (may need reducing)
+    #   start: 305
+    #   speed: 300
+      # acceleration: 1
+      # demonstrate_on_boot: true
+    - name: "leg_l_tilt"
+      model: 'ST3215'
+      id: 7
+      range: [8, 1796] # 1788 total range (4095 = 360 degrees)
+      range_degrees: 156.9
+      start: 1617
+      # calibrate_on_boot: true
+    - name: "leg_l_hip"
+      model: 'ST3215'
+      id: 8
+      range: [853, 3098]
+      range_degrees: 197.3
+      # start: 2451 
+    - name: "leg_l_knee"
+      model: 'ST3215'
+      id: 9
+      range: [1332, 3404]
+      range_degrees: 181.1
+      # start: 2643
+    - name: "leg_l_ankle"
+      model: 'ST3215'
+      id: 10
+      range: [614, 2270]
+      range_degrees: 145.2
+      # start: 1566
+      # demonstrate_on_boot: true
+
+chatgpt:
+  enabled: true
+  config:
+    model: gpt-4o-mini
+    persona: "You are a helpful assistant robot. You respond with short phrases where possible."
+
+controller_handler:
+  enabled: true
+  inject:
+    controller: XboxController
+  on_inject:
+    - start
+  config:
+    debug: false
+    modifier_buttons:
+      - BTN_TL
+      - BTN_TR
+    mapping:
+      default:
+        BTN_TL:
+          actions:
+            - topic: ''
+              args: {}
+        BTN_TR:
+          actions:
+            - topic: ''
+              args: {}
+        BTN_SELECT:
+          actions:
+            - topic: 'record/stop'
+              args: {}
+        BTN_START:
+          actions:
+            - topic: 'record/start'
+              args: {}
+        KEY_RECORD: # Only on Xbox S/X remotes
+          actions:
+            - topic: ''
+              args: {}
+        BTN_MODE: # Xbox Logo
+          actions:
+            - topic: ''
+              args: {}
+        ABS_HAT0X: # DPAD X
+          actions:
+            - topic: ''
+              args: {}
+        ABS_HAT0Y: # DPAD Y
+          actions:
+            - topic: ''
+              args: {}
+        BTN_A:
+          actions:
+            - topic: 'tts'
+              args: {msg: 'Test Default'}
+        BTN_X:
+          actions:
+            - topic: 'eye/blink'
+              args: {}
+        BTN_Y:
+          actions:
+            - topic: 'gpio/laser/toggle'
+              args: {}
+        BTN_B:
+          actions:
+            - topic: 'vision/toggle'
+              args: {}
+        ABS_RX:
+          actions:
+            - topic: 'servo:neck_pan:mv'
+              args: {}
+              modifier:
+                scale: 50  # max speed per event
+        ABS_RZ:
+          actions:
+            - topic: 'servo:neck_tilt:mv'
+              args: {}
+              modifier:
+                scale: -50
+            - topic: 'servo:neck_tilt2:mv'
+              args: {}
+              modifier:
+                scale: 50
+        ABS_RY: # Right trigger
+          start: -1.0
+          actions:
+            - topic: 'servo:leg_r_ankle:mv'
+              args: {}
+              modifier:
+                scale: -50
+        ABS_Z:  # Left trigger
+          start: -1.0
+          actions:
+            - topic: 'servo:leg_l_ankle:mv'
+              args: {}
+              modifier:
+                scale: -50
+        ABS_X:
+          actions:
+            - topic: 'eye/move'
+              args: {axis: 'y'}
+              modifier:
+                mapping: [0, 240]
+        ABS_Y:
+          actions:
+            - topic: 'eye/move'
+              args: {axis: 'x'}
+              modifier:
+                mapping: [240, 0]
+      BTN_TL:
+        BTN_X:
+          actions:
+            - topic: 'servo:neck_pan:mv'
+              args: {delta: -50}
+        BTN_Y:
+          actions:
+            - topic: 'servo:neck_tilt:mv'
+              args: {delta: -50}
+            - topic: 'servo:neck_tilt2:mv'
+              args: {delta: 50}
+        BTN_B:
+          actions:
+            - topic: 'servo:neck_pan:mv'
+              args: {delta: 50}
+        BTN_A:
+          actions:
+            - topic: 'servo:neck_tilt:mv'
+              args: {delta: 50}
+            - topic: 'servo:neck_tilt2:mv'
+              args: {delta: -50}
+      BTN_TR:
+        BTN_X:
+          actions:
+            - topic: 'servo:neck_tilt:mv'
+              args: {delta: 50}
+        BTN_Y:
+          actions:
+            - topic: 'servo:neck_tilt:mv'
+              args: {delta: -50}
+        BTN_B:
+          actions:
+            - topic: 'servo:neck_tilt2:mv'
+              args: {delta: 50}
+        BTN_A:
+          actions:
+            - topic: 'servo:neck_tilt2:mv'
+              args: {delta: -50}
+        ABS_HAT0Y:
+          actions:
+            - topic: 'servo:neck_tilt:mvabs'
+              args: {
+                position: 511
+              }
+            - topic: 'servo:neck_tilt2:mvabs'
+              args: {
+                position: 511
+              }
+        ABS_X:
+          actions:
+            - topic: 'servo:leg_l_ankle:mv'
+              modifier:
+                scale: 50
+            - topic: 'servo:leg_r_ankle:mv'
+              modifier:
+                scale: -50
+            - topic: 'servo:leg_l_knee:mv'
+              modifier:
+                scale: 50
+            - topic: 'servo:leg_r_knee:mv'
+              modifier:
+                scale: -50
+            - topic: 'servo:leg_l_hip:mv'
+              modifier:
+                scale: 50
+            - topic: 'servo:leg_r_hip:mv'
+              modifier:
+                scale: -50
+
+gpio_laser:
+  enabled: true
+  config:
+    pin: 6
+    test_on_boot: false
+
+gpio_motion:
+  enabled: true
+  config:
+    pin: 9
+    test_on_boot: false
+
+gpio_read:
+  enabled: false
+  config:
+    pin: 5
+    test_on_boot: false
+
+input_recorder:
+  enabled: true
+  config:
+    animations_dir: animations/recorded
+
+logwrapper:
+  enabled: true # Highly recommended to enable this module
+  config:
+    filename: app.log
+    log_level: 'debug' # debug, info, warning, error, critical
+    cli_level: 'info' # debug, info, warning, error, critical
+
+messaging_service:
+  enabled: true # Required for framework to function
+  config:
+    protocol: 'pubsub' # 'mqtt' or 'pubsub' - something is wrong with mqtt that prevents the loops from executing correctly
+    mqtt_host: 'localhost' 
+    mqtt_port: 1883
+
+oled_display:
+  enabled: true
+  config:
+    reset_pin: 26 # Changed directly in waveshare config.py to avoid conflict with TFT display
+    dc_pin: 24 # Changed directly in waveshare config.py to avoid conflict with TFT display
+
+personality:
+  enabled: true
+  inject:
+    servos: "Servo_*"
+    imu.head: BNO055_imu_head
+    imu.body: BNO055_imu_body
+    vision: Vision
+  config:
+    mode: 6 # Config.MODE_LIVE
+    sleep_timeout: 60  # Time in seconds before entering sleep mode
+
+pitemperature:
+  enabled: true
+
+tft_display:
+  enabled: true
+  config:
+    bus: 0 # Use `ls /dev/spi*` to identify. (/dev/spidev0.0) is bus 0, device 0
+    device: 0 # Use `ls /dev/spi*` to identify. (/dev/spidev0.0) is bus 0, device 0
+    rst_pin: 27
+    dc_pin: 25
+    bl_pin: 18 # Not used if no backlight pin on device
+    rotation: -90.0
+    test_on_boot: true
+    colors:
+      red: (255, 32, 32)
+      blue: (0, 245, 255)
+      green: (0, 255, 180)
+      purple: (255, 0, 255)
+      yellow: (255, 255, 0)
+      white: (255, 255, 255)
+      gray: (128, 128, 128)
+      dark_gray: (64, 64, 64)
+
+ttsmodule:
+  enabled: true
+  config:
+    service: "elevenlabs"
+    voice_id: "pMsXgVXv3BLzUgSXRplE"
+
+tracking:
+  enabled: false
+
+vision_imx500:
+  enabled: true
+  config:
+    preview: false
+
+xbox_controller:
+  enabled: true
+  config:
+    normalised: true
+    debug: false
+    device: '/dev/input/js0'  # Add this
+    deadzone: 4000 # thumbsticks deadzone (seems to be needed for xbox controllers)
+    button_names:  # Add this
+      0: 'BTN_A'
+      1: 'BTN_B'
+      2: 'BTN_X'
+      3: 'BTN_Y'
+      4: 'BTN_TL'
+      5: 'BTN_TR'
+      6: 'BTN_SELECT'
+      7: 'BTN_START'
+      8: 'BTN_MODE'
+      9: 'BTN_THUMBL'
+      10: 'BTN_THUMBR'
+      11: 'KEY_RECORD'  # Xbox Series controller
+    axis_names:  # Add this
+      0: 'ABS_X'
+      1: 'ABS_Y'
+      2: 'ABS_Z'
+      3: 'ABS_RZ'
+      4: 'ABS_RX'
+      5: 'ABS_RY'
+      6: 'ABS_HAT0X'
+      7: 'ABS_HAT0Y'
+    axis_max: 32767.0
+    axis_min: -32767.0

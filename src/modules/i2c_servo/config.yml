@@ -1,0 +1,10 @@
+i2c_servo:
+  config:
+    test_on_boot: false
+    servo_count: 16
+  dependencies:
+    unix:
+    - python3-smbus
+    python:
+    - adafruit-circuitpython-servokit
+  class: I2CServo

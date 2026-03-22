@@ -1,0 +1,5 @@
+servo:
+  class: Servo
+  dependencies:
+    python:
+      - pigpio
