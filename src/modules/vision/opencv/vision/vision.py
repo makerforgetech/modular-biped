@@ -62,7 +62,11 @@ class Vision(BaseModule):
         self.moving = False
 
     def setup_messaging(self):
-        self.subscribe('system/loop', self.scan)
+        pass
+
+    def loop(self):
+        """Called every system loop cycle to run object detection."""
+        self.scan()
 
     def scan(self):
         self.last_results = self.parse_detections()

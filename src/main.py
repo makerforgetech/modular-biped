@@ -33,7 +33,7 @@ def main():
 
     # Use the new SystemLoop class to run the main loop
     from system_loop import SystemLoop
-    system_loop = SystemLoop(module_instances['MessagingService'].messaging_service, module_instances.get('Personality'))
+    system_loop = SystemLoop(module_instances['MessagingService'].messaging_service, module_instances)
     system_loop.start()
 
 if __name__ == '__main__':

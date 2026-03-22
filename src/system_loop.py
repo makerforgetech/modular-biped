@@ -8,9 +8,9 @@ class SystemLoop:
     STATE_RUNNING = 3
     DEFAULT_SLEEP_INTERVAL = 0.01  # 10ms
     
-    def __init__(self, messaging_service, personality):
+    def __init__(self, messaging_service, module_instances=None):
         self.messaging_service = messaging_service
-        self.personality = personality
+        self._modules = list((module_instances or {}).values())
         self._state = SystemLoop.STATE_RUNNING
         self._state_requests = {}
         self._motion_state = self._state # To remember previous state before sleeping due to motion
@@ -118,9 +118,8 @@ class SystemLoop:
                 time.sleep(self.sleep_interval)
             if self._state == SystemLoop.STATE_SLEEPING:
                 continue
-            self.messaging_service.publish('system/loop')
-            if self.personality is not None:
-                self.personality.loop()  # Call personality loop every cycle for more responsive updates
+            for module in self._modules:
+                module.loop()
             now = time.time()
             if now - self._second_loop > 1:
                 self._second_loop = now

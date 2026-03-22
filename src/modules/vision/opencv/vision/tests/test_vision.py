@@ -17,6 +17,13 @@ class TestOpenCVVision(unittest.TestCase):
         v = Vision.__new__(Vision)
         with patch.object(v, 'subscribe') as mock_sub:
             v.setup_messaging()
+            mock_sub.assert_not_called()
+
+    def test_loop_calls_scan(self):
+        v = Vision.__new__(Vision)
+        with patch.object(v, 'scan') as mock_scan:
+            v.loop()
+            mock_scan.assert_called_once()
 
 if __name__ == '__main__':
     unittest.main()

@@ -194,14 +194,20 @@ class TestBusServoQueue(unittest.TestCase):
     # ------------------------------------------------------------------
     # setup_messaging subscriptions
     # ------------------------------------------------------------------
-    def test_setup_messaging_subscribes_to_system_loop(self):
+    def test_loop_calls_process_queue(self):
+        """loop() should call _process_queue to drain the move queue."""
+        with patch.object(self.sv, '_process_queue') as mock_pq:
+            self.sv.loop()
+            mock_pq.assert_called_once()
+
+    def test_setup_messaging_does_not_subscribe_to_system_loop(self):
+        """system/loop subscription replaced by direct loop() call — should not be in subscriptions."""
         messaging_service = MagicMock()
-        # Set via property so setup_messaging() is called
         with patch.object(self.sv, 'get_position', return_value=100):
             self.sv.messaging_service = messaging_service
 
         topics = [c.args[0] for c in messaging_service.subscribe.call_args_list]
-        self.assertIn('system/loop', topics)
+        self.assertNotIn('system/loop', topics)
 
     def test_setup_messaging_subscribes_queue_topic(self):
         messaging_service = MagicMock()

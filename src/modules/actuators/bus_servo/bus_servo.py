@@ -109,7 +109,6 @@ class Servo(BaseModule):
         self.subscribe('servo:' + self.identifier + ':queue', self.move)
         self.subscribe('system/exit', self.exit)
         self.subscribe('servo/pose', self.move_to_pose)
-        self.subscribe('system/loop', self._process_queue)
         
         if self.calibrate_on_boot:
             self.calibrate_dynamic() # Log will show current position repeatedly to help with manual configuration
@@ -206,10 +205,14 @@ class Servo(BaseModule):
             'delay': delay,
         })
 
+    def loop(self):
+        """Called every system loop cycle to drain the move queue."""
+        self._process_queue()
+
     def _process_queue(self, **kwargs):
         """
         Process the next item in the move queue if the servo is not moving.
-        Called on system/loop.
+        Called every loop cycle.
         """
         if not self._move_queue:
             return

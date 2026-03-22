@@ -19,8 +19,11 @@ class ControllerHandler(BaseModule):
     def start(self):
         self.running = True
         self.log("Controller Handler started", level='info')
-        # Subscribe to loop event
-        self.messaging_service.subscribe('system/loop', self._process_input)
+
+    def loop(self):
+        """Called every system loop cycle to process controller input."""
+        if self.running:
+            self._process_input()
         
     def _process_input(self):
         """Process input from the controller and publish corresponding events."""
