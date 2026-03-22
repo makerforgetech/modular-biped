@@ -30,19 +30,19 @@ sys.path.append("..")
 from STservo_sdk import *
 
 # User config
-SERVO_TYPE = input("Enter servo type (STS for ST3215, SCSCL for SC09): ").strip().upper()
+SERVO_TYPE = input("Enter servo type (ST for ST3215, SC for SC09): ").strip().upper()
 SERVO_ID = int(input("Enter current servo ID (1-253): "))
 BAUDRATE = 1000000
-DEVICENAME = '/dev/ttyAMA0'  # Change as needed, find with `ls /dev/ttyACM*`
+DEVICENAME = '/dev/ttyACM0'  # Change as needed, find with `ls /dev/ttyACM*`
 
 # Initialize PortHandler
 portHandler = PortHandler(DEVICENAME)
 
 # Select correct packet handler
-if SERVO_TYPE == "STS":
+if SERVO_TYPE == "ST":
     packetHandler = sts(portHandler)
     ID_ADDR = 5
-elif SERVO_TYPE == "SCSCL":
+elif SERVO_TYPE == "SC":
     packetHandler = scscl(portHandler)
     ID_ADDR = 5
 else:
@@ -75,7 +75,7 @@ while True:
 
     # Read present position/speed (optional, for feedback)
     try:
-        if SERVO_TYPE == "STS":
+        if SERVO_TYPE == "ST":
             pos, spd, comm_result, err = packetHandler.ReadPosSpeed(SERVO_ID)
         else:
             pos, spd, comm_result, err = packetHandler.ReadPosSpeed(SERVO_ID)
@@ -128,20 +128,18 @@ while True:
     print(f"{SERVO_TYPE} servo ID changed successfully to {new_id}")
     SERVO_ID = new_id
     
-    print(f"Press any key to center servo ID {SERVO_ID} (required for further calibration)...")
-    getch()
-    # Center servo
-    if SERVO_TYPE == "STS":
+    if SERVO_TYPE == "ST":
+        print(f"Press any key to center servo ID {SERVO_ID} (required for further calibration)...")
+        getch()
+        # Center servo
         center_result, center_error = packetHandler.WritePosEx(SERVO_ID, 2048, 1000, 50)
-    else:
-        center_result, center_error = packetHandler.WritePosEx(SERVO_ID, 512, 1000, 50)
-    if center_result != COMM_SUCCESS or center_error != 0:
-        print("Failed to center servo: %s %s" % (
-            packetHandler.getTxRxResult(center_result),
-            packetHandler.getRxPacketError(center_error)
-        ))
-    else:
-        print(f"Centered servo ID {SERVO_ID}")
+        if center_result != COMM_SUCCESS or center_error != 0:
+            print("Failed to center servo: %s %s" % (
+                packetHandler.getTxRxResult(center_result),
+                packetHandler.getRxPacketError(center_error)
+            ))
+        else:
+            print(f"Centered servo ID {SERVO_ID}")
 
 # Close port
 portHandler.closePort()
