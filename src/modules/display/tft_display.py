@@ -54,7 +54,7 @@ class TFTDisplay(BaseModule):
 
     def draw_image(self, img):
         disp = self.disp
-        image = Image.open(os.getcwd() + '/modules/display/images/' + img)
+        image = Image.open(os.getcwd() + '/src/modules/display/images/' + img)
         new_image = image.resize((disp.width, disp.height)).rotate(self.rotation)
         self.show_image(new_image)
 

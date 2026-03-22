@@ -119,7 +119,8 @@ class SystemLoop:
             if self._state == SystemLoop.STATE_SLEEPING:
                 continue
             for module in self._modules:
-                module.loop()
+                if hasattr(module, 'loop') and callable(module.loop):
+                    module.loop()
             now = time.time()
             if now - self._second_loop > 1:
                 self._second_loop = now

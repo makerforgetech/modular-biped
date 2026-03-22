@@ -373,6 +373,7 @@ class Vision(BaseModule):
                             help="Path to the labels file")
         parser.add_argument("--print-self.intrinsics", action="store_true",
                             help="Print JSON network_intrinsics then exit")
+        parser.add_argument("--env", default='cody', help="Set the environment (e.g. archie, buddy, cody, server, laptop)")
         return parser.parse_args()
 
 

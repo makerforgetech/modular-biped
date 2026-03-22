@@ -390,7 +390,7 @@ vision_imx500:
     preview: false
 
 xbox_controller:
-  enabled: false
+  enabled: true
   config:
     normalised: true
     debug: false

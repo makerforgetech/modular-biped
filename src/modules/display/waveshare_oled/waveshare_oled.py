@@ -49,7 +49,7 @@ class WaveshareOLED(BaseModule):
         try:
             font = ImageFont.truetype(font_path, font_size)
         except Exception as e:
-            self.log(f"Font load error: {e}", type='error')
+            self.log(f"Font load error: {e}", level='error')
             font = None
         if font:
             w, h = draw.textsize(text, font=font)
@@ -73,7 +73,7 @@ class WaveshareOLED(BaseModule):
             font1 = ImageFont.truetype(font_path, 12)
             font2 = ImageFont.truetype(font_path, 18)
         except Exception as e:
-            self.log(f"Font load error: {e}", type='error')
+            self.log(f"Font load error: {e}", level='error')
             font1 = font2 = None
         draw.line([(0,0),(127,0)], fill=0)
         draw.line([(0,0),(0,31)], fill=0)

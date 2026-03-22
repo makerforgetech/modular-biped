@@ -49,6 +49,8 @@ class MessagingService:
                     f"Invalid mqtt_port '{kwargs.get('mqtt_port')}': must be an integer."
                 ) from exc
             self._mqtt = MQTTMessagingService(broker=host, port=port)
+        
+        self.messaging_service = self._mqtt if self.protocol == 'mqtt' else self._pubsub
 
     def subscribe(self, topic, callback, **kwargs):
         """

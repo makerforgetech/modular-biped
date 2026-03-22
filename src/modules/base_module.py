@@ -36,13 +36,15 @@ class BaseModule:
         """Called every system loop cycle. Override in subclasses that need per-cycle polling."""
         pass
         
-    def log(self, message, level='info'):
+    def log(self, message, level='info', type=None):
         """
         Advanced logging, includes class name, method name, and line number to message string
         """
         # get class name, method name
         class_name = self.__class__.__name__
         method_name = inspect.stack()[1].function
+        if type:
+            level = type
         
         #get line number of calling class
         frame = inspect.stack()[1]
