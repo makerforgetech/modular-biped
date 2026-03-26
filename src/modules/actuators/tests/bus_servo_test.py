@@ -11,17 +11,15 @@ def _make_servo(model='ST', speed=300, acceleration=50, range=(0, 4095)):
     The messaging service is wired up so subscribe/publish work via simple
     dict-based stubs (avoiding the real pub/sub library).
     """
-    # Patch hardware imports so no serial port is needed
-    with patch.dict('sys.modules', {
-        'modules.actuators.bus_servo.STservo_sdk': MagicMock(),
-        'modules.actuators.bus_servo.SCservo_sdk': MagicMock(),
-    }):
-        from modules.actuators.bus_servo import servo as servo_mod
+    from modules.actuators.bus_servo import bus_servo as servo_mod
 
-        # Patch COMM_SUCCESS constant used by handle_errors
-        servo_mod.COMM_SUCCESS = 0
+    # Create a mock backend servo (replaces WaveshareBusServo, etc.)
+    mock_backend = MagicMock()
+    mock_backend.get_moving.return_value = 0
+    mock_backend.get_position.return_value = 100
 
-        # Build a minimal kwargs dict
+    # Patch BusServoFactory.create so no hardware SDK is imported
+    with patch.object(servo_mod.BusServoFactory, 'create', return_value=mock_backend):
         kwargs = {
             'name': 'test_servo',
             'model': model,
@@ -37,41 +35,21 @@ def _make_servo(model='ST', speed=300, acceleration=50, range=(0, 4095)):
             'start': None,
             'poses': [],
         }
-
-        # Patch PortHandler so openPort / setBaudRate succeed
-        port_handler = MagicMock()
-        port_handler.openPort.return_value = True
-        port_handler.setBaudRate.return_value = True
-        servo_mod.PortHandler = MagicMock(return_value=port_handler)
-
-        # Patch packet handler constructors
-        packet_handler = MagicMock()
-        servo_mod.sts = MagicMock(return_value=packet_handler)
-        servo_mod.PacketHandler = MagicMock(return_value=packet_handler)
-
-        # WritePosEx returns (comm_result, error) – both 0 = success
-        packet_handler.WritePosEx.return_value = (0, 0)
-        packet_handler.ReadMoving.return_value = (0, 0, 0)
-        packet_handler.ReadPosSpeed.return_value = (100, 0, 0, 0)
-
         sv = servo_mod.Servo(**kwargs)
-        sv.pos = 100  # Set a known current position
 
-        # Wire up a mock messaging service
-        messaging_service = MagicMock()
-        sv._messaging_service = messaging_service
-        # Call setup_messaging manually (skipping hardware init side-effects)
-        # We do NOT set sv.messaging_service via property to avoid re-running setup
+    sv.pos = 100  # Set a known current position
 
-        return sv, packet_handler
+    # Wire up a mock messaging service
+    messaging_service = MagicMock()
+    sv._messaging_service = messaging_service
+
+    return sv, mock_backend
 
 
 class TestBusServoQueue(unittest.TestCase):
 
     def setUp(self):
         self.sv, self.ph = _make_servo()
-        # Make handle_errors always return False (no error)
-        self.sv.handle_errors = MagicMock(return_value=False)
 
     # ------------------------------------------------------------------
     # move (queues the request)
@@ -166,30 +144,22 @@ class TestBusServoQueue(unittest.TestCase):
         self.sv._do_move.assert_called_once_with(400, 50, 5)
 
     # ------------------------------------------------------------------
-    # _do_move – no blocking sleep, speed/acceleration params
+    # _do_move – no blocking sleep, delegates to backend
     # ------------------------------------------------------------------
     def test_move_does_not_block(self):
         """_do_move() must not call time.sleep (blocking removed)."""
-        self.sv.is_moving = MagicMock(return_value=True)
         with patch('time.sleep') as mock_sleep:
-            # Even when is_moving returns True, _do_move() should not sleep
             self.sv._do_move(500)
         mock_sleep.assert_not_called()
 
     def test_move_accepts_speed_acceleration_params(self):
-        """_do_move() should use supplied speed/acceleration, not instance defaults."""
-        self.sv.is_moving = MagicMock(return_value=False)
+        """_do_move() should delegate the move to the backend servo."""
         self.sv._do_move(500, speed=10, acceleration=2)
-        self.ph.WritePosEx.assert_called_once_with(
-            self.sv.index, 500, 10, 2
-        )
+        self.ph.move_to.assert_called_once_with(500, unit='degrees')
 
     def test_move_uses_instance_defaults_when_not_supplied(self):
-        self.sv.is_moving = MagicMock(return_value=False)
         self.sv._do_move(500)
-        self.ph.WritePosEx.assert_called_once_with(
-            self.sv.index, 500, self.sv.speed, self.sv.acceleration
-        )
+        self.ph.move_to.assert_called_once_with(500, unit='degrees')
 
     # ------------------------------------------------------------------
     # setup_messaging subscriptions

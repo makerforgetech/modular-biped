@@ -125,9 +125,9 @@ class Personality(BaseModule):
             
         print(f"Pitch: {pitch}, Angle to zero yaw: {zero_yaw}")
         if abs(pitch) > 5:
-            self.servos['neck_tilt'].move_degrees(pitch)
+            self.servos['neck_tilt'].move_relative(pitch)
         if abs(zero_yaw) > 5:
-            self.servos['neck_pan'].move_degrees(zero_yaw)
+            self.servos['neck_pan'].move_relative(zero_yaw)
             
     def one_leg_balance(self):
         """ Use body IMU data to move legs into a one legged stance by lifting one leg and adjusting the other leg and body to maintain balance. """
@@ -140,24 +140,24 @@ class Personality(BaseModule):
             if abs(roll) < 3:
                 return   # No need to adjust for small angles
             # Return to center pos
-            self.servos['leg_l_tilt'].move(self.servos['leg_l_tilt'].start)
-            self.servos['leg_r_tilt'].move(self.servos['leg_r_tilt'].start)
+            self.servos['leg_l_tilt'].move_relative(self.servos['leg_l_tilt'].start)
+            self.servos['leg_r_tilt'].move_relative(self.servos['leg_r_tilt'].start)
             return
         print(f"Current body roll: {roll}")
         # This should just show one leg extend under the body, and the other knee bending. For demo only
         if roll > 0:
-            # self.servos['leg_l_knee'].move_degrees(-90)
-            self.servos['leg_l_tilt'].move_degrees(roll)
-            self.servos['leg_r_tilt'].move(self.servos['leg_r_tilt'].start)
-            # self.servos['leg_r_knee'].move_degrees(90)
+            # self.servos['leg_l_knee'].move_relative(-90)
+            self.servos['leg_l_tilt'].move_relative(roll)
+            self.servos['leg_r_tilt'].move_relative(self.servos['leg_r_tilt'].start)
+            # self.servos['leg_r_knee'].move_relative(90)
             pass
         else:
-            self.servos['leg_r_tilt'].move_degrees(roll)
+            self.servos['leg_r_tilt'].move_relative(roll)
             # self.servos['leg_l_tilt'].calibrate_to_center()
-            self.servos['leg_l_tilt'].move(self.servos['leg_l_tilt'].start)
-            # self.servos['leg_r_knee'].move_degrees(-90)
-            # self.servos['leg_r_tilt'].move_degrees(-pitch)
-            # self.servos['leg_l_knee'].move_degrees(90)
+            self.servos['leg_l_tilt'].move_relative(self.servos['leg_l_tilt'].start)
+            # self.servos['leg_r_knee'].move_relative(-90)
+            # self.servos['leg_r_tilt'].move_relative(-pitch)
+            # self.servos['leg_l_knee'].move_relative(90)
 
     def balance(self):
         """Use head and body IMU data to maintain balance by adjusting leg servos."""
@@ -171,8 +171,8 @@ class Personality(BaseModule):
             if abs(pitch) < 2:
                 return  # No need to adjust for small angles
             # print(f"Angle to move: {pitch}")
-            self.servos['leg_l_hip'].move_degrees(-pitch) 
-            self.servos['leg_r_hip'].move_degrees(pitch)
+            self.servos['leg_l_hip'].move_relative(-pitch) 
+            self.servos['leg_r_hip'].move_relative(pitch)
     
     def handle_user_message(self, user_id=None, message=None):
         print(f"Received message from user {user_id}: {message}")
@@ -217,9 +217,9 @@ class Personality(BaseModule):
     def loop_10(self):
         # loop 3 times:
         # for i in range(3):
-        #     self.servos['leg_l_ankle'].move(1000, speed=0)
-        #     self.servos['leg_l_ankle'].move(1500, speed=0) 
-        # self.servos['leg_l_ankle'].move_degrees(50)
+        #     self.servos['leg_l_ankle'].move_relative(1000, speed=0)
+        #     self.servos['leg_l_ankle'].move_relative(1500, speed=0) 
+        # self.servos['leg_l_ankle'].move_relative(50)
         # self.scan_vision()
         # self.output_current_pose()
         # self.publish('servo/pose', pose_name='wave_1') # For testing pose movement
@@ -454,7 +454,7 @@ class Personality(BaseModule):
         pan_angle = int(((center_pos_x - (camera_size[0] / 2)) / (camera_size[0] / 2)) * 40)  # Scale to -40 to 40 degrees
         if abs(pan_angle) > track_threshold[0]:  # Only move if the angle is greater than 5 degrees to avoid jitter
             self.log(f"Moving neck pan to {pan_angle} degrees based on detected object position")
-            self.servos['neck_pan'].move_degrees(pan_angle)
+            self.servos['neck_pan'].move_relative(pan_angle)
             
         # Move tilt servo based on center_pos_y position relative to camera_size
         # Focus on the top of the bounding box in the Y axis
@@ -462,7 +462,7 @@ class Personality(BaseModule):
         tilt_angle = int(((top_section_y - (camera_size[1] / 2)) / (camera_size[1] / 2)) * 40)  # Scale to -40 to 40 degrees
         if abs(tilt_angle) > track_threshold[1]:  # Only move if the angle is greater than 5 degrees to avoid jitter
             self.log(f"Moving neck tilt to {tilt_angle} degrees based on detected object position")
-            self.servos['neck_tilt'].move_degrees(-tilt_angle)
+            self.servos['neck_tilt'].move_relative(-tilt_angle)
 
     # Motion: Updates the last motion time
     def update_motion_time(self, value):

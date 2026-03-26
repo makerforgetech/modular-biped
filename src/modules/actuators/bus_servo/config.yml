@@ -1,5 +1,8 @@
 bus_servo:
   class: Servo
   dependencies:
+    python:
+      - rustypot
+      - numpy
     unix:
       - python3-serial

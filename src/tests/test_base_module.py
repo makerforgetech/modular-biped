@@ -1,3 +1,7 @@
+import sys
+from unittest.mock import MagicMock
+sys.modules['yaml'] = MagicMock()
+sys.modules['requests'] = MagicMock()
 import unittest
 from unittest import mock
 from modules.base_module import BaseModule

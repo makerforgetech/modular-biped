@@ -1,4 +1,7 @@
 import sys
+from unittest.mock import MagicMock
+sys.modules['yaml'] = MagicMock()
+import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
