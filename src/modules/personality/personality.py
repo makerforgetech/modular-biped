@@ -140,21 +140,21 @@ class Personality(BaseModule):
             if abs(roll) < 3:
                 return   # No need to adjust for small angles
             # Return to center pos
-            self.servos['leg_l_tilt'].move_relative(self.servos['leg_l_tilt'].start)
-            self.servos['leg_r_tilt'].move_relative(self.servos['leg_r_tilt'].start)
+            self.servos['leg_l_tilt'].move(self.servos['leg_l_tilt'].start)
+            self.servos['leg_r_tilt'].move(self.servos['leg_r_tilt'].start)
             return
         print(f"Current body roll: {roll}")
         # This should just show one leg extend under the body, and the other knee bending. For demo only
         if roll > 0:
             # self.servos['leg_l_knee'].move_relative(-90)
             self.servos['leg_l_tilt'].move_relative(roll)
-            self.servos['leg_r_tilt'].move_relative(self.servos['leg_r_tilt'].start)
+            self.servos['leg_r_tilt'].move(self.servos['leg_r_tilt'].start)
             # self.servos['leg_r_knee'].move_relative(90)
             pass
         else:
             self.servos['leg_r_tilt'].move_relative(roll)
             # self.servos['leg_l_tilt'].calibrate_to_center()
-            self.servos['leg_l_tilt'].move_relative(self.servos['leg_l_tilt'].start)
+            self.servos['leg_l_tilt'].move(self.servos['leg_l_tilt'].start)
             # self.servos['leg_r_knee'].move_relative(-90)
             # self.servos['leg_r_tilt'].move_relative(-pitch)
             # self.servos['leg_l_knee'].move_relative(90)

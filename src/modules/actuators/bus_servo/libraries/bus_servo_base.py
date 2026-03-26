@@ -8,6 +8,7 @@ class BusServoBase(ABC):
         self.baudrate = baudrate
         self.range = range
         self.range_degrees = range_degrees
+        self.log = kwargs.get('log', lambda msg, **kw: print(msg))
 
     @abstractmethod
     def get_speed(self, unit='degrees'):

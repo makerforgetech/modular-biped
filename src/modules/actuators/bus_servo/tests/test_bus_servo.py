@@ -21,13 +21,14 @@ class TestWaveshareBusServo(unittest.TestCase):
         self.servo = WaveshareBusServo(1, 'ST3215', '/dev/ttyUSB0', range=[0, 180])
         self.servo.packetHandler = self.mock_packet
         self.servo.portHandler = MagicMock()
-        self.servo.index = 1
         self.servo.speed = 10
         self.servo.acceleration = 5
-        self.servo.identifier = 'test'
-        self.servo.name = 'test'
         self.servo.range = [0, 180]
         self.servo.log = MagicMock()
+        # Set up default return values for SDK methods that return (comm_result, error) tuples
+        self.mock_packet.WritePosEx.return_value = (0, 0)
+        self.mock_packet.WheelMode.return_value = (0, 0)
+        self.mock_packet.WriteSpec.return_value = (0, 0)
     def tearDown(self):
         sys.modules.pop('modules.actuators.bus_servo.libraries.waveshare.STservo_sdk', None)
         sys.modules.pop('numpy', None)
@@ -98,13 +99,8 @@ class TestWaveshareBusServo(unittest.TestCase):
         self.assertFalse(self.servo.handle_errors(0, 0))
 
     def test_calibrate_to_center(self):
-        self.servo.packetHandler.WritePosEx.return_value = (0, 0)
         self.servo.handle_errors = MagicMock(return_value=False)
         self.servo.range = [0, 180]
-        self.servo.index = 1
-        self.servo.speed = 10
-        self.servo.acceleration = 5
-        self.servo.identifier = 'test'
         self.servo.model = 'ST3215'
         self.servo.calibrate_to_center()
 

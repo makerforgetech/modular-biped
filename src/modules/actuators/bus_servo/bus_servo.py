@@ -137,6 +137,11 @@ class Servo(BaseModule):
         if position < self.range[0] or position > self.range[1]:
             self.log(f"Position {position} out of range ({self.range[0]}-{self.range[1]})", level='error')
             return
+        # Apply per-move speed/acceleration overrides if supported by backend
+        if speed is not None and hasattr(self.backend_servo, 'set_speed'):
+            self.backend_servo.set_speed(speed)
+        if acceleration is not None and hasattr(self.backend_servo, 'set_acceleration'):
+            self.backend_servo.set_acceleration(acceleration)
         # Delegate to backend
         self.backend_servo.move_to(position, unit='degrees')
         self.pos = position
@@ -175,10 +180,13 @@ class Servo(BaseModule):
         """
         if not self.poses:
             return None
-        for pose in self.poses:
-            if pose_name in pose:
-                return pose[pose_name]
-        return None  # or raise an exception if preferred
+        return self.poses.get(pose_name)
+
+    def calibrate_to_center(self):
+        """
+        Move the servo to the center of its range using the backend implementation.
+        """
+        self.backend_servo.calibrate_to_center()
 
     def calibrate(self):
         """
