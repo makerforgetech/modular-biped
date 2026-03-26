@@ -58,8 +58,14 @@ def main():
         shell.move("/etc/asound.conf", "/etc/asound.conf.old")
     shell.write_text_file("~/asound.conf",
 """
+# Use the card name (sndrpigooglevoi) instead of a hardcoded card number.
+# The ALSA card number for the I2S device can change between boots when HDMI
+# devices are present, so referencing by name ensures the correct device is
+# always targeted.
+
 pcm.speakerbonnet {
-   type hw card 0
+   type hw
+   card sndrpigooglevoi
 }
 
 pcm.dmixer {
@@ -77,23 +83,29 @@ pcm.dmixer {
 }
 
 ctl.dmixer {
-    type hw card 0
+    type hw
+    card sndrpigooglevoi
 }
 
 pcm.softvol {
     type softvol
     slave.pcm "dmixer"
     control.name "PCM"
-    control.card 0
+    control.card sndrpigooglevoi
 }
 
 ctl.softvol {
-    type hw card 0
+    type hw
+    card sndrpigooglevoi
 }
 
+# Separate playback and capture defaults using asym so that:
+#   - aplay / speaker output uses the softvol/dmix chain
+#   - arecord / microphone input uses the I2S capture device directly
 pcm.!default {
-    type             plug
-    slave.pcm       "softvol"
+    type asym
+    playback.pcm "softvol"
+    capture.pcm "hw:sndrpigooglevoi"
 }
 """)
     shell.move("~/asound.conf", "/etc/asound.conf")
@@ -126,11 +138,7 @@ WantedBy=multi-user.target""", append=False)
             print("Testing...")
             shell.run_command("speaker-test -l5 -c2 -t wav")
     print("\n" + colored.green("All done!"))
-<<<<<<< Updated upstream
-    print("\nEnjoy your new {PRODUCT_NAME}!")
-=======
     print(f"\nEnjoy your new {PRODUCT_NAME}!")
->>>>>>> Stashed changes
     if reboot:
         shell.prompt_reboot()
 

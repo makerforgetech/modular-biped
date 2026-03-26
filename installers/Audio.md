@@ -18,6 +18,70 @@ Unfortunately, when testing recently I can't get this to work at all on the CM5.
 
 Below is the dump of my investigation around the configuration files needed, and the ideal contents of those files. Despite this I have not managed to resolve the issues on the CM5.
 
+## Root Cause Analysis (CM5 Audio Not Working)
+
+The following issues were identified as likely root causes for audio not working on the CM5:
+
+### Issue 1 — ALSA card number is hardcoded to 0 in `asound.conf` (Critical)
+
+`asound.conf` referenced `card 0` everywhere. On CM5, the two vc4-hdmi devices
+enumerate first (as cards 0 and 1), so the I2S soundcard ends up as **card 1 or
+card 2** — and the actual card number changes between boots depending on
+enumeration order. This means ALSA's softvol/dmix chain was targeting the wrong
+device (an HDMI output), not the MAX98357B.
+
+**Fix applied:** All `card 0` references in `asound.conf` are replaced with
+`card sndrpigooglevoi` (the stable ALSA name of the googlevoicehat card),
+so the configuration always targets the correct device regardless of enumeration
+order.
+
+> **Note:** `hdmi_ignore_edid_audio=1` prevents HDMI from being auto-selected
+> as the *default* audio device, but it does **not** prevent the vc4hdmi cards
+> from appearing with low card numbers in `aplay -l`.
+
+### Issue 2 — No capture (microphone) path defined in `asound.conf`
+
+The previous `asound.conf` defined `pcm.!default` as `type plug → softvol →
+dmix`, which is a **playback-only** chain. Running `arecord -D default` or any
+speech-recognition library against the default device would fail because
+`dmix` cannot be used for capture.
+
+**Fix applied:** `pcm.!default` is changed to `type asym`, which independently
+routes:
+- Playback → softvol → dmix → I2S card (unchanged)
+- Capture → `hw:sndrpigooglevoi` (direct hardware access to the I2S mic)
+
+### Issue 3 — `i2smic.py` bails on CM5 / Pi 5
+
+The Adafruit `i2smic.py` script builds and installs the custom `snd-i2smic-rpi`
+kernel module for I2S PDM microphones. The model-detection table only listed Pi
+models up to Pi 4 / CM4. Running the script on a CM5 caused it to exit with
+*"Unsupported Pi board detected."*, meaning the kernel module was **never
+installed**.
+
+**Fix applied:** CM5 and Pi 5 model strings (`RASPBERRY_PI_5B`,
+`RASPBERRY_PI_CM5`, `RASPBERRY_PI_5`) are added to the model table with
+`pimodel_select = 2` (same platform generation as Pi 4 / CM4).
+
+> **Note:** The `googlevoicehat-soundcard` overlay itself exposes a capture
+> device for I2S microphones connected to the Pi's I2S DATA-IN pin. If that
+> capture device works correctly for the ICS-43434, running `i2smic.py` may
+> not be necessary. Use `arecord -l` to verify which capture devices appear
+> after reboot.
+
+### Issue 4 — `install_audio.sh` and `i2samp.py` contained unresolved merge conflict markers
+
+Both files had `<<<<<<< / ======= / >>>>>>>` conflict markers committed into the
+branch. This would cause Python syntax errors and shell script failures at
+runtime.
+
+**Fix applied:** Conflicts resolved — the system-Python3 / `--break-system-packages`
+variant of `install_audio.sh` is kept (appropriate for Raspberry Pi OS Bookworm),
+and the correct f-string `print(f"\nEnjoy your new {PRODUCT_NAME}!")` is kept
+in `i2samp.py`.
+
+---
+
 ## 1. Device Tree and Overlays
 - Only one I2S audio overlay should be enabled in `/boot/firmware/config.txt` (or `/boot/config.txt`).
 - For the Google Voice HAT, use:
@@ -48,11 +112,18 @@ hdmi_ignore_edid_audio=1
 - If present, ensure any lines blacklisting I2S drivers are commented out (start with `#`).
 
 ## 3. ALSA Configuration (`/etc/asound.conf`)
-- This file defines the software audio pipeline for playback.
-- For I2S output, use:
+- This file defines the software audio pipeline for playback **and capture**.
+- Reference the card by **name** (`sndrpigooglevoi`), not by number. The card
+  number changes between boots on CM5/Pi 5 because the two vc4-hdmi devices
+  are enumerated first.
+- Use `type asym` for `pcm.!default` so that playback and capture are routed
+  independently (dmix/softvol are playback-only; using `type plug` for default
+  blocks microphone capture).
+- For I2S output + ICS-43434 input, use:
 	```
 	pcm.speakerbonnet {
-		 type hw card 0
+		 type hw
+		 card sndrpigooglevoi
 	}
 
 	pcm.dmixer {
@@ -70,26 +141,30 @@ hdmi_ignore_edid_audio=1
 	}
 
 	ctl.dmixer {
-			type hw card 0
+			type hw
+			card sndrpigooglevoi
 	}
 
 	pcm.softvol {
 			type softvol
 			slave.pcm "dmixer"
 			control.name "PCM"
-			control.card 0
+			control.card sndrpigooglevoi
 	}
 
 	ctl.softvol {
-			type hw card 0
+			type hw
+			card sndrpigooglevoi
 	}
 
 	pcm.!default {
-			type             plug
-			slave.pcm       "softvol"
+			type asym
+			playback.pcm "softvol"
+			capture.pcm "hw:sndrpigooglevoi"
 	}
 	```
-- This sets the default output to use software volume and mixing, targeting card 0 (your I2S device).
+- This routes playback through the softvol/dmix chain and capture directly to
+  the I2S hardware device, both referencing the card by stable name.
 
 ## 4. Systemd Service (`/etc/systemd/system/aplay.service`)
 - Keeps the audio device open to prevent popping/clicking:
@@ -117,11 +192,17 @@ hdmi_ignore_edid_audio=1
 - Ignore warnings about sample rate mismatch if you hear sound; ALSA is resampling.
 
 ## 6. Microphone/Input Devices
-- asound.conf does not define input devices.
-- Use `arecord -l` to list capture devices.
-- Use `arecord` to test recording:
+- `asound.conf` now defines the capture path via `pcm.!default` → `type asym`
+  → `capture.pcm "hw:sndrpigooglevoi"`.
+- Use `arecord -l` to list capture devices. The ICS-43434 should appear under
+  the `sndrpigooglevoi` card.
+- Test recording using the default device:
 	```
-	arecord -D hw:0,0 -f S16_LE -c 1 -r 16000 test.wav
+	arecord -D default -f S16_LE -c 2 -r 44100 -d 5 test.wav
+	```
+  Or directly via the hardware device:
+	```
+	arecord -D hw:sndrpigooglevoi -f S16_LE -c 2 -r 44100 -d 5 test.wav
 	```
 - For speech_recognition, use:
 	```python
@@ -131,29 +212,29 @@ hdmi_ignore_edid_audio=1
 	and select the correct device by name or index.
 
 ## 7. Common Issues and Solutions
-- **No sound:** Check card number in asound.conf matches your I2S device (use `aplay -l`).
-- **Playback errors with hw:0,0:** Use `default` or `plughw:0,0` for format conversion.
-- **HDMI devices present:** Add `hdmi_ignore_edid_audio=1` and comment out `dtoverlay=vc4-kms-v3d` if not needed.
-- **Multiple overlays:** Only enable the one matching your hardware.
-- **No input device:** Ensure your mic is detected by ALSA and appears in `arecord -l` and `sr.Microphone.list_microphone_names()`.
+- **No sound:** Use `aplay -l` to list devices and confirm `sndrpigooglevoi` is present. Do not rely on card numbers — they change between boots on CM5/Pi 5.
+- **Playback errors with hw:0,0:** Use `default` or `hw:sndrpigooglevoi` for the correct device.
+- **HDMI devices present:** `hdmi_ignore_edid_audio=1` stops HDMI being selected as the default sink, but vc4hdmi cards still appear in `aplay -l` and can claim low card numbers. Always reference the I2S card by name.
+- **Multiple overlays:** Only enable the one matching your hardware. Comment out `max98357a`, `dual_i2s`, and `i2s-mmap` if `googlevoicehat-soundcard` is active.
+- **No input device / microphone not working:** Ensure the ICS-43434 is wired to the Pi's I2S DATA-IN pin. Run `arecord -l` and confirm the `sndrpigooglevoi` card has a capture subdevice. If not, check the overlay is loaded (`dmesg | grep snd`). Note that `i2smic.py` can also install a separate `snd-i2smic-rpi` capture driver, but this is generally not needed when `googlevoicehat-soundcard` is used.
+- **`i2smic.py` says "Unsupported Pi board":** CM5 and Pi 5 are now added to the supported model list with `pimodel_select = 2`.
 
 ## 8. Summary Table of Key Files
 
 | File/Setting                | Ideal Content/Setting                                                                 |
 |-----------------------------|--------------------------------------------------------------------------------------|
-| /boot/firmware/config.txt   | Only `dtoverlay=googlevoicehat-soundcard` enabled, `dtparam=audio=on` disabled       |
+| /boot/firmware/config.txt   | Only `dtoverlay=googlevoicehat-soundcard` enabled, `dtparam=audio=on` disabled, `hdmi_ignore_edid_audio=1` |
 | /etc/modprobe.d/raspi-blacklist.conf | Empty or all lines commented out                                            |
-| /etc/asound.conf            | As above, with card number matching your I2S device                                 |
-| /etc/systemd/system/aplay.service | As above, optional                                                            |
-| arecord -l / aplay -l       | Confirm card 0 is your I2S device                                                   |
+| /etc/asound.conf            | Use card name `sndrpigooglevoi`; `type asym` default separating playback and capture |
+| /etc/systemd/system/aplay.service | As above, optional (prevents pop/click on first audio output)               |
+| arecord -l / aplay -l       | Confirm `sndrpigooglevoi` card appears with both playback and capture subdevices     |
 | speech_recognition devices  | Use `sr.Microphone.list_microphone_names()` to find the correct input device         |
 
 ## 9. General Best Practices
-- Always match card numbers in asound.conf to your actual hardware.
+- Reference ALSA cards by **name** (e.g. `sndrpigooglevoi`), not by number -- card numbers can change on every boot on Pi 5 / CM5.
 - Only enable one I2S overlay at a time.
-- Use ALSA’s default or plug devices for best compatibility.
-- Use arecord and aplay for basic input/output testing.
-- Use speech_recognition’s device listing to select the correct mic.
+- Use `arecord -D default` and `aplay -D default` for basic input/output testing.
+- Use speech_recognition's device listing to select the correct mic.
 
 
 
