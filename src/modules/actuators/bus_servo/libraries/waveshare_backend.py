@@ -1,6 +1,7 @@
 from .bus_servo_base import BusServoBase
 from .utils import degrees_to_radians, radians_to_degrees, degrees_to_raw, raw_to_degrees, radians_to_raw, raw_to_radians
 import math
+import threading
 
 # Control table address
 ADDR_TORQUE_ENABLE         = 40 # Same address for both ST and SC servos
@@ -14,35 +15,114 @@ SC_MAX = 1024
 
 COMM_SUCCESS = 0  # Communication success (matches value in both ST and SC SDKs)
 
+
+class _WaveshareConnectionManager:
+    """Shared connection pool for Waveshare servo bus connections.
+
+    Multiple WaveshareBusServo instances on the same serial port, baudrate, and
+    protocol share a single PortHandler/packetHandler so that writes to the bus
+    are serialized through one connection rather than opening the port multiple
+    times.  The underlying port is only closed when the last reference is
+    released via release().
+    """
+
+    _lock = threading.Lock()
+    _connections = {}  # key: (port, baudrate, protocol) -> dict
+
+    @classmethod
+    def acquire(cls, port, baudrate, protocol, create_connection):
+        """Return the shared (portHandler, packetHandler) for the given bus.
+
+        :param port: Serial port path (e.g. '/dev/ttyAMA0')
+        :param baudrate: Baud rate integer
+        :param protocol: 'ST' or 'SC' – determines which SDK is in use
+        :param create_connection: Zero-arg callable that opens the port and
+               returns ``(portHandler, packetHandler)``.  Only invoked when no
+               existing connection is found for the key.
+        :returns: ``(portHandler, packetHandler)``
+        """
+        key = (port, baudrate, protocol)
+        with cls._lock:
+            if key not in cls._connections:
+                portHandler, packetHandler = create_connection()
+                cls._connections[key] = {
+                    'portHandler': portHandler,
+                    'packetHandler': packetHandler,
+                    'ref_count': 0,
+                }
+            cls._connections[key]['ref_count'] += 1
+            conn = cls._connections[key]
+            return conn['portHandler'], conn['packetHandler']
+
+    @classmethod
+    def release(cls, port, baudrate, protocol):
+        """Decrement the reference count for the given bus connection.
+
+        When the count reaches zero the port is closed and the entry is removed.
+        """
+        key = (port, baudrate, protocol)
+        with cls._lock:
+            if key not in cls._connections:
+                return
+            cls._connections[key]['ref_count'] -= 1
+            if cls._connections[key]['ref_count'] <= 0:
+                try:
+                    cls._connections[key]['portHandler'].closePort()
+                except OSError:
+                    pass
+                del cls._connections[key]
+
+    @classmethod
+    def reset(cls):
+        """Remove all tracked connections without closing ports.
+
+        Intended for use in tests to reset state between test cases.
+        """
+        with cls._lock:
+            cls._connections.clear()
+
+
 class WaveshareBusServo(BusServoBase):
     def __init__(self, servo_id, model, port, baudrate=1000000, range=None, range_degrees=None, **kwargs):
         super().__init__(servo_id, model, port, baudrate, range, **kwargs)
         self.speed = kwargs.get('speed', 300)
         self.acceleration = kwargs.get('acceleration', 50)
-        # Import and initialize the correct SDK based on model
+        # Determine protocol and raw/degree limits from model, then acquire or
+        # reuse the shared connection for this (port, baudrate, protocol).
         if model.startswith('ST'):
             from .waveshare.STservo_sdk import PortHandler, sts
-            self.portHandler = PortHandler(port)
-            self.packetHandler = sts(self.portHandler)
+            self._protocol = 'ST'
             self.max_raw = 4095
             self.min_raw = 0
             self.max_deg = 360
             self.min_deg = 0
+            def _create():
+                ph = PortHandler(port)
+                if not ph.openPort():
+                    raise RuntimeError(f"Failed to open port {port} for servo {servo_id}")
+                if not ph.setBaudRate(baudrate):
+                    raise RuntimeError(f"Failed to set baudrate {baudrate} for servo {servo_id}")
+                return ph, sts(ph)
         elif model.startswith('SC'):
             from .waveshare.SCservo_sdk import PortHandler, PacketHandler
-            self.portHandler = PortHandler(port)
-            self.packetHandler = PacketHandler(1)
+            self._protocol = 'SC'
             self.max_raw = 1023
             self.min_raw = 0
             self.max_deg = 300
             self.min_deg = 0
+            def _create():
+                ph = PortHandler(port)
+                if not ph.openPort():
+                    raise RuntimeError(f"Failed to open port {port} for servo {servo_id}")
+                if not ph.setBaudRate(baudrate):
+                    raise RuntimeError(f"Failed to set baudrate {baudrate} for servo {servo_id}")
+                return ph, PacketHandler(1)
         else:
             raise ValueError(f"Unknown model: {model}")
-        # Open port and set baudrate
-        if not self.portHandler.openPort():
-            raise RuntimeError(f"Failed to open port {port} for servo {servo_id}")
-        if not self.portHandler.setBaudRate(baudrate):
-            raise RuntimeError(f"Failed to set baudrate {baudrate} for servo {servo_id}")
+
+        self.portHandler, self.packetHandler = _WaveshareConnectionManager.acquire(
+            port, baudrate, self._protocol, _create
+        )
 
     def move_to(self, value, unit='degrees'):
         if unit == 'degrees':
@@ -85,7 +165,7 @@ class WaveshareBusServo(BusServoBase):
             self.packetHandler.write1ByteTxRx(self.portHandler, self.servo_id, ADDR_TORQUE_ENABLE, 1)
 
     def exit(self):
-        self.portHandler.closePort()
+        _WaveshareConnectionManager.release(self.port, self.baudrate, self._protocol)
 
     def move_to_raw(self, raw_value):
         if self.model.startswith('ST'):

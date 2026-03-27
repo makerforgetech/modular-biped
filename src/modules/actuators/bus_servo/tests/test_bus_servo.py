@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 from modules.actuators.bus_servo.bus_servo import Servo
 from modules.actuators.bus_servo.libraries.simulation_backend import SimulationBusServo
 from modules.actuators.bus_servo.libraries.factory import BusServoFactory
-from modules.actuators.bus_servo.libraries.waveshare_backend import WaveshareBusServo
+from modules.actuators.bus_servo.libraries.waveshare_backend import WaveshareBusServo, _WaveshareConnectionManager
 
 
 class TestWaveshareBusServo(unittest.TestCase):
@@ -13,14 +13,14 @@ class TestWaveshareBusServo(unittest.TestCase):
         sys.modules['numpy'] = MagicMock()
         self.mock_packet = MagicMock()
         mock_sts = MagicMock(return_value=self.mock_packet)
-        mock_PortHandler = MagicMock()
+        self.mock_port_handler_instance = MagicMock()
+        mock_PortHandler = MagicMock(return_value=self.mock_port_handler_instance)
         sys.modules['modules.actuators.bus_servo.libraries.waveshare.STservo_sdk'] = MagicMock(
             sts=mock_sts,
             PortHandler=mock_PortHandler
         )
         self.servo = WaveshareBusServo(1, 'ST3215', '/dev/ttyUSB0', range=[0, 180])
         self.servo.packetHandler = self.mock_packet
-        self.servo.portHandler = MagicMock()
         self.servo.speed = 10
         self.servo.acceleration = 5
         self.servo.range = [0, 180]
@@ -29,9 +29,12 @@ class TestWaveshareBusServo(unittest.TestCase):
         self.mock_packet.WritePosEx.return_value = (0, 0)
         self.mock_packet.WheelMode.return_value = (0, 0)
         self.mock_packet.WriteSpec.return_value = (0, 0)
+
     def tearDown(self):
         sys.modules.pop('modules.actuators.bus_servo.libraries.waveshare.STservo_sdk', None)
         sys.modules.pop('numpy', None)
+        # Clear the connection manager so each test starts with a clean slate
+        _WaveshareConnectionManager.reset()
 
     def test_move_to(self):
         self.servo.move_to(90, unit='degrees')
@@ -103,6 +106,33 @@ class TestWaveshareBusServo(unittest.TestCase):
         self.servo.range = [0, 180]
         self.servo.model = 'ST3215'
         self.servo.calibrate_to_center()
+
+    def test_exit_closes_port_when_last_reference_released(self):
+        # Port should be closed only after all servo instances release the connection.
+        self.servo.exit()
+        self.mock_port_handler_instance.closePort.assert_called_once()
+
+    def test_shared_connection_port_not_closed_until_all_released(self):
+        # Create a second servo on the same port/baudrate; they should share one connection.
+        servo2 = WaveshareBusServo(2, 'ST3215', '/dev/ttyUSB0', range=[0, 180])
+        key = ('/dev/ttyUSB0', 1000000, 'ST')
+        self.assertEqual(_WaveshareConnectionManager._connections[key]['ref_count'], 2)
+
+        # Release first servo – port must still be open.
+        self.servo.exit()
+        self.mock_port_handler_instance.closePort.assert_not_called()
+        self.assertEqual(_WaveshareConnectionManager._connections[key]['ref_count'], 1)
+
+        # Release second servo – port must now be closed.
+        servo2.exit()
+        self.mock_port_handler_instance.closePort.assert_called_once()
+        self.assertNotIn(key, _WaveshareConnectionManager._connections)
+
+    def test_shared_connection_reuses_handlers(self):
+        # Two servos on the same bus must share the exact same portHandler and packetHandler.
+        servo2 = WaveshareBusServo(2, 'ST3215', '/dev/ttyUSB0', range=[0, 180])
+        self.assertIs(self.servo.portHandler, servo2.portHandler)
+        self.assertIs(self.servo.packetHandler, servo2.packetHandler)
 
 class TestRustypotBusServo(unittest.TestCase):
     def setUp(self):
