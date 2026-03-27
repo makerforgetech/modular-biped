@@ -1,3 +1,6 @@
+import sys
+from unittest.mock import MagicMock
+sys.modules['requests'] = MagicMock()
 import unittest
 from unittest.mock import MagicMock, patch
 from modules.network.rtlsdr.rtlsdr import RTLSDR

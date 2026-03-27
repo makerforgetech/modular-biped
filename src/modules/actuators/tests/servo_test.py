@@ -1,28 +1,39 @@
-from unittest import TestCase, mock
-from modules.mocks import mock_pigpio
-from modules.mocks import mock_arduino_serial
-from modules.actuators.servo import Servo
-import pytest
+import sys
+import unittest
+from unittest import mock
+from unittest.mock import MagicMock, patch
 
-@mock.patch('modules.actuators.servo.pub', return_value=mock.Mock())
-class ServoTest(TestCase):
+# Mock hardware dependencies before importing Servo
+sys.modules['yaml'] = MagicMock()
+sys.modules['pigpio'] = MagicMock()
+sys.modules['modules.network.arduinoserial'] = MagicMock()
+sys.modules['modules.network.arduinoserial.arduinoserial'] = MagicMock()
 
-    def test_init(self, mock_pub):
+from modules.actuators.servo.servo import Servo
+
+
+class ServoTest(unittest.TestCase):
+
+    def _make_servo(self, **kwargs):
+        sv = Servo(**kwargs)
+        sv._messaging_service = MagicMock()
+        return sv
+
+    def test_init(self):
         # Pin 1, default values
-        sv = Servo(1, 'test', (20000, 40000))
+        sv = Servo(pin=1, name='test', range=(20000, 40000), serial=True)
         assert sv.pos == 30000
         assert sv.range == (20000, 40000)
         assert sv.pin == 1
 
         # Override defaults
-        sv = Servo(10, 'test', (10, 40), start_pos=50)
+        sv = Servo(pin=10, name='test', range=(10, 40), start=50, serial=True)
         assert sv.pos == 25
         assert sv.range == (10, 40)
         assert sv.pin == 10
 
-
-    def test_move(self, mock_pub):
-        sv = Servo(1, 'test', (0, 200), start_pos=50)
+    def test_move(self):
+        sv = self._make_servo(pin=1, name='test', range=(0, 200), start=50, serial=None)
         # test absolute values
         sv.move(10)
         assert sv.pos == 20
@@ -41,47 +52,45 @@ class ServoTest(TestCase):
         assert sv.pos == 100
 
         # test out of range values
-        with pytest.raises(ValueError) as ex:
+        with self.assertRaises(ValueError) as cm:
             sv.move(-10, False)
-        assert "out of range" in str(ex.value)
-        with pytest.raises(ValueError) as ex:
+        assert "out of range" in str(cm.exception)
+        with self.assertRaises(ValueError) as cm:
             sv.move(101, False)
-        assert "out of range" in str(ex.value)
+        assert "out of range" in str(cm.exception)
 
         sv.move(-10)
         assert sv.pos == 0
         sv.move(181)
         assert sv.pos == 200
 
-
-    def test_move_relative(self, mock_pub):
-        sv = Servo(1, 'test', (0, 200), start_pos=50)
-        # test absolute values
+    def test_move_relative(self):
+        sv = self._make_servo(pin=1, name='test', range=(0, 200), start=50, serial=None)
+        # test relative values
         sv.move_relative(10)
         assert sv.pos == 120
         sv.move_relative(-20)
         assert sv.pos == 80
 
         # test out of range values
-        with pytest.raises(ValueError) as ex:
+        with self.assertRaises(ValueError) as cm:
             sv.move_relative(-50, False)
-        assert "out of range" in str(ex.value)
-        with pytest.raises(ValueError) as ex:
+        assert "out of range" in str(cm.exception)
+        with self.assertRaises(ValueError) as cm:
             sv.move_relative(101, False)
-        assert "out of range" in str(ex.value)
+        assert "out of range" in str(cm.exception)
 
         sv.move_relative(-50)
         assert sv.pos == 0
         sv.move_relative(101)
         assert sv.pos == 200
 
-
-    def test_buffer(self, mock_pub):
-        sv = Servo(1, 'test', (0, 2000), start_pos=50)
+    def test_buffer(self):
+        sv = self._make_servo(pin=1, name='test', range=(0, 2000), start=50, serial=None)
         sv.move(100)
         assert sv.pos == 2000
 
-        sv2 = Servo(1, 'test', (0, 2000), start_pos=50, buffer=100)
+        sv2 = self._make_servo(pin=1, name='test', range=(0, 2000), start=50, buffer=100, serial=None)
         sv2.move(100)
         assert sv2.pos == 2000
 
@@ -92,8 +101,10 @@ class ServoTest(TestCase):
         assert len(sequence) == 1
 
         sequence = sv2.calculate_move(100, 200)
-        # [(100, 0.1), (101.5, 0.1), (103.75, 0.1), (107.125, 0.1), (112.1875, 0.1), (119.78125, 0.1), (131.171875, 0.1), (148.2578125, 0.1), (173.88671875, 0.1), (200, 0.1)]
         assert len(sequence) == 10
         assert sequence[0][0] == 100
         assert sequence[9][0] == 200
 
+
+if __name__ == '__main__':
+    unittest.main()

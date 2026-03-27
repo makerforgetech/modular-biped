@@ -20,57 +20,51 @@ bus_servo:
   enabled: true
   config:
     poses:
-      - legs_forward: {'leg_r_tilt': 2806, 'leg_r_hip': 1989, 'leg_r_knee': 1349, 'leg_r_ankle': 2754, 'neck_pan': 1698, 'neck_tilt': 118, 'leg_l_tilt': 1619, 'leg_l_hip': 1028, 'leg_l_knee': 2634, 'leg_l_ankle': 1567}
-      - sit: {'leg_r_tilt': 2806, 'leg_r_hip': 2063, 'leg_r_knee': 1840, 'leg_r_ankle': 3641, 'neck_pan': 1697, 'neck_tilt': 118, 'leg_l_tilt': 1621, 'leg_l_hip': 853, 'leg_l_knee': 2161, 'leg_l_ankle': 614}
-      - wave_1: {'leg_r_tilt': 2809, 'leg_r_hip': 2063, 'leg_r_knee': 1840, 'leg_r_ankle': 3641, 'neck_pan': 1697, 'neck_tilt': 118, 'leg_l_tilt': 1618, 'leg_l_hip': 855, 'leg_l_knee': 2614, 'leg_l_ankle': 1337}
-      - wave_2: {'leg_r_tilt': 2807, 'leg_r_hip': 2063, 'leg_r_knee': 1840, 'leg_r_ankle': 3641, 'neck_pan': 1697, 'neck_tilt': 118, 'leg_l_tilt': 1618, 'leg_l_hip': 855, 'leg_l_knee': 2614, 'leg_l_ankle': 874}      
-      - stand_low: {'leg_r_tilt': 2790, 'leg_r_hip': 422, 'leg_r_knee': 717, 'leg_r_ankle': 3174, 'neck_pan': 1697, 'neck_tilt': 119, 'leg_l_tilt': 1578, 'leg_l_hip': 2668, 'leg_l_knee': 3342, 'leg_l_ankle': 1107}      
-      - stand_high: {'leg_r_tilt': 2790, 'leg_r_hip': 692, 'leg_r_knee': 1322, 'leg_r_ankle': 2861, 'neck_pan': 1700, 'neck_tilt': 123, 'leg_l_tilt': 1578, 'leg_l_hip': 2510, 'leg_l_knee': 2712, 'leg_l_ankle': 1560}     
-      - sit_edge: {'leg_r_tilt': 2790, 'leg_r_hip': 1918, 'leg_r_knee': 2768, 'leg_r_ankle': 2854, 'neck_pan': 1704, 'neck_tilt': 124, 'leg_l_tilt': 1577, 'leg_l_hip': 1183, 'leg_l_knee': 1332, 'leg_l_ankle': 1562}    
-      - sit_edge_swing_l: {'leg_r_tilt': 2790, 'leg_r_hip': 1918, 'leg_r_knee': 2768, 'leg_r_ankle': 2854, 'neck_pan': 1704, 'neck_tilt': 124, 'leg_l_tilt': 1577, 'leg_l_hip': 1185, 'leg_l_knee': 1789, 'leg_l_ankle': 1988}    
-      - sit_edge_swing_r: {'leg_r_tilt': 2790, 'leg_r_hip': 1918, 'leg_r_knee': 2222, 'leg_r_ankle': 2496, 'neck_pan': 1704, 'neck_tilt': 124, 'leg_l_tilt': 1577, 'leg_l_hip': 1182, 'leg_l_knee': 1345, 'leg_l_ankle': 1511}    
+      - legs_forward: {'leg_r_tilt': 246.7, 'leg_r_hip': 174.8, 'leg_r_knee': 118.6, 'leg_r_ankle': 242.0, 'neck_pan': 149.3, 'neck_tilt': 34.6, 'leg_l_tilt': 142.6, 'leg_l_hip': 90.2, 'leg_l_knee': 231.6, 'leg_l_ankle': 137.7}
+      - sit: {'leg_r_tilt': 246.7, 'leg_r_hip': 181.3, 'leg_r_knee': 161.7, 'leg_r_ankle': 319.7, 'neck_pan': 149.2, 'neck_tilt': 34.6, 'leg_l_tilt': 142.8, 'leg_l_hip': 74.9, 'leg_l_knee': 189.7, 'leg_l_ankle': 53.9}
+      - wave_1: {'leg_r_tilt': 246.9, 'leg_r_hip': 181.3, 'leg_r_knee': 161.7, 'leg_r_ankle': 319.7, 'neck_pan': 149.2, 'neck_tilt': 34.6, 'leg_l_tilt': 142.5, 'leg_l_hip': 75.1, 'leg_l_knee': 229.7, 'leg_l_ankle': 117.6}
+      - wave_2: {'leg_r_tilt': 246.8, 'leg_r_hip': 181.3, 'leg_r_knee': 161.7, 'leg_r_ankle': 319.7, 'neck_pan': 149.2, 'neck_tilt': 34.6, 'leg_l_tilt': 142.5, 'leg_l_hip': 75.1, 'leg_l_knee': 229.7, 'leg_l_ankle': 76.5}
+      - stand_low: {'leg_r_tilt': 245.3, 'leg_r_hip': 37.1, 'leg_r_knee': 62.9, 'leg_r_ankle': 279.1, 'neck_pan': 149.2, 'neck_tilt': 35.0, 'leg_l_tilt': 138.8, 'leg_l_hip': 233.1, 'leg_l_knee': 277.2, 'leg_l_ankle': 96.2}
+      - stand_high: {'leg_r_tilt': 245.3, 'leg_r_hip': 60.8, 'leg_r_knee': 116.2, 'leg_r_ankle': 251.5, 'neck_pan': 149.5, 'neck_tilt': 36.1, 'leg_l_tilt': 138.8, 'leg_l_hip': 219.7, 'leg_l_knee': 225.7, 'leg_l_ankle': 135.2}
+      - sit_edge: {'leg_r_tilt': 245.3, 'leg_r_hip': 168.7, 'leg_r_knee': 243.5, 'leg_r_ankle': 251.0, 'neck_pan': 149.8, 'neck_tilt': 36.6, 'leg_l_tilt': 138.7, 'leg_l_hip': 101.7, 'leg_l_knee': 117.1, 'leg_l_ankle': 137.2}
+      - sit_edge_swing_l: {'leg_r_tilt': 245.3, 'leg_r_hip': 168.7, 'leg_r_knee': 243.5, 'leg_r_ankle': 251.0, 'neck_pan': 149.8, 'neck_tilt': 36.6, 'leg_l_tilt': 138.7, 'leg_l_hip': 101.9, 'leg_l_knee': 157.2, 'leg_l_ankle': 176.2}
+      - sit_edge_swing_r: {'leg_r_tilt': 245.3, 'leg_r_hip': 168.7, 'leg_r_knee': 195.3, 'leg_r_ankle': 220.2, 'neck_pan': 149.8, 'neck_tilt': 36.6, 'leg_l_tilt': 138.7, 'leg_l_hip': 101.6, 'leg_l_knee': 118.2, 'leg_l_ankle': 134.7}
   instances:
     - name: "leg_r_tilt"
       model: 'ST3215'
       id: 1
-      range: [2511, 3944] # 1433 total range (4095 = 360 degrees)
-      range_degrees: 125.9
-      start: 2810
+      range: [220.9, 346.6] # converted from raw (4095 = 360 degrees)
+      start: 246.9
       # calibrate_on_boot: true
     - name: "leg_r_hip"
       model: 'ST3215'
       id: 3
-      range: [0, 2063]
-      range_degrees: 181.3
+      range: [0.0, 181.3]
       # calibrate_on_boot: true
-      # start: 1688
+      # start: 148.4
     - name: "leg_r_knee"
       model: 'ST3215'
       id: 2
-      range: [717, 3297]
-      range_degrees: 226.2
-      # start: 1345
+      range: [62.9, 295.7]
+      # start: 118.2
     - name: "leg_r_ankle"
       model: 'ST3215'
       id: 6
-      range: [2459, 3872]
-      range_degrees: 123.7
-      # start: 2762
+      range: [216.1, 340.5]
+      # start: 243.0
     - name: "neck_pan"
       model: 'ST3215'
       id: 12
-      range: [0, 3412] # 300 degrees = 3412, 360 degrees = 4095
-      range_degrees: 299.7
-      start: 1706
+      range: [0.0, 299.1] # converted from raw (4095 = 360 degrees)
+      start: 149.9
       # calibrate_on_boot: true
       # demonstrate_on_boot: true
     # - name: "neck_pan"
     #   model: 'SC09'
     #   baudrate: 115200
     #   id: 4
-    #   range: [0, 1023]
-    #   range_degrees: 300
-    #   start: 511
+    #   range: [0.0, 300.0]
+    #   start: 150.0
       # calibrate_on_boot: true
       # demonstrate_on_boot: true
       # speed: 60 # tested up to 600
@@ -78,9 +72,8 @@ bus_servo:
       model: 'SC09'
       baudrate: 115200
       id: 11
-      range: [30, 220]
-      range_degrees: 55.6
-      start: 120
+      range: [8.8, 64.5] # converted from raw (1023 = 300 degrees)
+      start: 35.2
       speed: 60 # max=0, 1 - 3000 tested
       # acceleration: 0 # max (no significant difference between this and 1 - 3000)
       # demonstrate_on_boot: true
@@ -88,36 +81,32 @@ bus_servo:
     #   model: 'SC09'
     #   baudrate: 115200
     #   id: 5
-    #   range: [0, 610] # 180 degree (may need reducing)
-    #   start: 305
+    #   range: [0.0, 179.0] # converted from raw (1023 = 300 degrees)
+    #   start: 89.5
     #   speed: 300
       # acceleration: 1
       # demonstrate_on_boot: true
     - name: "leg_l_tilt"
       model: 'ST3215'
       id: 7
-      range: [8, 1796] # 1788 total range (4095 = 360 degrees)
-      range_degrees: 156.9
-      start: 1617
+      range: [0.7, 157.8] # converted from raw (4095 = 360 degrees)
+      start: 142.1
       # calibrate_on_boot: true
     - name: "leg_l_hip"
       model: 'ST3215'
       id: 8
-      range: [853, 3098]
-      range_degrees: 197.3
-      # start: 2451 
+      range: [74.9, 279.2]
+      # start: 215.4
     - name: "leg_l_knee"
       model: 'ST3215'
       id: 9
-      range: [1332, 3404]
-      range_degrees: 181.1
-      # start: 2643
+      range: [117.1, 299.3]
+      # start: 232.2
     - name: "leg_l_ankle"
       model: 'ST3215'
       id: 10
-      range: [614, 2270]
-      range_degrees: 145.2
-      # start: 1566
+      range: [53.9, 199.3]
+      # start: 137.6
       # demonstrate_on_boot: true
 
 chatgpt:

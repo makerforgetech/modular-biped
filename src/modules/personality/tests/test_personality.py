@@ -1,3 +1,6 @@
+import sys
+from unittest.mock import MagicMock
+sys.modules['yaml'] = MagicMock()
 import unittest
 from unittest.mock import MagicMock, patch
 from modules.personality.personality import Personality
