@@ -2,99 +2,144 @@
 
 ## Overview
 
-Serial bus servos allow for efficient communication and control of multiple servos over a single bus. The `Servo` class provides a high-level interface to manage these servos, including setting positions, speeds, and handling configurations. The hardware interface is now fully backend-agnostic, supporting multiple libraries and simulation.
+Serial bus servos allow for efficient communication and control of multiple servos over a single bus. The `ServoManager` class provides a centralised, high-level interface to manage all servos on a bus, including setting positions, coordinating multi-servo motions, and handling configuration. The hardware interface is backend-agnostic, supporting multiple libraries and simulation.
 
 ## Architecture
 
-The bus_servo module now supports multiple backends:
+### ServoManager
 
-- **Waveshare**: Uses the official Waveshare ST/SC SDKs for hardware control.
-- **Rustypot**: Uses the rustypot library for Feetech and compatible servos.
-- **Simulation**: A software-only backend for debugging and development, which logs all actions instead of controlling hardware.
+`ServoManager` is the single `BaseModule` responsible for all bus servo operations:
 
-You can select the backend in your configuration. All backends implement the same interface, so you can switch between them without changing your code.
+- Owns one shared hardware controller per physical serial bus (port + baudrate).  Multiple servos on the same bus open the port **only once**, avoiding contention.
+- Maintains a registry of lightweight `ServoState` objects keyed by servo name.
+- Handles all messaging subscriptions for every managed servo.
+- Processes per-servo move queues each system-loop cycle.
+- Provides high-level APIs for coordinated motion: `move_to_pose()`, `group_move()`.
 
-All servo configuration (range, start, poses) is now in **degrees** for clarity and cross-backend compatibility.
+### ServoState
+
+`ServoState` is a lightweight per-servo holder:
+
+- Stores only configuration and logical state: name, ID, model, range, speed, acceleration, current position, move queue, and poses.
+- Does **not** own the serial port or controller.
+- Delegates every hardware operation (move, read position, torque enable/disable) to the owning `ServoManager`.
+
+### Backends
+
+| Backend | Class | Notes |
+|---------|-------|-------|
+| `waveshare` | `WaveshareBusServo` | Official Waveshare ST/SC SDKs (included). Port shared via class-level singleton. |
+| `rustypot` | `RustypotBusServo` | Rustypot library for Feetech-compatible servos. |
+| `simulation` | `SimulationBusServo` | Software-only, logs all actions; no hardware required. |
+
+All backends implement the same `BusServoBase` interface.
 
 ## Configuration
 
-The configuration file (e.g. `environments/cody.yml`) contains the configuration for each bus servo. The `instances` section defines the servos, their IDs, and their initial positions, all in degrees. The `poses` section defines named poses, also in degrees.
+Servos are declared in the environment YAML file (e.g. `environments/cody.yml`) under a single `bus_servo` entry.  All servo instances are listed under `config.servos`; the `ServoManager` is instantiated **once** and manages all of them.
 
-## Getting Started / Calibration
-
-To calibrate the servos, each must have their ID set individually. To achieve this, connect one servo to the driver board and run `modules/actuators/bus_servo/change_id.py`. This script will prompt you to enter the ID for the connected servo, which will then be saved permanently on the servo.
-
-If you have challenges understanding the current ID of the servo, run `modules/actuators/bus_servo/libraries/waveshare/STServo_examples/read_all.py` or `modules/actuators/bus_servo/libraries/waveshare/SCServo_examples/read_all.py` depending on the servo type. This script will read and display the current ID of the connected servo.
-
-Once the ID has been set for all servos, you can use the `Servo` class to control them by enabling it in the environment yaml file.
-
-### Centering
-The servos raw value range is between 0-4095 for ST servos and 0-1024 for SC servos, this equates to 360 and 300 degrees respectively. The position readout can wrap around, so the servos should be set to the midpoint before mounting them in the robot otherwise it can result in the servo passing the wrong way through the range of values, which could damage the robot.  
-
-The `change_id.py` script will set the servo to the midpoint when changing the ID. The servo should then be mounted in the robot at roughly the midpoint position.
-
-You can also enable `center_on_boot` for each servo in the configuration file, which will move the servo to the center of its range on initialization.
-
-
-### Calibration
-To calibrate the servo positions, set the flag `calibrate_on_boot` to `true` in the configuration file for each instance (servo). This will cause the servo to output it's current position in the debug log, which can then be copied into the start position, or range. Servos can be manually moved to any position to identify their range or certain poses. 
-
-Finally, set `calibrate_on_boot` to false and re-run the program to start using the servos with their configured positions.
-
-### Demonstration
-
-To demonstrate the servo movement on boot, set the flag `demonstrate_on_boot` to `true` in the configuration file for each instance (servo). This will cause the servo to move to its minimum and maximum positions once on initialization, allowing you to see the range of motion.
-
-## Subscriptions and direct command
-
-The `Servo` class subscribes to the following topics:
-`servo:<identifier>:mv` - to move the servo to a specific position relative to it's current position.
-`servo:<identifier>:mvabs` - to move the servo to a specific position with absolute values.
-
-The environment configuration can also inject the servos into a module for direct control:
-
+```yaml
+bus_servo:
+  enabled: true
+  config:
+    backend: 'waveshare'   # waveshare | rustypot | simulation
+    poses:
+      - stand: {leg_r_tilt: 246.7, leg_l_tilt: 142.6, ...}
+    servos:
+      - name: leg_r_tilt
+        model: ST3215
+        id: 1
+        range: [220.9, 346.6]
+        start: 246.9
+      - name: neck_tilt
+        model: SC09
+        baudrate: 115200   # overrides the default baudrate for this servo
+        id: 11
+        range: [8.8, 64.5]
+        start: 35.2
+        speed: 60
 ```
+
+## Injecting into other modules
+
+Inject the `ServoManager` into modules that need direct servo access:
+
+```yaml
 my_module:
   enabled: true
   inject:
-    servos: "Servo_*"
+    servos: ServoManager
 ```
 
-You can then directly call the servo such as:
+Because `ServoManager` exposes a dict-like interface, existing code that accesses servos via `self.servos[name]` continues to work unchanged:
 
-```
+```python
 self.servos['neck_tilt'].move_relative(pitch)
-self.servos['neck_tilt'].move(pitch)
+self.servos['neck_pan'].move(150)
+for name, servo in self.servos.items():
+    servo.detach()
 ```
 
-## Smooth initialization
+## Messaging
 
-Because the `Servo` class gets the current position of the servo on initialization, there is no danger of a servo jumping from an unknown position to the start position. This is especially useful when the servos are powered on in a random position and is an advantage over hobby servos.
+The manager subscribes automatically for every servo listed in `config.servos`:
+
+| Topic | Action |
+|-------|--------|
+| `servo:<name>:mvabs` | Queue absolute move (degrees) |
+| `servo:<name>:mv` | Queue relative move (delta degrees) |
+| `servo:<name>:queue` | Alias for absolute move |
+| `servo/pose` | Move all servos to a named pose |
+
+## Coordinated motion
+
+Use `group_move()` to queue moves for multiple servos in one call:
+
+```python
+self.servo_manager.group_move({
+    'leg_l_hip': 180,
+    'leg_r_hip': 180,
+    'leg_l_knee': 90,
+    'leg_r_knee': 90,
+})
+```
+
+Or publish a named pose to move all servos simultaneously:
+
+```python
+self.publish('servo/pose', pose_name='stand_low')
+```
+
+## Getting Started / Calibration
+
+To calibrate the servos, each must have their ID set individually. Connect one servo to the driver board and run `modules/actuators/bus_servo/change_id.py`. This script will prompt you to enter the ID for the connected servo.
+
+If you need to discover a servo's current ID, run `modules/actuators/bus_servo/libraries/waveshare/STServo_examples/read_all.py` (ST) or the SC equivalent.
+
+### Centering
+
+Servo raw values range from 0–4095 (ST, 360°) or 0–1024 (SC, 300°). Set servos to their midpoint before mounting to avoid wrapping through the wrong direction.
+
+### Calibration via `calibrate_on_boot`
+
+Set `calibrate_on_boot: true` for a servo in the config to continuously log its current position. Move the servo manually, then copy min/max values into `range`.  Disable the flag when done.
+
+### Demonstration
+
+Set `demonstrate_on_boot: true` to sweep a servo through its full range on startup.
 
 ## SC vs ST servos
 
-The `Servo` class supports both ST and SC series servos from Waveshare, Feetech and compatible servos. The type of servo is determined by the `model` variable in the configuration file, and the backend is selected via the `backend` parameter. The class will automatically use the appropriate backend for the specified servo type.
+Both families are supported via the same backend; the `model` field selects the correct SDK.  ST servos (e.g. ST3215) have 360° range and support continuous-rotation mode.  SC servos (e.g. SC09) have a 300° range.
 
-There are some limitations to the SC servos as they do not support continuous rotation and have a lower rotational range compared to the ST servos. The simulation backend is useful for development and debugging without hardware.
+## Notes
 
-## Backends
-
-- **WaveshareBusServo**: Uses the official Waveshare SDKs for ST/SC servos (this library is included in this repo).
-- **RustypotBusServo**: Uses the rustypot library for Feetech and compatible servos (this library is referenced via python import).
-- **SimulationBusServo**: Simulates servo behavior and logs all actions for debugging (no library required).
-
-All backends implement the same methods, including movement, speed, torque, calibration, and error handling.
-
-## Notes during testing
-
-- Speed: between 0 and 3000 for SC servos tested, 0 is max, then 1-3000 increases speed.
-- Acceleration: between 0 and 3000 for SC servos tested, 0 is max but no significant difference observed between values.
-- Overload error occurring fairly frequently on SC servos using Waveshare library. However when testing with scheduled movements the issue is far less frequent. This may be due to sending commands too quickly in succession. Cycling torque off/on seems to resolve the error, otherwise you need to power cycle the servo.
-- To disable torque on SC servos use: `self.packetHandler.write1ByteTxRx(self.portHandler, self.index, ADDR_TORQUE_ENABLE, 0)`, change the 0 to 1 to enable torque.
-- In some cases the overload error does seem to be caused by load on the servo, in which case toggling the torque does not resolve this. The neck pan is an example of this where the SC servo needed to be replaced with the more powerful ST servo.
+- Speed: 0 = max on SC servos; 1–3000 slows it down.
+- Overload errors on SC servos can sometimes be resolved by toggling torque off/on.
 
 ## References
-https://www.waveshare.com/wiki/ST3215_Servo
-https://www.waveshare.com/wiki/SC09_Servo
-https://www.waveshare.com/wiki/Bus_Servo_Adapter_(A)
-https://github.com/pollen-robotics/rustypot
+
+- https://www.waveshare.com/wiki/ST3215_Servo
+- https://www.waveshare.com/wiki/SC09_Servo
+- https://www.waveshare.com/wiki/Bus_Servo_Adapter_(A)
+- https://github.com/pollen-robotics/rustypot

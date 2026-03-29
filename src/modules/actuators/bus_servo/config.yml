@@ -1,5 +1,5 @@
 bus_servo:
-  class: Servo
+  class: ServoManager
   dependencies:
     python:
       - rustypot
