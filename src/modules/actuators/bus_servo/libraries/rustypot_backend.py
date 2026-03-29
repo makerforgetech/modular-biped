@@ -3,21 +3,42 @@ from .utils import degrees_to_radians, radians_to_degrees
 import numpy as np
 
 class RustypotBusServo(BusServoBase):
-        
+    # Class-level dictionary to store controller singletons by (port, baudrate)
+    _controller_singletons = {}
+
     def __init__(self, servo_id, model, port, baudrate=1000000, range=None, range_degrees=None, **kwargs):
         super().__init__(servo_id, model, port, baudrate, range, **kwargs)
-        if model.startswith('ST'):
-            from rustypot import Sts3215PyController
-            self.controller = Sts3215PyController(port, baudrate, 0.1)
-            self.max_rad = np.deg2rad(360)
-            self.min_rad = 0
-        elif model.startswith('SC'):
-            from rustypot import Scs0009PyController
-            self.controller = Scs0009PyController(port, baudrate, 0.1)
-            self.max_rad = np.deg2rad(300)
-            self.min_rad = 0
+        key = (port)
+        if key in RustypotBusServo._controller_singletons:
+            self.controller = RustypotBusServo._controller_singletons[key]['controller']
+            # Set max_rad/min_rad based on the controller type already created
+            self.max_rad = RustypotBusServo._controller_singletons[key]['max_rad']
+            self.min_rad = RustypotBusServo._controller_singletons[key]['min_rad']
+            existing_model = RustypotBusServo._controller_singletons[key]['model']
+            if (model.startswith('ST') and not existing_model.startswith('ST')) or (model.startswith('SC') and not existing_model.startswith('SC')):
+                self.log(f"Warning: Attempted to create a {model} controller for port {port}, but a {existing_model} controller already exists. Reusing the existing controller.")
         else:
-            raise ValueError(f"Unknown model: {model}")
+            if model.startswith('ST'):
+                from rustypot import Sts3215PyController
+                controller = Sts3215PyController(port, baudrate, 0.1)
+                max_rad = np.deg2rad(360)
+                min_rad = 0
+            elif model.startswith('SC'):
+                from rustypot import Scs0009PyController
+                controller = Scs0009PyController(port, baudrate, 0.1)
+                max_rad = np.deg2rad(300)
+                min_rad = 0
+            else:
+                raise ValueError(f"Unknown model: {model}")
+            RustypotBusServo._controller_singletons[key] = {
+                'controller': controller,
+                'model': model,
+                'max_rad': max_rad,
+                'min_rad': min_rad
+            }
+            self.controller = controller
+            self.max_rad = max_rad
+            self.min_rad = min_rad
         
     def get_speed(self, unit='degrees'):
         rad_s = self.controller.read_present_speed(self.servo_id)
@@ -69,13 +90,19 @@ class RustypotBusServo(BusServoBase):
 
     def get_position(self, unit='degrees'):
         rad = self.controller.read_present_position(self.servo_id)
+        # Ensure rad is a scalar, not a numpy array
+        if isinstance(rad, np.ndarray):
+            rad = float(rad.item())
         if unit == 'degrees':
-            return np.rad2deg(rad)
+            deg = np.rad2deg(rad)
+            if isinstance(deg, np.ndarray):
+                deg = float(deg.item())
+            return deg
         elif unit == 'radians':
-            return rad
+            return float(rad)
         elif unit == 'raw':
             # Not directly supported; return radians as raw
-            return rad
+            return float(rad)
         else:
             raise ValueError(f"Unknown unit: {unit}")
 

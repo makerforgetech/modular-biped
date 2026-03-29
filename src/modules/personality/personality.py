@@ -222,7 +222,7 @@ class Personality(BaseModule):
         # self.servos['leg_l_ankle'].move_relative(50)
         # self.scan_vision()
         # self.output_current_pose()
-        # self.publish('servo/pose', pose_name='wave_1') # For testing pose movement
+        # self.publish('servo/pose', pose_name='stand_low_narrow') # For testing pose movement
         # time.sleep(1)
         # current_pose = self.estimate_current_pose()
         # if current_pose not in self.servos['leg_r_tilt'].poses:
@@ -252,8 +252,8 @@ class Personality(BaseModule):
         now = time.time()
         self.cycle_display()
         self.balance()
-        self.chicken_head()
-        self.one_leg_balance()
+        # self.chicken_head()
+        # self.one_leg_balance()
         self.estimate_current_pose()
         
         # Handle ongoing object reaction

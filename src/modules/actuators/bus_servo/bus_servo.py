@@ -12,6 +12,7 @@ class Servo(BaseModule):
         Servo class
         """
         self.backend = kwargs.get('backend', 'waveshare')
+        print(f"Creating servo with backend {self.backend}")
         self.identifier = kwargs.get('name')
         self.model = kwargs.get('model', 'ST')
         self.index = kwargs.get('id')
@@ -162,10 +163,20 @@ class Servo(BaseModule):
         
         
     def is_moving(self):
-        if self.backend_servo.get_moving() == 1:
+        try:
+            moving = self.backend_servo.get_moving()
+        except Exception as e:
+            self.log(f"Exception in get_moving for servo {self.identifier}: {e}", level='error')
+            return False
+        if moving == 1:
             return True
-        elif abs(self.pos - self.get_position()) > 2:
-            print(f"Warning: Servo {self.identifier} is not reporting as moving but position {self.get_position()} does not match target position {self.pos}")
+        try:
+            pos = self.get_position()
+        except Exception as e:
+            self.log(f"Exception in get_position for servo {self.identifier}: {e}", level='error')
+            return False
+        if abs(self.pos - pos) > 2:
+            self.log(f"Warning: Servo {self.identifier} is not reporting as moving but position {pos} does not match target position {self.pos}", level='warning')
         return False
         
     def get_position(self):
