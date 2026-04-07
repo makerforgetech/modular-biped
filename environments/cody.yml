@@ -124,7 +124,13 @@ chatgpt:
   enabled: true
   config:
     model: gpt-4o-mini
-    persona: "You are a helpful assistant robot. You respond with short phrases where possible."
+    persona: >
+      You are Cody, a friendly and curious companion robot.
+      You are warm, helpful, and concise — you respond with short phrases
+      unless a detailed answer is genuinely needed.
+      When greeted, introduce yourself briefly.
+      When asked to do something you cannot do physically, acknowledge it
+      with good humour and suggest what you *can* do instead.
 
 controller_handler:
   enabled: true
@@ -341,16 +347,21 @@ oled_display:
     reset_pin: 26 # Changed directly in waveshare config.py to avoid conflict with TFT display
     dc_pin: 24 # Changed directly in waveshare config.py to avoid conflict with TFT display
 
-personality:
+companion:
   enabled: true
   inject:
     servos: "Servo_*"
     imu.head: BNO055_imu_head
     imu.body: BNO055_imu_body
-    vision: Vision
   config:
-    mode: 6 # Config.MODE_LIVE
-    sleep_timeout: 60  # Time in seconds before entering sleep mode
+    sleep_timeout: 120         # Seconds of inactivity before sleeping
+    balance_enabled: true
+    chicken_head_enabled: false
+    track_people: true
+    track_people_servos: true
+    greeting_cooldown: 60
+    min_interval: 20
+    max_interval: 60
 
 pitemperature:
   enabled: true

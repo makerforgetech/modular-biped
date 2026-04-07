@@ -1,0 +1,11 @@
+companion:
+  config:
+    sleep_timeout: 120         # Seconds of inactivity before entering sleep state
+    balance_enabled: true      # Use body IMU to keep the robot balanced
+    chicken_head_enabled: false # Use head IMU to stabilise head orientation
+    track_people: true         # Track detected people with the eye display
+    track_people_servos: false # Also move neck servos to follow detected people
+    greeting_cooldown: 60      # Minimum seconds between greeting the same visitor
+    min_interval: 20           # Minimum seconds between idle actions
+    max_interval: 60           # Maximum seconds between idle actions
+  class: Companion
