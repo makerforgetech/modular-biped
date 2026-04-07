@@ -151,7 +151,7 @@ class TestCompanionSleepManagement(unittest.TestCase):
         self.c = _make_companion(sleep_timeout=1)
 
     def test_sleeps_after_timeout(self):
-        self.c.last_interaction_time = time.time() - 5
+        self.c.last_interaction_time = time.time() - (self.c.sleep_timeout + 1)
         self.c._on_second()
         self.assertEqual(self.c.state, Companion.STATE_SLEEPING)
 

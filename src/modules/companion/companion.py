@@ -267,9 +267,9 @@ class Companion(BaseModule):
         cy = bbox[1] + bbox[3] / 2
         sx = int((cx / camera[0]) * screen[0])
         sy = int((cy / camera[1]) * screen[1])
-        # Rotate 90° anticlockwise then flip x to match display orientation
-        sx, sy = sy, screen[0] - sx
-        sx = screen[0] - sx
+        # Rotate 90° anticlockwise then flip horizontally to match display
+        # orientation: (sx, sy) → (screen[0] - sy, screen[0] - sx)
+        sx, sy = screen[0] - sy, screen[0] - sx
         # Scale to the inner 50% of the display to reduce jitter
         sx = int(sx * 0.5) + screen[0] // 4
         sy = int(sy * 0.5) + screen[1] // 4
