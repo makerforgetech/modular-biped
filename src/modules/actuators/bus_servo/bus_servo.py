@@ -6,44 +6,99 @@ import select
 import time
 from modules.base_module import BaseModule
 from modules.actuators.bus_servo.libraries.factory import BusServoFactory
-
-
-class ServoState:
-    """
-    Lightweight servo configuration and state holder.
-
-    Stores per-servo identity and logical state (position, queue) only.
-    All hardware operations are delegated to the owning ServoManager so
-    that a single shared controller instance handles every servo on a bus.
-    """
-
-    def __init__(self, manager, **kwargs):
-        self._manager = manager
+class Servo(BaseModule):
+    def __init__(self, **kwargs):
+        """
+        Servo class
+        """
+        self.backend = kwargs.get('backend', 'waveshare')
+        print(f"Creating servo with backend {self.backend}")
         self.identifier = kwargs.get('name')
         self.model = kwargs.get('model', 'ST')
         self.index = kwargs.get('id')
         self.range = kwargs.get('range')
-        self.start = kwargs.get('start')
-        self.port = kwargs.get('port', '/dev/ttyAMA0')
+        self.start = kwargs.get('start') # Default start position
+        self.poses = kwargs.get('poses')  # Dictionary of poses
         self.baudrate = kwargs.get('baudrate', 1000000)
-        self.speed = kwargs.get('speed', 300)
-        self.acceleration = kwargs.get('acceleration', 50)
+        self.port = kwargs.get('port', '/dev/ttyAMA0') # Change as needed, find with `ls /dev/ttyAMA*`
+        self.calibrate_on_boot = kwargs.get('calibrate_on_boot', False) # Loop to show position for manual configuration
+        self.demonstrate_on_boot = kwargs.get('demonstrate_on_boot', False) # Move to min and max to demonstrate range
+        self.center_on_boot = kwargs.get('center_on_boot', False) # Move to center of range on boot
         self.pos = None
+        self.speed = kwargs.get('speed', 300) # 3073
+        self.acceleration = kwargs.get('acceleration', 50)
         self._move_queue = collections.deque()
+        poses_list = kwargs.get('poses', [])
+        self.poses = {list(pose.keys())[0]: list(pose.values())[0] for pose in poses_list}
 
-        # Accept either a pre-converted poses dict or a list of single-key dicts
-        poses = kwargs.get('poses', [])
-        if isinstance(poses, dict):
-            self.poses = poses
+        # Backend selection
+        
+        self.backend_servo = BusServoFactory.create(
+            backend=self.backend,
+            model=self.model,
+            servo_id=self.index,
+            port=self.port,
+            baudrate=self.baudrate,
+            range=self.range,
+        )
+        
+    def detach(self):
+        # Detach servo using backend
+        self.backend_servo.detach()
+    
+    def exit(self):
+        self.detach()
+        self.backend_servo.exit()
+
+    def setup_messaging(self):
+        self.subscribe('servo:' + self.identifier + ':mvabs', self.move)
+        self.subscribe('servo:' + self.identifier + ':mv', self.move_relative)
+        self.subscribe('servo:' + self.identifier + ':queue', self.move)
+        self.subscribe('system/exit', self.exit)
+        self.subscribe('servo/pose', self.move_to_pose)
+        
+        if self.calibrate_on_boot:
+            self.calibrate_dynamic() # Log will show current position repeatedly to help with manual configuration
+        
+        self.pos = self.get_position()  # Get initial position to avoid jumping from unknown position
+        
+        if self.center_on_boot:
+            self.calibrate_to_center()
+        
+        if self.demonstrate_on_boot:
+            self.log(f"Demonstrating servo {self.identifier} movement, speed={self.speed}, acceleration={self.acceleration}")
+            if self.range is not None:
+                self.move(self.range[0]) # Move to min range
+                self.move((self.range[0] + self.range[1]) // 2) # Move to center
+                self.move(self.range[1]) # Move to max range
+            else:
+                self.log(f"Range not set for servo {self.identifier}, cannot demonstrate movement", level='warning')
+        
+        # Move to start position
+        # if self.get_pose_value('stand') is not None:
+            # self.start = self.get_pose_value('stand')
+        if self.start is not None:
+            self.move(self.start)
+        
+    def move_to_pose(self, pose_name):
+        # print(self.poses)
+        pose_value = self.poses.get(pose_name)
+        # print(f"{self.identifier} - Pose '{pose_name}' value: {pose_value}")
+        my_pose_value = pose_value.get(self.identifier)
+        print(f"Moving servo {self.identifier} to pose '{pose_name}' with value {my_pose_value}")
+        if my_pose_value is not None:
+            self.move(my_pose_value)
         else:
-            self.poses = {list(p.keys())[0]: list(p.values())[0] for p in poses}
-
-    # ------------------------------------------------------------------
-    # Queue helpers
-    # ------------------------------------------------------------------
-
+            self.log(f"Pose '{pose_name}' not found for servo {self.identifier}", level='warning')
+            
     def move(self, position, speed=None, acceleration=None, delay=0, **kwargs):
-        """Queue a move to an absolute position (degrees)."""
+        """
+        Add a move request to the queue.
+        :param position: Target position
+        :param speed: Optional speed override
+        :param acceleration: Optional acceleration override
+        :param delay: Optional delay in seconds before executing (for animation)
+        """
         self._move_queue.append({
             'position': position,
             'speed': speed if speed is not None else self.speed,
@@ -52,293 +107,158 @@ class ServoState:
             'delay': delay,
         })
 
-    def move_relative(self, delta):
-        """Queue a relative move from the current position."""
-        if self.pos is None:
-            return
-        new_position = round(self.pos + delta)
-        if self.range:
-            if new_position < self.range[0] or new_position > self.range[1]:
-                new_position = self.range[0] if new_position < self.range[0] else self.range[1]
-        self.move(new_position)
-
-    # ------------------------------------------------------------------
-    # Hardware delegates → ServoManager
-    # ------------------------------------------------------------------
-
-    def detach(self):
-        """Disable torque via the manager."""
-        self._manager.detach_servo(self.identifier)
-
-    def attach(self):
-        """Enable torque via the manager."""
-        self._manager.attach_servo(self.identifier)
-
-    def get_position(self):
-        """Return the current hardware position (degrees) via the manager."""
-        return self._manager.get_servo_position(self.identifier)
-
-    def is_moving(self):
-        """Return True if the servo is still moving (via the manager)."""
-        return self._manager.is_servo_moving(self.identifier)
-
-    def calibrate_to_center(self):
-        """Move the servo to the centre of its range via the manager."""
-        self._manager.calibrate_servo_to_center(self.identifier)
-
-
-class ServoManager(BaseModule):
-    """
-    Central manager for all bus servos.
-
-    Owns the shared hardware backend controller(s) and manages every servo
-    operation, including coordinated group moves and pose transitions.
-
-    ServoState instances are lightweight holders that delegate all hardware
-    access through this manager, ensuring:
-      - a single serial port is opened per bus;
-      - motion commands can be batched, sequenced, or synchronised;
-      - all hardware access is serialised through one place.
-
-    The manager exposes a dict-like interface (``__getitem__``, ``items()``,
-    ``values()``, ``get()``) so existing code that treats the injected
-    ``servos`` attribute as a ``{name: servo}`` mapping continues to work
-    without modification.
-    """
-
-    def __init__(self, **kwargs):
-        self.backend = kwargs.get('backend', 'waveshare')
-        self._default_port = kwargs.get('port', '/dev/ttyAMA0')
-        self._default_baudrate = kwargs.get('baudrate', 1000000)
-        self._default_speed = kwargs.get('speed', 300)
-        self._default_acceleration = kwargs.get('acceleration', 50)
-
-        # Shared poses: {pose_name: {servo_name: position_degrees}}
-        poses_list = kwargs.get('poses', [])
-        self._poses = {list(p.keys())[0]: list(p.values())[0] for p in poses_list}
-
-        self._servos = {}          # {name: ServoState}
-        self._servo_backends = {}  # {name: BusServoBase}
-
-        for servo_cfg in kwargs.get('servos', []):
-            # Apply manager-level defaults where the servo config does not
-            # supply its own value, then override with servo-specific values.
-            full_cfg = {
-                'port': self._default_port,
-                'baudrate': self._default_baudrate,
-                'speed': self._default_speed,
-                'acceleration': self._default_acceleration,
-                **servo_cfg,
-                'poses': self._poses,  # share the global poses dict
-            }
-            servo_state = ServoState(manager=self, **full_cfg)
-            self._servos[servo_state.identifier] = servo_state
-
-            # Create per-servo backend.  Port/controller sharing is handled
-            # transparently by class-level singletons inside each backend class.
-            backend = BusServoFactory.create(
-                backend=self.backend,
-                model=servo_state.model,
-                servo_id=servo_state.index,
-                port=servo_state.port,
-                baudrate=servo_state.baudrate,
-                range=servo_state.range,
-            )
-            self._servo_backends[servo_state.identifier] = backend
-
-    # ------------------------------------------------------------------
-    # Dict-like interface for backward-compatible injection
-    # ------------------------------------------------------------------
-
-    def __getitem__(self, key):
-        return self._servos[key]
-
-    def __iter__(self):
-        return iter(self._servos)
-
-    def __contains__(self, key):
-        return key in self._servos
-
-    def items(self):
-        return self._servos.items()
-
-    def values(self):
-        return self._servos.values()
-
-    def get(self, key, default=None):
-        return self._servos.get(key, default)
-
-    # ------------------------------------------------------------------
-    # BaseModule hooks
-    # ------------------------------------------------------------------
-
-    def setup_messaging(self):
-        """Subscribe to per-servo and global topics for all managed servos."""
-        for name, servo in self._servos.items():
-            self.subscribe(f'servo:{name}:mvabs', servo.move)
-            self.subscribe(f'servo:{name}:mv', servo.move_relative)
-            self.subscribe(f'servo:{name}:queue', servo.move)
-        self.subscribe('servo/pose', self.move_to_pose)
-        self.subscribe('system/exit', self.exit)
-
-        # Initialise positions and queue start moves
-        for name, servo in self._servos.items():
-            try:
-                servo.pos = self.get_servo_position(name)
-            except Exception:
-                if servo.start is not None:
-                    servo.pos = servo.start
-                elif servo.range:
-                    servo.pos = servo.range[0]
-                else:
-                    servo.pos = 0
-                    self.log(
-                        f"No range or start configured for servo {name}; "
-                        f"initialising position to 0",
-                        level='warning',
-                    )
-            if servo.start is not None:
-                servo.move(servo.start)
-
     def loop(self):
-        """Process every servo's move queue once per system-loop cycle."""
-        for servo in self._servos.values():
-            self._process_servo_queue(servo)
+        """Called every system loop cycle to drain the move queue."""
+        self._process_queue()
 
-    # ------------------------------------------------------------------
-    # Internal queue processing
-    # ------------------------------------------------------------------
-
-    def _process_servo_queue(self, servo):
-        """Drain one item from the given servo's queue if the servo is idle."""
-        if not servo._move_queue:
+    def _process_queue(self, **kwargs):
+        """
+        Process the next item in the move queue if the servo is not moving.
+        Called every loop cycle.
+        """
+        if not self._move_queue:
             return
-        if self.is_servo_moving(servo.identifier):
+        if self.is_moving():
             return
-        next_item = servo._move_queue[0]
+        next_item = self._move_queue[0]
         if time.time() - next_item['timestamp'] >= next_item['delay']:
-            servo._move_queue.popleft()
-            self._do_move(servo, next_item['position'],
-                          next_item['speed'], next_item['acceleration'])
+            self._move_queue.popleft()
+            self._do_move(next_item['position'], next_item['speed'], next_item['acceleration'])
 
-    def _do_move(self, servo, position, speed=None, acceleration=None):
-        """Execute a single hardware move for the given ServoState."""
+    def _do_move(self, position, speed=None, acceleration=None):
+        """
+        Move the servo to an absolute position.
+        :param position: Position to move to
+        :param speed: Optional speed override
+        :param acceleration: Optional acceleration override
+        """
         if position is None:
-            self.log(f"Position is None for servo {servo.identifier}, cannot move",
-                     level='error')
+            self.log(f"Position is None for servo {self.identifier}, cannot move", level='error')
             return
-        if servo.range and (position < servo.range[0] or position > servo.range[1]):
-            self.log(
-                f"Position {position} out of range "
-                f"({servo.range[0]}-{servo.range[1]})",
-                level='error',
-            )
+        if position < self.range[0] or position > self.range[1]:
+            self.log(f"Position {position} out of range ({self.range[0]}-{self.range[1]})", level='error')
             return
-        backend = self._servo_backends.get(servo.identifier)
-        if backend is None:
-            return
-        if speed is not None and hasattr(backend, 'set_speed'):
-            backend.set_speed(speed)
-        if acceleration is not None and hasattr(backend, 'set_acceleration'):
-            backend.set_acceleration(acceleration)
-        backend.move_to(position, unit='degrees')
-        servo.pos = position
-
-    # ------------------------------------------------------------------
-    # High-level coordination APIs
-    # ------------------------------------------------------------------
-
-    def move_to_pose(self, pose_name):
-        """Queue moves for all servos to the positions defined in the named pose."""
-        pose_values = self._poses.get(pose_name, {})
-        if not pose_values:
-            self.log(f"Pose '{pose_name}' not found", level='warning')
-            return
-        for servo_name, position in pose_values.items():
-            if servo_name in self._servos:
-                self._servos[servo_name].move(position)
-
-    def group_move(self, moves):
+        # Apply per-move speed/acceleration overrides if supported by backend
+        if speed is not None and hasattr(self.backend_servo, 'set_speed'):
+            self.backend_servo.set_speed(speed)
+        if acceleration is not None and hasattr(self.backend_servo, 'set_acceleration'):
+            self.backend_servo.set_acceleration(acceleration)
+        # Delegate to backend
+        self.backend_servo.move_to(position, unit='degrees')
+        self.pos = position
+    
+    def move_relative(self, delta):
         """
-        Queue coordinated moves for multiple servos.
-
-        :param moves: ``{servo_name: position}`` dict or iterable of
-                      ``(servo_name, position)`` pairs.
+        Move the servo relative to its current position.
+        :param delta: Change in position (can be negative)
         """
-        if isinstance(moves, dict):
-            moves = moves.items()
-        for servo_name, position in moves:
-            if servo_name in self._servos:
-                self._servos[servo_name].move(position)
-
-    # ------------------------------------------------------------------
-    # Per-servo hardware delegates
-    # ------------------------------------------------------------------
-
-    def get_servo_position(self, servo_name):
-        """Return the current hardware position (degrees) of the named servo."""
-        backend = self._servo_backends.get(servo_name)
-        if backend is None:
-            return None
-        return backend.get_position(unit='degrees')
-
-    def is_servo_moving(self, servo_name):
-        """Return True if the named servo is still moving."""
-        servo = self._servos.get(servo_name)
-        backend = self._servo_backends.get(servo_name)
-        if servo is None or backend is None:
-            return False
+        # self.log(f"Moving servo {self.identifier} from {self.pos} by delta {delta}")
+        new_position = round(self.pos + delta)
+        if new_position < self.range[0] or new_position > self.range[1]:
+            self.log(f"Position {new_position} out of range ({self.range[0]}-{self.range[1]}). Adjusting", level='warning')
+            new_position = self.range[0] if new_position < self.range[0] else self.range[1]
+        
+        # Move to new position
+        self.move(new_position)
+        
+        
+    def is_moving(self):
         try:
-            moving = backend.get_moving()
+            moving = self.backend_servo.get_moving()
         except Exception as e:
-            self.log(f"Exception in get_moving for servo {servo_name}: {e}",
-                     level='error')
+            self.log(f"Exception in get_moving for servo {self.identifier}: {e}", level='error')
             return False
         if moving == 1:
             return True
-        if servo.pos is not None:
-            try:
-                pos = self.get_servo_position(servo_name)
-                if pos is not None and abs(servo.pos - pos) > 2:
-                    self.log(
-                        f"Servo {servo_name} not reported as moving but position "
-                        f"mismatch: target={servo.pos}, current={pos}",
-                        level='warning',
-                    )
-            except Exception:
-                pass
+        try:
+            pos = self.get_position()
+        except Exception as e:
+            self.log(f"Exception in get_position for servo {self.identifier}: {e}", level='error')
+            return False
+        if abs(self.pos - pos) > 2:
+            self.log(f"Warning: Servo {self.identifier} is not reporting as moving but position {pos} does not match target position {self.pos}", level='warning')
         return False
+        
+    def get_position(self):
+        """
+        Get the current position of the servo.
+        """
+        return self.backend_servo.get_position(unit='degrees')
+    
+    def get_pose_value(self, pose_name):
+        """
+        Returns the position value for the given pose name from self.poses.
+        """
+        if not self.poses:
+            return None
+        return self.poses.get(pose_name)
 
-    def detach_servo(self, servo_name):
-        """Disable torque on the named servo."""
-        backend = self._servo_backends.get(servo_name)
-        if backend:
-            backend.detach()
+    def calibrate_to_center(self):
+        """
+        Move the servo to the center of its range using the backend implementation.
+        """
+        self.backend_servo.calibrate_to_center()
 
-    def attach_servo(self, servo_name):
-        """Enable torque on the named servo."""
-        backend = self._servo_backends.get(servo_name)
-        if backend:
-            backend.attach()
+    def calibrate(self):
+        """
+        Move each servo to capture min and max positions for calibration.
+        """
+        self.log(f"Move servo {self.identifier} to minimum position and press any key...")
+        getch()  # Waits for a single key press
+        min = self.get_position()
+        self.log(f"Captured minimum position: {min}")
+        self.log(f"Move servo {self.identifier} to maximum position and press any key...")
+        getch()  # Waits for a single key press
+        max = self.get_position()
+        self.log(f"Captured maximum position: {max}")
+        self.range = (min, max)
+        if self.start is not None and (self.start < min or self.start > max):
+            self.start = (min + max) // 2
+            self.log(f"Start position {self.start} out of new range, setting to midpoint {self.start}")
+        self.log(f"Updated range for {self.identifier}: {self.range}. Start position: {self.start}")
 
-    def calibrate_servo_to_center(self, servo_name):
-        """Move the named servo to the centre of its configured range."""
-        backend = self._servo_backends.get(servo_name)
-        if backend:
-            backend.calibrate_to_center()
+    def calibrate_dynamic(self):
+        """
+        Continuously log the current position to help with manual calibration.
+        Store min an max as they are found.
+        Complete on key press. and store in self.range
+        """
+        self.log(f"Calibrating servo {self.identifier}. Move the servo to find min and max positions. Press any key to finish...")
+        self.detach()
+        min_pos = None
+        max_pos = None
+        try:
+            while True:
+                pos = round(self.get_position(), 2)
+                if pos is None:
+                    self.log(f"Failed to get position for servo {self.identifier}", level='warning')
+                    continue
+                if min_pos is None or pos < min_pos:
+                    min_pos = pos
+                if max_pos is None or pos > max_pos:
+                    max_pos = pos
+                # Print on the same line, pad with spaces to clear previous content
+                # (4095 = 360 degrees, so 1264 = 111 degrees)
+                range_degrees = max_pos - min_pos if min_pos is not None and max_pos is not None else 'N/A'
+                print(f"\rCurrent position: {pos}, Min: {min_pos}, Max: {max_pos} Range: {range_degrees}", end='', flush=True)
+                time.sleep(0.05)
+                if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+                    sys.stdin.read(1)  # Consume the key so buffer is cleared
+                    break
+        except KeyboardInterrupt:
+            # No need to handle as this is to allow changing selected servo
+            pass
+        print()  # Move to next line after loop
+        if min_pos is not None and max_pos is not None:
+            self.range = (min_pos, max_pos)
+            self.log(f"Calibration complete for {self.identifier}. Range: {self.range}")
+        else:
+            self.log(f"No positions recorded during calibration for {self.identifier}.", level='warning')
+            
+        if self.start is not None and (self.start < min_pos or self.start > max_pos):
+            self.start = (min_pos + max_pos) // 2
+            self.log(f"Start position {self.start} out of new range, setting to midpoint {self.start}")
 
-    def detach_all(self):
-        """Disable torque on every managed servo."""
-        for name in self._servos:
-            self.detach_servo(name)
-
-    def exit(self, **kwargs):
-        """Disable torque and release all backends on system exit."""
-        self.detach_all()
-        for backend in self._servo_backends.values():
-            try:
-                backend.exit()
-            except Exception:
-                pass
+    
 
 

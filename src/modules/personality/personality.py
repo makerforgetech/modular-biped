@@ -171,8 +171,8 @@ class Personality(BaseModule):
             if abs(pitch) < 2:
                 return  # No need to adjust for small angles
             # print(f"Angle to move: {pitch}")
-            self.servos['leg_l_hip'].move_relative(-pitch) 
-            self.servos['leg_r_hip'].move_relative(pitch)
+            self.servos['leg_l_hip'].move_relative(pitch) 
+            self.servos['leg_r_hip'].move_relative(-pitch)
     
     def handle_user_message(self, user_id=None, message=None):
         print(f"Received message from user {user_id}: {message}")

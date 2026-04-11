@@ -15,68 +15,34 @@ SC_MAX = 1024
 COMM_SUCCESS = 0  # Communication success (matches value in both ST and SC SDKs)
 
 class WaveshareBusServo(BusServoBase):
-    # Class-level cache: one PortHandler + PacketHandler per (port, baudrate, model_type).
-    # All servo instances sharing a physical bus reuse the same port handle, so the
-    # serial port is opened only once regardless of how many servos are managed.
-    _port_singletons = {}  # {(port, baudrate, model_type): {portHandler, packetHandler, ...}}
-
     def __init__(self, servo_id, model, port, baudrate=1000000, range=None, range_degrees=None, **kwargs):
         super().__init__(servo_id, model, port, baudrate, range, **kwargs)
         self.speed = kwargs.get('speed', 300)
         self.acceleration = kwargs.get('acceleration', 50)
-
-        model_type = 'ST' if model.startswith('ST') else ('SC' if model.startswith('SC') else None)
-        if model_type is None:
-            raise ValueError(f"Unknown model: {model}")
-        key = (port, baudrate, model_type)
-
-        if key in WaveshareBusServo._port_singletons:
-            # Reuse the already-open port; just grab the shared handles.
-            singleton = WaveshareBusServo._port_singletons[key]
-            self.portHandler = singleton['portHandler']
-            self.packetHandler = singleton['packetHandler']
-            self.max_raw = singleton['max_raw']
-            self.min_raw = singleton['min_raw']
-            self.max_deg = singleton['max_deg']
-            self.min_deg = singleton['min_deg']
-            singleton['refcount'] += 1
+        # Import and initialize the correct SDK based on model
+        if model.startswith('ST'):
+            from .waveshare.STservo_sdk import PortHandler, sts
+            self.portHandler = PortHandler(port)
+            self.packetHandler = sts(self.portHandler)
+            self.max_raw = 4095
+            self.min_raw = 0
+            self.max_deg = 360
+            self.min_deg = 0
+        elif model.startswith('SC'):
+            from .waveshare.SCservo_sdk import PortHandler, PacketHandler
+            self.portHandler = PortHandler(port)
+            self.packetHandler = PacketHandler(1)
+            self.max_raw = 1023
+            self.min_raw = 0
+            self.max_deg = 300
+            self.min_deg = 0
         else:
-            # First servo on this (port, baudrate, model_type) — open the port.
-            if model.startswith('ST'):
-                from .waveshare.STservo_sdk import PortHandler, sts
-                portHandler = PortHandler(port)
-                packetHandler = sts(portHandler)
-                max_raw, min_raw = 4095, 0
-                max_deg, min_deg = 360, 0
-            elif model.startswith('SC'):
-                from .waveshare.SCservo_sdk import PortHandler, PacketHandler
-                portHandler = PortHandler(port)
-                packetHandler = PacketHandler(1)
-                max_raw, min_raw = 1023, 0
-                max_deg, min_deg = 300, 0
-            else:
-                raise ValueError(f"Unknown model: {model}")
-
-            if not portHandler.openPort():
-                raise RuntimeError(f"Failed to open port {port} for servo {servo_id}")
-            if not portHandler.setBaudRate(baudrate):
-                raise RuntimeError(f"Failed to set baudrate {baudrate} for servo {servo_id}")
-
-            WaveshareBusServo._port_singletons[key] = {
-                'portHandler': portHandler,
-                'packetHandler': packetHandler,
-                'max_raw': max_raw,
-                'min_raw': min_raw,
-                'max_deg': max_deg,
-                'min_deg': min_deg,
-                'refcount': 1,
-            }
-            self.portHandler = portHandler
-            self.packetHandler = packetHandler
-            self.max_raw = max_raw
-            self.min_raw = min_raw
-            self.max_deg = max_deg
-            self.min_deg = min_deg
+            raise ValueError(f"Unknown model: {model}")
+        # Open port and set baudrate
+        if not self.portHandler.openPort():
+            raise RuntimeError(f"Failed to open port {port} for servo {servo_id}")
+        if not self.portHandler.setBaudRate(baudrate):
+            raise RuntimeError(f"Failed to set baudrate {baudrate} for servo {servo_id}")
 
     def move_to(self, value, unit='degrees'):
         if unit == 'degrees':
@@ -119,14 +85,7 @@ class WaveshareBusServo(BusServoBase):
             self.packetHandler.write1ByteTxRx(self.portHandler, self.servo_id, ADDR_TORQUE_ENABLE, 1)
 
     def exit(self):
-        model_type = 'ST' if self.model.startswith('ST') else 'SC'
-        key = (self.port, self.baudrate, model_type)
-        singleton = WaveshareBusServo._port_singletons.get(key)
-        if singleton:
-            singleton['refcount'] -= 1
-            if singleton['refcount'] <= 0:
-                self.portHandler.closePort()
-                del WaveshareBusServo._port_singletons[key]
+        self.portHandler.closePort()
 
     def move_to_raw(self, raw_value):
         if self.model.startswith('ST'):

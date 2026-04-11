@@ -30,82 +30,82 @@ bus_servo:
       - sit_edge: {'leg_r_tilt': 245.3, 'leg_r_hip': 168.7, 'leg_r_knee': 243.5, 'leg_r_ankle': 251.0, 'neck_pan': 149.8, 'neck_tilt': 36.6, 'leg_l_tilt': 138.7, 'leg_l_hip': 101.7, 'leg_l_knee': 117.1, 'leg_l_ankle': 137.2}
       - sit_edge_swing_l: {'leg_r_tilt': 245.3, 'leg_r_hip': 168.7, 'leg_r_knee': 243.5, 'leg_r_ankle': 251.0, 'neck_pan': 149.8, 'neck_tilt': 36.6, 'leg_l_tilt': 138.7, 'leg_l_hip': 101.9, 'leg_l_knee': 157.2, 'leg_l_ankle': 176.2}
       - sit_edge_swing_r: {'leg_r_tilt': 245.3, 'leg_r_hip': 168.7, 'leg_r_knee': 195.3, 'leg_r_ankle': 220.2, 'neck_pan': 149.8, 'neck_tilt': 36.6, 'leg_l_tilt': 138.7, 'leg_l_hip': 101.6, 'leg_l_knee': 118.2, 'leg_l_ankle': 134.7}
-    servos:
-      - name: "leg_r_tilt"
-        model: 'ST3215'
-        id: 1
-        range: [220.9, 346.6] # converted from raw (4095 = 360 degrees)
-        start: 246.9
-        # calibrate_on_boot: true
-      - name: "leg_r_hip"
-        model: 'ST3215'
-        id: 3
-        range: [0.0, 181.3]
-        # calibrate_on_boot: true
-        # start: 148.4
-      - name: "leg_r_knee"
-        model: 'ST3215'
-        id: 2
-        range: [62.9, 295.7]
-        # start: 118.2
-      - name: "leg_r_ankle"
-        model: 'ST3215'
-        id: 6
-        range: [216.1, 340.5]
-        # start: 243.0
-      - name: "neck_pan"
-        model: 'ST3215'
-        id: 12
-        range: [0.0, 299.1] # converted from raw (4095 = 360 degrees)
-        start: 149.9
-        # calibrate_on_boot: true
-        # demonstrate_on_boot: true
-      # - name: "neck_pan"
-      #   model: 'SC09'
-      #   baudrate: 115200
-      #   id: 4
-      #   range: [0.0, 300.0]
-      #   start: 150.0
-        # calibrate_on_boot: true
-        # demonstrate_on_boot: true
-        # speed: 60 # tested up to 600
-      - name: "neck_tilt"
-        model: 'SC09'
-        baudrate: 115200
-        id: 11
-        range: [8.8, 64.5] # converted from raw (1023 = 300 degrees)
-        start: 35.2
-        speed: 60 # max=0, 1 - 3000 tested
-        # acceleration: 0 # max (no significant difference between this and 1 - 3000)
-        # demonstrate_on_boot: true
-      # - name: "neck_tilt2"
-      #   model: 'SC09'
-      #   baudrate: 115200
-      #   id: 5
-      #   range: [0.0, 179.0] # converted from raw (1023 = 300 degrees)
-      #   start: 89.5
-      #   speed: 300
-        # acceleration: 1
-        # demonstrate_on_boot: true
-      - name: "leg_l_tilt"
-        model: 'ST3215'
-        id: 7
-        range: [0.7, 157.8] # converted from raw (4095 = 360 degrees)
-        start: 142.1
-        # calibrate_on_boot: true
-      - name: "leg_l_hip"
-        model: 'ST3215'
-        id: 8
-        range: [74.9, 279.2]
-        # start: 215.4
-      - name: "leg_l_knee"
-        model: 'ST3215'
-        id: 9
-        range: [117.1, 299.3]
-        # start: 232.2
-      - name: "leg_l_ankle"
-        model: 'ST3215'
-        id: 10
-        range: [53.9, 199.3]
-        # start: 137.6
-        # demonstrate_on_boot: true
+  instances:
+    - name: "leg_r_tilt"
+      model: 'ST3215'
+      id: 1
+      range: [220.9, 346.6] # converted from raw (4095 = 360 degrees)
+      start: 246.9
+      # calibrate_on_boot: true
+    - name: "leg_r_hip"
+      model: 'ST3215'
+      id: 3
+      range: [0.0, 181.3]
+      # calibrate_on_boot: true
+      # start: 148.4
+    - name: "leg_r_knee"
+      model: 'ST3215'
+      id: 2
+      range: [62.9, 295.7]
+      # start: 118.2
+    - name: "leg_r_ankle"
+      model: 'ST3215'
+      id: 6
+      range: [216.1, 340.5]
+      # start: 243.0
+    - name: "neck_pan"
+      model: 'ST3215'
+      id: 12
+      range: [0.0, 299.1] # converted from raw (4095 = 360 degrees)
+      start: 149.9
+      # calibrate_on_boot: true
+      # demonstrate_on_boot: true
+    # - name: "neck_pan"
+    #   model: 'SC09'
+    #   baudrate: 115200
+    #   id: 4
+    #   range: [0.0, 300.0]
+    #   start: 150.0
+      # calibrate_on_boot: true
+      # demonstrate_on_boot: true
+      # speed: 60 # tested up to 600
+    - name: "neck_tilt"
+      model: 'SC09'
+      baudrate: 115200
+      id: 11
+      range: [8.8, 64.5] # converted from raw (1023 = 300 degrees)
+      start: 35.2
+      speed: 60 # max=0, 1 - 3000 tested
+      # acceleration: 0 # max (no significant difference between this and 1 - 3000)
+      # demonstrate_on_boot: true
+    # - name: "neck_tilt2"
+    #   model: 'SC09'
+    #   baudrate: 115200
+    #   id: 5
+    #   range: [0.0, 179.0] # converted from raw (1023 = 300 degrees)
+    #   start: 89.5
+    #   speed: 300
+      # acceleration: 1
+      # demonstrate_on_boot: true
+    - name: "leg_l_tilt"
+      model: 'ST3215'
+      id: 7
+      range: [0.7, 157.8] # converted from raw (4095 = 360 degrees)
+      start: 142.1
+      # calibrate_on_boot: true
+    - name: "leg_l_hip"
+      model: 'ST3215'
+      id: 8
+      range: [74.9, 279.2]
+      # start: 215.4
+    - name: "leg_l_knee"
+      model: 'ST3215'
+      id: 9
+      range: [117.1, 299.3]
+      # start: 232.2
+    - name: "leg_l_ankle"
+      model: 'ST3215'
+      id: 10
+      range: [53.9, 199.3]
+      # start: 137.6
+      # demonstrate_on_boot: true
