@@ -25,7 +25,7 @@ from threading import Lock
 
 # sys.path.append("..")
 # Uses STServo and SCServo SDK library
-from modules.actuators.bus_servo.STservo_sdk import PortHandler, sts, COMM_SUCCESS
+from modules.actuators.bus_servo.STservo_sdk import PortHandler, sts, COMM_SUCCESS, COMM_PORT_BUSY, COMM_RX_TIMEOUT
 from modules.actuators.bus_servo.SCservo_sdk import PacketHandler, SCS_LOWORD, SCS_HIWORD, SCS_TOHOST
 
 from modules.base_module import BaseModule
@@ -62,7 +62,7 @@ class Servo(BaseModule):
         self.demonstrate_on_boot = kwargs.get('demonstrate_on_boot', False) # Move to min and max to demonstrate range
         self.center_on_boot = kwargs.get('center_on_boot', False) # Move to center of range on boot
         self.pos = None
-        self.speed = kwargs.get('speed', 300) # 3073
+        self.speed = kwargs.get('speed', 0) # 3073
         self.acceleration = kwargs.get('acceleration', 50)
         self._move_queue = collections.deque()
         # After loading YAML:
@@ -166,8 +166,11 @@ class Servo(BaseModule):
             self.log(f"Pose '{pose_name}' not found for servo {self.identifier}", level='warning')
             
     def _sc_write(self, type, value, verbose=False):
-        with self._port_lock:
-            comm_result, error = self.packetHandler.write2ByteTxRx(self.portHandler, self.index, type, value)
+        comm_result, error = self._execute_with_retries(
+            lambda: self._locked_call(
+                lambda: self.packetHandler.write2ByteTxRx(self.portHandler, self.index, type, value)
+            )
+        )
         if hasattr(self.packetHandler, 'getTxRxResult') and verbose:
             self.log(f"[SCServo Result] {self.packetHandler.getTxRxResult(comm_result)}")
         if hasattr(self.packetHandler, 'getRxPacketError') and error != 0:
@@ -190,6 +193,24 @@ class Servo(BaseModule):
             # speed, speed_comm_result, speed_error = self.packetHandler.read2ByteTxRx(self.portHandler, self.index, ADDR_SCS_PRESENT_SPEED)
             # self.log(f"[SCServo][{self.identifier}] Error context: load={load} (comm_result={load_comm_result}, error={load_error}), position={pos} (comm_result={pos_comm_result}, error={pos_error}), speed={speed} (comm_result={speed_comm_result}, error={speed_error})")
         return comm_result == COMM_SUCCESS and error == 0
+
+    def _locked_call(self, operation):
+        with self._port_lock:
+            return operation()
+
+    def _execute_with_retries(self, operation, retries=2, retry_delay=0.002):
+        result = operation()
+        if not isinstance(result, tuple) or len(result) < 2:
+            return result
+
+        comm_result = result[-2]
+        retries_remaining = retries
+        while comm_result in (COMM_PORT_BUSY, COMM_RX_TIMEOUT) and retries_remaining > 0:
+            time.sleep(retry_delay)
+            result = operation()
+            comm_result = result[-2]
+            retries_remaining -= 1
+        return result
     
     def move_degrees(self, degrees):
         if self.range_degrees is None:
@@ -267,8 +288,11 @@ class Servo(BaseModule):
         
         # Write STServo goal position
         if self.model.startswith('ST'):
-            with self._port_lock:
-                sts_comm_result, sts_error = self.packetHandler.WritePosEx(self.index, position, speed, acceleration)
+            sts_comm_result, sts_error = self._execute_with_retries(
+                lambda: self._locked_call(
+                    lambda: self.packetHandler.WritePosEx(self.index, position, speed, acceleration)
+                )
+            )
             if not self.handle_errors(sts_comm_result, sts_error):
                 self.log(f"Moved ST servo {self.identifier} from {self.pos} to position {position}")
                 self.pos = position  # Update current position
@@ -299,16 +323,7 @@ class Servo(BaseModule):
         
         
     def is_moving(self):
-        if self.get_moving() == 1:
-            return True
-        current_position = self.get_position()
-        if self.pos is not None and current_position is not None and abs(self.pos - current_position) > 15:
-            self.log(
-                f"Servo {self.identifier} is not reporting as moving but position {current_position} does not match target position {self.pos}",
-                level='warning'
-            )
-            return True
-        return False
+        return self.get_moving() == 1
         
     def get_position(self):
         """
@@ -316,8 +331,9 @@ class Servo(BaseModule):
         """
         if self.model.startswith('ST'):
             # Read STServo present position
-            with self._port_lock:
-                sts_present_position, sts_present_speed, sts_comm_result, sts_error = self.packetHandler.ReadPosSpeed(self.index)
+            sts_present_position, sts_present_speed, sts_comm_result, sts_error = self._execute_with_retries(
+                lambda: self._locked_call(lambda: self.packetHandler.ReadPosSpeed(self.index))
+            )
             if not self.handle_errors(sts_comm_result, sts_error):
                 # self.log("[ID:%03d] PresPos:%d PresSpd:%d" % (self.index, sts_present_position, sts_present_speed))
                 return sts_present_position
@@ -330,8 +346,9 @@ class Servo(BaseModule):
         """
         if self.model.startswith('ST'):
             # Read STServo present position
-            with self._port_lock:
-                sts_present_position, sts_present_speed, sts_comm_result, sts_error = self.packetHandler.ReadPosSpeed(self.index)
+            sts_present_position, sts_present_speed, sts_comm_result, sts_error = self._execute_with_retries(
+                lambda: self._locked_call(lambda: self.packetHandler.ReadPosSpeed(self.index))
+            )
             if not self.handle_errors(sts_comm_result, sts_error):
                 return sts_present_speed
         else:
@@ -343,8 +360,9 @@ class Servo(BaseModule):
         """
         if self.model.startswith('ST'):
             # Read STServo moving status
-            with self._port_lock:
-                moving, sts_comm_result, sts_error = self.packetHandler.ReadMoving(self.index)
+            moving, sts_comm_result, sts_error = self._execute_with_retries(
+                lambda: self._locked_call(lambda: self.packetHandler.ReadMoving(self.index))
+            )
             if not self.handle_errors(sts_comm_result, sts_error):
                 return moving
         else:
@@ -355,8 +373,11 @@ class Servo(BaseModule):
         
     def sc_get_position_speed(self, pos_or_speed):
         # Read SCServo present position
-        with self._port_lock:
-            scs_present_position_speed, scs_comm_result, scs_error = self.packetHandler.read4ByteTxRx(self.portHandler, self.index, ADDR_SCS_PRESENT_POSITION)
+        scs_present_position_speed, scs_comm_result, scs_error = self._execute_with_retries(
+            lambda: self._locked_call(
+                lambda: self.packetHandler.read4ByteTxRx(self.portHandler, self.index, ADDR_SCS_PRESENT_POSITION)
+            )
+        )
         if not self.handle_errors(scs_comm_result, scs_error):
             scs_present_position = SCS_LOWORD(scs_present_position_speed)
             scs_present_speed = SCS_HIWORD(scs_present_position_speed)

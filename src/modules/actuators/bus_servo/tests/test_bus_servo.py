@@ -29,19 +29,18 @@ class TestBusServo(unittest.TestCase):
         servo = Servo(name='test', id=1, range=[0, 1023])
         self.assertEqual(servo.baudrate, 1000000)
         self.assertEqual(servo.port, '/dev/ttyAMA0')
+        self.assertEqual(servo.speed, 0)
 
-    def test_is_moving_true_when_mismatch_to_target(self):
+    def test_is_moving_false_when_mismatch_to_target(self):
         servo = Servo(name='test', id=1, range=[0, 4095], model='ST3215')
         servo.pos = 3396
         servo.get_moving = MagicMock(return_value=0)
         servo.get_position = MagicMock(return_value=3047)
         servo.log = MagicMock()
 
-        self.assertTrue(servo.is_moving())
-        servo.log.assert_called_once_with(
-            "Servo test is not reporting as moving but position 3047 does not match target position 3396",
-            level='warning'
-        )
+        self.assertFalse(servo.is_moving())
+        servo.get_position.assert_not_called()
+        servo.log.assert_not_called()
 
     def test_is_moving_false_when_within_tolerance(self):
         servo = Servo(name='test', id=1, range=[0, 4095], model='ST3215')
