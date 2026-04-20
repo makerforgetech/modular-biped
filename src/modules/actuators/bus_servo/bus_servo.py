@@ -198,18 +198,22 @@ class Servo(BaseModule):
         with self._port_lock:
             return operation()
 
-    def _execute_with_retries(self, operation, retries=2, retry_delay=0.002):
+    def _execute_with_retries(self, operation, max_attempts=3, retry_delay=0.002):
+        # ST/SC SDK methods used in this module return tuples with
+        # communication result and packet error in the final two positions.
         result = operation()
         if not isinstance(result, tuple) or len(result) < 2:
             return result
 
         comm_result = result[-2]
-        retries_remaining = retries
-        while comm_result in (COMM_PORT_BUSY, COMM_RX_TIMEOUT) and retries_remaining > 0:
+        attempts = 1
+        while comm_result in (COMM_PORT_BUSY, COMM_RX_TIMEOUT) and attempts < max_attempts:
             time.sleep(retry_delay)
             result = operation()
+            if not isinstance(result, tuple) or len(result) < 2:
+                return result
             comm_result = result[-2]
-            retries_remaining -= 1
+            attempts += 1
         return result
     
     def move_degrees(self, degrees):

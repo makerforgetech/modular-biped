@@ -9,6 +9,7 @@ sys.modules['modules.actuators.bus_servo.STservo_sdk'] = mock_st_sdk
 sys.modules['modules.actuators.bus_servo.SCservo_sdk'] = mock_sc_sdk
 
 from modules.actuators.bus_servo.bus_servo import Servo
+from modules.actuators.bus_servo import bus_servo as bus_servo_module
 
 class TestBusServo(unittest.TestCase):
     def setUp(self):
@@ -31,7 +32,7 @@ class TestBusServo(unittest.TestCase):
         self.assertEqual(servo.port, '/dev/ttyAMA0')
         self.assertEqual(servo.speed, 0)
 
-    def test_is_moving_false_when_mismatch_to_target(self):
+    def test_is_moving_returns_false_when_get_moving_returns_zero(self):
         servo = Servo(name='test', id=1, range=[0, 4095], model='ST3215')
         servo.pos = 3396
         servo.get_moving = MagicMock(return_value=0)
@@ -41,6 +42,51 @@ class TestBusServo(unittest.TestCase):
         self.assertFalse(servo.is_moving())
         servo.get_position.assert_not_called()
         servo.log.assert_not_called()
+
+    def test_is_moving_returns_true_when_get_moving_returns_one(self):
+        servo = Servo(name='test', id=1, range=[0, 4095], model='ST3215')
+        servo.get_moving = MagicMock(return_value=1)
+        self.assertTrue(servo.is_moving())
+
+    def test_execute_with_retries_retries_port_busy_then_succeeds(self):
+        servo = Servo(name='test', id=1, range=[0, 4095], model='ST3215')
+        operation = MagicMock(side_effect=[(-1, 0), (0, 0)])
+        with patch.object(bus_servo_module, 'COMM_PORT_BUSY', -1), \
+             patch.object(bus_servo_module, 'COMM_RX_TIMEOUT', -6), \
+             patch('modules.actuators.bus_servo.bus_servo.time.sleep') as mock_sleep:
+            result = servo._execute_with_retries(operation, max_attempts=3, retry_delay=0)
+        self.assertEqual(result, (0, 0))
+        self.assertEqual(operation.call_count, 2)
+        mock_sleep.assert_called_once_with(0)
+
+    def test_execute_with_retries_returns_immediately_on_success(self):
+        servo = Servo(name='test', id=1, range=[0, 4095], model='ST3215')
+        operation = MagicMock(return_value=(0, 0))
+        with patch.object(bus_servo_module, 'COMM_PORT_BUSY', -1), \
+             patch.object(bus_servo_module, 'COMM_RX_TIMEOUT', -6), \
+             patch('modules.actuators.bus_servo.bus_servo.time.sleep') as mock_sleep:
+            result = servo._execute_with_retries(operation, max_attempts=3, retry_delay=0)
+        self.assertEqual(result, (0, 0))
+        self.assertEqual(operation.call_count, 1)
+        mock_sleep.assert_not_called()
+
+    def test_execute_with_retries_returns_failure_after_max_attempts(self):
+        servo = Servo(name='test', id=1, range=[0, 4095], model='ST3215')
+        operation = MagicMock(return_value=(-1, 0))
+        with patch.object(bus_servo_module, 'COMM_PORT_BUSY', -1), patch.object(bus_servo_module, 'COMM_RX_TIMEOUT', -6):
+            result = servo._execute_with_retries(operation, max_attempts=3, retry_delay=0)
+        self.assertEqual(result, (-1, 0))
+        self.assertEqual(operation.call_count, 3)
+
+    def test_execute_with_retries_applies_retry_delay(self):
+        servo = Servo(name='test', id=1, range=[0, 4095], model='ST3215')
+        operation = MagicMock(side_effect=[(-1, 0), (0, 0)])
+        with patch.object(bus_servo_module, 'COMM_PORT_BUSY', -1), \
+             patch.object(bus_servo_module, 'COMM_RX_TIMEOUT', -6), \
+             patch('modules.actuators.bus_servo.bus_servo.time.sleep') as mock_sleep:
+            result = servo._execute_with_retries(operation, max_attempts=3, retry_delay=0.01)
+        self.assertEqual(result, (0, 0))
+        mock_sleep.assert_called_once_with(0.01)
 
     def test_is_moving_false_when_within_tolerance(self):
         servo = Servo(name='test', id=1, range=[0, 4095], model='ST3215')
