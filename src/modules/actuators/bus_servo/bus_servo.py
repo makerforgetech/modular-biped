@@ -114,9 +114,11 @@ class Servo(BaseModule):
     def exit(self):
         self.detach()
         if self._port_key in self._shared_port_refcounts:
-            self._shared_port_refcounts[self._port_key] -= 1
-            if self._shared_port_refcounts[self._port_key] <= 0:
-                with self._port_lock:
+            with self._port_lock:
+                self._shared_port_refcounts[self._port_key] -= 1
+                if self._shared_port_refcounts[self._port_key] > 0:
+                    return
+                else:
                     self.portHandler.closePort()
                 del self._shared_port_refcounts[self._port_key]
                 del self._shared_port_locks[self._port_key]
@@ -487,7 +489,14 @@ class Servo(BaseModule):
         elif self.model.startswith('SC'):
             self.pos = (self.range[0] + self.range[1]) // 2  # Update current position to center
             with self._port_lock:
-                self.packetHandler.write1ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_ACC, self.acceleration)
-                self.packetHandler.write2ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_SPEED, self.speed)
-                self.packetHandler.write2ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_POSITION, self.pos)
-            self.log(f"Moved servo {self.identifier} to position {self.pos}")
+                acc_result, acc_error = self.packetHandler.write1ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_ACC, self.acceleration)
+                speed_result, speed_error = self.packetHandler.write2ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_SPEED, self.speed)
+                pos_result, pos_error = self.packetHandler.write2ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_POSITION, self.pos)
+            if any([
+                self.handle_errors(acc_result, acc_error),
+                self.handle_errors(speed_result, speed_error),
+                self.handle_errors(pos_result, pos_error),
+            ]):
+                self.log(f"Failed to move servo {self.identifier} to center position {self.pos}", level='error')
+            else:
+                self.log(f"Moved servo {self.identifier} to position {self.pos}")
