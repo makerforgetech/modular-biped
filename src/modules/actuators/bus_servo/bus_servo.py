@@ -48,7 +48,7 @@ class Servo(BaseModule):
         self.model = kwargs.get('model', 'ST')
         self.index = kwargs.get('id')
         self.range = kwargs.get('range')
-        self.range_degrees = kwargs.get('range_degrees', None)  # Optional range in degrees for easier control
+        self.range_degrees = kwargs.get('range_degrees', self.calculate_range_degrees(self.range[0], self.range[1]))
         self.start = kwargs.get('start') # Default start position
         self.poses = kwargs.get('poses')  # Dictionary of poses
         self.baudrate = kwargs.get('baudrate', 1000000)
@@ -57,7 +57,7 @@ class Servo(BaseModule):
         self.demonstrate_on_boot = kwargs.get('demonstrate_on_boot', False) # Move to min and max to demonstrate range
         self.center_on_boot = kwargs.get('center_on_boot', False) # Move to center of range on boot
         self.pos = None
-        self.speed = kwargs.get('speed', 300) # 3073
+        self.speed = kwargs.get('speed', 0) # 3073
         self.acceleration = kwargs.get('acceleration', 50)
         self._move_queue = collections.deque()
         # After loading YAML:
@@ -416,7 +416,7 @@ class Servo(BaseModule):
                     max_pos = pos
                 # Print on the same line, pad with spaces to clear previous content
                 # (4095 = 360 degrees, so 1264 = 111 degrees)
-                range_degrees = (360/4095)*(max_pos - min_pos) if min_pos is not None and max_pos is not None else 'N/A'
+                range_degrees = self.calculate_range_degrees(max_pos, min_pos)
                 print(f"\rCurrent position: {pos}, Min: {min_pos}, Max: {max_pos} Range(deg): {range_degrees}", end='', flush=True)
                 time.sleep(0.05)
                 if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
@@ -435,6 +435,9 @@ class Servo(BaseModule):
         if self.start is not None and (self.start < min_pos or self.start > max_pos):
             self.start = (min_pos + max_pos) // 2
             self.log(f"Start position {self.start} out of new range, setting to midpoint {self.start}")
+    
+    def calculate_range_degrees(self, max_pos, min_pos):
+            return (360/ST_MAX)*(max_pos - min_pos) if min_pos is not None and max_pos is not None else 'N/A'
 
     def calibrate_to_center(self):
         """

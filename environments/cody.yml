@@ -20,47 +20,48 @@ bus_servo:
   enabled: true
   config:
     poses:
-      - legs_forward: {'leg_r_tilt': 2806, 'leg_r_hip': 1989, 'leg_r_knee': 1349, 'leg_r_ankle': 2754, 'neck_pan': 1698, 'neck_tilt': 118, 'leg_l_tilt': 1619, 'leg_l_hip': 1028, 'leg_l_knee': 2634, 'leg_l_ankle': 1567}
-      - sit: {'leg_r_tilt': 2806, 'leg_r_hip': 2063, 'leg_r_knee': 1840, 'leg_r_ankle': 3641, 'neck_pan': 1697, 'neck_tilt': 118, 'leg_l_tilt': 1621, 'leg_l_hip': 853, 'leg_l_knee': 2161, 'leg_l_ankle': 614}
-      - wave_1: {'leg_r_tilt': 2809, 'leg_r_hip': 2063, 'leg_r_knee': 1840, 'leg_r_ankle': 3641, 'neck_pan': 1697, 'neck_tilt': 118, 'leg_l_tilt': 1618, 'leg_l_hip': 855, 'leg_l_knee': 2614, 'leg_l_ankle': 1337}
-      - wave_2: {'leg_r_tilt': 2807, 'leg_r_hip': 2063, 'leg_r_knee': 1840, 'leg_r_ankle': 3641, 'neck_pan': 1697, 'neck_tilt': 118, 'leg_l_tilt': 1618, 'leg_l_hip': 855, 'leg_l_knee': 2614, 'leg_l_ankle': 874}      
-      - stand_low: {'leg_r_tilt': 2790, 'leg_r_hip': 422, 'leg_r_knee': 717, 'leg_r_ankle': 3174, 'neck_pan': 1697, 'neck_tilt': 119, 'leg_l_tilt': 1578, 'leg_l_hip': 2668, 'leg_l_knee': 3342, 'leg_l_ankle': 1107}      
-      - stand_high: {'leg_r_tilt': 2790, 'leg_r_hip': 692, 'leg_r_knee': 1322, 'leg_r_ankle': 2861, 'neck_pan': 1700, 'neck_tilt': 123, 'leg_l_tilt': 1578, 'leg_l_hip': 2510, 'leg_l_knee': 2712, 'leg_l_ankle': 1560}     
-      - sit_edge: {'leg_r_tilt': 2790, 'leg_r_hip': 1918, 'leg_r_knee': 2768, 'leg_r_ankle': 2854, 'neck_pan': 1704, 'neck_tilt': 124, 'leg_l_tilt': 1577, 'leg_l_hip': 1183, 'leg_l_knee': 1332, 'leg_l_ankle': 1562}    
-      - sit_edge_swing_l: {'leg_r_tilt': 2790, 'leg_r_hip': 1918, 'leg_r_knee': 2768, 'leg_r_ankle': 2854, 'neck_pan': 1704, 'neck_tilt': 124, 'leg_l_tilt': 1577, 'leg_l_hip': 1185, 'leg_l_knee': 1789, 'leg_l_ankle': 1988}    
-      - sit_edge_swing_r: {'leg_r_tilt': 2790, 'leg_r_hip': 1918, 'leg_r_knee': 2222, 'leg_r_ankle': 2496, 'neck_pan': 1704, 'neck_tilt': 124, 'leg_l_tilt': 1577, 'leg_l_hip': 1182, 'leg_l_knee': 1345, 'leg_l_ankle': 1511}    
+      - storage: {'leg_r_tilt': 2784, 'leg_r_hip': 1006, 'leg_r_knee': 772, 'leg_r_ankle': 2991, 'neck_pan': 1708, 'neck_tilt': 121, 'leg_l_tilt': 1601, 'leg_l_hip': 3108, 'leg_l_knee': 3258, 'leg_l_ankle': 1286}
+      - legs_forward: {'leg_r_tilt': 2784, 'leg_r_hip': 1005, 'leg_r_knee': 1998, 'leg_r_ankle': 2351, 'neck_pan': 1710, 'neck_tilt': 121, 'leg_l_tilt': 1606, 'leg_l_hip': 3099, 'leg_l_knee': 2107, 'leg_l_ankle': 1865}
+      - sit: {'leg_r_tilt': 2784, 'leg_r_hip': 866, 'leg_r_knee': 2042, 'leg_r_ankle': 3396, 'neck_pan': 1711, 'neck_tilt': 121, 'leg_l_tilt': 1597, 'leg_l_hip': 3229, 'leg_l_knee': 2095, 'leg_l_ankle': 698}
+      - wave_1: {'leg_r_tilt': 2785, 'leg_r_hip': 857, 'leg_r_knee': 2037, 'leg_r_ankle': 3396, 'neck_pan': 1710, 'neck_tilt': 121, 'leg_l_tilt': 1599, 'leg_l_hip': 3131, 'leg_l_knee': 2626, 'leg_l_ankle': 1371}
+      - wave_2: {'leg_r_tilt': 2785, 'leg_r_hip': 857, 'leg_r_knee': 2037, 'leg_r_ankle': 3396, 'neck_pan': 1710, 'neck_tilt': 121, 'leg_l_tilt': 1599, 'leg_l_hip': 3131, 'leg_l_knee': 2626, 'leg_l_ankle': 701}
+      - stand_straight: {'leg_r_tilt': 2735, 'leg_r_hip': 1968, 'leg_r_knee': 2029, 'leg_r_ankle': 2353, 'neck_pan': 1711, 'neck_tilt': 121, 'leg_l_tilt': 1596, 'leg_l_hip': 2087, 'leg_l_knee': 2075, 'leg_l_ankle': 1799}
+      - stand_low: {'leg_r_tilt': 2698, 'leg_r_hip': 3051, 'leg_r_knee': 596, 'leg_r_ankle': 2751, 'neck_pan': 1708, 'neck_tilt': 120, 'leg_l_tilt': 1626, 'leg_l_hip': 1149, 'leg_l_knee': 3481, 'leg_l_ankle': 1306}
+      - stand_high: {'leg_r_tilt': 2687, 'leg_r_hip': 2547, 'leg_r_knee': 1080, 'leg_r_ankle': 2753, 'neck_pan': 1711, 'neck_tilt': 116, 'leg_l_tilt': 1595, 'leg_l_hip': 1536, 'leg_l_knee': 2976, 'leg_l_ankle': 1522}
+      - stand_dip_l: {'leg_r_tilt': 2693, 'leg_r_hip': 2539, 'leg_r_knee': 1081, 'leg_r_ankle': 2742, 'neck_pan': 1713, 'neck_tilt': 119, 'leg_l_tilt': 1623, 'leg_l_hip': 1386, 'leg_l_knee': 3139, 'leg_l_ankle': 1522} 
+      - stand_dip_r: {'leg_r_tilt': 2685, 'leg_r_hip': 2703, 'leg_r_knee': 971, 'leg_r_ankle': 2743, 'neck_pan': 1709, 'neck_tilt': 119, 'leg_l_tilt': 1657, 'leg_l_hip': 1463, 'leg_l_knee': 2992, 'leg_l_ankle': 1511}
+      - sit_edge: {'leg_r_tilt': 2784, 'leg_r_hip': 985, 'leg_r_knee': 2897, 'leg_r_ankle': 2816, 'neck_pan': 1711, 'neck_tilt': 121, 'leg_l_tilt': 1606, 'leg_l_hip': 3072, 'leg_l_knee': 1431, 'leg_l_ankle': 1161}
+      - sit_edge_swing_l: {'leg_r_tilt': 2784, 'leg_r_hip': 985, 'leg_r_knee': 2897, 'leg_r_ankle': 2816, 'neck_pan': 1709, 'neck_tilt': 121, 'leg_l_tilt': 1606, 'leg_l_hip': 3071, 'leg_l_knee': 1928, 'leg_l_ankle': 1154}   
+      - sit_edge_swing_r: {'leg_r_tilt': 2783, 'leg_r_hip': 986, 'leg_r_knee': 2028, 'leg_r_ankle': 2633, 'neck_pan': 1709, 'neck_tilt': 121, 'leg_l_tilt': 1606, 'leg_l_hip': 3072, 'leg_l_knee': 1326, 'leg_l_ankle': 1161}
+      - legs_straight_out: {'leg_r_tilt': 3696, 'leg_r_hip': 2066, 'leg_r_knee': 1904, 'leg_r_ankle': 2777, 'neck_pan': 1713, 'neck_tilt': 116, 'leg_l_tilt': 599, 'leg_l_hip': 2103, 'leg_l_knee': 2285, 'leg_l_ankle': 1140}
+      - crab: {'leg_r_tilt': 3695, 'leg_r_hip': 1046, 'leg_r_knee': 1451, 'leg_r_ankle': 2745, 'neck_pan': 1712, 'neck_tilt': 116, 'leg_l_tilt': 599, 'leg_l_hip': 2930, 'leg_l_knee': 2855, 'leg_l_ankle': 1230}
   instances:
     - name: "leg_r_tilt"
       model: 'ST3215'
       id: 1
-      range: [2511, 3944] # 1433 total range (4095 = 360 degrees)
-      range_degrees: 125.9
-      start: 2810
-      # calibrate_on_boot: true
+      range: [2352, 3749]
+      # start: 2791
     - name: "leg_r_hip"
       model: 'ST3215'
       id: 3
-      range: [0, 2063]
-      range_degrees: 181.3
+      range: [615, 3423]
+      # center_on_boot: true
       # calibrate_on_boot: true
-      # start: 1688
+      # start: 977
     - name: "leg_r_knee"
       model: 'ST3215'
       id: 2
-      range: [717, 3297]
-      range_degrees: 226.2
-      # start: 1345
+      range: [596, 3384]
+      # start: 1999
     - name: "leg_r_ankle"
       model: 'ST3215'
       id: 6
-      range: [2459, 3872]
-      range_degrees: 123.7
-      # start: 2762
+      range: [1123, 3638]
+      # start: 2351
     - name: "neck_pan"
       model: 'ST3215'
       id: 12
       range: [0, 3412] # 300 degrees = 3412, 360 degrees = 4095
-      range_degrees: 299.7
       start: 1706
       # calibrate_on_boot: true
       # demonstrate_on_boot: true
@@ -69,7 +70,6 @@ bus_servo:
     #   baudrate: 115200
     #   id: 4
     #   range: [0, 1023]
-    #   range_degrees: 300
     #   start: 511
       # calibrate_on_boot: true
       # demonstrate_on_boot: true
@@ -79,7 +79,6 @@ bus_servo:
       baudrate: 115200
       id: 11
       range: [30, 220]
-      range_degrees: 55.6
       start: 120
       speed: 60 # max=0, 1 - 3000 tested
       # acceleration: 0 # max (no significant difference between this and 1 - 3000)
@@ -97,27 +96,24 @@ bus_servo:
       model: 'ST3215'
       id: 7
       range: [8, 1796] # 1788 total range (4095 = 360 degrees)
-      range_degrees: 156.9
-      start: 1617
-      # calibrate_on_boot: true
+      # start: 1607
     - name: "leg_l_hip"
       model: 'ST3215'
       id: 8
-      range: [853, 3098]
-      range_degrees: 197.3
-      # start: 2451 
+      range: [615, 3423]
+      # center_on_boot: true
+      # calibrate_on_boot: true
+      # start: 977
     - name: "leg_l_knee"
       model: 'ST3215'
       id: 9
-      range: [1332, 3404]
-      range_degrees: 181.1
-      # start: 2643
+      range: [684, 3481]
+      # start: 2106
     - name: "leg_l_ankle"
       model: 'ST3215'
       id: 10
-      range: [614, 2270]
-      range_degrees: 145.2
-      # start: 1566
+      range: [520, 3059]
+      # start: 1856
       # demonstrate_on_boot: true
 
 chatgpt:
