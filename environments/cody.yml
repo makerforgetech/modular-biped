@@ -19,6 +19,7 @@ bno055:
 bus_servo:
   enabled: true
   config:
+    backend: 'waveshare'
     poses:
       - legs_forward: {'leg_r_tilt': 246.7, 'leg_r_hip': 174.8, 'leg_r_knee': 118.6, 'leg_r_ankle': 242.0, 'neck_pan': 149.3, 'neck_tilt': 34.6, 'leg_l_tilt': 142.6, 'leg_l_hip': 90.2, 'leg_l_knee': 231.6, 'leg_l_ankle': 137.7}
       - sit: {'leg_r_tilt': 246.7, 'leg_r_hip': 181.3, 'leg_r_knee': 161.7, 'leg_r_ankle': 319.7, 'neck_pan': 149.2, 'neck_tilt': 34.6, 'leg_l_tilt': 142.8, 'leg_l_hip': 74.9, 'leg_l_knee': 189.7, 'leg_l_ankle': 53.9}
@@ -29,29 +30,33 @@ bus_servo:
       - sit_edge: {'leg_r_tilt': 245.3, 'leg_r_hip': 168.7, 'leg_r_knee': 243.5, 'leg_r_ankle': 251.0, 'neck_pan': 149.8, 'neck_tilt': 36.6, 'leg_l_tilt': 138.7, 'leg_l_hip': 101.7, 'leg_l_knee': 117.1, 'leg_l_ankle': 137.2}
       - sit_edge_swing_l: {'leg_r_tilt': 245.3, 'leg_r_hip': 168.7, 'leg_r_knee': 243.5, 'leg_r_ankle': 251.0, 'neck_pan': 149.8, 'neck_tilt': 36.6, 'leg_l_tilt': 138.7, 'leg_l_hip': 101.9, 'leg_l_knee': 157.2, 'leg_l_ankle': 176.2}
       - sit_edge_swing_r: {'leg_r_tilt': 245.3, 'leg_r_hip': 168.7, 'leg_r_knee': 195.3, 'leg_r_ankle': 220.2, 'neck_pan': 149.8, 'neck_tilt': 36.6, 'leg_l_tilt': 138.7, 'leg_l_hip': 101.6, 'leg_l_knee': 118.2, 'leg_l_ankle': 134.7}
+      - stand_low_narrow: {'leg_r_tilt': 221.0989010989011, 'leg_r_hip': 38.417582417582416, 'leg_r_knee': 72.17582417582418, 'leg_r_ankle': 258.1978021978022, 'neck_pan': 150.24175824175825, 'neck_tilt': 34.604105571847505, 'leg_l_tilt': 160.26373626373626, 'leg_l_hip': 235.07692307692307, 'leg_l_knee': 284.65934065934067, 'leg_l_ankle': 107.86813186813187}
   instances:
     - name: "leg_r_tilt"
       model: 'ST3215'
       id: 1
-      range: [220.9, 346.6] # converted from raw (4095 = 360 degrees)
-      start: 246.9
+      range: [212.4, 315.69] # converted from raw (4095 = 360 degrees)
+      start: 242.9
       # calibrate_on_boot: true
     - name: "leg_r_hip"
       model: 'ST3215'
       id: 3
-      range: [0.0, 181.3]
+      range: [0, 360] # Need to re-center
+      center_on_boot: true
       # calibrate_on_boot: true
-      # start: 148.4
+      # start: 65
     - name: "leg_r_knee"
       model: 'ST3215'
       id: 2
-      range: [62.9, 295.7]
-      # start: 118.2
+      range: [52.13, 296.7]
+      # calibrate_on_boot: true
+      # start: 55.3
     - name: "leg_r_ankle"
       model: 'ST3215'
       id: 6
-      range: [216.1, 340.5]
-      # start: 243.0
+      range: [111.74, 323.16]
+      # calibrate_on_boot: true
+      # start: 256.35
     - name: "neck_pan"
       model: 'ST3215'
       id: 12
@@ -89,24 +94,28 @@ bus_servo:
     - name: "leg_l_tilt"
       model: 'ST3215'
       id: 7
-      range: [0.7, 157.8] # converted from raw (4095 = 360 degrees)
-      start: 142.1
+      range: [53.01, 160.44] # converted from raw (4095 = 360 degrees)
+      start: 137.32
       # calibrate_on_boot: true
     - name: "leg_l_hip"
       model: 'ST3215'
       id: 8
-      range: [74.9, 279.2]
-      # start: 215.4
+      range: [0, 360] # Need to re-center
+      center_on_boot: true
+      # calibrate_on_boot: true
+      # start: 214.33
     - name: "leg_l_knee"
       model: 'ST3215'
       id: 9
-      range: [117.1, 299.3]
-      # start: 232.2
+      range: [75.78, 299.3]
+      # calibrate_on_boot: true
+      # start: 299
     - name: "leg_l_ankle"
       model: 'ST3215'
       id: 10
-      range: [53.9, 199.3]
-      # start: 137.6
+      range: [47.47, 262.15]
+      # calibrate_on_boot: true
+      # start: 113.58
       # demonstrate_on_boot: true
 
 chatgpt:

@@ -12,6 +12,7 @@ class Servo(BaseModule):
         Servo class
         """
         self.backend = kwargs.get('backend', 'waveshare')
+        print(f"Creating servo with backend {self.backend}")
         self.identifier = kwargs.get('name')
         self.model = kwargs.get('model', 'ST')
         self.index = kwargs.get('id')
@@ -23,6 +24,7 @@ class Servo(BaseModule):
         self.calibrate_on_boot = kwargs.get('calibrate_on_boot', False) # Loop to show position for manual configuration
         self.demonstrate_on_boot = kwargs.get('demonstrate_on_boot', False) # Move to min and max to demonstrate range
         self.center_on_boot = kwargs.get('center_on_boot', False) # Move to center of range on boot
+        self.zero_on_boot = kwargs.get('zero_on_boot', False) # Set current position as zero on boot
         self.pos = None
         self.speed = kwargs.get('speed', 300) # 3073
         self.acceleration = kwargs.get('acceleration', 50)
@@ -56,13 +58,13 @@ class Servo(BaseModule):
         self.subscribe('system/exit', self.exit)
         self.subscribe('servo/pose', self.move_to_pose)
         
+        if self.center_on_boot:
+            self.calibrate_to_center()
+            
         if self.calibrate_on_boot:
             self.calibrate_dynamic() # Log will show current position repeatedly to help with manual configuration
         
         self.pos = self.get_position()  # Get initial position to avoid jumping from unknown position
-        
-        if self.center_on_boot:
-            self.calibrate_to_center()
         
         if self.demonstrate_on_boot:
             self.log(f"Demonstrating servo {self.identifier} movement, speed={self.speed}, acceleration={self.acceleration}")
@@ -162,10 +164,21 @@ class Servo(BaseModule):
         
         
     def is_moving(self):
-        if self.backend_servo.get_moving() == 1:
+        try:
+            moving = self.backend_servo.get_moving()
+        except Exception as e:
+            self.log(f"Exception in get_moving for servo {self.identifier}: {e}", level='error')
+            return False
+        if moving == 1:
             return True
-        elif abs(self.pos - self.get_position()) > 2:
-            print(f"Warning: Servo {self.identifier} is not reporting as moving but position {self.get_position()} does not match target position {self.pos}")
+        try:
+            pos = self.get_position()
+        except Exception as e:
+            self.log(f"Exception in get_position for servo {self.identifier}: {e}", level='error')
+            return False
+        if abs(self.pos - pos) > 2:
+            self.log(f"Warning: Servo {self.identifier} is not reporting as moving but position {pos} does not match target position {self.pos}", level='warning')
+            self.move(self.pos)  # Attempt to correct by moving to current position
         return False
         
     def get_position(self):
@@ -218,7 +231,7 @@ class Servo(BaseModule):
         max_pos = None
         try:
             while True:
-                pos = self.get_position()
+                pos = round(self.get_position(), 2)
                 if pos is None:
                     self.log(f"Failed to get position for servo {self.identifier}", level='warning')
                     continue
@@ -247,7 +260,3 @@ class Servo(BaseModule):
         if self.start is not None and (self.start < min_pos or self.start > max_pos):
             self.start = (min_pos + max_pos) // 2
             self.log(f"Start position {self.start} out of new range, setting to midpoint {self.start}")
-
-    
-
-
