@@ -34,11 +34,11 @@ class Personality(BaseModule):
         self.imu = {} # Set in main.py
         self.vision = None # Set in main.py
         self.euler = None
-        self.balance_enabled = kwargs.get('balance_enabled', True)
+        self.balance_enabled = kwargs.get('balance_enabled', False)
         self.chicken_head_enabled = kwargs.get('chicken_head_enabled', False)
-        self.track_people = kwargs.get('track_people', True) # Uses vision data to track detected people with the eyes, and optionally neck servos.
+        self.track_people = kwargs.get('track_people', False) # Uses vision data to track detected people with the eyes, and optionally neck servos.
         self.track_people_servos = kwargs.get('track_people_servos', False) # Moves neck servos to track detected people.
-        self.one_leg_balance_enabled = kwargs.get('one_leg_balance_enabled', True)
+        self.one_leg_balance_enabled = kwargs.get('one_leg_balance_enabled', False)
         self.servos = {} # Set in main.py
         self.pose = None
 
@@ -215,34 +215,27 @@ class Personality(BaseModule):
             self.publish('display/body/text', text=f"{self.pose}", font_size=20)
 
     def loop_10(self):
-        # loop 3 times:
-        # for i in range(3):
-        #     self.servos['leg_l_ankle'].move(1000, speed=0)
-        #     self.servos['leg_l_ankle'].move(1500, speed=0) 
-        # self.servos['leg_l_ankle'].move_degrees(50)
         # self.scan_vision()
         # self.output_current_pose()
-        # self.publish('servo/pose', pose_name='wave_1') # For testing pose movement
-        # time.sleep(1)
-        # current_pose = self.estimate_current_pose()
-        # if current_pose not in self.servos['leg_r_tilt'].poses:
-        #     return
-        # if current_pose == 'sit':
-            # self.publish('servo/pose', pose_name='wave_1') # For testing pose movement
-            # self.publish('servo/pose', pose_name='wave_2') # For testing pose movement
-            # self.publish('servo/pose', pose_name='wave_1') # For testing pose movement
-            # self.publish('servo/pose', pose_name='wave_2') # For testing pose movement
-            # self.publish('servo/pose', pose_name='sit') # For testing pose movement
-            # self.pose = 'sit'
-        # elif current_pose == 'sit_edge':
-        #     self.pose = 'sit_edge_swing_l'
-        # elif current_pose == 'sit_edge_swing_l':
-        #     self.pose = 'sit_edge_swing_r'
-        # elif current_pose == 'sit_edge_swing_r':
-        #     self.pose = 'sit_edge'
-        # elif current_pose == 'legs_forward':
-        #     self.pose = 'sit'
-        # self.publish('servo/pose', pose_name=self.pose) # For testing pose movement
+        current_pose = self.estimate_current_pose()
+        if current_pose not in self.servos['leg_r_tilt'].poses:
+            self.publish('servo/pose', pose_name='legs_forward') # Start in a default pose
+            return
+        if current_pose == 'sit':
+            self.publish('servo/pose', pose_name='wave_1') # For testing pose movement
+            self.publish('servo/pose', pose_name='wave_2') # For testing pose movement
+            self.publish('servo/pose', pose_name='wave_1') # For testing pose movement
+            self.publish('servo/pose', pose_name='wave_2') # For testing pose movement
+            self.pose = 'sit'
+        elif current_pose == 'sit_edge':
+            self.pose = 'sit_edge_swing_l'
+        elif current_pose == 'sit_edge_swing_l':
+            self.pose = 'sit_edge_swing_r'
+        elif current_pose == 'sit_edge_swing_r':
+            self.pose = 'sit_edge'
+        elif current_pose == 'legs_forward':
+            self.pose = 'sit'
+        self.publish('servo/pose', pose_name=self.pose) # For testing pose movement
         pass
     
     def loop(self):
