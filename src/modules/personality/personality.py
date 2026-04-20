@@ -219,22 +219,26 @@ class Personality(BaseModule):
         # self.output_current_pose()
         current_pose = self.estimate_current_pose()
         if current_pose not in self.servos['leg_r_tilt'].poses:
-            self.publish('servo/pose', pose_name='legs_forward') # Start in a default pose
+            self.publish('servo/pose', pose_name='stand_high') # Start in a default pose
             return
-        if current_pose == 'sit':
-            self.publish('servo/pose', pose_name='wave_1') # For testing pose movement
-            self.publish('servo/pose', pose_name='wave_2') # For testing pose movement
-            self.publish('servo/pose', pose_name='wave_1') # For testing pose movement
-            self.publish('servo/pose', pose_name='wave_2') # For testing pose movement
+        if current_pose == 'stand_low':
+            self.pose = 'stand_high'
+        elif current_pose == 'stand_high' or current_pose == 'stand_dip_l' or current_pose == 'stand_dip_r':
+            for _ in range(2):
+                self.publish('servo/pose', pose_name='stand_dip_l') # For testing pose movement
+                self.publish('servo/pose', pose_name='stand_dip_r') # For testing pose movement
+            self.pose = 'stand_high'
+        elif current_pose == 'sit':
+            for _ in range(3):
+                self.publish('servo/pose', pose_name='wave_1') # For testing pose movement
+                self.publish('servo/pose', pose_name='wave_2') # For testing pose movement
             self.pose = 'sit'
-        elif current_pose == 'sit_edge':
-            self.pose = 'sit_edge_swing_l'
-        elif current_pose == 'sit_edge_swing_l':
-            self.pose = 'sit_edge_swing_r'
-        elif current_pose == 'sit_edge_swing_r':
+        elif current_pose == 'sit_edge' or current_pose == 'sit_edge_swing_l' or current_pose == 'sit_edge_swing_r':
+            # random number between 1 and 4
+            for _ in range(4):
+                self.publish('servo/pose', pose_name='sit_edge_swing_l') # For testing pose movement
+                self.publish('servo/pose', pose_name='sit_edge_swing_r') # For testing pose movement
             self.pose = 'sit_edge'
-        elif current_pose == 'legs_forward':
-            self.pose = 'sit'
         self.publish('servo/pose', pose_name=self.pose) # For testing pose movement
         pass
     
