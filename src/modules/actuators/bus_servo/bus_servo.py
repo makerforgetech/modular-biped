@@ -277,8 +277,13 @@ class Servo(BaseModule):
     def is_moving(self):
         if self.get_moving() == 1:
             return True
-        elif abs(self.pos - self.get_position()) > 15:
-            print(f"Warning: Servo {self.identifier} is not reporting as moving but position {self.get_position()} does not match target position {self.pos}")
+        current_position = self.get_position()
+        if self.pos is not None and current_position is not None and abs(self.pos - current_position) > 15:
+            self.log(
+                f"Servo {self.identifier} is not reporting as moving but position {current_position} does not match target position {self.pos}",
+                level='warning'
+            )
+            return True
         return False
         
     def get_position(self):
@@ -456,6 +461,5 @@ class Servo(BaseModule):
             self.packetHandler.write2ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_SPEED, self.speed)
             self.packetHandler.write2ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_POSITION, self.pos)
             self.log(f"Moved servo {self.identifier} to position {self.pos}")
-
 
 
