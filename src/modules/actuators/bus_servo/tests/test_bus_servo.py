@@ -42,8 +42,10 @@ class TestBusServo(unittest.TestCase):
         servo.pos = 3396
         servo.get_moving = MagicMock(return_value=0)
         servo.get_position = MagicMock(return_value=3390)
+        servo.log = MagicMock()
 
         self.assertFalse(servo.is_moving())
+        servo.log.assert_not_called()
 
 if __name__ == '__main__':
     unittest.main()
