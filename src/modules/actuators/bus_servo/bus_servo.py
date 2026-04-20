@@ -4,6 +4,7 @@ import collections
 import sys
 import select
 import time
+from threading import Lock
 
 # if os.name == 'nt':
 #     import msvcrt
@@ -40,6 +41,10 @@ ST_MAX = 4095
 SC_MAX = 1024
 
 class Servo(BaseModule):
+    _shared_port_handlers = {}
+    _shared_port_locks = {}
+    _shared_port_refcounts = {}
+
     def __init__(self, **kwargs):
         """
         Servo class
@@ -65,10 +70,23 @@ class Servo(BaseModule):
         # Convert to dict:
         self.poses = {list(pose.keys())[0]: list(pose.values())[0] for pose in poses_list}
 
-        # Initialize PortHandler instance
-        # Set the port path
-        # Get methods and members of PortHandlerLinux or PortHandlerWindows
-        self.portHandler = PortHandler(self.port)
+        self._port_key = (self.port, self.baudrate)
+        if self._port_key not in self._shared_port_handlers:
+            port_handler = PortHandler(self.port)
+            # Open port
+            if not port_handler.openPort():
+                raise Exception("Failed to open the port")
+
+            # Set port baudrate
+            if not port_handler.setBaudRate(self.baudrate):
+                raise Exception("Failed to change the baudrate")
+            self._shared_port_handlers[self._port_key] = port_handler
+            self._shared_port_locks[self._port_key] = Lock()
+            self._shared_port_refcounts[self._port_key] = 0
+
+        self.portHandler = self._shared_port_handlers[self._port_key]
+        self._port_lock = self._shared_port_locks[self._port_key]
+        self._shared_port_refcounts[self._port_key] += 1
         
         # if model starts with ST or SC, use the appropriate packet handler
         if self.model.startswith('ST'):
@@ -77,31 +95,32 @@ class Servo(BaseModule):
             self.packetHandler = PacketHandler(1) # 1 = protocol_end in examples
         else:
             raise ValueError(f"Unknown servo model: {self.model}. Supported models are ST and SC.")
-
-        # Open port
-        if not self.portHandler.openPort():
-            raise Exception("Failed to open the port")
-
-        # Set port baudrate
-        if not self.portHandler.setBaudRate(self.baudrate):
-            raise Exception("Failed to change the baudrate")
         
     def detach(self):
         # Detach servo
         if self.model.startswith('ST'):
             # Disable torque for STServo
-            sts_comm_result, sts_error = self.packetHandler.write1ByteTxRx(self.index, ADDR_TORQUE_ENABLE, 0)
+            with self._port_lock:
+                sts_comm_result, sts_error = self.packetHandler.write1ByteTxRx(self.index, ADDR_TORQUE_ENABLE, 0)
             if not self.handle_errors(sts_comm_result, sts_error):
                 self.log(f"ST Servo {self.identifier} disabled")
         else:
             # Disable torque for SCServo
-            scs_comm_result, scs_error = self.packetHandler.write1ByteTxRx(self.portHandler, self.index, ADDR_TORQUE_ENABLE, 0)
+            with self._port_lock:
+                scs_comm_result, scs_error = self.packetHandler.write1ByteTxRx(self.portHandler, self.index, ADDR_TORQUE_ENABLE, 0)
             if not self.handle_errors(scs_comm_result, scs_error):
                 self.log(f"SC Servo {self.identifier} disabled")
     
     def exit(self):
         self.detach()
-        self.portHandler.closePort()
+        if self._port_key in self._shared_port_refcounts:
+            self._shared_port_refcounts[self._port_key] -= 1
+            if self._shared_port_refcounts[self._port_key] <= 0:
+                with self._port_lock:
+                    self.portHandler.closePort()
+                del self._shared_port_refcounts[self._port_key]
+                del self._shared_port_locks[self._port_key]
+                del self._shared_port_handlers[self._port_key]
 
     def setup_messaging(self):
         self.subscribe('servo:' + self.identifier + ':mvabs', self.move)
@@ -145,13 +164,15 @@ class Servo(BaseModule):
             self.log(f"Pose '{pose_name}' not found for servo {self.identifier}", level='warning')
             
     def _sc_write(self, type, value, verbose=False):
-        comm_result, error = self.packetHandler.write2ByteTxRx(self.portHandler, self.index, type, value)
+        with self._port_lock:
+            comm_result, error = self.packetHandler.write2ByteTxRx(self.portHandler, self.index, type, value)
         if hasattr(self.packetHandler, 'getTxRxResult') and verbose:
             self.log(f"[SCServo Result] {self.packetHandler.getTxRxResult(comm_result)}")
         if hasattr(self.packetHandler, 'getRxPacketError') and error != 0:
             self.log(f"[SCServo Error] {self.identifier} {self.packetHandler.getRxPacketError(error)}")
             # Attempting to clear error by toggling torque off and on
-            comm_result, error = self.packetHandler.write1ByteTxRx(self.portHandler, self.index, ADDR_TORQUE_ENABLE, 0)
+            with self._port_lock:
+                comm_result, error = self.packetHandler.write1ByteTxRx(self.portHandler, self.index, ADDR_TORQUE_ENABLE, 0)
             time.sleep(0.1)
             # comm_result, error = self.packetHandler.write1ByteTxRx(self.portHandler, self.index, ADDR_TORQUE_ENABLE, )
             # self._sc_write(type, value)
@@ -244,7 +265,8 @@ class Servo(BaseModule):
         
         # Write STServo goal position
         if self.model.startswith('ST'):
-            sts_comm_result, sts_error = self.packetHandler.WritePosEx(self.index, position, speed, acceleration)
+            with self._port_lock:
+                sts_comm_result, sts_error = self.packetHandler.WritePosEx(self.index, position, speed, acceleration)
             if not self.handle_errors(sts_comm_result, sts_error):
                 self.log(f"Moved ST servo {self.identifier} from {self.pos} to position {position}")
                 self.pos = position  # Update current position
@@ -292,7 +314,8 @@ class Servo(BaseModule):
         """
         if self.model.startswith('ST'):
             # Read STServo present position
-            sts_present_position, sts_present_speed, sts_comm_result, sts_error = self.packetHandler.ReadPosSpeed(self.index)
+            with self._port_lock:
+                sts_present_position, sts_present_speed, sts_comm_result, sts_error = self.packetHandler.ReadPosSpeed(self.index)
             if not self.handle_errors(sts_comm_result, sts_error):
                 # self.log("[ID:%03d] PresPos:%d PresSpd:%d" % (self.index, sts_present_position, sts_present_speed))
                 return sts_present_position
@@ -305,7 +328,8 @@ class Servo(BaseModule):
         """
         if self.model.startswith('ST'):
             # Read STServo present position
-            sts_present_position, sts_present_speed, sts_comm_result, sts_error = self.packetHandler.ReadPosSpeed(self.index)
+            with self._port_lock:
+                sts_present_position, sts_present_speed, sts_comm_result, sts_error = self.packetHandler.ReadPosSpeed(self.index)
             if not self.handle_errors(sts_comm_result, sts_error):
                 return sts_present_speed
         else:
@@ -317,7 +341,8 @@ class Servo(BaseModule):
         """
         if self.model.startswith('ST'):
             # Read STServo moving status
-            moving, sts_comm_result, sts_error = self.packetHandler.ReadMoving(self.index)
+            with self._port_lock:
+                moving, sts_comm_result, sts_error = self.packetHandler.ReadMoving(self.index)
             if not self.handle_errors(sts_comm_result, sts_error):
                 return moving
         else:
@@ -328,7 +353,8 @@ class Servo(BaseModule):
         
     def sc_get_position_speed(self, pos_or_speed):
         # Read SCServo present position
-        scs_present_position_speed, scs_comm_result, scs_error = self.packetHandler.read4ByteTxRx(self.portHandler, self.index, ADDR_SCS_PRESENT_POSITION)
+        with self._port_lock:
+            scs_present_position_speed, scs_comm_result, scs_error = self.packetHandler.read4ByteTxRx(self.portHandler, self.index, ADDR_SCS_PRESENT_POSITION)
         if not self.handle_errors(scs_comm_result, scs_error):
             scs_present_position = SCS_LOWORD(scs_present_position_speed)
             scs_present_speed = SCS_HIWORD(scs_present_position_speed)
@@ -344,14 +370,16 @@ class Servo(BaseModule):
         """
         if self.model.startswith('SC'):
             raise ValueError("Continuous mode is not supported for SCServo models.")
-        sts_comm_result, sts_error = self.packetHandler.WheelMode(self.index)
+        with self._port_lock:
+            sts_comm_result, sts_error = self.packetHandler.WheelMode(self.index)
         if not self.handle_errors(sts_comm_result, sts_error):
             self.log(f"Servo {self.name} set to wheel mode")
             
     def turn_wheel(self, speed):
         if self.model.startswith('SC'):
             raise ValueError("Continuous mode is not supported for SCServo models.")
-        sts_comm_result, sts_error = self.packetHandler.WriteSpec(self.index, speed, self.acceleration)
+        with self._port_lock:
+            sts_comm_result, sts_error = self.packetHandler.WriteSpec(self.index, speed, self.acceleration)
         if not self.handle_errors(sts_comm_result, sts_error):
             self.log(f"Servo {self.name} turned at speed {speed}")
             
@@ -451,15 +479,15 @@ class Servo(BaseModule):
         
         if self.model.startswith('ST'):
             self.pos = (self.range[0] + self.range[1]) // 2  # Update current position to center
-            sts_comm_result, sts_error = self.packetHandler.WritePosEx(self.index, self.pos, self.speed, self.acceleration)
+            with self._port_lock:
+                sts_comm_result, sts_error = self.packetHandler.WritePosEx(self.index, self.pos, self.speed, self.acceleration)
             if not self.handle_errors(sts_comm_result, sts_error):
                 self.log(f"Moved servo {self.identifier} to position {self.pos}")
                 
         elif self.model.startswith('SC'):
             self.pos = (self.range[0] + self.range[1]) // 2  # Update current position to center
-            self.packetHandler.write1ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_ACC, self.acceleration)
-            self.packetHandler.write2ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_SPEED, self.speed)
-            self.packetHandler.write2ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_POSITION, self.pos)
+            with self._port_lock:
+                self.packetHandler.write1ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_ACC, self.acceleration)
+                self.packetHandler.write2ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_SPEED, self.speed)
+                self.packetHandler.write2ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_POSITION, self.pos)
             self.log(f"Moved servo {self.identifier} to position {self.pos}")
-
-
