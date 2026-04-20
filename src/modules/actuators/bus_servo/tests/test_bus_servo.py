@@ -32,7 +32,10 @@ class TestBusServo(unittest.TestCase):
         servo.log = MagicMock()
 
         self.assertTrue(servo.is_moving())
-        servo.log.assert_called_once()
+        servo.log.assert_called_once_with(
+            "Servo test is not reporting as moving but position 3047 does not match target position 3396",
+            level='warning'
+        )
 
     def test_is_moving_false_when_within_tolerance(self):
         servo = Servo(name='test', id=1, range=[0, 4095], model='ST3215')
