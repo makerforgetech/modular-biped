@@ -181,5 +181,6 @@ class WaveshareBusServo(BusServoBase):
             return
         center_deg = (self.range[0] + self.range[1]) / 2
         center_raw = degrees_to_raw(center_deg, self.min_deg, self.max_deg, self.min_raw, self.max_raw)
+        self.log(f"Calibrating servo {self.servo_id} to center position {center_deg} degrees (raw: {center_raw})")
         self.move_to_raw(center_raw)
         self.log(f"Moved servo {self.servo_id} to center position {center_deg} degrees (raw: {center_raw})")

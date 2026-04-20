@@ -41,9 +41,10 @@ bus_servo:
     - name: "leg_r_hip"
       model: 'ST3215'
       id: 3
-      range: [0.0, 101.3] # Need to re-center
+      range: [0, 360] # Need to re-center
+      center_on_boot: true
       # calibrate_on_boot: true
-      start: 65
+      # start: 65
     - name: "leg_r_knee"
       model: 'ST3215'
       id: 2
@@ -99,9 +100,10 @@ bus_servo:
     - name: "leg_l_hip"
       model: 'ST3215'
       id: 8
-      range: [144.35, 336] # Need to re-center
+      range: [0, 360] # Need to re-center
+      center_on_boot: true
       # calibrate_on_boot: true
-      start: 214.33
+      # start: 214.33
     - name: "leg_l_knee"
       model: 'ST3215'
       id: 9
