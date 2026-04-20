@@ -62,7 +62,7 @@ class Servo(BaseModule):
         self.demonstrate_on_boot = kwargs.get('demonstrate_on_boot', False) # Move to min and max to demonstrate range
         self.center_on_boot = kwargs.get('center_on_boot', False) # Move to center of range on boot
         self.pos = None
-        self.speed = kwargs.get('speed', 0) # 3073
+        self.speed = kwargs.get('speed', 300) # 3073
         self.acceleration = kwargs.get('acceleration', 50)
         self._move_queue = collections.deque()
         # After loading YAML:
@@ -307,7 +307,7 @@ class Servo(BaseModule):
                 f"Servo {self.identifier} is not reporting as moving but position {current_position} does not match target position {self.pos}",
                 level='warning'
             )
-            return False
+            return True
         return False
         
     def get_position(self):
