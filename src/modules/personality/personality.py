@@ -39,6 +39,7 @@ class Personality(BaseModule):
         self.track_people = kwargs.get('track_people', False) # Uses vision data to track detected people with the eyes, and optionally neck servos.
         self.track_people_servos = kwargs.get('track_people_servos', False) # Moves neck servos to track detected people.
         self.one_leg_balance_enabled = kwargs.get('one_leg_balance_enabled', False)
+        self.animate_pose_enabled = kwargs.get('animate_pose_enabled', False) # Cycles through predefined poses randomly every 10 seconds in loop_10()
         self.servos = {} # Set in main.py
         self.pose = None
 
@@ -162,17 +163,22 @@ class Personality(BaseModule):
     def balance(self):
         """Use head and body IMU data to maintain balance by adjusting leg servos."""
         if not self.balance_enabled or 'body' not in self.imu:
+            self.log("Balance check skipped: IMU data not available or balance disabled")
             return
+        # self.log("Balance check")
         euler = self.imu['body'].get_euler()
+        # self.log(f"Current body Euler angles: {euler}")
         # if euler has changed significantly since last update, adjust servos
         if self.euler is None or any(abs(e - self.euler[i]) > 1 for i, e in enumerate(euler)):
             self.euler = euler
             pitch = euler[1]
+            # self.log(f"Adjusting balance with pitch: {pitch}")
             if abs(pitch) < 2:
                 return  # No need to adjust for small angles
             # print(f"Angle to move: {pitch}")
-            self.servos['leg_l_hip'].move_degrees(-pitch) 
-            self.servos['leg_r_hip'].move_degrees(pitch)
+            self.log(f"Moving leg servos to adjust balance: leg_l_hip {-pitch} degrees, leg_r_hip {pitch} degrees")
+            self.servos['leg_l_hip'].move_degrees(pitch) 
+            self.servos['leg_r_hip'].move_degrees(-pitch)
     
     def handle_user_message(self, user_id=None, message=None):
         print(f"Received message from user {user_id}: {message}")
@@ -217,24 +223,33 @@ class Personality(BaseModule):
     def loop_10(self):
         # self.scan_vision()
         # self.output_current_pose()
+        if self.animate_pose_enabled:
+            self.animate_pose()
+    
+    def animate_pose(self):
         current_pose = self.estimate_current_pose()
         if current_pose not in self.servos['leg_r_tilt'].poses:
             self.publish('servo/pose', pose_name='legs_forward') # Start in a default pose
             return
-        if current_pose == 'sit':
-            self.publish('servo/pose', pose_name='wave_1') # For testing pose movement
-            self.publish('servo/pose', pose_name='wave_2') # For testing pose movement
-            self.publish('servo/pose', pose_name='wave_1') # For testing pose movement
-            self.publish('servo/pose', pose_name='wave_2') # For testing pose movement
+        # if current_pose == 'stand_low':
+        #     self.pose = 'stand_high'
+        # elif current_pose == 'stand_high':
+        #     self.pose = 'stand_low'
+        # elif current_pose == 'stand_high' or current_pose == 'stand_dip_l' or current_pose == 'stand_dip_r':
+        #     # chose from stand_dip_l and stand_dip_r poses randomly
+        #     self.publish('servo/pose', pose_name=('stand_dip_l' if choice([True, False]) else 'stand_dip_r')) # For testing pose movement
+        #     self.pose = 'stand_high'
+        elif current_pose == 'sit':
+            for _ in range(3):
+                self.publish('servo/pose', pose_name='wave_1') # For testing pose movement
+                self.publish('servo/pose', pose_name='wave_2') # For testing pose movement
             self.pose = 'sit'
-        elif current_pose == 'sit_edge':
-            self.pose = 'sit_edge_swing_l'
-        elif current_pose == 'sit_edge_swing_l':
-            self.pose = 'sit_edge_swing_r'
-        elif current_pose == 'sit_edge_swing_r':
+        elif current_pose == 'sit_edge' or current_pose == 'sit_edge_swing_l' or current_pose == 'sit_edge_swing_r':
+            # random number between 1 and 4
+            for _ in range(4):
+                self.publish('servo/pose', pose_name='sit_edge_swing_l') # For testing pose movement
+                self.publish('servo/pose', pose_name='sit_edge_swing_r') # For testing pose movement
             self.pose = 'sit_edge'
-        elif current_pose == 'legs_forward':
-            self.pose = 'sit'
         self.publish('servo/pose', pose_name=self.pose) # For testing pose movement
         pass
     
@@ -285,7 +300,9 @@ class Personality(BaseModule):
         # print(f"Current positions: {current_pose}")
         try:
             for pose_name, pose_values in self.servos['leg_r_tilt'].poses.items():
-                if all(abs(current_pose.get(servo_name, 0) - pose_value) < 100 for servo_name, pose_value in pose_values.items()):
+            #ignore pan and tilt servos
+                servos_to_check = {k: v for k, v in pose_values.items() if k not in ['neck_pan', 'neck_tilt']}
+                if all(abs(current_pose.get(servo_name, 0) - pose_value) < 100 for servo_name, pose_value in servos_to_check.items()):
                     # print(f"Current pose is approximately: {pose_name}")
                     self.pose = pose_name
                     return pose_name
@@ -441,7 +458,7 @@ class Personality(BaseModule):
         if not self.track_people_servos:
             return
         
-        track_threshold = [15, 15] # Minimum angle change to trigger servo movement
+        track_threshold = [15, 10] # Minimum angle change to trigger servo movement
         
         # Move pan servo based on center_pos_x position relative to camera_size
         pan_angle = int(((center_pos_x - (camera_size[0] / 2)) / (camera_size[0] / 2)) * 40)  # Scale to -40 to 40 degrees

@@ -35,6 +35,11 @@ bus_servo:
       - sit_edge_swing_r: {'leg_r_tilt': 2783, 'leg_r_hip': 986, 'leg_r_knee': 2028, 'leg_r_ankle': 2633, 'neck_pan': 1709, 'neck_tilt': 121, 'leg_l_tilt': 1606, 'leg_l_hip': 3072, 'leg_l_knee': 1326, 'leg_l_ankle': 1161}
       - legs_straight_out: {'leg_r_tilt': 3696, 'leg_r_hip': 2066, 'leg_r_knee': 1904, 'leg_r_ankle': 2777, 'neck_pan': 1713, 'neck_tilt': 116, 'leg_l_tilt': 599, 'leg_l_hip': 2103, 'leg_l_knee': 2285, 'leg_l_ankle': 1140}
       - crab: {'leg_r_tilt': 3695, 'leg_r_hip': 1046, 'leg_r_knee': 1451, 'leg_r_ankle': 2745, 'neck_pan': 1712, 'neck_tilt': 116, 'leg_l_tilt': 599, 'leg_l_hip': 2930, 'leg_l_knee': 2855, 'leg_l_ankle': 1230}
+      # - sit_safe:
+      # - sit_safe_toe_up_l
+      # - sit_safe_toe_up_r
+      # - sit_safe_toe_down_l
+      # - sit_safe_toe_down_r
   instances:
     - name: "leg_r_tilt"
       model: 'ST3215'
@@ -51,7 +56,7 @@ bus_servo:
     - name: "leg_r_knee"
       model: 'ST3215'
       id: 2
-      range: [596, 3384]
+      range: [626, 3384]
       # start: 1999
     - name: "leg_r_ankle"
       model: 'ST3215'
@@ -61,7 +66,7 @@ bus_servo:
     - name: "neck_pan"
       model: 'ST3215'
       id: 12
-      range: [0, 3412] # 300 degrees = 3412, 360 degrees = 4095
+      range: [1200, 2200] # Reduced range to prevent damaging wires
       start: 1706
       # calibrate_on_boot: true
       # demonstrate_on_boot: true
@@ -78,7 +83,7 @@ bus_servo:
       model: 'SC09'
       baudrate: 115200
       id: 11
-      range: [30, 220]
+      range: [30, 200]
       start: 120
       speed: 60 # max=0, 1 - 3000 tested
       # acceleration: 0 # max (no significant difference between this and 1 - 3000)
@@ -107,7 +112,7 @@ bus_servo:
     - name: "leg_l_knee"
       model: 'ST3215'
       id: 9
-      range: [684, 3481]
+      range: [684, 3471]
       # start: 2106
     - name: "leg_l_ankle"
       model: 'ST3215'
@@ -347,6 +352,10 @@ personality:
   config:
     mode: 6 # Config.MODE_LIVE
     sleep_timeout: 60  # Time in seconds before entering sleep mode
+    balance_enabled: true
+    track_people: true
+    track_people_servos: true
+    animate_pose_enabled: false
 
 pitemperature:
   enabled: true

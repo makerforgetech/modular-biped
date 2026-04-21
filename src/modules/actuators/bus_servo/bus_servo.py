@@ -172,9 +172,11 @@ class Servo(BaseModule):
         if self.range_degrees is None:
             self.log(f"Servo {self.identifier} does not have range_degrees set, cannot move by degrees", level='error')
             return
+        # self.log(f"[move_degrees] Moving servo {self.identifier} by {degrees} degrees")
         # Convert degrees to position value based on range, adjusting RELATIVE to current position
         self.pos = self.get_position()  # Update current position before calculating new position
         if self.range is not None and self.pos is not None:
+            # self.log(f"Current position: {self.pos}, Range: {self.range}, Range degrees: {self.range_degrees}")
             # Calculate how many position units correspond to the degree change
             units_per_degree = (self.range[1] - self.range[0]) / self.range_degrees
             position_delta = degrees * units_per_degree
@@ -188,6 +190,8 @@ class Servo(BaseModule):
                 pc_move = round((degrees / self.range_degrees) * 100)
                 self.log(f"Moving servo {self.identifier} by {degrees} degrees (position {self.pos} -> {new_position} | {pc_move}% of range)")
                 self.move(new_position)
+            else:
+                self.log(f"Invalid range_degrees for servo {self.identifier}, cannot move by degrees {self.range_degrees}", level='error')
 
     def move(self, position, speed=None, acceleration=None, delay=0, **kwargs):
         """
@@ -277,8 +281,13 @@ class Servo(BaseModule):
     def is_moving(self):
         if self.get_moving() == 1:
             return True
-        elif abs(self.pos - self.get_position()) > 15:
-            print(f"Warning: Servo {self.identifier} is not reporting as moving but position {self.get_position()} does not match target position {self.pos}")
+        current_position = self.get_position()
+        if self.pos is not None and current_position is not None and abs(self.pos - current_position) > 15:
+            self.log(
+                f"Servo {self.identifier} is not reporting as moving but position {current_position} does not match target position {self.pos}",
+                level='warning'
+            )
+            return False
         return False
         
     def get_position(self):
@@ -435,9 +444,9 @@ class Servo(BaseModule):
         if self.start is not None and (self.start < min_pos or self.start > max_pos):
             self.start = (min_pos + max_pos) // 2
             self.log(f"Start position {self.start} out of new range, setting to midpoint {self.start}")
-    
+
     def calculate_range_degrees(self, max_pos, min_pos):
-            return (360/ST_MAX)*(max_pos - min_pos) if min_pos is not None and max_pos is not None else 'N/A'
+        return (360/ST_MAX)*abs(max_pos - min_pos) if min_pos is not None and max_pos is not None else 0
 
     def calibrate_to_center(self):
         """
@@ -457,6 +466,3 @@ class Servo(BaseModule):
             self.packetHandler.write2ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_SPEED, self.speed)
             self.packetHandler.write2ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_POSITION, self.pos)
             self.log(f"Moved servo {self.identifier} to position {self.pos}")
-
-
-
