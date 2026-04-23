@@ -58,7 +58,7 @@ class Servo(BaseModule):
         self.center_on_boot = kwargs.get('center_on_boot', False) # Move to center of range on boot
         self.pos = None
         self.speed = kwargs.get('speed', 0) # 3073
-        self.acceleration = kwargs.get('acceleration', 50)
+        self.acceleration = kwargs.get('acceleration', 0)
         self._move_queue = collections.deque()
         # After loading YAML:
         poses_list = kwargs.get('poses', [])
@@ -135,6 +135,10 @@ class Servo(BaseModule):
         
     def move_to_pose(self, pose_name):
         # print(self.poses)
+        # if pose in list of poses
+        if pose_name not in self.poses:
+            self.log(f"Pose '{pose_name}' not found for servo {self.identifier}", level='warning')
+            return
         pose_value = self.poses.get(pose_name)
         # print(f"{self.identifier} - Pose '{pose_name}' value: {pose_value}")
         my_pose_value = pose_value.get(self.identifier)

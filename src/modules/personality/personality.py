@@ -41,7 +41,21 @@ class Personality(BaseModule):
         self.one_leg_balance_enabled = kwargs.get('one_leg_balance_enabled', False)
         self.animate_pose_enabled = kwargs.get('animate_pose_enabled', False) # Cycles through predefined poses randomly every 10 seconds in loop_10()
         self.servos = {} # Set in main.py
+        
+        self.pose_list = kwargs.get('poses', []) # List of predefined poses with servo positions
+        # After loading YAML:
+        poses_list = kwargs.get('poses', [])
+        # Convert to dict:
+        self.pose_list = {list(pose.keys())[0]: list(pose.values())[0] for pose in poses_list}
+        
         self.pose = None
+        self.knee_pose_thresholds = kwargs.get('knee_pose_thresholds')
+        self._pose_queue = [] # To queue animations
+        self._animating_pose = False # Flag to indicate if currently animating a pose
+        
+        self.check_being_carried_enabled = kwargs.get('check_being_carried_enabled', False) # If true, monitor body IMU for signs of being carried and disable leg servos if detected
+        self._carried = False # To track if being carried based on IMU data
+        self._last_imu_acceleration = None # To track last IMU acceleration for carried detection
 
         # Define possible actions
         self.actions = [
@@ -55,6 +69,7 @@ class Personality(BaseModule):
         """Subscribe to necessary topics."""
         self.subscribe('system/loop/1', self.loop_second)
         self.subscribe('system/loop/10', self.loop_10)
+        self.subscribe('system/loop/60', self.loop_60)
         if self.track_people:
             self.subscribe('vision/detections', self.handle_vision_detections) # Enable after testing north facing
         self.subscribe('gpio/motion', self.update_motion_time)
@@ -219,71 +234,157 @@ class Personality(BaseModule):
             self.publish('display/body/text', text=f"{self.current_hz}Hz", font_size=20)
         elif self.display_state == 5:
             self.publish('display/body/text', text=f"{self.pose}", font_size=20)
-
-    def loop_10(self):
-        # self.scan_vision()
-        # self.output_current_pose()
-        if self.animate_pose_enabled:
-            self.animate_pose()
     
     def animate_pose(self):
-        current_pose = self.estimate_current_pose()
-        if current_pose not in self.servos['leg_r_tilt'].poses:
-            self.publish('servo/pose', pose_name='legs_forward') # Start in a default pose
+        # current_pose = self.estimate_current_pose()
+        current_pose = self.estimate_pose_from_knee()
+        if current_pose is None:
+            self.pose = 'No Pose'
+            self.log("Current pose could not be estimated. Cannot animate pose.", level='warning')
             return
-        # if current_pose == 'stand_low':
-        #     self.pose = 'stand_high'
-        # elif current_pose == 'stand_high':
-        #     self.pose = 'stand_low'
-        # elif current_pose == 'stand_high' or current_pose == 'stand_dip_l' or current_pose == 'stand_dip_r':
-        #     # chose from stand_dip_l and stand_dip_r poses randomly
-        #     self.publish('servo/pose', pose_name=('stand_dip_l' if choice([True, False]) else 'stand_dip_r')) # For testing pose movement
-        #     self.pose = 'stand_high'
-        elif current_pose == 'sit':
-            for _ in range(3):
-                self.publish('servo/pose', pose_name='wave_1') # For testing pose movement
-                self.publish('servo/pose', pose_name='wave_2') # For testing pose movement
-            self.pose = 'sit'
-        elif current_pose == 'sit_edge' or current_pose == 'sit_edge_swing_l' or current_pose == 'sit_edge_swing_r':
-            # random number between 1 and 4
-            for _ in range(4):
-                self.publish('servo/pose', pose_name='sit_edge_swing_l') # For testing pose movement
-                self.publish('servo/pose', pose_name='sit_edge_swing_r') # For testing pose movement
-            self.pose = 'sit_edge'
-        self.publish('servo/pose', pose_name=self.pose) # For testing pose movement
-        pass
+
+        if current_pose == 'sitting':
+            self.animate_wave('sit')
+        elif current_pose == 'sitting_edge':
+            self.animate_swing_legs('sit_edge')
+        elif current_pose == 'standing':
+            self.animate_stand_low()
+            
+    def check_being_carried(self):
+        """ Detect if being carried by monitoring body IMU for prolonged movement (3 seconds) without corresponding leg movement. If detected, disable leg servos and set self._carried to true. """
+        # _last_imu_acceleration to store last acceleration value from body IMU. If acceleration above threshold and no leg movement for 3 seconds, consider being carried.
+        if self.check_being_carried_enabled == False or 'body' not in self.imu:
+            return
+        acceleration = self.imu['body'].get_linear_acceleration()
+        # if any values in tuple above threshold, consider as significant movement  
+        if isinstance(acceleration, (tuple, list)):
+            if any(abs(a) > 0.5 for a in acceleration):
+                acceleration = max(abs(a) for a in acceleration) # Use max acceleration value for threshold check
+            else:
+                acceleration = 0
+        if acceleration > 0:
+            if self._last_imu_acceleration is None: 
+                self._last_imu_acceleration = time.time()
+            if time.time() - self._last_imu_acceleration > 3 and not self._carried:
+                self._carried = True
+                for servo in self.servos.values():
+                    servo.detach() # Disable torque to allow free movement when being carried
+                self.publish('log', message="[Personality] Detected being carried. Disabling leg servos.")
+        else:
+            self._last_imu_acceleration = None
+            if self._carried:
+                self._carried = False
+                self.publish('log', message="[Personality] No longer being carried. Re-enabling leg servos.")
+            
+    
+    def animate_pose_queue(self):
+        """Non-blocking: queue pose for animation. Actual processing is in loop()."""
+        if self._pose_queue and not any(servo.is_moving() for servo in self.servos.values()):
+            pose_name = self._pose_queue.pop(0)
+            self.manually_trigger_pose(pose_name)
+            # self.publish('servo/pose', pose_name=pose_name)
+            
+    def animate_stand_low(self):
+        self.log("Animating stand_low pose")
+        self.manually_trigger_pose('stand_high')
+        # self.publish('servo/pose', pose_name='stand_low')
+            
+    def animate_wave(self, return_to_pose):
+        self.log(f"Animating wave from pose: {return_to_pose}")
+        queue = []
+        for _ in range(3):
+            queue.append('wave_1')
+            queue.append('wave_2')
+        queue.append(return_to_pose)
+        self._pose_queue.extend(queue)
+    
+    def animate_swing_legs(self, return_to_pose):
+        self.log(f"Animating leg swing from pose: {return_to_pose}")
+        queue = []
+        for _ in range(4):
+            queue.append('sit_edge_swing_l')
+            queue.append('sit_edge_swing_r')
+        queue.append(return_to_pose)
+        self._pose_queue.extend(queue)
+        
+    def manually_trigger_pose(self, pose_name):
+        self.log(f"Manually triggering pose: {pose_name}")
+        pose = self.pose_list.get(pose_name)
+        if pose is None:
+            self.log(f"Pose '{pose_name}' not found in pose list", level='warning')
+            return
+        for servo_name, position in pose.items():
+            if servo_name not in self.servos:
+                self.log(f"Servo '{servo_name}' not found for pose '{pose_name}'", level='warning')
+                continue
+            try:
+                self.servos[servo_name].move(position)
+            except Exception as e:
+                self.log(f"Error moving servo '{servo_name}' to position {position} for pose '{pose_name}': {e}", level='error')
     
     def loop(self):
         pass
         
     def loop_second(self):
         now = time.time()
-        self.cycle_display()
-        self.balance()
-        self.chicken_head()
-        self.one_leg_balance()
-        self.estimate_current_pose()
+        self.cycle_display() # Update display every second
+        self.balance() # Adjust balance every second based on IMU data
+        self.chicken_head() # Move head to match head IMU orientation every second
+        self.one_leg_balance() # Adjust legs for one legged balance based on body roll every second
+        self.animate_pose_queue() # Process pose animation queue every second. This allows it to run in the background without blocking other actions.
+        self.check_being_carried() # Check if being carried every second based on IMU data
         
-        # Handle ongoing object reaction
-        if self.object_reaction_end_time and now >= self.object_reaction_end_time:
-            self.publish('led', identifiers=[
-                'right', 'top_right', 'top_left', 'left', 
-                'bottom_left', 'bottom_right'
-            ], color="off")
-            self.object_reaction_end_time = None
+        # self.estimate_current_pose()
+        
+        # # Handle ongoing object reaction
+        # if self.object_reaction_end_time and now >= self.object_reaction_end_time:
+        #     self.publish('led', identifiers=[
+        #         'right', 'top_right', 'top_left', 'left', 
+        #         'bottom_left', 'bottom_right'
+        #     ], color="off")
+        #     self.object_reaction_end_time = None
 
-        # self.update_eye()
-        self.random_neopixel_status()
+        # # self.update_eye()
+        # self.random_neopixel_status()
 
         # Check if it's time for the next action
-        if now >= self.next_action_time:
-            action = choice(self.actions)
-            action()
-            self.next_action_time = self.calculate_next_action_time()
+        # if now >= self.next_action_time:
+        #     action = choice(self.actions)
+        #     action()
+        #     self.next_action_time = self.calculate_next_action_time()
 
-        # If serial has been idle for more than 10 seconds, call random_animation()
-        if self.last_serial_time and (now - self.last_serial_time > 10):
-            self.random_animation()
+        # # If serial has been idle for more than 10 seconds, call random_animation()
+        # if self.last_serial_time and (now - self.last_serial_time > 10):
+        #     self.random_animation()
+            
+    def loop_10(self):
+        # self.scan_vision()
+        # self.output_current_pose()
+        if self.animate_pose_enabled:
+            self.animate_pose()
+        pass
+    
+    def loop_60(self):
+        if self.animate_pose_enabled:
+            self.animate_pose()
+
+    def estimate_pose_from_knee(self):
+        """ Simplify by just checking leg_l_knee position against self.knee_pose_thresholds to determine if sitting, standing, or sitting on an edge. """
+        knee_pose = None
+        if self.knee_pose_thresholds and self.servos['leg_l_knee']:
+            
+            try:
+                knee_pos = self.servos['leg_l_knee'].get_position()
+                if knee_pos <= self.knee_pose_thresholds['sitting_edge']:
+                    knee_pose = 'sitting_edge'
+                elif knee_pos > self.knee_pose_thresholds['sitting_edge'] and knee_pos < self.knee_pose_thresholds['standing']:
+                    knee_pose = 'sitting'
+                else:
+                    knee_pose = 'standing'
+                self.log(f"Estimated pose: {knee_pose} based on knee position: {knee_pos}")
+            except Exception as e:
+                self.log(f"Error estimating pose from knee position: {e}", level='warning')
+        return knee_pose
     
     def estimate_current_pose(self):
         """ Identify current pose by matching servo positions to known poses in config. Do not require exact match of values, but 'close enough' check"""

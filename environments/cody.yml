@@ -25,7 +25,7 @@ bus_servo:
       - sit: {'leg_r_tilt': 2784, 'leg_r_hip': 866, 'leg_r_knee': 2042, 'leg_r_ankle': 3396, 'neck_pan': 1711, 'neck_tilt': 121, 'leg_l_tilt': 1597, 'leg_l_hip': 3229, 'leg_l_knee': 2095, 'leg_l_ankle': 698}
       - wave_1: {'leg_r_tilt': 2785, 'leg_r_hip': 857, 'leg_r_knee': 2037, 'leg_r_ankle': 3396, 'neck_pan': 1710, 'neck_tilt': 121, 'leg_l_tilt': 1599, 'leg_l_hip': 3131, 'leg_l_knee': 2626, 'leg_l_ankle': 1371}
       - wave_2: {'leg_r_tilt': 2785, 'leg_r_hip': 857, 'leg_r_knee': 2037, 'leg_r_ankle': 3396, 'neck_pan': 1710, 'neck_tilt': 121, 'leg_l_tilt': 1599, 'leg_l_hip': 3131, 'leg_l_knee': 2626, 'leg_l_ankle': 701}
-      - stand_straight: {'leg_r_tilt': 2735, 'leg_r_hip': 1968, 'leg_r_knee': 2029, 'leg_r_ankle': 2353, 'neck_pan': 1711, 'neck_tilt': 121, 'leg_l_tilt': 1596, 'leg_l_hip': 2087, 'leg_l_knee': 2075, 'leg_l_ankle': 1799}
+      # - stand_straight: {'leg_r_tilt': 2735, 'leg_r_hip': 1968, 'leg_r_knee': 2029, 'leg_r_ankle': 2353, 'neck_pan': 1711, 'neck_tilt': 121, 'leg_l_tilt': 1596, 'leg_l_hip': 2087, 'leg_l_knee': 2075, 'leg_l_ankle': 1799}
       - stand_low: {'leg_r_tilt': 2698, 'leg_r_hip': 3051, 'leg_r_knee': 596, 'leg_r_ankle': 2751, 'neck_pan': 1708, 'neck_tilt': 120, 'leg_l_tilt': 1626, 'leg_l_hip': 1149, 'leg_l_knee': 3481, 'leg_l_ankle': 1306}
       - stand_high: {'leg_r_tilt': 2687, 'leg_r_hip': 2547, 'leg_r_knee': 1080, 'leg_r_ankle': 2753, 'neck_pan': 1711, 'neck_tilt': 116, 'leg_l_tilt': 1595, 'leg_l_hip': 1536, 'leg_l_knee': 2976, 'leg_l_ankle': 1522}
       - stand_dip_l: {'leg_r_tilt': 2693, 'leg_r_hip': 2539, 'leg_r_knee': 1081, 'leg_r_ankle': 2742, 'neck_pan': 1713, 'neck_tilt': 119, 'leg_l_tilt': 1623, 'leg_l_hip': 1386, 'leg_l_knee': 3139, 'leg_l_ankle': 1522} 
@@ -355,7 +355,33 @@ personality:
     balance_enabled: true
     track_people: true
     track_people_servos: true
-    animate_pose_enabled: false
+    animate_pose_enabled: true
+    check_being_carried_enabled: false
+    knee_pose_thresholds:
+        sitting_edge: 1700 # 1431
+        sitting: 2000 # 2095
+        standing: 2900 # 2976
+    poses:
+      - storage: {'leg_r_tilt': 2784, 'leg_r_hip': 1006, 'leg_r_knee': 772, 'leg_r_ankle': 2991, 'neck_pan': 1708, 'neck_tilt': 121, 'leg_l_tilt': 1601, 'leg_l_hip': 3108, 'leg_l_knee': 3258, 'leg_l_ankle': 1286}
+      - legs_forward: {'leg_r_tilt': 2784, 'leg_r_hip': 1005, 'leg_r_knee': 1998, 'leg_r_ankle': 2351, 'leg_l_tilt': 1606, 'leg_l_hip': 3099, 'leg_l_knee': 2107, 'leg_l_ankle': 1865}
+      - sit: {'leg_r_tilt': 2784, 'leg_r_hip': 866, 'leg_r_knee': 2042, 'leg_r_ankle': 3396, 'leg_l_tilt': 1597, 'leg_l_hip': 3229, 'leg_l_knee': 2095, 'leg_l_ankle': 698}
+      - wave_1: {'leg_r_tilt': 2785, 'leg_r_hip': 857, 'leg_r_knee': 2037, 'leg_r_ankle': 3396, 'leg_l_tilt': 1599, 'leg_l_hip': 3131, 'leg_l_knee': 2626, 'leg_l_ankle': 1371}
+      - wave_2: {'leg_r_tilt': 2785, 'leg_r_hip': 857, 'leg_r_knee': 2037, 'leg_r_ankle': 3396, 'leg_l_tilt': 1599, 'leg_l_hip': 3131, 'leg_l_knee': 2626, 'leg_l_ankle': 701}
+      # - stand_straight: {'leg_r_tilt': 2735, 'leg_r_hip': 1968, 'leg_r_knee': 2029, 'leg_r_ankle': 2353, 'leg_l_tilt': 1596, 'leg_l_hip': 2087, 'leg_l_knee': 2075, 'leg_l_ankle': 1799}
+      - stand_low: {'leg_r_tilt': 2698, 'leg_r_hip': 3051, 'leg_r_knee': 596, 'leg_r_ankle': 2751, 'leg_l_tilt': 1626, 'leg_l_hip': 1149, 'leg_l_knee': 3481, 'leg_l_ankle': 1306}
+      - stand_high: {'leg_r_tilt': 2687, 'leg_r_hip': 2547, 'leg_r_knee': 1080, 'leg_r_ankle': 2753, 'leg_l_tilt': 1595, 'leg_l_hip': 1536, 'leg_l_knee': 2976, 'leg_l_ankle': 1522}
+      - stand_dip_l: {'leg_r_tilt': 2693, 'leg_r_hip': 2539, 'leg_r_knee': 1081, 'leg_r_ankle': 2742, 'leg_l_tilt': 1623, 'leg_l_hip': 1386, 'leg_l_knee': 3139, 'leg_l_ankle': 1522} 
+      - stand_dip_r: {'leg_r_tilt': 2685, 'leg_r_hip': 2703, 'leg_r_knee': 971, 'leg_r_ankle': 2743, 'leg_l_tilt': 1657, 'leg_l_hip': 1463, 'leg_l_knee': 2992, 'leg_l_ankle': 1511}
+      - sit_edge: {'leg_r_tilt': 2784, 'leg_r_hip': 985, 'leg_r_knee': 2897, 'leg_r_ankle': 2816,  'leg_l_tilt': 1606, 'leg_l_hip': 3072, 'leg_l_knee': 1431, 'leg_l_ankle': 1161}
+      - sit_edge_swing_l: {'leg_r_tilt': 2784, 'leg_r_hip': 985, 'leg_r_knee': 2897, 'leg_r_ankle': 2816, 'leg_l_tilt': 1606, 'leg_l_hip': 3071, 'leg_l_knee': 1928, 'leg_l_ankle': 1154}   
+      - sit_edge_swing_r: {'leg_r_tilt': 2783, 'leg_r_hip': 986, 'leg_r_knee': 2028, 'leg_r_ankle': 2633, 'leg_l_tilt': 1606, 'leg_l_hip': 3072, 'leg_l_knee': 1326, 'leg_l_ankle': 1161}
+      - legs_straight_out: {'leg_r_tilt': 3696, 'leg_r_hip': 2066, 'leg_r_knee': 1904, 'leg_r_ankle': 2777, 'leg_l_tilt': 599, 'leg_l_hip': 2103, 'leg_l_knee': 2285, 'leg_l_ankle': 1140}
+      - crab: {'leg_r_tilt': 3695, 'leg_r_hip': 1046, 'leg_r_knee': 1451, 'leg_r_ankle': 2745, 'leg_l_tilt': 599, 'leg_l_hip': 2930, 'leg_l_knee': 2855, 'leg_l_ankle': 1230}
+      # - sit_safe:
+      # - sit_safe_toe_up_l
+      # - sit_safe_toe_up_r
+      # - sit_safe_toe_down_l
+      # - sit_safe_toe_down_r
 
 pitemperature:
   enabled: true
