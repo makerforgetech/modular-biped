@@ -25,8 +25,8 @@ jobs:
 
       - name: Run unittests
         run: |
-          PYTHONPATH=src $BASE_DIR/myenv/bin/python3 -m unittest discover -s src/tests -p 'test_*.py' -t src
-          PYTHONPATH=src $BASE_DIR/myenv/bin/python3 -m unittest discover -s src/modules -p 'test_*.py' -t src
+          PYTHONPATH=src myenv/bin/python3 -m unittest discover -s src/tests -p 'test_*.py' -t src
+          PYTHONPATH=src myenv/bin/python3 -m unittest discover -s src/modules -p 'test_*.py' -t src
     
     permissions:
       pull-requests: write
