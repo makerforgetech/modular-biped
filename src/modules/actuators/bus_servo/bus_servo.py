@@ -108,7 +108,7 @@ class Servo(BaseModule):
         self.subscribe('servo:' + self.identifier + ':mv', self.move_relative)
         self.subscribe('servo:' + self.identifier + ':queue', self.move)
         self.subscribe('system/exit', self.exit)
-        self.subscribe('servo/pose', self.move_to_pose)
+        # self.subscribe('servo/pose', self.move_to_pose) # Disabled as this was causing issues with servos. Personality should call move directly.
         
         if self.calibrate_on_boot:
             self.calibrate_dynamic() # Log will show current position repeatedly to help with manual configuration
