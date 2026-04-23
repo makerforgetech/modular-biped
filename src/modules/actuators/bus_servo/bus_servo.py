@@ -172,7 +172,7 @@ class Servo(BaseModule):
             # self.log(f"[SCServo][{self.identifier}] Error context: load={load} (comm_result={load_comm_result}, error={load_error}), position={pos} (comm_result={pos_comm_result}, error={pos_error}), speed={speed} (comm_result={speed_comm_result}, error={speed_error})")
         return comm_result == COMM_SUCCESS and error == 0
     
-    def move_degrees(self, degrees):
+    def move_degrees(self, degrees, speed=None):
         if self.range_degrees is None:
             self.log(f"Servo {self.identifier} does not have range_degrees set, cannot move by degrees", level='error')
             return
@@ -193,7 +193,7 @@ class Servo(BaseModule):
             if self.range_degrees > 0:
                 pc_move = round((degrees / self.range_degrees) * 100)
                 self.log(f"Moving servo {self.identifier} by {degrees} degrees (position {self.pos} -> {new_position} | {pc_move}% of range)")
-                self.move(new_position)
+                self.move(new_position, speed)
             else:
                 self.log(f"Invalid range_degrees for servo {self.identifier}, cannot move by degrees {self.range_degrees}", level='error')
 

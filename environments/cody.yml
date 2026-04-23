@@ -85,7 +85,7 @@ bus_servo:
       id: 11
       range: [30, 200]
       start: 120
-      speed: 60 # max=0, 1 - 3000 tested
+      speed: 200 # max=0, 1 - 3000 tested
       # acceleration: 0 # max (no significant difference between this and 1 - 3000)
       # demonstrate_on_boot: true
     # - name: "neck_tilt2"

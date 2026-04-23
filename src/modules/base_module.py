@@ -15,6 +15,10 @@ class BaseModule:
     def setup_messaging(self):
         """Override this method in child classes to subscribe to topics."""
         pass  # No default implementation, subclasses should define their own subscriptions
+
+    def on_load(self):
+        """Called when the module is loaded. Override in subclasses for initialization."""
+        pass
     
     def publish(self, topic, *args, **kwargs):
         if self.messaging_service is None:

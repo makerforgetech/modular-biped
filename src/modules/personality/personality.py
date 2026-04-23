@@ -87,6 +87,9 @@ class Personality(BaseModule):
         #     self.subscribe('imu/imu_body/data', self.handle_imu_data)
         # self.publish('gpio/laser', state=True) # Turn on laser if no one has been detected
 
+    def on_load(self):
+        self.animate_pose()
+
     def test_servos(self):
         
         self.log("Testing neck tilt servos")
@@ -178,7 +181,7 @@ class Personality(BaseModule):
     def balance(self):
         """Use head and body IMU data to maintain balance by adjusting leg servos."""
         if not self.balance_enabled or 'body' not in self.imu:
-            self.log("Balance check skipped: IMU data not available or balance disabled")
+            # self.log("Balance check skipped: IMU data not available or balance disabled")
             return
         # self.log("Balance check")
         euler = self.imu['body'].get_euler()
@@ -192,8 +195,8 @@ class Personality(BaseModule):
                 return  # No need to adjust for small angles
             # print(f"Angle to move: {pitch}")
             self.log(f"Moving leg servos to adjust balance: leg_l_hip {-pitch} degrees, leg_r_hip {pitch} degrees")
-            self.servos['leg_l_hip'].move_degrees(pitch) 
-            self.servos['leg_r_hip'].move_degrees(-pitch)
+            self.servos['leg_l_hip'].move_degrees(pitch, 200) 
+            self.servos['leg_r_hip'].move_degrees(-pitch, 200)
     
     def handle_user_message(self, user_id=None, message=None):
         print(f"Received message from user {user_id}: {message}")
@@ -244,11 +247,14 @@ class Personality(BaseModule):
             return
 
         if current_pose == 'sitting':
+            self.balance_enabled = False
             self.animate_wave('sit')
         elif current_pose == 'sitting_edge':
+            self.balance_enabled = False
             self.animate_swing_legs('sit_edge')
         elif current_pose == 'standing':
             self.animate_stand_low()
+            self.balance_enabled = True
             
     def check_being_carried(self):
         """ Detect if being carried by monitoring body IMU for prolonged movement (3 seconds) without corresponding leg movement. If detected, disable leg servos and set self._carried to true. """
@@ -360,8 +366,6 @@ class Personality(BaseModule):
     def loop_10(self):
         # self.scan_vision()
         # self.output_current_pose()
-        if self.animate_pose_enabled:
-            self.animate_pose()
         pass
     
     def loop_60(self):
