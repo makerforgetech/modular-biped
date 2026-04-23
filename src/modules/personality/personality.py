@@ -254,6 +254,7 @@ class Personality(BaseModule):
             self.animate_swing_legs('sit_edge')
         elif current_pose == 'standing':
             self.animate_stand_low()
+            self.animate_pose_enabled = False # Don't move servos again, just stand.
             self.balance_enabled = True
             
     def check_being_carried(self):
