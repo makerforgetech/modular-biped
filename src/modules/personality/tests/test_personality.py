@@ -9,7 +9,7 @@ class TestPersonality(unittest.TestCase):
         self.assertEqual(p.eye, 'blue')
         self.assertEqual(p.min_interval, 20)
         self.assertEqual(p.max_interval, 60)
-        self.assertEqual(p.balance_enabled, True)
+        self.assertEqual(p.balance_enabled, False)
         self.assertIsNotNone(p.next_action_time)
 
     def test_init_custom(self):
