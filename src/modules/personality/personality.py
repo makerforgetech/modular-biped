@@ -239,6 +239,8 @@ class Personality(BaseModule):
             self.publish('display/body/text', text=f"{self.pose}", font_size=20)
     
     def animate_pose(self):
+        if not self.animate_pose_enabled:
+            return
         # current_pose = self.estimate_current_pose()
         current_pose = self.estimate_pose_from_knee()
         if current_pose is None:
@@ -253,7 +255,7 @@ class Personality(BaseModule):
             self.balance_enabled = False
             self.animate_swing_legs('sit_edge')
         elif current_pose == 'standing':
-            self.animate_stand_low()
+            self.animate_stand_high()
             self.animate_pose_enabled = False # Don't move servos again, just stand.
             self.balance_enabled = True
             
@@ -289,12 +291,10 @@ class Personality(BaseModule):
         if self._pose_queue and not any(servo.is_moving() for servo in self.servos.values()):
             pose_name = self._pose_queue.pop(0)
             self.manually_trigger_pose(pose_name)
-            # self.publish('servo/pose', pose_name=pose_name)
             
-    def animate_stand_low(self):
-        self.log("Animating stand_low pose")
+    def animate_stand_high(self):
+        self.log("Animating stand_high pose")
         self.manually_trigger_pose('stand_high')
-        # self.publish('servo/pose', pose_name='stand_low')
             
     def animate_wave(self, return_to_pose):
         self.log(f"Animating wave from pose: {return_to_pose}")
@@ -370,8 +370,7 @@ class Personality(BaseModule):
         pass
     
     def loop_60(self):
-        if self.animate_pose_enabled:
-            self.animate_pose()
+        self.animate_pose()
 
     def estimate_pose_from_knee(self):
         """ Simplify by just checking leg_l_knee position against self.knee_pose_thresholds to determine if sitting, standing, or sitting on an edge. """
