@@ -450,7 +450,8 @@ class Servo(BaseModule):
             self.log(f"Start position {self.start} out of new range, setting to midpoint {self.start}")
 
     def calculate_range_degrees(self, max_pos, min_pos):
-        return (360/ST_MAX)*abs(max_pos - min_pos) if min_pos is not None and max_pos is not None else 0
+        max_val = SC_MAX if self.model.startswith('SC') else ST_MAX
+        return (360/max_val)*abs(max_pos - min_pos) if min_pos is not None and max_pos is not None else 0
 
     def calibrate_to_center(self):
         """
