@@ -34,6 +34,12 @@ class BNO055(BaseModule):
     def get_euler(self):
         return self.sensor.euler
     
+    def get_acceleration(self):
+        return self.sensor.acceleration
+    
+    def get_linear_acceleration(self):
+        return self.sensor.linear_acceleration
+    
     def _get_data(self):
         data = {
             'temperature': self.sensor.temperature,

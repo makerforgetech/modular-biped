@@ -204,6 +204,13 @@ class ModuleLoader:
                     else:
                         print(f"[ModuleLoader] on_inject: {target_key}.{method_name} not found or not callable")
 
+    def modules_loaded(self, instances):
+        """Call on_load() for all modules after dependencies have been injected."""
+        for name, module in instances.items():
+            if hasattr(module, 'on_load') and callable(module.on_load):
+                print(f"[ModuleLoader] Calling on_load for {name}")
+                module.on_load()
+
     def _resolve_inject_source(self, source_spec, instances):
         """
         Resolve an inject source specification to a value.

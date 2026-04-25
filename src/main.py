@@ -35,6 +35,7 @@ def main():
     # Inject messaging service and all module-to-module dependencies declared in the
     # environment YAML file (inject: / on_inject: blocks).
     loader.inject_dependencies(module_instances)
+    loader.modules_loaded(module_instances)  # Call on_load() for all modules after injection
 
     # Use the new SystemLoop class to run the main loop
     system_loop = SystemLoop(module_instances['MessagingService'].messaging_service, module_instances)

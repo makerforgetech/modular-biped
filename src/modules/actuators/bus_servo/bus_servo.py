@@ -48,7 +48,7 @@ class Servo(BaseModule):
         self.model = kwargs.get('model', 'ST')
         self.index = kwargs.get('id')
         self.range = kwargs.get('range')
-        self.range_degrees = kwargs.get('range_degrees', None)  # Optional range in degrees for easier control
+        self.range_degrees = kwargs.get('range_degrees', self.calculate_range_degrees(self.range[0], self.range[1]))
         self.start = kwargs.get('start') # Default start position
         self.poses = kwargs.get('poses')  # Dictionary of poses
         self.baudrate = kwargs.get('baudrate', 1000000)
@@ -57,8 +57,8 @@ class Servo(BaseModule):
         self.demonstrate_on_boot = kwargs.get('demonstrate_on_boot', False) # Move to min and max to demonstrate range
         self.center_on_boot = kwargs.get('center_on_boot', False) # Move to center of range on boot
         self.pos = None
-        self.speed = kwargs.get('speed', 300) # 3073
-        self.acceleration = kwargs.get('acceleration', 50)
+        self.speed = kwargs.get('speed', 0) # 3073
+        self.acceleration = kwargs.get('acceleration', 0)
         self._move_queue = collections.deque()
         # After loading YAML:
         poses_list = kwargs.get('poses', [])
@@ -108,7 +108,7 @@ class Servo(BaseModule):
         self.subscribe('servo:' + self.identifier + ':mv', self.move_relative)
         self.subscribe('servo:' + self.identifier + ':queue', self.move)
         self.subscribe('system/exit', self.exit)
-        self.subscribe('servo/pose', self.move_to_pose)
+        # self.subscribe('servo/pose', self.move_to_pose) # Disabled as this was causing issues with servos. Personality should call move directly.
         
         if self.calibrate_on_boot:
             self.calibrate_dynamic() # Log will show current position repeatedly to help with manual configuration
@@ -135,6 +135,10 @@ class Servo(BaseModule):
         
     def move_to_pose(self, pose_name):
         # print(self.poses)
+        # if pose in list of poses
+        if pose_name not in self.poses:
+            self.log(f"Pose '{pose_name}' not found for servo {self.identifier}", level='warning')
+            return
         pose_value = self.poses.get(pose_name)
         # print(f"{self.identifier} - Pose '{pose_name}' value: {pose_value}")
         my_pose_value = pose_value.get(self.identifier)
@@ -168,13 +172,15 @@ class Servo(BaseModule):
             # self.log(f"[SCServo][{self.identifier}] Error context: load={load} (comm_result={load_comm_result}, error={load_error}), position={pos} (comm_result={pos_comm_result}, error={pos_error}), speed={speed} (comm_result={speed_comm_result}, error={speed_error})")
         return comm_result == COMM_SUCCESS and error == 0
     
-    def move_degrees(self, degrees):
+    def move_degrees(self, degrees, speed=None):
         if self.range_degrees is None:
             self.log(f"Servo {self.identifier} does not have range_degrees set, cannot move by degrees", level='error')
             return
+        # self.log(f"[move_degrees] Moving servo {self.identifier} by {degrees} degrees")
         # Convert degrees to position value based on range, adjusting RELATIVE to current position
         self.pos = self.get_position()  # Update current position before calculating new position
         if self.range is not None and self.pos is not None:
+            # self.log(f"Current position: {self.pos}, Range: {self.range}, Range degrees: {self.range_degrees}")
             # Calculate how many position units correspond to the degree change
             units_per_degree = (self.range[1] - self.range[0]) / self.range_degrees
             position_delta = degrees * units_per_degree
@@ -187,7 +193,9 @@ class Servo(BaseModule):
             if self.range_degrees > 0:
                 pc_move = round((degrees / self.range_degrees) * 100)
                 self.log(f"Moving servo {self.identifier} by {degrees} degrees (position {self.pos} -> {new_position} | {pc_move}% of range)")
-                self.move(new_position)
+                self.move(new_position, speed)
+            else:
+                self.log(f"Invalid range_degrees for servo {self.identifier}, cannot move by degrees {self.range_degrees}", level='error')
 
     def move(self, position, speed=None, acceleration=None, delay=0, **kwargs):
         """
@@ -277,8 +285,13 @@ class Servo(BaseModule):
     def is_moving(self):
         if self.get_moving() == 1:
             return True
-        elif abs(self.pos - self.get_position()) > 15:
-            print(f"Warning: Servo {self.identifier} is not reporting as moving but position {self.get_position()} does not match target position {self.pos}")
+        current_position = self.get_position()
+        if self.pos is not None and current_position is not None and abs(self.pos - current_position) > 15:
+            self.log(
+                f"Servo {self.identifier} is not reporting as moving but position {current_position} does not match target position {self.pos}",
+                level='warning'
+            )
+            return False
         return False
         
     def get_position(self):
@@ -416,7 +429,7 @@ class Servo(BaseModule):
                     max_pos = pos
                 # Print on the same line, pad with spaces to clear previous content
                 # (4095 = 360 degrees, so 1264 = 111 degrees)
-                range_degrees = (360/4095)*(max_pos - min_pos) if min_pos is not None and max_pos is not None else 'N/A'
+                range_degrees = self.calculate_range_degrees(max_pos, min_pos)
                 print(f"\rCurrent position: {pos}, Min: {min_pos}, Max: {max_pos} Range(deg): {range_degrees}", end='', flush=True)
                 time.sleep(0.05)
                 if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
@@ -436,6 +449,10 @@ class Servo(BaseModule):
             self.start = (min_pos + max_pos) // 2
             self.log(f"Start position {self.start} out of new range, setting to midpoint {self.start}")
 
+    def calculate_range_degrees(self, max_pos, min_pos):
+        max_val = SC_MAX if self.model.startswith('SC') else ST_MAX
+        return (360/max_val)*abs(max_pos - min_pos) if min_pos is not None and max_pos is not None else 0
+
     def calibrate_to_center(self):
         """
         Move the servo to the center of its range.
@@ -454,6 +471,3 @@ class Servo(BaseModule):
             self.packetHandler.write2ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_SPEED, self.speed)
             self.packetHandler.write2ByteTxRx(self.portHandler, self.index, ADDR_SCS_GOAL_POSITION, self.pos)
             self.log(f"Moved servo {self.identifier} to position {self.pos}")
-
-
-
