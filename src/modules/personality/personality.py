@@ -370,7 +370,8 @@ class Personality(BaseModule):
         pass
     
     def loop_60(self):
-        self.animate_pose()
+        # self.animate_pose()
+        pass
 
     def estimate_pose_from_knee(self):
         """ Simplify by just checking leg_l_knee position against self.knee_pose_thresholds to determine if sitting, standing, or sitting on an edge. """
