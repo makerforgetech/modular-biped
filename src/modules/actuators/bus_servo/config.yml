@@ -1,0 +1,5 @@
+bus_servo:
+  class: Servo
+  dependencies:
+    unix:
+      - python3-serial

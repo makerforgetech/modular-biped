@@ -1,0 +1,4 @@
+input_recorder:
+  config:
+    animations_dir: animations/recorded
+  class: InputRecorder

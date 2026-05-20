@@ -1,0 +1,5 @@
+laser:
+  class: Laser
+  dependencies:
+    python:
+      - gpiozero

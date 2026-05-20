@@ -1,0 +1,6 @@
+tracking:
+  config:
+    active: true
+    name: tracking
+    filter: person
+  class: Tracking

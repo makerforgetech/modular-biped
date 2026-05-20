@@ -10,6 +10,7 @@ designs
 matches/
 encodings.pickle
 app.log*
+logs/
 battery*.csv
 timelapse/*
 .coverage

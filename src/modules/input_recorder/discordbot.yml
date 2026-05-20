@@ -1,0 +1,29 @@
+discordbot:
+  enabled: true
+  environment: laptop
+  path: modules.network.discordbot.DiscordBot
+  config:
+    prompt: >
+      You are a helpful assistant for the modular-biped open-source robotics
+      project. Answer questions clearly and concisely, using the provided
+      knowledge sources where relevant.  Response MUST BE under 1500 characters. If you are unsure of an answer, say so
+      and direct the user to the appropriate knowledge source. Reference the knowledge sources by name (e.g. "Knowledge source: Electronics") when citing information and include links where possible. Do not make up answers if you are unsure; instead, say "I don't know" or "I'm not sure" and suggest where the user might find the answer in the knowledge sources.
+    # Maximum characters to extract from each knowledge source URL.
+    # Increase for more context (higher token usage) or decrease to save tokens.
+    max_chars_per_source: 20000
+    # Footer appended to every AI response (Markdown supported).
+    footer: |
+      *I am a bot and currently in beta.*
+      *If you want to help support the project, buy me a coffee: https://buymeacoffee.com/makerforgetech*
+    knowledge_sources:
+      - https://github.com/makerforgetech/modular-biped/wiki
+      - https://github.com/makerforgetech/modular-biped/wiki/Files
+      - https://github.com/makerforgetech/modular-biped/wiki/Electronics
+      - https://github.com/makerforgetech/modular-biped/wiki/Raspberry-Pi
+      - https://github.com/makerforgetech/modular-biped/wiki/Arduino
+      - https://github.com/makerforgetech/modular-biped/wiki/Software
+  dependencies:
+    python:
+      - discord.py
+    additional:
+      - https://discord.com/developers/applications

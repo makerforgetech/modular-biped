@@ -1,0 +1,9 @@
+telegram:
+  config:
+    user_whitelist: []
+  dependencies:
+    python:
+    - python-telegram-bot
+    additional:
+    - https://core.telegram.org/bots/tutorial#obtain-your-bot-token
+  class: TelegramBot

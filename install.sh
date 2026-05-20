@@ -23,63 +23,94 @@ import yaml, sys, os
 
 config_file = "$1"
 env = "$2" or 'robot'
-module_name = os.path.basename(config_file).replace('.yml', '')  # Get the module name from the filename
+module_name = os.path.basename(os.path.dirname(config_file))
 try:
   with open(config_file) as f:
     config = yaml.safe_load(f)
-    if isinstance(config, dict):
-      for section in config.values():
-        # Check if enabled
-        if not (isinstance(section, dict) and section.get('enabled', False)):
-          continue
-        # Environment filtering logic (match module_loader.py)
-        env_field = section.get('environment')
-        if env_field is not None:
-          if isinstance(env_field, str):
-            if env_field != env:
-              continue
-          elif isinstance(env_field, list):
-            if env not in env_field:
-              continue
-        # If passed, print dependencies
-        if 'dependencies' in section:
-          print(f"MODULE:{module_name}")
-          for dep_type, deps in section['dependencies'].items():
-            if dep_type == 'python':
-              for dep in deps:
-                print(f"PYTHON:{dep}")
-            elif dep_type == 'unix':
-              for dep in deps:
-                print(f"UNIX:{dep}")
-            elif dep_type == 'additional':
-              for url in deps:
-                print(f"ADDITIONAL:{module_name}:{url}")
+    # Expect structure: {module_name: {config: ..., dependencies: ...}}
+    section = config.get(module_name)
+    if section:
+      # Check if enabled (if present in config)
+      enabled = section.get('enabled', True)
+      if not enabled:
+        sys.exit(0)
+      # Environment filtering logic
+      env_field = section.get('environment')
+      if env_field is not None:
+        if isinstance(env_field, str):
+          if env_field != env:
+            sys.exit(0)
+        elif isinstance(env_field, list):
+          if env not in env_field:
+            sys.exit(0)
+      # Print dependencies
+      if 'dependencies' in section:
+        print(f"MODULE:{module_name}")
+        for dep_type, deps in section['dependencies'].items():
+          if dep_type == 'python':
+            for dep in deps:
+              print(f"PYTHON:{dep}")
+          elif dep_type == 'unix':
+            for dep in deps:
+              print(f"UNIX:{dep}")
+          elif dep_type == 'additional':
+            for url in deps:
+              print(f"ADDITIONAL:{module_name}:{url}")
 except yaml.YAMLError as e:
   print(f"Error reading {config_file}: {e}", file=sys.stderr)
 EOF
 }
 
-# Determine environment argument (default to 'robot')
+
+# Determine environment YAML (default to environments/server.yml)
 if [ -z "$1" ]; then
-  ENVIRONMENT="robot"
+  ENV_YAML="environments/server.yml"
 else
-  ENVIRONMENT="$1"
+  ENV_YAML="environments/$1.yml"
 fi
 
-# Iterate over each YAML config file in the config directory, passing environment
-for config_file in config/*.yml; do
-  while IFS= read -r dependency; do
-    # Separate Python and Unix dependencies and capture active module names
-    if [[ $dependency == MODULE:* ]]; then
-      ACTIVE_MODULES+=("${dependency#MODULE:}")
-    elif [[ $dependency == PYTHON:* ]]; then
-      PYTHON_DEPENDENCIES+=("${dependency#PYTHON:}")
-    elif [[ $dependency == UNIX:* ]]; then
-      UNIX_DEPENDENCIES+=("${dependency#UNIX:}")
-    elif [[ $dependency == ADDITIONAL:* ]]; then
-      ADDITIONAL_URLS+=("${dependency#ADDITIONAL:}")
+# Helper: get enabled modules from environment YAML
+get_enabled_modules() {
+  myenv/bin/python3 - <<EOF
+import yaml, sys
+with open("$ENV_YAML") as f:
+    env = yaml.safe_load(f)
+    for mod, conf in env.items():
+        if isinstance(conf, dict) and conf.get('enabled', False):
+            print(mod)
+EOF
+}
+
+# Find config.yml for each enabled module and parse dependencies
+for mod in $(get_enabled_modules); do
+  # Find config.yml in any subdirectory named after the module, at any depth
+  config_path=$(find src/modules -type d -name "$mod" | while read moddir; do
+    if [ -f "$moddir/config.yml" ]; then
+      echo "$moddir/config.yml"
     fi
-  done < <(parse_dependencies "$config_file" "$ENVIRONMENT")
+  done | head -n1)
+  if [ -n "$config_path" ]; then
+    while IFS= read -r dependency; do
+      if [[ $dependency == MODULE:* ]]; then
+        ACTIVE_MODULES+=("${dependency#MODULE:}")
+      elif [[ $dependency == PYTHON:* ]]; then
+        PYTHON_DEPENDENCIES+=("${dependency#PYTHON:}")
+      elif [[ $dependency == UNIX:* ]]; then
+        UNIX_DEPENDENCIES+=("${dependency#UNIX:}")
+      elif [[ $dependency == ADDITIONAL:* ]]; then
+        ADDITIONAL_URLS+=("${dependency#ADDITIONAL:}")
+      fi
+    done < <(parse_dependencies "$config_path" "$ENVIRONMENT")
+  fi
+done
+
+# Optionally, print main Python files for each active module
+echo -e "\nActive module main files:"
+for mod in $(get_enabled_modules); do
+  pyfile=$(find src/modules -type f -name "*.py" | grep "/$mod/" | head -n1)
+  if [ -n "$pyfile" ]; then
+    echo " - $mod: $pyfile"
+  fi
 done
 
 # Remove duplicate dependencies

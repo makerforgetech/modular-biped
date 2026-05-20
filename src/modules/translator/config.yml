@@ -1,0 +1,9 @@
+translator:
+  config:
+    default:
+      src: en
+      dest: en
+  dependencies:
+    python:
+    - googletrans==3.1.0a0
+  class: Translator

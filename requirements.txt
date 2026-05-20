@@ -1,7 +1,7 @@
-### NOTE
-# This file is not in use, please add your dependencies to the module's config file:
-# dependencies:
-#   python:
-#     - <dependency>
-#   unix:
-#     - <dependency>
+# Test dependencies — packages required for CI unit tests.
+# Module runtime dependencies belong in each module's config.yml under
+# dependencies.python rather than here.
+pyyaml
+requests
+pypubsub
+paho-mqtt

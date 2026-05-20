@@ -1,0 +1,15 @@
+speechinput:
+  config:
+    device_name: pulse
+    start_on_boot: false
+  dependencies:
+    unix:
+    - flac
+    - python3-pyaudio
+    - ladspa-sdk
+    python:
+    - SpeechRecognition
+    additional:
+    - installers/install-mics.sh
+    - installers/install-speech-recognition.sh
+  class: SpeechInput
