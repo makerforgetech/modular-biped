@@ -1,0 +1,16 @@
+# Laptop — local development and testing environment with no hardware modules.
+# Useful for developing, testing, and running the Discord bot locally.
+# Matches modules configured with environment: 'laptop' or without 'robot' restriction.
+
+# ── Core ──────────────────────────────────────────────────────────────────────
+
+messaging_service:
+  enabled: true
+
+logwrapper:
+  enabled: true
+
+speechinput:
+  enabled: true
+  config:
+    start_on_boot: true

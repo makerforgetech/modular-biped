@@ -1,0 +1,94 @@
+// Custom I2S audio overlay for CM5 carrier board
+// - MAX98357A speaker amplifier (I2S TX, SD_MODE on GPIO16)
+// - 2x ICS-43434 stereo microphones (I2S RX, L/R SELECT pins)
+//
+// Creates a single simple-audio-card with two DAI links:
+//   PCM device 0 (hw:cm5-i2s-audio,0): playback via MAX98357A
+//   PCM device 1 (hw:cm5-i2s-audio,1): capture via ICS-43434 stereo pair
+//
+// Replaces dtoverlay=googlevoicehat-soundcard in /boot/firmware/config.txt
+
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "brcm,bcm2712";
+
+	// Enable the RP1 I2S controller as clock producer (master)
+	fragment@0 {
+		target = <&i2s_clk_producer>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	// MAX98357A speaker amplifier node (SD_MODE on GPIO16)
+	fragment@1 {
+		target-path = "/";
+		__overlay__ {
+			max98357a_dac: max98357a {
+				compatible = "maxim,max98357a";
+				#sound-dai-cells = <0>;
+				sdmode-gpios = <&gpio 16 0>;
+				status = "okay";
+			};
+		};
+	};
+
+	// ICS-43434 stereo microphone pair (treated as ICS-43432 compatible)
+	// L/R SELECT: one mic at GND (left), one at 3.3V (right), both on GPIO20
+	fragment@2 {
+		target-path = "/";
+		__overlay__ {
+			ics43434_mics: ics43434-stereo {
+				compatible = "invensense,ics43432";
+				#sound-dai-cells = <0>;
+				status = "okay";
+			};
+		};
+	};
+
+	// Sound card: two DAI links share the same I2S controller
+	//   dai-link@0: I2S TX -> MAX98357A  (playback, PCM device 0)
+	//   dai-link@1: ICS-43434 -> I2S RX  (capture, PCM device 1)
+	fragment@3 {
+		target = <&sound>;
+		__overlay__ {
+			compatible = "simple-audio-card";
+			simple-audio-card,name = "cm5-i2s-audio";
+			status = "okay";
+
+			spk_link: simple-audio-card,dai-link@0 {
+				format = "i2s";
+				bitclock-master = <&spk_cpu>;
+				frame-master = <&spk_cpu>;
+
+				spk_cpu: cpu {
+					sound-dai = <&i2s_clk_producer>;
+					dai-tdm-slot-num = <2>;
+					dai-tdm-slot-width = <32>;
+				};
+
+				spk_codec: codec {
+					sound-dai = <&max98357a_dac>;
+				};
+			};
+
+			mic_link: simple-audio-card,dai-link@1 {
+				format = "i2s";
+				bitclock-master = <&mic_cpu>;
+				frame-master = <&mic_cpu>;
+
+				mic_cpu: cpu {
+					sound-dai = <&i2s_clk_producer>;
+					dai-tdm-slot-num = <2>;
+					dai-tdm-slot-width = <32>;
+				};
+
+				mic_codec: codec {
+					sound-dai = <&ics43434_mics>;
+				};
+			};
+		};
+	};
+};

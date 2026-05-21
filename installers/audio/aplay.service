@@ -3,7 +3,7 @@
 Description=Invoke aplay from /dev/zero at system start.
 
 [Service]
-ExecStart=/usr/bin/aplay -D default -t raw -r 44100 -c 2 -f S16_LE /dev/zero
+ExecStart=/usr/bin/aplay -D default -t raw -r 48000 -c 2 -f S32_LE /dev/zero
 
 [Install]
 WantedBy=multi-user.target

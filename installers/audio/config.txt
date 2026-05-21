@@ -54,6 +54,6 @@ dtparam=uart0=on
 #dtoverlay=i2s-mmap
 #dtoverlay=googlevoicehat-soundcard
 #dtoverlay=max98357a
-dtoverlay=googlevoicehat-soundcard
+dtoverlay=cm5-i2s-audio
 #dtoverlay=dual_i2s
 hdmi_ignore_edid_audio=1
