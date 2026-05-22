@@ -1,3 +1,5 @@
+import os
+import subprocess
 import speech_recognition as sr
 from time import sleep
 from threading import Thread
@@ -11,7 +13,7 @@ class SpeechInput(BaseModule):
         self.recognizer = sr.Recognizer()
         self.recognizer.pause_threshold = 2
 
-        self.device_name = kwargs.get('device_name', 'lp')
+        self.device_name = kwargs.get('device_name', 'pulse')
         self.device = self.get_device_index(self.device_name)
         self.sample_rate = kwargs.get('sample_rate', 16000)
 
@@ -19,6 +21,11 @@ class SpeechInput(BaseModule):
         self.listening = False
         
         self.start_on_boot = kwargs.get('start_on_boot', False)
+        self.wake_word = kwargs.get('wake_word', None)
+        
+        self.capture_detections = kwargs.get('capture_detections', False)
+        self.repeat_captures = kwargs.get('repeat_captures', False)
+        print('SpeechInput initialized with device ' + str(self.device) + ' and sample rate ' + str(self.sample_rate) + '. Start on boot: ' + str(self.start_on_boot))
     
     def setup_messaging(self):
         self.subscribe('speech:listen', self.start)
@@ -34,6 +41,7 @@ class SpeechInput(BaseModule):
 
     def start(self):
         self.listening = True
+        self.log('Starting speech detection')
         Thread(target=self.detect, args=()).start()
         return self
 
@@ -43,6 +51,8 @@ class SpeechInput(BaseModule):
             if name == device_name:
                 print('Mapping mic to index ' + str(index))
                 return index
+            # throw exception if device name is not found
+        raise Exception('Device name ' + device_name + ' not found. Available devices: ' + str(sr.Microphone.list_microphone_names()))
 
     def detect(self):
         """
@@ -59,11 +69,27 @@ class SpeechInput(BaseModule):
                     audio = self.recognizer.listen(source, timeout=10, phrase_time_limit=15)
                     val = self.recognizer.recognize_google(audio)
                     
-                    #save audio with filename as val substituting any non alphanumeric characters with underscores
-                    filename = str(val).replace(' ', '_').replace('[^a-zA-Z0-9]', '_')
-                    with open("speech_" + filename +  ".wav", "wb") as f:
-                        f.write(audio.get_wav_data())
-                        
+                    # if wake word is set check each word in list against wake word and ignore if not detected
+                    if self.wake_word:
+                        found = False
+                        for word in self.wake_word:
+                            if word.lower() in val.lower(): 
+                                found = True
+                                break
+                        if not found:
+                            self.log('Wake word "' + str(self.wake_word) + '" not detected in "' + val + '". Ignoring.')
+                            continue
+                    
+                    if self.capture_detections:
+                        #save audio with filename as val substituting any non alphanumeric characters with underscores
+                        filename = str(val).replace(' ', '_').replace('[^a-zA-Z0-9]', '_')
+                        with open("speech_" + filename +  ".wav", "wb") as f:
+                            f.write(audio.get_wav_data())
+                        if self.repeat_captures:
+                            # play back file via speakers
+                            self.log('Playing back audio')
+                            subprocess.call(['aplay', '-D', 'plughw:cm5i2saudio,1', "speech_" + filename +  ".wav"])
+                    
                     self.log('I heard: ' + str(val))
                     self.publish('speech', text=val.lower())
                     self.publish('tts', msg='I heard ' + val.lower())

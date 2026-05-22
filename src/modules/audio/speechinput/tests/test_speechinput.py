@@ -7,6 +7,7 @@ mock_recognizer = MagicMock()
 mock_microphone = MagicMock()
 mock_speech_recognition.Recognizer.return_value = mock_recognizer
 mock_speech_recognition.Microphone.return_value = mock_microphone
+mock_speech_recognition.Microphone.list_microphone_names.return_value = ['test', 'pulse']
 sys.modules['speech_recognition'] = mock_speech_recognition
 
 from modules.audio.speechinput.speechinput import SpeechInput

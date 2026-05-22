@@ -1,0 +1,24 @@
+# Laptop — local development and testing environment with no hardware modules.
+# Useful for developing, testing, and running the Discord bot locally.
+# Matches modules configured with environment: 'laptop' or without 'robot' restriction.
+
+# ── Core ──────────────────────────────────────────────────────────────────────
+
+messaging_service:
+  enabled: true
+
+logwrapper:
+  enabled: true
+
+speechinput:
+  enabled: true
+  config:
+    wake_word: ['cody','kodi'] # if set, will only process speech that contains this word. Can be used to avoid processing random speech in the environment.
+    start_on_boot: true
+
+chatgpt:
+  enabled: true
+
+ttsmodule:
+  enabled: false # need to add credit
+
