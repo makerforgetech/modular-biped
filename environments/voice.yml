@@ -13,12 +13,12 @@ logwrapper:
 speechinput:
   enabled: true
   config:
-    wake_word: 'cody' # if set, will only process speech that contains this word. Can be used to avoid processing random speech in the environment.
+    wake_word: ['cody','kodi'] # if set, will only process speech that contains this word. Can be used to avoid processing random speech in the environment.
     start_on_boot: true
 
 chatgpt:
   enabled: true
 
 ttsmodule:
-  enabled: true
+  enabled: false # need to add credit
 

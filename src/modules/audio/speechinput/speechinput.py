@@ -69,9 +69,16 @@ class SpeechInput(BaseModule):
                     audio = self.recognizer.listen(source, timeout=10, phrase_time_limit=15)
                     val = self.recognizer.recognize_google(audio)
                     
-                    if self.wake_word and self.wake_word not in val.lower():
-                        self.log('Wake word "' + self.wake_word + '" not detected in "' + val + '". Ignoring.')
-                        continue
+                    # if wake word is set check each word in list against wake word and ignore if not detected
+                    if self.wake_word:
+                        found = False
+                        for word in self.wake_word:
+                            if word.lower() in val.lower(): 
+                                found = True
+                                break
+                        if not found:
+                            self.log('Wake word "' + str(self.wake_word) + '" not detected in "' + val + '". Ignoring.')
+                            continue
                     
                     if self.capture_detections:
                         #save audio with filename as val substituting any non alphanumeric characters with underscores
