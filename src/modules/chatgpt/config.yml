@@ -1,10 +1,7 @@
 chatgpt:
   config:
     model: gpt-4o-mini
-    persona: 'You are a helpful assistant robot. You respond with short phrases where
-      possible. Alternatively, you can respond with the following commands instead
-      of text if you feel they are appropriate: - animate/head_nod - animate/head_shake
-      - gpio/laser/on - gpio/laser/off'
+    persona: 'You are a helpful assistant robot. You respond with short phrases where possible.
   dependencies:
     python:
     - openai

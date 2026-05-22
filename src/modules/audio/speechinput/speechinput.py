@@ -21,6 +21,8 @@ class SpeechInput(BaseModule):
         self.listening = False
         
         self.start_on_boot = kwargs.get('start_on_boot', False)
+        self.wake_word = kwargs.get('wake_word', None)
+        
         self.capture_detections = kwargs.get('capture_detections', False)
         self.repeat_captures = kwargs.get('repeat_captures', False)
         print('SpeechInput initialized with device ' + str(self.device) + ' and sample rate ' + str(self.sample_rate) + '. Start on boot: ' + str(self.start_on_boot))
@@ -66,6 +68,10 @@ class SpeechInput(BaseModule):
                 try:
                     audio = self.recognizer.listen(source, timeout=10, phrase_time_limit=15)
                     val = self.recognizer.recognize_google(audio)
+                    
+                    if self.wake_word and self.wake_word not in val.lower():
+                        self.log('Wake word "' + self.wake_word + '" not detected in "' + val + '". Ignoring.')
+                        continue
                     
                     if self.capture_detections:
                         #save audio with filename as val substituting any non alphanumeric characters with underscores
