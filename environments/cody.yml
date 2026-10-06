@@ -386,7 +386,7 @@ personality:
 pitemperature:
   enabled: true
 
-tft_display:
+tft_display_eye:
   enabled: true
   config:
     bus: 0 # Use `ls /dev/spi*` to identify. (/dev/spidev0.0) is bus 0, device 0

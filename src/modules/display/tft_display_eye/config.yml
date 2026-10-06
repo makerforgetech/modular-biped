@@ -1,4 +1,4 @@
-tft_display:
+tft_display_eye:
   class: TFTDisplayEye
   config:
     colors:

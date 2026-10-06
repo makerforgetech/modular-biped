@@ -29,6 +29,8 @@ class RSVPDisplay(TFTDisplay):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        print('Initializing RSVPDisplay with config: ' + str(kwargs))
+        self.test_on_boot = kwargs.get('test_on_boot', False)
         self.wpm = kwargs.get('wpm', 250)
         self.font_size = kwargs.get('font_size', 40)
         self.text_color = tuple(kwargs.get('text_color', (255, 255, 255)))
@@ -44,12 +46,16 @@ class RSVPDisplay(TFTDisplay):
         super().setup_messaging()
         self.subscribe('rsvp/text', self.display_rsvp)
 
+    def on_load(self):
+        if self.test_on_boot:
+            self.display_rsvp('This is an RSVP Display. It shows one word at a time with the optimal recognition point highlighted.')
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
 
     def display_rsvp(self, text):
         """Start displaying *text* in RSVP format.  Any ongoing sequence is stopped first."""
+        self.log('Received text for RSVP display: ' + str(text))
         self._stop_rsvp()
         self._stop_event.clear()
         self._rsvp_thread = threading.Thread(
@@ -71,12 +77,37 @@ class RSVPDisplay(TFTDisplay):
 
     def _rsvp_loop(self, text):
         words = text.split()
+        orp_x = self._compute_sentence_orp_x(words)
         for word in words:
             if self._stop_event.is_set():
                 break
-            self._render_word(word)
+            self._render_word(word, orp_x)
             delay = self._word_delay(word)
             self._stop_event.wait(timeout=delay)
+
+    def _compute_sentence_orp_x(self, words):
+        """Return a fixed ORP x position for all words in the sentence.
+
+        Each word is measured as if it were centred on the display, and the
+        resulting ORP left-edge positions are averaged so that the highlighted
+        character stays roughly stationary while words appear centred.
+        """
+        if not words:
+            return self.background.width // 2
+        draw = ImageDraw.Draw(self.background)
+        width = self.background.width
+        positions = []
+        for word in words:
+            if not word:
+                continue
+            orp_idx = self._get_orp_index(word)
+            left_w = self._text_width(draw, word[:orp_idx])
+            orp_w = self._text_width(draw, word[orp_idx])
+            right_w = self._text_width(draw, word[orp_idx + 1:])
+            full_w = left_w + orp_w + right_w
+            word_left_x = width // 2 - full_w // 2
+            positions.append(word_left_x + left_w)
+        return int(sum(positions) / len(positions))
 
     def _get_orp_index(self, word):
         """Return the index of the Optimal Recognition Point character."""
@@ -93,7 +124,7 @@ class RSVPDisplay(TFTDisplay):
             return base * 2.5
         return base
 
-    def _render_word(self, word):
+    def _render_word(self, word, orp_x=None):
         """Draw *word* on a black background with the ORP character highlighted."""
         if not word:
             return
@@ -114,8 +145,9 @@ class RSVPDisplay(TFTDisplay):
         left_w = self._text_width(draw, left_part)
         orp_w = self._text_width(draw, orp_char)
 
-        # The ORP character is anchored at the horizontal centre of the display
-        orp_x = width // 2 - orp_w // 2
+        # Use the pre-computed sentence ORP position, or fall back to centre
+        if orp_x is None:
+            orp_x = width // 2 - orp_w // 2
         left_x = orp_x - left_w
         right_x = orp_x + orp_w
 
@@ -129,7 +161,7 @@ class RSVPDisplay(TFTDisplay):
         if right_part:
             draw.text((right_x, y), right_part, font=self._font, fill=self.text_color)
 
-        self.show_image(img)
+        self.show_image(img.rotate(self.rotation))
 
     def _text_width(self, draw, text):
         """Return the pixel width of *text* using the current font."""
