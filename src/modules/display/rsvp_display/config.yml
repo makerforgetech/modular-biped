@@ -1,0 +1,15 @@
+rsvp_display:
+  class: RSVPDisplay
+  config:
+    wpm: 250
+    font_size: 40
+    text_color: [255, 255, 255]
+    highlight_color: [255, 50, 50]
+  dependencies:
+    unix:
+      - python3-pip
+      - python3-pil
+      - python3-numpy
+      - fonts-dejavu-core
+    python:
+      - spidev

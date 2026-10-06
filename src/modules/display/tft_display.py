@@ -13,11 +13,11 @@ class TFTDisplay(BaseModule):
     def __init__(self, **kwargs):
         self.rotation = kwargs.get('rotation', 0)
         try:
-            spi = SPI.SpiDev(kwargs.get('bus'), kwargs.get('device'))
+            spi = SPI.SpiDev(kwargs.get('bus', 0), kwargs.get('device', 0))
             spi.max_speed_hz = 10000000
             self.disp = LCD_1inch28.LCD_1inch28(
-                spi=spi, spi_freq=10000000, rst=kwargs.get('rst_pin'),
-                dc=kwargs.get('dc_pin'), bl=kwargs.get('bl_pin')
+                spi=spi, spi_freq=10000000, rst=kwargs.get('rst_pin', 27),
+                dc=kwargs.get('dc_pin', 25), bl=kwargs.get('bl_pin', 18)
             )
             self.img = None
             self.clear_display()

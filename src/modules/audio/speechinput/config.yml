@@ -1,7 +1,4 @@
 speechinput:
-  config:
-    device_name: pulse
-    start_on_boot: false
   dependencies:
     unix:
     - flac
@@ -10,6 +7,5 @@ speechinput:
     python:
     - SpeechRecognition
     additional:
-    - installers/install-mics.sh
-    - installers/install-speech-recognition.sh
+    - installers/install-audio.sh
   class: SpeechInput

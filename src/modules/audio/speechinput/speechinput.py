@@ -1,3 +1,5 @@
+import os
+import subprocess
 import speech_recognition as sr
 from time import sleep
 from threading import Thread
@@ -9,16 +11,43 @@ class SpeechInput(BaseModule):
     """
     def __init__(self, **kwargs):
         self.recognizer = sr.Recognizer()
-        self.recognizer.pause_threshold = 2
 
-        self.device_name = kwargs.get('device_name', 'lp')
+        # Energy threshold: minimum audio level considered speech.
+        # adjust_for_ambient_noise() will override this, but it acts as the
+        # starting point. Increase if noise causes false triggers; decrease if
+        # quiet speech is missed.
+        self.recognizer.energy_threshold = kwargs.get('energy_threshold', 300)
+
+        # Allow the recognizer to adapt the threshold over time. Keep True
+        # unless the environment is very stable; False locks the threshold at
+        # the value set by adjust_for_ambient_noise.
+        self.recognizer.dynamic_energy_threshold = kwargs.get('dynamic_energy_threshold', True)
+
+        # Seconds of silence that end a phrase. Default (0.8 s) cuts off speech
+        # too aggressively; 2 s gives more natural pauses.
+        self.recognizer.pause_threshold = kwargs.get('pause_threshold', 2)
+
+        # Seconds of non-speaking audio kept at the edges of a recording.
+        # Increasing this avoids clipping the first/last syllable.
+        self.recognizer.non_speaking_duration = kwargs.get('non_speaking_duration', 0.8)
+
+        self.device_name = kwargs.get('device_name', 'pulse')
         self.device = self.get_device_index(self.device_name)
         self.sample_rate = kwargs.get('sample_rate', 16000)
 
         self.mic = sr.Microphone(device_index=self.device, sample_rate=self.sample_rate)
         self.listening = False
-        
+
+        # Recalibrate ambient noise after this many consecutive timeouts.
+        # Timeouts mean the energy threshold has drifted above the speech level.
+        self.recalibrate_interval = kwargs.get('recalibrate_interval', 5)
+
         self.start_on_boot = kwargs.get('start_on_boot', False)
+        self.wake_word = kwargs.get('wake_word', None)
+
+        self.capture_detections = kwargs.get('capture_detections', False)
+        self.repeat_captures = kwargs.get('repeat_captures', False)
+        print('SpeechInput initialized with device ' + str(self.device) + ' and sample rate ' + str(self.sample_rate) + '. Start on boot: ' + str(self.start_on_boot))
     
     def setup_messaging(self):
         self.subscribe('speech:listen', self.start)
@@ -34,6 +63,7 @@ class SpeechInput(BaseModule):
 
     def start(self):
         self.listening = True
+        self.log('Starting speech detection')
         Thread(target=self.detect, args=()).start()
         return self
 
@@ -43,6 +73,8 @@ class SpeechInput(BaseModule):
             if name == device_name:
                 print('Mapping mic to index ' + str(index))
                 return index
+            # throw exception if device name is not found
+        raise Exception('Device name ' + device_name + ' not found. Available devices: ' + str(sr.Microphone.list_microphone_names()))
 
     def detect(self):
         """
@@ -52,25 +84,50 @@ class SpeechInput(BaseModule):
         self.log('Initialising Detection')
         with self.mic as source:
             self.recognizer.adjust_for_ambient_noise(source, duration=2)
-            # self.recognizer.energy_threshold = 300  # Adjust based on your environment
-            self.log('Detecting...')
+            self.log('Detecting... (energy threshold: ' + str(int(self.recognizer.energy_threshold)) + ')')
+            timeout_count = 0
             while self.listening:
                 try:
                     audio = self.recognizer.listen(source, timeout=10, phrase_time_limit=15)
+                    timeout_count = 0
                     val = self.recognizer.recognize_google(audio)
                     
-                    #save audio with filename as val substituting any non alphanumeric characters with underscores
-                    filename = str(val).replace(' ', '_').replace('[^a-zA-Z0-9]', '_')
-                    with open("speech_" + filename +  ".wav", "wb") as f:
-                        f.write(audio.get_wav_data())
-                        
+                    # if wake word is set check each word in list against wake word and ignore if not detected
+                    if self.wake_word:
+                        found = False
+                        for word in self.wake_word:
+                            if word.lower() in val.lower(): 
+                                found = True
+                                break
+                        if not found:
+                            self.log('Wake word "' + str(self.wake_word) + '" not detected in "' + val + '". Ignoring.')
+                            continue
+                    
+                    if self.capture_detections:
+                        #save audio with filename as val substituting any non alphanumeric characters with underscores
+                        filename = str(val).replace(' ', '_').replace('[^a-zA-Z0-9]', '_')
+                        with open("speech_" + filename +  ".wav", "wb") as f:
+                            f.write(audio.get_wav_data())
+                        if self.repeat_captures:
+                            # play back file via speakers
+                            self.log('Playing back audio')
+                            subprocess.call(['aplay', '-D', 'plughw:cm5i2saudio,1', "speech_" + filename +  ".wav"])
+                    
                     self.log('I heard: ' + str(val))
                     self.publish('speech', text=val.lower())
                     self.publish('tts', msg='I heard ' + val.lower())
-                except sr.WaitTimeoutError as e:
-                    self.publish('log/error', message='[Speech] Timeout Error: ' + str(e))
-                except sr.UnknownValueError as e:
+                    self.publish('rsvp/text', text='I heard: ' + val.lower())
+                except sr.WaitTimeoutError:
+                    timeout_count += 1
+                    if timeout_count >= self.recalibrate_interval:
+                        self.log('Recalibrating for ambient noise after ' + str(timeout_count) + ' timeouts...')
+                        self.recognizer.adjust_for_ambient_noise(source, duration=1)
+                        self.log('Energy threshold now: ' + str(int(self.recognizer.energy_threshold)))
+                        timeout_count = 0
+                except sr.UnknownValueError:
                     pass
+                except Exception as e:
+                    self.log('Detection error: ' + str(e))
                     # self.publish('log/error', msg='[Speech] Detection Error: ' + str(e))
                 # finally:
                     # self.publish('led', identifiers='top5', color='off')

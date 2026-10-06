@@ -11,5 +11,5 @@ ttsmodule:
     - ffmpeg
     - libespeak1
     additional:
-    - installers/install-amp.sh
+    - installers/install-audio.sh
   class: TTSModule
